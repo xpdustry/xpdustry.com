@@ -21,7 +21,10 @@ export function parseReleaseId(id: string): ParsedReleaseId | undefined {
 export function releaseUrl(id: string): string {
   const parsed = parseReleaseId(id);
   if (!parsed) return "https://github.com/xpdustry";
-  return `https://github.com/${parsed.repository}/releases/tag/${parsed.tag}`;
+  return `https://github.com/${parsed.repository
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")}/releases/tag/${encodeURIComponent(parsed.tag)}`;
 }
 
 /** `NoHorny v4.0.0-beta.8`, falling back to the repository name off-list. */

@@ -14,7 +14,12 @@ export default function Document(props: ParentProps) {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ebf0f4" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1218" />
         {/* No <title> here on purpose: every route renders <PageMeta>, and a
             static one in the shell would come first in the head and win. */}
         <script>{THEME_BOOTSTRAP}</script>

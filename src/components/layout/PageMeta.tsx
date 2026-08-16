@@ -26,10 +26,15 @@ export function PageMeta(props: PageMetaProps) {
       <Meta property="og:title" content={fullTitle()} />
       <Meta property="og:description" content={props.description} />
       <Meta property="og:url" content={url()} />
+      <Meta property="og:image" content={`${SITE.origin}/og.png`} />
+      <Meta property="og:image:width" content="1200" />
+      <Meta property="og:image:height" content="630" />
+      <Meta property="og:image:alt" content={SITE.name} />
 
-      <Meta name="twitter:card" content="summary" />
+      <Meta name="twitter:card" content="summary_large_image" />
       <Meta name="twitter:title" content={fullTitle()} />
       <Meta name="twitter:description" content={props.description} />
+      <Meta name="twitter:image" content={`${SITE.origin}/og.png`} />
 
       {props.publishedAt && <Meta property="article:published_time" content={props.publishedAt} />}
     </>

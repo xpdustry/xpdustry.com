@@ -86,13 +86,13 @@ describe("the inline bootstrap", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
 
-  test("still sets a theme when storage throws", () => {
+  test("when storage throws, follows the system preference", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("storage disabled");
     });
+    stubPrefersDark(true);
     new Function(THEME_BOOTSTRAP)();
-    // Anything but an unset attribute, which would leave the page unstyled.
-    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(document.documentElement.dataset.theme).toBe("dark");
   });
 
   test("carries no import or modern syntax, because it runs before the bundle", () => {

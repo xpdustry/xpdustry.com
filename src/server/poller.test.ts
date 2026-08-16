@@ -120,6 +120,39 @@ describe("Poller", () => {
     expect(timers.scheduled).toEqual([]);
   });
 
+  test("a throwing onError still schedules the next cycle", async () => {
+    const timers = fakeClock();
+    new Poller({
+      intervalMs: 1000,
+      run: async () => {
+        throw new Error("upstream down");
+      },
+      onError: () => {
+        throw new Error("reporter exploded");
+      },
+      clock: timers.clock,
+    }).start();
+
+    await vi.waitFor(() => expect(timers.scheduled).toEqual([1000]));
+  });
+
+  test("stop then start during a cycle does not let the old cycle schedule", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    const run = vi.fn(() => gate);
+    const timers = fakeClock();
+    const poller = new Poller({ intervalMs: 1000, run, clock: timers.clock });
+
+    poller.start();
+    poller.stop();
+    poller.start();
+    expect(run).toHaveBeenCalledTimes(2);
+
+    release();
+    await gate;
+    await vi.waitFor(() => expect(timers.scheduled).toEqual([1000]));
+  });
+
   test("reports a failed cycle and keeps going", async () => {
     const onError = vi.fn();
     const timers = fakeClock();

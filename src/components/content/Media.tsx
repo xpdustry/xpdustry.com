@@ -57,8 +57,8 @@ export function PostVideo(props: PostVideoProps) {
           height={props.height}
         >
           <source src={props.src} type="video/mp4" />
-          <span class="block p-4 text-sm text-ink-muted">{props.fallback}</span>
         </video>
+        <span class="block p-4 text-sm text-ink-muted">{props.fallback}</span>
       </span>
       {props.caption && (
         <figcaption class="mt-3 text-center text-sm text-ink-faint">{props.caption}</figcaption>

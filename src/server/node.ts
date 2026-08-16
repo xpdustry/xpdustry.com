@@ -11,6 +11,7 @@ import { createReadStream, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { handleRequest } from "virtual:solid-ssr-handler";
 import { getRuntime, readConfig, stopRuntime } from "#app/server/runtime";
 
@@ -35,6 +36,7 @@ const MIME_TYPES: Record<string, string> = {
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
   ".webm": "video/webm",
+  ".webmanifest": "application/manifest+json",
   ".webp": "image/webp",
   ".woff": "font/woff",
   ".woff2": "font/woff2",
@@ -55,7 +57,7 @@ const server = createServer((req, res) => {
 });
 
 async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
-  if (serveStatic(req, res)) return;
+  if (await serveStatic(req, res)) return;
   const response = await handleRequest(toWebRequest(req));
   await sendWebResponse(res, response);
 }
@@ -64,7 +66,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
  * Serves the built client assets. Only paths that stay inside `dist/client`
  * after normalization are considered, so `..` in a URL cannot walk out of it.
  */
-function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {
+async function serveStatic(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
 
   const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
@@ -97,7 +99,12 @@ function serveStatic(req: IncomingMessage, res: ServerResponse): boolean {
     return true;
   }
 
-  createReadStream(target).pipe(res);
+  try {
+    await pipeline(createReadStream(target), res);
+  } catch (error) {
+    console.error("[http] static read failed", error);
+    if (!res.destroyed) res.destroy();
+  }
   return true;
 }
 

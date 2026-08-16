@@ -74,13 +74,18 @@ export class Poller {
     try {
       await this.#options.run(controller.signal);
     } catch (error) {
-      if (this.#started) this.#options.onError?.(error);
-    } finally {
-      if (this.#controller === controller) this.#controller = null;
+      if (this.#started) {
+        try {
+          this.#options.onError?.(error);
+        } catch {
+          // A throwing reporter must not kill the loop.
+        }
+      }
     }
 
-    // A stop() during the cycle must not schedule another one.
-    if (!this.#started) return;
+    // stop() then start() before this cycle settles must not schedule twice.
+    if (!this.#started || this.#controller !== controller) return;
+    this.#controller = null;
     this.#timer = this.#clock.setTimeout(() => {
       this.#timer = null;
       void this.#cycle();

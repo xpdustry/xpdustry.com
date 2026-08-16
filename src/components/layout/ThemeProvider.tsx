@@ -1,7 +1,7 @@
 import {
   createContext,
-  createEffect,
   createSignal,
+  onSettled,
   type Accessor,
   type ParentProps,
   useContext,
@@ -24,17 +24,13 @@ const ThemeContext = createContext<ThemeContextValue>();
 export function ThemeProvider(props: ParentProps) {
   const [theme, setTheme] = createSignal<ThemeChoice | null>(null);
 
-  createEffect(
-    () => typeof document !== "undefined",
-    (isClient) => {
-      if (!isClient) return;
-      const resolved =
-        (document.documentElement.dataset.theme as ThemeChoice | undefined) ??
-        readStoredTheme() ??
-        systemTheme();
-      setTheme(resolved);
-    },
-  );
+  onSettled(() => {
+    const resolved =
+      (document.documentElement.dataset.theme as ThemeChoice | undefined) ??
+      readStoredTheme() ??
+      systemTheme();
+    setTheme(resolved);
+  });
 
   const toggleTheme = () => {
     const target = theme() === "dark" ? "light" : "dark";

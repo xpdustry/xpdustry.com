@@ -70,7 +70,7 @@ let runtime: Runtime | null = null;
 
 export function readConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
   const raw = env.PORT ?? "3000";
-  const port = Number.parseInt(raw, 10);
+  const port = Number(raw);
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error(`PORT must be a number between 1 and 65535, got ${JSON.stringify(raw)}`);
   }
