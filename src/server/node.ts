@@ -69,7 +69,12 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
 async function serveStatic(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
 
-  const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(new URL(req.url ?? "/", "http://localhost").pathname);
+  } catch {
+    return false;
+  }
   if (pathname === "/" || pathname.endsWith("/")) return false;
 
   const target = join(CLIENT_ROOT, normalize(pathname));
