@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
 #
 # Two stages. The build stage installs everything, because Vite and TypeScript
 # are build tools; the runtime stage copies the two dist trees and a
@@ -7,7 +7,7 @@
 #   podman build -t xpdustry-website .
 #   podman run --rm -p 3000:3000 xpdustry-website
 
-FROM docker.io/library/node:22-slim AS base
+FROM docker.io/library/node:22-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436 AS base
 ENV PNPM_HOME="/pnpm" \
     PATH="/pnpm:$PATH"
 # The pinned packageManager in package.json decides the pnpm version.
