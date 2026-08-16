@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -24 1072 1072"
+     class="xp-logo xp-logo--flat" role="img" aria-label="Xpdustry">
+  <title>Xpdustry</title>
+  <style>
+    .xp-f--cog { fill: var(--xp-cog, #00fff1); }
+    .xp-f--x   { fill: var(--xp-x, #ffffff); }
+    .xp-flood  { flood-color: var(--xp-outline, #30363b); }
+    /* These are transform-free source groups. The teeth carry baked-in SVG
+       rotations and must not be re-origined. */
+    .xp-f, .xp-cog-motion { transform-box: view-box; transform-origin: 536px 536px; }
+    .xp-gap-motion { transform-box: fill-box; transform-origin: center; }
+  </style>
+  <defs>
+    <rect id="xp-diagonal-bar" x="174.08" y="358.4" width="675.84" height="307.2" rx="51.2"/>
+    <rect id="xp-x-bar" x="81.92" y="450.56" width="860.16" height="122.88" rx="20.48"/>
+    <rect id="xp-gap-bar" class="xp-gap-motion" x="40.96" y="409.6" width="942.08" height="204.8" rx="61.44"/>
+
+    <clipPath id="xp-clip-axis"><circle cx="512" cy="512" r="368.64"/></clipPath>
+    <clipPath id="xp-clip-diagonal"><circle cx="512" cy="512" r="337.92"/></clipPath>
+    <clipPath id="xp-clip-x"><circle cx="512" cy="512" r="430.08"/></clipPath>
+    <clipPath id="xp-clip-gap"><circle cx="512" cy="512" r="471.04"/></clipPath>
+
+    <path id="xp-tooth" d="M 812.994 450.56 L 871.933 459.482 A 10.24 10.24 0 0 1 880.64 469.606 L 880.64 554.394 A 10.24 10.24 0 0 1 871.933 564.518 L 812.994 573.44 Z"/>
+
+    <g id="xp-axis-teeth" clip-path="url(#xp-clip-axis)">
+      <use class="xp-tooth xp-tooth--e" href="#xp-tooth"/>
+      <use class="xp-tooth xp-tooth--s" href="#xp-tooth" transform="rotate(90 512 512)"/>
+      <use class="xp-tooth xp-tooth--w" href="#xp-tooth" transform="rotate(180 512 512)"/>
+      <use class="xp-tooth xp-tooth--n" href="#xp-tooth" transform="rotate(270 512 512)"/>
+    </g>
+
+    <g id="xp-diagonal-teeth" clip-path="url(#xp-clip-diagonal)">
+      <use class="xp-tooth xp-tooth--ne" href="#xp-diagonal-bar" transform="rotate(45 512 512)"/>
+      <use class="xp-tooth xp-tooth--nw" href="#xp-diagonal-bar" transform="rotate(-45 512 512)"/>
+    </g>
+
+    <g id="xp-gap" clip-path="url(#xp-clip-gap)">
+      <use href="#xp-gap-bar" transform="rotate(45 512 512)"/>
+      <use href="#xp-gap-bar" transform="rotate(-45 512 512)"/>
+    </g>
+
+    <mask id="xp-bore" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse"
+          x="0" y="0" width="1024" height="1024" mask-type="luminance">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <circle cx="512" cy="512" r="245.76" fill="#000"/>
+      <use href="#xp-gap" fill="#000"/>
+    </mask>
+
+    <!-- the cog: ring + four axis teeth + two diagonals, bored out and channelled
+         so the X drops into it rather than sitting on top of it -->
+    <g id="xp-cog" class="xp-cog-motion" mask="url(#xp-bore)">
+      <circle class="xp-cog-ring" cx="512" cy="512" r="307.2"/>
+      <use href="#xp-axis-teeth"/>
+      <use href="#xp-diagonal-teeth"/>
+    </g>
+
+    <g id="xp-x" clip-path="url(#xp-clip-x)">
+      <use href="#xp-x-bar" transform="rotate(45 512 512)"/>
+      <use href="#xp-x-bar" transform="rotate(-45 512 512)"/>
+    </g>
+
+    <filter id="xp-outline"
+            x="-20.48" y="-20.48"
+            width="1064.96" height="1085.44"
+            filterUnits="userSpaceOnUse" primitiveUnits="userSpaceOnUse"
+            color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10.24" result="soft"/>
+      <feComponentTransfer in="soft" result="dilated">
+        <feFuncA type="linear" slope="100" intercept="-2"/>
+      </feComponentTransfer>
+      <feFlood class="xp-flood" flood-color="#30363b" result="ink"/>
+      <feComposite in="ink" in2="dilated" operator="in"/>
+    </filter>
+    <g id="xp-flat">
+      <g class="xp-f xp-f--cog" fill="#00fff1"><use href="#xp-cog"/></g>
+      <g class="xp-f xp-f--x" fill="#ffffff"><use href="#xp-x"/></g>
+    </g>
+  </defs>
+  <use href="#xp-flat" filter="url(#xp-outline)"/>
+  <use href="#xp-flat"/>
+</svg>

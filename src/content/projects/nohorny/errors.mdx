@@ -1,0 +1,23 @@
+---
+title: Common errors
+description: Fixes for problems you hit when running NoHorny.
+order: 5
+---
+
+## Content-Type image/jpeg;charset=UTF-8 is not supported
+
+The classify endpoint accepts `image/jpeg` and `image/png`. Spring's encoding filter rewrites the
+type to `image/jpeg;charset=UTF-8`, and the request is rejected.
+
+The log looks like this:
+
+```log
+HttpMediaTypeNotSupportedException: Content-Type 'image/jpeg;charset=UTF-8' is not supported
+```
+
+Add this to `application.yaml` and restart:
+
+```yaml
+spring:
+  servlet.encoding.enabled: false
+```

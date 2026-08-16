@@ -1,0 +1,56 @@
+---
+title: Run your own server
+description: Host the NoHorny classification server yourself.
+order: 4
+---
+
+You can host the classification server yourself. It needs Java 25.
+
+## Start the server
+
+```bash
+java -jar nohorny-server.jar start
+```
+
+The Docker image is `ghcr.io/xpdustry/nohorny-server`. It already runs `start` and listens on port
+`8080`.
+
+## Configure
+
+Use an `application.yaml` next to the jar, environment variables such as `SERVER_PORT=9090`, or
+flags:
+
+```bash
+java -jar nohorny-server.jar start -- --server.port=9090
+```
+
+It listens on `127.0.0.1:8080` by default, localhost only. Set `server.address` to `0.0.0.0` to
+expose it. Set `server.servlet.context-path` to `/api` if you want `/api/status` and
+`/api/classify`.
+
+```yaml
+server:
+  address: 127.0.0.1
+  port: 8080
+
+nohorny:
+  classifier:
+    vit:
+      thresholds:
+        warn: 0.6
+        nsfw: 0.9
+```
+
+The rest of the file is in the
+[repository](https://github.com/xpdustry/nohorny/blob/master/nohorny-server/src/main/resources/application.yaml).
+
+The default classifier is a ViT model. Set `nohorny.classifier.type` to `sight-engine` to use
+SightEngine instead.
+
+The server does not check HTTP auth.
+
+## Point the plugin at it
+
+```bash
+config nohorny-api-endpoint http://127.0.0.1:8080
+```

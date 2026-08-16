@@ -1,0 +1,51 @@
+---
+title: Install the plugin
+description: >-
+  Put the NoHorny client jar in config/mods and use the public classification server.
+order: 2
+---
+
+import { Callout } from "#app/components/content/Callout";
+
+## Requirements
+
+- Mindustry 159 or later
+- Java 25
+- [SLF4MD](https://github.com/xpdustry/slf4md), optional. It routes plugin logs through the
+  Mindustry logger.
+
+## Install the jar
+
+1. Download `nohorny-client.jar` from the [latest release](https://github.com/xpdustry/nohorny/releases/latest).
+2. Put it in `config/mods`, next to your other plugins.
+3. Restart the server.
+
+```bash
+# from your Mindustry server directory
+wget -O config/mods/nohorny-client.jar \
+  https://github.com/xpdustry/nohorny/releases/latest/download/nohorny-client.jar
+```
+
+## Check that it worked
+
+On startup the plugin calls the status endpoint and logs what came back.
+
+```log
+[I] The NoHorny server https://nohorny.xpdustry.com/api is operational: ok
+[E] The NoHorny server https://nohorny.xpdustry.com/api is not reachable, is it running?
+[E] The NoHorny server https://nohorny.xpdustry.com/api returned 401 on status check: unauthorized
+```
+
+Changing the endpoint or the auth settings runs the check again, so you can fix a typo without
+restarting.
+
+## What happens by default
+
+The policy is `BAN_NSFW`. An NSFW group is deleted and its author is banned by UUID and IP.
+Everyone online sees a chat line naming the player and the coordinates.
+
+Deleted blocks are refunded to the owning team, processors linked to a display included.
+
+<Callout variant="warn" label="Upgrade first">
+  Releases older than beta 8 no longer work against the public instance. Update the jar.
+</Callout>
