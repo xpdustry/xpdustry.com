@@ -1,0 +1,39 @@
+# Anything the build stage would only have to throw away, plus everything
+# that must never reach an image layer.
+
+.git
+.gitignore
+.github
+
+node_modules
+node_modules_prod
+.pnpm-prod
+dist
+.vite
+.output
+.wrangler
+.vercel
+.netlify
+
+# Secrets. Nothing in the image needs one; the runtime takes no credentials.
+.env
+.env.*
+*.pem
+*.key
+
+# Editors and OS noise
+.idea
+.vscode
+*.swp
+.DS_Store
+Thumbs.db
+
+# Local caches and reports
+coverage
+.cache
+*.log
+*.tsbuildinfo
+
+Containerfile
+.containerignore
+IMPLEMENTATION_PLAN.md

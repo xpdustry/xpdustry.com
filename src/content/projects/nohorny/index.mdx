@@ -1,0 +1,38 @@
+---
+title: NoHorny
+description: >-
+  NoHorny reads logic displays and canvases, sends each rendered group to a
+  classifier, and applies your server's moderation policy.
+order: 1
+---
+
+NoHorny keeps sexual imagery off a Mindustry server without someone watching the map.
+
+## How it works
+
+The plugin tracks logic displays and canvases. Neighboring blocks become a group, the group is
+rendered to an image, and that image goes to a classification server. The answer is a rating and a
+confidence score. Finally, the auto-moderator applies your policy.
+
+## Ratings
+
+Every answer carries a rating and a confidence between `0.0` and `1.0`. The cutoffs live on the
+classification server, not the plugin.
+
+| Rating | Public instance      |
+| ------ | -------------------- |
+| `SAFE` | Below `0.6`          |
+| `WARN` | `0.6` to below `0.9` |
+| `NSFW` | `0.9` and up         |
+
+## Client and server
+
+The client is a Mindustry plugin, one jar in `config/mods`. The server owns the model and answers
+the classify call. The client uses `https://nohorny.xpdustry.com/api` by default, so most people
+only install the plugin. You can also [run your own server](/projects/nohorny/server).
+
+## What you need
+
+- Mindustry 159 or later
+- Java 25
+- [SLF4MD](https://github.com/xpdustry/slf4md), optional, for tidier logs
