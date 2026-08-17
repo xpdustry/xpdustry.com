@@ -1,3 +1,5 @@
+# Build output
+
 dist
 .wrangler
 .output
@@ -10,7 +12,7 @@ app.config.timestamp_*.js
 .env
 .env*.local
 
-# dependencies
+# Dependencies
 /node_modules
 
 # IDEs and editors
