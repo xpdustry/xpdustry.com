@@ -75,6 +75,11 @@ import screenshot from "#app/assets/blog/screenshot.png";
 
 Then run `pnpm check`. Invalid frontmatter and duplicate release IDs fail the build.
 
+## Attributions
+
+- [Noise texture](https://commons.wikimedia.org/wiki/File:512x512_Dissolve_Noise_Texture.png) (`src/assets/grain-250.png`).
+- [Lucky Fireant](https://uiverse.io/ui-kits/lucky-fireant-71-b2686726) (Great UI kit, makes the buttons fun to press).
+
 ## TODO
 
 - [ ] Nuke AI tests (oh my god gpt, why do you need to test EVERY BUTTON)
