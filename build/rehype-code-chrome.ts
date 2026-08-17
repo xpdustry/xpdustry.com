@@ -30,16 +30,15 @@ export function rehypeCodeChrome() {
         "data-source": source,
       };
 
-      code.children = highlight(source, language).map(
-        (token): ElementContent =>
-          token.kind === null
-            ? { type: "text", value: token.value }
-            : {
-                type: "element",
-                tagName: "span",
-                properties: { className: [TOKEN_CLASS[token.kind]] },
-                children: [{ type: "text", value: token.value }],
-              },
+      code.children = highlight(source, language).map((token): ElementContent =>
+        token.kind === null
+          ? { type: "text", value: token.value }
+          : {
+              type: "element",
+              tagName: "span",
+              properties: { className: [TOKEN_CLASS[token.kind]] },
+              children: [{ type: "text", value: token.value }],
+            },
       );
     });
   };

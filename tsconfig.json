@@ -11,10 +11,9 @@
     "isolatedModules": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
-      "#app/*": ["src/*"],
-      "#build/*": ["build/*"]
+      "#app/*": ["./src/*"],
+      "#build/*": ["./build/*"]
     },
     "noEmit": true,
     "allowImportingTsExtensions": true,

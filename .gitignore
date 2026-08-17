@@ -14,14 +14,11 @@ app.config.timestamp_*.js
 /node_modules
 
 # IDEs and editors
-/.idea
+.idea/
 .project
 .classpath
 *.launch
 .settings/
-
-# Temp
-gitignore
 
 # System Files
 .DS_Store

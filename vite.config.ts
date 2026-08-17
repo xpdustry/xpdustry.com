@@ -19,10 +19,10 @@ const devOnlyRoutes = ["/styleguide"];
 
 export default defineConfig(({ mode }) => ({
   resolve: {
-    alias: {
-      "#app": fileURLToPath(new URL("./src", import.meta.url)),
-      "#build": fileURLToPath(new URL("./build", import.meta.url)),
-    },
+    tsconfigPaths: true,
+  },
+  css: {
+    devSourcemap: true,
   },
   plugins: [
     tailwindcss(),
@@ -136,4 +136,3 @@ export default defineConfig(({ mode }) => ({
     assetsInlineLimit: 0,
   },
 }));
-import { fileURLToPath, URL } from "node:url";
