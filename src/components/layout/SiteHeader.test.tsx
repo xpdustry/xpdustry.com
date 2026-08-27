@@ -34,9 +34,10 @@ const burger = () => screen.getByRole("button", { name: /menu/i });
 describe("<SiteHeader />", () => {
   test("offers the agreed navigation and nothing else", () => {
     renderHeader();
-    for (const label of ["Home", "Projects", "Blog"]) {
+    for (const label of ["Home", "Blog"]) {
       expect(screen.getAllByRole("link", { name: label }).length).toBeGreaterThan(0);
     }
+    expect(screen.queryByRole("link", { name: "Projects" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Docs" })).toBeNull();
     // No search, no command palette hint, no newsletter, no Twitter/X.
     expect(screen.queryByRole("searchbox")).toBeNull();
@@ -47,13 +48,6 @@ describe("<SiteHeader />", () => {
   test("marks the current page", () => {
     renderHeader("/blog");
     const current = screen.getAllByRole("link", { name: "Blog" })[0];
-    expect(current).toHaveAttribute("aria-current", "page");
-  });
-
-  // A project page lives under the tab, so the tab stays lit while you read it.
-  test("marks the Projects tab on a project's own page", () => {
-    renderHeader("/projects/nohorny");
-    const current = screen.getAllByRole("link", { name: "Projects" })[0];
     expect(current).toHaveAttribute("aria-current", "page");
   });
 

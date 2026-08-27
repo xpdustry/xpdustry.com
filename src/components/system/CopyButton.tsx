@@ -8,7 +8,7 @@
  */
 
 import type { JSX } from "@solidjs/web";
-import { createSignal, onSettled, Show } from "solid-js";
+import { children, createSignal, onSettled, Show } from "solid-js";
 import { CheckIcon } from "#app/components/system/Icons";
 import { Button, type ButtonSize, type ButtonVariant } from "#app/components/system/Pressable";
 
@@ -24,9 +24,12 @@ export interface CopyButtonProps {
    * the button reports it without a word of layout.
    */
   icon?: boolean;
+  /** Full width, for a control that owns its row. */
+  block?: boolean;
   variant?: ButtonVariant;
   size?: ButtonSize;
   class?: string;
+  faceClass?: string;
   children?: JSX.Element;
 }
 
@@ -35,6 +38,10 @@ type Outcome = "idle" | "copied" | "failed";
 const RESET_DELAY_MS = 2400;
 
 export function CopyButton(props: CopyButtonProps) {
+  // Resolved once. Reading props.children from more than one place would
+  // build the face again on every read, and the copy would report itself on
+  // a set of nodes the button had already thrown away.
+  const face = children(() => props.children);
   const [outcome, setOutcome] = createSignal<Outcome>("idle");
   const [message, setMessage] = createSignal("");
 
@@ -74,15 +81,28 @@ export function CopyButton(props: CopyButtonProps) {
         variant={props.variant ?? "plain"}
         size={props.size ?? "sm"}
         icon={props.icon}
+        block={props.block}
         class={props.class}
-        aria-label={props.icon ? label() : undefined}
+        faceClass={props.faceClass}
+        aria-label={props.icon || props.label !== undefined ? label() : undefined}
         title={props.icon ? label() : undefined}
         onClick={() => void copy()}
       >
-        <Show when={props.icon && outcome() === "copied"} fallback={props.children}>
-          <CheckIcon />
+        <Show
+          when={props.icon}
+          fallback={
+            // Children are the resting face: an address, a filename. Once the
+            // copy has settled the outcome takes the whole button, because a
+            // tick tucked beside unchanged content is easy to miss.
+            <Show when={outcome() === "idle" && face() !== undefined} fallback={label()}>
+              {face()}
+            </Show>
+          }
+        >
+          <Show when={outcome() === "copied"} fallback={face()}>
+            <CheckIcon />
+          </Show>
         </Show>
-        <Show when={!props.icon}>{label()}</Show>
       </Button>
       {/* Off-screen rather than hidden: a display:none region is not announced. */}
       <span class="sr-only" role="status" aria-live="polite">

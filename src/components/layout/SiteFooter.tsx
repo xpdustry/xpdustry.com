@@ -29,9 +29,6 @@ export function SiteFooter() {
             <a class={footerLink} href="/">
               Home
             </a>
-            <a class={footerLink} href="/projects">
-              Projects
-            </a>
             <a class={footerLink} href="/blog">
               Blog
             </a>

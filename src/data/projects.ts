@@ -18,8 +18,6 @@ export interface ProjectDefinition {
   repository: `${string}/${string}`;
   summary: string;
   order: number;
-  /** Set when the project has pages on this site, rooted at /projects/<slug>. */
-  hosted?: boolean;
   /** The project's own mark. Projects without one borrow the Xpdustry cog. */
   icon?: string;
 }
@@ -32,7 +30,6 @@ export const projects: readonly ProjectDefinition[] = [
     summary:
       "A safety plugin that detects and removes NSFW imagery from logic displays and canvases.",
     order: 1,
-    hosted: true,
     icon: nohornyIcon,
   },
   {
@@ -59,27 +56,8 @@ export const projects: readonly ProjectDefinition[] = [
   },
 ];
 
-export const projectsBySlug: ReadonlyMap<ProjectSlug, ProjectDefinition> = new Map(
-  projects.map((project) => [project.slug, project]),
-);
-
 export function repositoryUrl(project: ProjectDefinition): string {
   return `https://github.com/${project.repository}`;
-}
-
-/** Where the project's own root page lives on this site, if it has one. */
-export function overviewPath(project: ProjectDefinition): string | undefined {
-  return project.hosted ? `/projects/${project.slug}` : undefined;
-}
-
-/**
- * The one destination a project card points at.
- *
- * A project with pages here is read here; one without has nothing to say that
- * its repository does not say better, so the card goes straight to GitHub.
- */
-export function projectUrl(project: ProjectDefinition): string {
-  return overviewPath(project) ?? repositoryUrl(project);
 }
 
 export interface ProjectIcon {

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ContentError, parseBlogFrontmatter, parseDocFrontmatter } from "#app/content/schema";
+import { ContentError, parseBlogFrontmatter } from "#app/content/schema";
 
 const valid = {
   title: "Beta 8 blurs your alerts",
@@ -87,27 +87,5 @@ describe("parseBlogFrontmatter", () => {
     expect(() => parseBlogFrontmatter("src/content/blog/broken.mdx", {})).toThrow(
       /^src\/content\/blog\/broken\.mdx:/,
     );
-  });
-});
-
-describe("parseDocFrontmatter", () => {
-  const doc = {
-    title: "Install the plugin",
-    description: "Drop one jar in config/mods.",
-    order: 2,
-  };
-
-  test("accepts the required fields", () => {
-    expect(parseDocFrontmatter("a.mdx", doc)).toEqual(doc);
-  });
-
-  test("rejects a missing or non-numeric order", () => {
-    expect(() => parseDocFrontmatter("a.mdx", { ...doc, order: "2" })).toThrow(/order/);
-    expect(() => parseDocFrontmatter("a.mdx", { ...doc, order: Number.NaN })).toThrow(/order/);
-  });
-
-  test("rejects frontmatter that is not a mapping", () => {
-    expect(() => parseDocFrontmatter("a.mdx", ["title"])).toThrow(/mapping/);
-    expect(() => parseDocFrontmatter("a.mdx", undefined)).toThrow(/mapping/);
   });
 });

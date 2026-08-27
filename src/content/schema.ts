@@ -43,17 +43,7 @@ export const blogFrontmatterSchema = v.object(
   "frontmatter is missing or is not a mapping",
 );
 
-export const docFrontmatterSchema = v.object(
-  {
-    title: nonEmptyStringSchema,
-    description: nonEmptyStringSchema,
-    order: v.pipe(v.number(), v.finite()),
-  },
-  "frontmatter is missing or is not a mapping",
-);
-
 export type BlogFrontmatter = v.InferOutput<typeof blogFrontmatterSchema>;
-export type DocFrontmatter = v.InferOutput<typeof docFrontmatterSchema>;
 
 export class ContentError extends Error {
   constructor(file: string, message: string, options?: ErrorOptions) {
@@ -64,10 +54,6 @@ export class ContentError extends Error {
 
 export function parseBlogFrontmatter(file: string, value: unknown): BlogFrontmatter {
   return parseFrontmatter(blogFrontmatterSchema, file, value);
-}
-
-export function parseDocFrontmatter(file: string, value: unknown): DocFrontmatter {
-  return parseFrontmatter(docFrontmatterSchema, file, value);
 }
 
 function parseFrontmatter<TSchema extends v.GenericSchema>(

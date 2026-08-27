@@ -3,7 +3,7 @@
 export const SITE = {
   name: "Xpdustry",
   /** The one sentence the whole site exists to say. */
-  positioning: "We build open-source software for Mindustry.",
+  positioning: "Pretty cool Mindustry tools.",
   description:
     "We build open-source software for Mindustry, and also run the Chaotic Neutral Mindustry servers.",
   github: "https://github.com/xpdustry",
@@ -15,6 +15,5 @@ export const SITE = {
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/projects", label: "Projects" },
   { href: "/blog", label: "Blog" },
 ] as const;

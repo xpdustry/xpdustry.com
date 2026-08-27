@@ -23,21 +23,26 @@
   margin-inline: auto;
 }
 
+/* The home page reads as one sequential list of bands, never columns side
+   by side. Each band's own card grid runs at most three per row: the 340px
+   floor is the narrowest a card stays legible at, and past three the grid
+   loses its rhythm. */
+.home-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 40rem) {
+  .home-list {
+    grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr));
+  }
+}
+
 .project-grid {
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
 }
 
 .footer-nav-grid {
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-}
-
-.docs-layout {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* A rail tracks the viewport, minus the sticky offset and breathing room. */
-.docs-rail {
-  max-block-size: calc(100dvh - 8rem);
 }
 
 @media (min-width: 48rem) {
@@ -51,20 +56,10 @@
 }
 
 @media (min-width: 64rem) {
-  .docs-layout {
-    grid-template-columns: 216px minmax(0, 1fr);
-  }
-
   /* Media can break wider than the article column on large screens. */
   .media {
     inline-size: calc(100% + 6rem);
     margin-inline: -3rem;
-  }
-}
-
-@media (min-width: 80rem) {
-  .docs-layout {
-    grid-template-columns: 216px minmax(0, 1fr) 190px;
   }
 }
 
@@ -103,30 +98,6 @@
   inline-size: var(--blob-size);
   block-size: var(--blob-size);
   translate: -50% -50%;
-}
-
-/* Native details owns the docs navigation state. CSS only handles the parts
-   that depend on its open attribute. */
-.docs-mobile summary svg {
-  transition: rotate var(--t-fast) var(--ease);
-}
-
-.docs-mobile[open] summary svg {
-  rotate: 180deg;
-}
-
-.docs-mobile[open] summary {
-  border-end-start-radius: 0;
-  border-end-end-radius: 0;
-}
-
-.docs-mobile[open] nav {
-  padding: 1rem;
-  border: var(--stroke) solid var(--line);
-  border-block-start: 0;
-  border-end-start-radius: 8px;
-  border-end-end-radius: 8px;
-  background: var(--panel-sunk);
 }
 
 /* Markdown emits bare elements, so article rhythm and contextual selectors

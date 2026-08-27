@@ -1,7 +1,6 @@
 import { Show } from "solid-js";
 import { CopyButton } from "#app/components/system/CopyButton";
 import { CopyIcon } from "#app/components/system/Icons";
-import { ButtonLink } from "#app/components/system/Pressable";
 import type { ServerSnapshotItem, SnapshotState } from "#app/data/snapshots";
 
 /**
@@ -11,7 +10,12 @@ import type { ServerSnapshotItem, SnapshotState } from "#app/data/snapshots";
  * nodes. The copy action always copies the friendly alias, never the address
  * the poller actually resolved and queried.
  */
-export function ServerCard(props: { server: ServerSnapshotItem; state: SnapshotState }) {
+export function ServerCard(props: {
+  server: ServerSnapshotItem;
+  state: SnapshotState;
+  /** The tighter row the home page stacks in a column: no description. */
+  compact?: boolean;
+}) {
   const online = () => props.server.online;
   // Before the first poll a card is not offline, it is unknown. Saying
   // "Offline" then would be a claim the process cannot yet support.
@@ -20,7 +24,8 @@ export function ServerCard(props: { server: ServerSnapshotItem; state: SnapshotS
   return (
     <li
       class={[
-        "grid h-full content-start gap-3 rounded-2xl border-2 border-line bg-panel p-6",
+        "grid h-full content-start gap-3 rounded-2xl border-2 border-line bg-panel",
+        props.compact ? "gap-2 p-4" : "p-6",
         { "border-line-soft bg-panel-sunk": !online() && !pending() },
       ]}
     >
@@ -31,7 +36,9 @@ export function ServerCard(props: { server: ServerSnapshotItem; state: SnapshotS
             online() ? "dot--live" : pending() ? "bg-signal" : "bg-danger",
           ]}
         />
-        <span class="text-base font-bold sm:text-lg">{props.server.label}</span>
+        <span class={props.compact ? "text-base font-bold" : "text-base font-bold sm:text-lg"}>
+          {props.server.label}
+        </span>
         <span class="ml-auto">
           <Show
             when={online() && props.server.info}
@@ -50,52 +57,44 @@ export function ServerCard(props: { server: ServerSnapshotItem; state: SnapshotS
         </span>
       </div>
 
-      <div class="grid min-h-11 content-start gap-0.5">
-        <Show
-          when={online() && props.server.info}
-          fallback={
-            <span class="truncate font-mono text-data tracking-tight text-ink-faint tabular-nums">
-              {pending() ? "Waiting for the first status poll" : "No response from this server"}
-            </span>
-          }
-        >
-          {(info) => (
-            <>
-              {/* No game mode: the server's own name already carries it. */}
+      {/* The compact card is a name, a state and a way in. What is on the map
+          right now changes every wave and is not what the reader is choosing
+          between, so it only appears on the full card. */}
+      <Show when={!props.compact}>
+        <div class="grid content-start gap-0.5">
+          <Show
+            when={online() && props.server.info}
+            fallback={
               <span class="truncate font-mono text-data tracking-tight text-ink-faint tabular-nums">
-                {info().map} · wave {info().wave}
+                {pending() ? "Waiting for the first status poll" : "No response from this server"}
               </span>
-              <Show when={info().description !== ""}>
-                <span class="line-clamp-2 text-sm text-ink-muted">{info().description}</span>
-              </Show>
-            </>
-          )}
-        </Show>
-      </div>
+            }
+          >
+            {(info) => (
+              <>
+                <span class="truncate font-mono text-data tracking-tight text-ink-faint tabular-nums">
+                  {info().map}
+                </span>
+              </>
+            )}
+          </Show>
+        </div>
+      </Show>
 
-      {/* Two ways in, side by side. Mindustry registers the mindustry://
-          scheme, so the address itself can be the join button for anyone with
-          the game installed; the square beside it copies the address for
-          everyone else, and for pasting to a friend. */}
-      <div class="mt-auto flex flex-wrap items-center gap-3 border-t border-line-soft pt-3">
+      {/* One control: the address, with a copy glyph beside it. Pressing it
+          copies and the whole face says so for a moment, which is the only
+          feedback a copy has. */}
+      <div class="mt-auto border-t border-line-soft pt-3">
         <CopyButton
-          icon
-          class="shrink-0"
+          block
+          faceClass="overflow-hidden px-3 font-mono font-medium tracking-tight"
           value={props.server.hostname}
           label={`Copy ${props.server.hostname}`}
           announcement={`Copied ${props.server.hostname}`}
         >
           <CopyIcon />
+          <span class="min-w-0 truncate">{props.server.hostname}</span>
         </CopyButton>
-        <ButtonLink
-          class="block min-w-0 flex-1"
-          faceClass="overflow-hidden px-3 font-mono font-medium tracking-tight"
-          size="sm"
-          href={`mindustry://${props.server.hostname}`}
-          title={`Join ${props.server.label} in Mindustry`}
-        >
-          {props.server.hostname}
-        </ButtonLink>
       </div>
     </li>
   );

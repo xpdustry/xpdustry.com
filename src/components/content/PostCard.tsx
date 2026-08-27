@@ -14,7 +14,29 @@ import { formatDate } from "#app/lib/format";
  * looked different in the two places it appears would read as two kinds of
  * thing.
  */
-export function PostCard(props: { post: BlogPost }) {
+export function PostCard(props: { post: BlogPost; compact?: boolean }) {
+  if (props.compact) {
+    return (
+      <CardLink
+        class="block h-full"
+        faceClass="flex flex-col items-stretch justify-start gap-1.5 p-4 text-left"
+        href={`/blog/${props.post.slug}`}
+      >
+        <span class="flex items-center justify-between gap-3 font-mono text-data tracking-tight text-ink-faint">
+          <span class="truncate" data-topic={props.post.frontmatter.topic}>
+            {props.post.frontmatter.topic}
+          </span>
+          <time datetime={props.post.frontmatter.publishedAt}>
+            {formatDate(props.post.frontmatter.publishedAt)}
+          </time>
+        </span>
+        <span class="text-base leading-tight font-bold text-ink">
+          {props.post.frontmatter.title}
+        </span>
+      </CardLink>
+    );
+  }
+
   return (
     <CardLink
       class="h-full"

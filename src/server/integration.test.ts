@@ -34,15 +34,10 @@ suite("SSR routes", () => {
   });
 
   test.each([
-    ["/", "We build open-source software for Mindustry."],
+    ["/", "Pretty cool Mindustry tools."],
     ["/blog", "Release notes"],
     ["/blog/nohorny-4-beta-1", "Just in time for Mindustry v8"],
     ["/blog/nohorny-4-beta-8", "Discord alerts are now blurred"],
-    ["/projects", "Our best open source tools"],
-    ["/projects/nohorny", "How it works"],
-    ["/projects/nohorny/install", "Install the jar"],
-    ["/projects/nohorny/settings", "Settings"],
-    ["/projects/nohorny/server", "Run your own server"],
   ])("%s renders its content server-side", async (path, needle) => {
     const response = await get(path);
     expect(response.status).toBe(200);
@@ -55,9 +50,9 @@ suite("SSR routes", () => {
 
     const html = await response.text();
     expect(html).toContain("this page does not exist");
-    // Home, Projects and Blog, and nothing that only exists in development.
-    expect(html).toContain('href="/projects"');
+    // Home and Blog, and nothing that only exists in development.
     expect(html).toContain('href="/blog"');
+    expect(html).not.toContain('href="/projects"');
     expect(html).not.toContain("styleguide");
   });
 
@@ -69,7 +64,7 @@ suite("SSR routes", () => {
     const html = await (await get("/")).text();
     // The section, its heading and every server alias are server-rendered
     // whether or not a poll has landed.
-    expect(html).toContain(">Mindustry servers</h2>");
+    expect(html).toContain(">Servers</h2>");
     expect(html).not.toContain(
       '<p class="lead">We also run the Chaotic Neutral Mindustry servers.</p>',
     );
@@ -89,12 +84,13 @@ suite("SSR routes", () => {
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
-  test("each project card is one link, to its pages here or to its repository", async () => {
+  test("each project card is one link, straight to its repository", async () => {
     const html = await (await get("/")).text();
-    // NoHorny has pages, so its card stays on the site; CLaJ has none.
-    expect(html).toContain('href="/projects/nohorny"');
-    expect(html).toContain('href="https://github.com/xpdustry/claj"');
-    expect(html).not.toContain("https://github.com/xpdustry/nohorny");
+    for (const repository of ["nohorny", "claj", "toxopid", "distributor"]) {
+      expect(html).toContain(`href="https://github.com/xpdustry/${repository}"`);
+    }
+    // The project pages are gone; no card may point back at them.
+    expect(html).not.toContain('href="/projects');
   });
 
   test("a post reaches its release changelog on GitHub", async () => {
@@ -131,7 +127,6 @@ suite("SSR routes", () => {
     ["/", "Xpdustry"],
     ["/blog", "Blog · Xpdustry"],
     ["/blog/nohorny-4-beta-1", "Say hello to NoHorny v4 beta 1 · Xpdustry"],
-    ["/projects/nohorny/install", "Install the plugin · Xpdustry"],
   ])("%s has exactly one title, and it is its own", async (path, expected) => {
     const html = await (await get(path)).text();
     const titles = [...html.matchAll(/<title[^>]*>([^<]*)<\/title>/g)].map((match) => match[1]);
@@ -141,7 +136,7 @@ suite("SSR routes", () => {
   });
 
   test("every page carries a title, description and canonical url", async () => {
-    for (const path of ["/", "/blog", "/projects", "/projects/nohorny"]) {
+    for (const path of ["/", "/blog"]) {
       const html = await (await get(path)).text();
       expect(html, path).toContain('<meta name="description"');
       expect(html, path).toContain(`<link rel="canonical" href="https://www.xpdustry.com${path}"`);
@@ -159,7 +154,7 @@ suite("SSR routes", () => {
   });
 
   test("every page offers a skip link and one page-level heading", async () => {
-    for (const path of ["/", "/blog", "/projects/nohorny/install"]) {
+    for (const path of ["/", "/blog"]) {
       const html = await (await get(path)).text();
       expect(html, path).toContain("Skip to content");
       expect((html.match(/<h1[\s>]/g) ?? []).length, path).toBe(1);

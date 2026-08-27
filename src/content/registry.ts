@@ -1,22 +1,16 @@
 /**
- * The blog and docs registries, built from the MDX in this directory.
+ * The blog registry, built from the MDX in this directory.
  *
- * `import.meta.glob` is eager because the whole corpus is nine short files:
+ * `import.meta.glob` is eager because the whole corpus is four short posts:
  * an index page needs every post's frontmatter anyway, and lazily loading
- * five modules to list five titles costs more than it saves.
+ * four modules to list four titles costs more than it saves.
  *
  * Every invariant is checked at module evaluation, so a bad date or a
  * duplicate slug fails the build rather than rendering a broken page.
  */
 
 import type { Component } from "solid-js";
-import {
-  ContentError,
-  parseBlogFrontmatter,
-  parseDocFrontmatter,
-  type BlogFrontmatter,
-  type DocFrontmatter,
-} from "#app/content/schema";
+import { ContentError, parseBlogFrontmatter, type BlogFrontmatter } from "#app/content/schema";
 import type { DocHeading } from "#build/rehype-heading-anchors";
 
 interface MdxModule {
@@ -32,20 +26,7 @@ export interface BlogPost {
   Content: Component<Record<string, unknown>>;
 }
 
-export interface DocPage {
-  /** Route path, e.g. `/projects/nohorny/install`. */
-  path: string;
-  project: string;
-  slug: string;
-  frontmatter: DocFrontmatter;
-  headings: DocHeading[];
-  Content: Component<Record<string, unknown>>;
-}
-
 const blogModules = import.meta.glob<MdxModule>("./blog/*.mdx", {
-  eager: true,
-});
-const docModules = import.meta.glob<MdxModule>("./projects/*/*.mdx", {
   eager: true,
 });
 
@@ -54,15 +35,8 @@ export const postsBySlug: ReadonlyMap<string, BlogPost> = new Map(
   posts.map((post) => [post.slug, post]),
 );
 
-export const docs: readonly DocPage[] = buildDocs();
-export const docsByPath: ReadonlyMap<string, DocPage> = new Map(docs.map((doc) => [doc.path, doc]));
-
 // Content invariant, checked at module evaluation like the rest of them.
 assertReleasesAreClaimedOnce();
-
-export function docsForProject(project: string): readonly DocPage[] {
-  return docs.filter((doc) => doc.project === project);
-}
 
 function buildPosts(): BlogPost[] {
   const seen = new Set<string>();
@@ -87,35 +61,6 @@ function buildPosts(): BlogPost[] {
   return built.sort(
     (a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt),
   );
-}
-
-function buildDocs(): DocPage[] {
-  const built: DocPage[] = [];
-
-  for (const [file, module] of Object.entries(docModules)) {
-    const match = /^\.\/projects\/([^/]+)\/([^/]+)\.mdx$/.exec(file);
-    if (!match)
-      throw new ContentError(file, "project pages live at content/projects/<project>/<slug>.mdx");
-    const [, project, name] = match;
-    const slug = name === "index" ? "" : name;
-
-    built.push({
-      path: slug === "" ? `/projects/${project}` : `/projects/${project}/${slug}`,
-      project,
-      slug,
-      frontmatter: parseDocFrontmatter(file, module.frontmatter),
-      headings: module.headings ?? [],
-      Content: module.default,
-    });
-  }
-
-  const paths = new Set<string>();
-  for (const doc of built) {
-    if (paths.has(doc.path)) throw new ContentError(doc.path, "duplicate docs path");
-    paths.add(doc.path);
-  }
-
-  return built.sort((a, b) => a.frontmatter.order - b.frontmatter.order);
 }
 
 /**
