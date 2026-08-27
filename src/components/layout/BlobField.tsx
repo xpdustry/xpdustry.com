@@ -1,8 +1,8 @@
 import { For, createUniqueId } from "solid-js";
 import grain from "#app/assets/grain-250.png";
 
-/** The field's palette. A shape's `tone` is an index into it. */
-const CYAN = ["#7afff8", "#00fff1", "#00c8bd", "#008f88"];
+/** The field shares the UI ramp. A shape's `tone` is an index into it. */
+const TEAL = ["var(--key-100)", "var(--key-200)", "var(--key-300)", "var(--key-400)"];
 
 /**
  * Radial offsets, in silhouettes rather than numbers.
@@ -199,7 +199,7 @@ export function BlobField(props: BlobFieldProps) {
               "--blob-x": `${blob.x}%`,
               "--blob-y": `${blob.y}%`,
               "--blob-size": blob.size,
-              color: CYAN[blob.tone],
+              color: TEAL[blob.tone],
             }}
           >
             <defs>

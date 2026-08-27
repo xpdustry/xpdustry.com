@@ -7,17 +7,25 @@
 
    Contrast pairs that matter, measured against the ink they carry:
 
-     key   #00fff1 on ink #1d262d   16.0:1
-     signal#fda817 on ink #1d262d    9.2:1
-     danger#cc2a2c on white          5.7:1
+     key-300 #41c1ba on ink #1d262d   6.99:1
+     key-400 #209c96 on ink #1d262d   4.58:1
+     signal  #fda817 on ink #1d262d   7.89:1
+     danger  #cc2a2c on white         5.34:1
    ========================================================================= */
 
 :root {
   /* Fixed by the logo. These four never re-theme. */
-  --key: #00fff1;
-  --key-wall: #007f79;
+  --brand: #00fff1;
+  --brand-wall: #007f79;
   --x-wall: #808080;
   --stamp: #30363b;
+
+  /* UI accent. Damped beside the logo, with room for interaction states. */
+  --key-100: #8debe5;
+  --key-200: #67dad3;
+  --key-300: #41c1ba;
+  --key-400: #209c96;
+  --key-500: #007f79;
 
   /* Status */
   --signal: #fda817;

@@ -96,6 +96,16 @@
     --face-gloss: var(--gloss);
   }
 
+  .accent:where(:hover:not(:disabled, [aria-disabled="true"])),
+  .accent[data-force="hover"] {
+    --face: var(--accent-hover);
+  }
+
+  .accent:where(:active:not(:disabled, [aria-disabled="true"])),
+  .accent[data-force="press"] {
+    --face: var(--accent-pressed);
+  }
+
   .signal {
     --face: var(--signal);
     --wall: var(--signal-wall);

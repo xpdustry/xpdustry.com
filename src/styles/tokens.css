@@ -54,10 +54,12 @@
 :root {
   color-scheme: light;
 
-  /* The accent owns pressable surfaces and nothing else: never text, never a
-     border, never a background wash. */
-  --accent: var(--key);
-  --accent-wall: var(--key-wall);
+  /* The accent marks controls and compact status UI. Each interaction gets a
+     real ramp stop instead of changing opacity. */
+  --accent: var(--key-300);
+  --accent-hover: var(--key-200);
+  --accent-pressed: var(--key-400);
+  --accent-wall: var(--key-500);
   --on-accent: var(--ink);
 
   --on-signal: var(--ink);
@@ -91,8 +93,8 @@
 
 /* The mark retints itself from whatever theme is active. */
 :root {
-  --xp-cog: var(--key);
-  --xp-cog-wall: var(--key-wall);
+  --xp-cog: var(--brand);
+  --xp-cog-wall: var(--brand-wall);
   --xp-x: #ffffff;
   --xp-x-wall: var(--x-wall);
   --xp-outline: var(--stamp);
