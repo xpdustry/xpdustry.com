@@ -1,6 +1,6 @@
-import { BlobField, SPARSE_BLOBS } from "#app/components/layout/BlobField";
 import { HttpStatus } from "#app/components/layout/HttpStatus";
 import { PageMeta } from "#app/components/layout/PageMeta";
+import { ReticulateField } from "#app/components/layout/ReticulateField";
 import { ButtonLink } from "#app/components/system/Pressable";
 
 /**
@@ -21,7 +21,7 @@ export function NotFound() {
         description="That page does not exist on the Xpdustry site."
         path="/404"
       />
-      <BlobField artwork={SPARSE_BLOBS} />
+      <ReticulateField />
       <div class="wrap py-32 text-center">
         <p class="font-mono text-5xl leading-none font-bold tracking-tighter text-ink-faint sm:text-8xl">
           404

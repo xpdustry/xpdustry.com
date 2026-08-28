@@ -12,6 +12,7 @@
     "dev": "vite",
     "build": "vite build",
     "start": "node dist/server/node.js",
+    "pattern": "node --experimental-strip-types vite/generate-reticulate.ts",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
     "lint": "oxlint .",

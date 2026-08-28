@@ -14,8 +14,8 @@ import { Callout } from "#app/components/content/Callout";
 import { Pager } from "#app/components/content/Pager";
 import { ProjectCard } from "#app/components/content/ProjectCard";
 import { ServerCard } from "#app/components/content/ServerCard";
-import { BlobField, PAGE_HEAD_BLOBS } from "#app/components/layout/BlobField";
 import { PageMeta } from "#app/components/layout/PageMeta";
+import { ReticulateField } from "#app/components/layout/ReticulateField";
 import { CopyButton } from "#app/components/system/CopyButton";
 import { ChevronDownIcon, DiscordIcon, GitHubIcon } from "#app/components/system/Icons";
 import { Button, ButtonLink, CardLink } from "#app/components/system/Pressable";
@@ -30,7 +30,7 @@ export default function Styleguide() {
   return (
     <>
       <PageMeta title="Style guide" description="Development fixture." path="/styleguide" />
-      <BlobField artwork={PAGE_HEAD_BLOBS} />
+      <ReticulateField />
 
       <div class="wrap py-12 pb-24">
         <header class="mb-12 max-w-prose">

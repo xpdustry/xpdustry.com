@@ -82,22 +82,26 @@
   }
 }
 
-/* Blob dimensions and positions come from the selected art preset. */
-.blobfield {
-  block-size: var(--blob-height, 900px);
-  opacity: var(--blob-opacity, 0.5);
+/* One field, one look, every page. The tile is 400px of baked simulation
+   shown at roughly 1.5x that, so the net stays fine without the browser
+   stretching it far enough to go soft. The field is tall because it is now
+   the only one on the page: it has to reach past the fold on its own, and
+   the fade is what ends it rather than its height. */
+.reticulate {
+  block-size: 1600px;
+  opacity: 0.13;
+  mask-image: linear-gradient(to bottom, #000 10%, transparent 88%);
 }
 
-[data-theme="dark"] .blobfield {
-  opacity: var(--blob-opacity-dark, 0.42);
+[data-theme="dark"] .reticulate {
+  opacity: 0.18;
 }
 
-.blobfield__shape {
-  inset-inline-start: var(--blob-x);
-  inset-block-start: var(--blob-y);
-  inline-size: var(--blob-size);
-  block-size: var(--blob-size);
-  translate: -50% -50%;
+.reticulate__net {
+  background: linear-gradient(100deg, var(--key-200), var(--key-300) 45%, var(--key-400));
+  /* `mask-image` is set inline: it carries the hashed asset URL. */
+  mask-size: clamp(440px, 48vw, 760px);
+  mask-repeat: repeat;
 }
 
 /* Markdown emits bare elements, so article rhythm and contextual selectors

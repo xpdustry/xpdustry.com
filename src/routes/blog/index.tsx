@@ -1,14 +1,14 @@
 import { For, Show } from "solid-js";
 import { PostCard } from "#app/components/content/PostCard";
-import { BlobField, PAGE_HEAD_ALT_BLOBS } from "#app/components/layout/BlobField";
 import { PageMeta } from "#app/components/layout/PageMeta";
+import { ReticulateField } from "#app/components/layout/ReticulateField";
 import { posts } from "#app/content/registry";
 
 export default function BlogIndex() {
   return (
     <>
       <PageMeta title="Blog" description="Release notes and technical deep dives." path="/blog" />
-      <BlobField artwork={PAGE_HEAD_ALT_BLOBS} />
+      <ReticulateField />
 
       <div class="wrap py-12 pb-24">
         <header class="mb-16 max-w-prose">

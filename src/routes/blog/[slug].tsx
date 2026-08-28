@@ -1,9 +1,9 @@
 import { useParams } from "@solidjs/router";
 import { For, Show, createMemo } from "solid-js";
 import { Pager } from "#app/components/content/Pager";
-import { ARTICLE_BLOBS, BlobField } from "#app/components/layout/BlobField";
 import { NotFound } from "#app/components/layout/NotFound";
 import { PageMeta } from "#app/components/layout/PageMeta";
+import { ReticulateField } from "#app/components/layout/ReticulateField";
 import { ButtonLink } from "#app/components/system/Pressable";
 import { posts, postsBySlug } from "#app/content/registry";
 import { formatDate } from "#app/lib/format";
@@ -29,7 +29,7 @@ export default function BlogPost() {
             type="article"
             publishedAt={entry().frontmatter.publishedAt}
           />
-          <BlobField artwork={ARTICLE_BLOBS} />
+          <ReticulateField />
 
           <div class="wrap py-16 pb-24">
             <article class="mx-auto w-full max-w-prose">

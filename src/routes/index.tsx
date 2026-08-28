@@ -3,8 +3,8 @@ import logo from "#app/assets/logo.svg";
 import { PostCard } from "#app/components/content/PostCard";
 import { ProjectCard } from "#app/components/content/ProjectCard";
 import { ServerCard } from "#app/components/content/ServerCard";
-import { BAND_WIDE_BLOBS, BlobField, HERO_BLOBS } from "#app/components/layout/BlobField";
 import { PageMeta } from "#app/components/layout/PageMeta";
+import { ReticulateField } from "#app/components/layout/ReticulateField";
 import { ButtonLink } from "#app/components/system/Pressable";
 import { postsBySlug } from "#app/content/registry";
 import { projects } from "#app/data/projects";
@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <>
       <PageMeta title={SITE.name} description={SITE.description} path="/" />
-      <BlobField artwork={HERO_BLOBS} />
+      <ReticulateField />
 
       <Hero />
 
@@ -33,7 +33,6 @@ export default function Home() {
           plus this top padding sums to the hero's own top padding, so the
           nav, the hero and the projects sit on one even rhythm. */}
       <div class="relative isolate pt-8 pb-12 sm:pb-16">
-        <BlobField artwork={BAND_WIDE_BLOBS} />
         <div class="wrap grid gap-12">
           <ProjectSection />
           <BlogSection />

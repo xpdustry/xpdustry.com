@@ -13,7 +13,7 @@ const Router = createRouter({ routes: fileRoutes(pageRoutes) });
 
 /**
  * The site shell. Every page renders inside this: skip link, header, main
- * landmark, footer. Pages own their own <h1>, their own blob field and their
+ * landmark, footer. Pages own their own <h1>, their own reticulate field and their
  * own metadata.
  */
 export default function App() {
