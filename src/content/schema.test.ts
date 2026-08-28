@@ -11,7 +11,7 @@ const valid = {
 
 describe("parseBlogFrontmatter", () => {
   test("accepts the required fields", () => {
-    expect(parseBlogFrontmatter("a.mdx", valid)).toEqual({
+    expect(parseBlogFrontmatter("a.md", valid)).toEqual({
       title: valid.title,
       description: valid.description,
       publishedAt: "2026-07-20T00:00:00.000Z",
@@ -21,7 +21,7 @@ describe("parseBlogFrontmatter", () => {
   });
 
   test("accepts a Date, which is what YAML makes of an unquoted date", () => {
-    const parsed = parseBlogFrontmatter("a.mdx", {
+    const parsed = parseBlogFrontmatter("a.md", {
       ...valid,
       publishedAt: new Date("2026-07-20T00:00:00Z"),
     });
@@ -29,7 +29,7 @@ describe("parseBlogFrontmatter", () => {
   });
 
   test("accepts an optional author picture", () => {
-    expect(parseBlogFrontmatter("a.mdx", { ...valid, pfp: "/phinner.svg" }).pfp).toBe(
+    expect(parseBlogFrontmatter("a.md", { ...valid, pfp: "/phinner.svg" }).pfp).toBe(
       "/phinner.svg",
     );
   });
@@ -38,27 +38,27 @@ describe("parseBlogFrontmatter", () => {
     "rejects a missing %s",
     (key) => {
       const { [key]: _dropped, ...rest } = valid as Record<string, unknown>;
-      expect(() => parseBlogFrontmatter("a.mdx", rest)).toThrow(ContentError);
+      expect(() => parseBlogFrontmatter("a.md", rest)).toThrow(ContentError);
     },
   );
 
   test("rejects an empty string where content is required", () => {
-    expect(() => parseBlogFrontmatter("a.mdx", { ...valid, title: "   " })).toThrow(/title/);
+    expect(() => parseBlogFrontmatter("a.md", { ...valid, title: "   " })).toThrow(/title/);
   });
 
   test.each(["yesterday", "2026-13-45", ""])("rejects the bad date %j", (publishedAt) => {
-    expect(() => parseBlogFrontmatter("a.mdx", { ...valid, publishedAt })).toThrow(/publishedAt/);
+    expect(() => parseBlogFrontmatter("a.md", { ...valid, publishedAt })).toThrow(/publishedAt/);
   });
 
   test("rejects an invalid updatedAt while allowing it to be absent", () => {
-    expect(parseBlogFrontmatter("a.mdx", valid).updatedAt).toBeUndefined();
-    expect(() => parseBlogFrontmatter("a.mdx", { ...valid, updatedAt: "soon" })).toThrow(
+    expect(parseBlogFrontmatter("a.md", valid).updatedAt).toBeUndefined();
+    expect(() => parseBlogFrontmatter("a.md", { ...valid, updatedAt: "soon" })).toThrow(
       /updatedAt/,
     );
   });
 
   test("accepts a well-formed release id", () => {
-    const parsed = parseBlogFrontmatter("a.mdx", {
+    const parsed = parseBlogFrontmatter("a.md", {
       ...valid,
       releases: ["xpdustry/nohorny@v4.0.0-beta.8"],
     });
@@ -68,7 +68,7 @@ describe("parseBlogFrontmatter", () => {
   test.each(["nohorny@v1", "xpdustry/nohorny", "xpdustry/nohorny@", "@v1"])(
     "rejects the malformed release id %j",
     (id) => {
-      expect(() => parseBlogFrontmatter("a.mdx", { ...valid, releases: [id] })).toThrow(
+      expect(() => parseBlogFrontmatter("a.md", { ...valid, releases: [id] })).toThrow(
         /owner\/repo@tag/,
       );
     },
@@ -76,7 +76,7 @@ describe("parseBlogFrontmatter", () => {
 
   test("rejects a duplicate release id within one post", () => {
     expect(() =>
-      parseBlogFrontmatter("a.mdx", {
+      parseBlogFrontmatter("a.md", {
         ...valid,
         releases: ["xpdustry/nohorny@v1", "xpdustry/nohorny@v1"],
       }),
@@ -84,8 +84,8 @@ describe("parseBlogFrontmatter", () => {
   });
 
   test("names the file in the error, so a build failure points at the post", () => {
-    expect(() => parseBlogFrontmatter("src/content/blog/broken.mdx", {})).toThrow(
-      /^src\/content\/blog\/broken\.mdx:/,
+    expect(() => parseBlogFrontmatter("src/content/blog/broken.md", {})).toThrow(
+      /^src\/content\/blog\/broken\.md:/,
     );
   });
 });

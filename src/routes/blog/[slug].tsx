@@ -1,7 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { Dynamic } from "@solidjs/web";
 import { For, Show, createMemo } from "solid-js";
-import { mdxComponents } from "#app/components/content/mdx-components";
 import { Pager } from "#app/components/content/Pager";
 import { ARTICLE_BLOBS, BlobField } from "#app/components/layout/BlobField";
 import { NotFound } from "#app/components/layout/NotFound";
@@ -76,11 +74,10 @@ export default function BlogPost() {
                 </span>
               </div>
 
-              <div class="doc max-w-full min-w-0 leading-relaxed text-ink-muted">
-                {/* The MDX module is a component; `components` maps the
-                    elements Markdown emits onto the site's chrome. */}
-                <Dynamic component={entry().Content} components={mdxComponents} />
-              </div>
+              <div
+                class="doc max-w-full min-w-0 leading-relaxed text-ink-muted"
+                innerHTML={entry().html}
+              />
 
               <Show when={(entry().frontmatter.releases ?? []).length > 0}>
                 <aside class="mt-12 grid gap-3 rounded-lg border border-line-soft bg-panel px-6 py-4">

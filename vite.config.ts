@@ -1,16 +1,9 @@
-import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import { routePathFromFile } from "filesystem-routing";
 import { fileRoutes } from "filesystem-routing/vite";
-import rehypeSlug from "rehype-slug";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkGfm from "remark-gfm";
-import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import solid from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
-// Native package import maps resolve these while Vite is still loading its config.
-import { rehypeCodeChrome } from "#build/rehype-code-chrome.ts";
-import { rehypeHeadingAnchors } from "#build/rehype-heading-anchors.ts";
+import { blogMarkdownPlugin } from "./vite/markdown.ts";
 
 // `/styleguide` is a visual regression fixture, not a page. Dropping it from
 // the route scan (rather than 404ing inside the component) keeps its fixtures
@@ -26,34 +19,14 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     tailwindcss(),
-    // MDX runs before the Solid plugin and hands off JSX rather than
-    // `jsx()` calls (`jsx: true`), so Solid's own compiler produces the
-    // output. Setting a `jsxImportSource` here instead would pull a second
-    // runtime into the bundle alongside the one the app already uses.
-    {
-      enforce: "pre" as const,
-      ...mdx({
-        jsx: true,
-        // Solid reads `class` and CSS-cased style properties. Left on the
-        // React defaults, MDX emits `className`, which Solid passes through
-        // as a literal attribute and every generated class silently misses.
-        elementAttributeNameCase: "html",
-        stylePropertyNameCase: "css",
-        remarkPlugins: [
-          remarkFrontmatter,
-          [remarkMdxFrontmatter, { name: "frontmatter" }],
-          remarkGfm,
-        ],
-        rehypePlugins: [rehypeSlug, rehypeHeadingAnchors, rehypeCodeChrome],
-      }),
-    },
+    blogMarkdownPlugin(),
     // `extensions` makes vite-plugin-solid also compile the `?pick=` route
-    // modules the fileRoutes plugin emits (their ids end in a query string),
-    // and the JSX that @mdx-js/rollup produces for `.mdx` sources.
+    // modules the fileRoutes plugin emits because their ids end in a query
+    // string rather than a normal source extension.
     solid({
       start: { middleware: "src/server/middleware.ts" },
       ssr: true,
-      extensions: [".jsx", ".tsx", ".mdx"],
+      extensions: [".jsx", ".tsx"],
     }),
     // vite-plugin-solid pins the SSR bundle to `server.js`, which collides
     // with the authored Node entry added below and pushes one of them to an
@@ -116,7 +89,7 @@ export default defineConfig(({ mode }) => ({
         test: {
           name: "server",
           environment: "node",
-          include: ["src/{server,content,lib}/**/*.test.{ts,tsx}"],
+          include: ["src/{server,content,lib}/**/*.test.{ts,tsx}", "vite/**/*.test.ts"],
         },
       },
       {

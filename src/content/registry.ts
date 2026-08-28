@@ -1,5 +1,5 @@
 /**
- * The blog registry, built from the MDX in this directory.
+ * The blog registry, built from compiled Markdown modules in this directory.
  *
  * `import.meta.glob` is eager because the whole corpus is four short posts:
  * an index page needs every post's frontmatter anyway, and lazily loading
@@ -9,24 +9,20 @@
  * duplicate slug fails the build rather than rendering a broken page.
  */
 
-import type { Component } from "solid-js";
-import { ContentError, parseBlogFrontmatter, type BlogFrontmatter } from "#app/content/schema";
-import type { DocHeading } from "#build/rehype-heading-anchors";
+import { ContentError, type BlogFrontmatter } from "#app/content/schema";
 
-interface MdxModule {
-  default: Component<Record<string, unknown>>;
-  frontmatter?: unknown;
-  headings?: DocHeading[];
+interface MarkdownModule {
+  frontmatter: BlogFrontmatter;
+  html: string;
 }
 
 export interface BlogPost {
   slug: string;
   frontmatter: BlogFrontmatter;
-  headings: DocHeading[];
-  Content: Component<Record<string, unknown>>;
+  html: string;
 }
 
-const blogModules = import.meta.glob<MdxModule>("./blog/*.mdx", {
+const blogModules = import.meta.glob<MarkdownModule>("./blog/*.md", {
   eager: true,
 });
 
@@ -47,13 +43,10 @@ function buildPosts(): BlogPost[] {
     if (seen.has(slug)) throw new ContentError(file, `duplicate post slug ${slug}`);
     seen.add(slug);
 
-    const frontmatter = parseBlogFrontmatter(file, module.frontmatter);
-
     built.push({
       slug,
-      frontmatter,
-      headings: module.headings ?? [],
-      Content: module.default,
+      frontmatter: module.frontmatter,
+      html: module.html,
     });
   }
 
@@ -85,5 +78,5 @@ function assertReleasesAreClaimedOnce(): void {
 }
 
 function fileSlug(file: string): string {
-  return file.replace(/^.*\//, "").replace(/\.mdx$/, "");
+  return file.replace(/^.*\//, "").replace(/\.md$/, "");
 }

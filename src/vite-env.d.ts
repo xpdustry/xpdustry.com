@@ -6,13 +6,3 @@ declare module "virtual:solid-ssr-handler" {
   const handler: { fetch: (request: Request) => Promise<Response> };
   export default handler;
 }
-
-declare module "*.mdx" {
-  import type { Component } from "solid-js";
-  import type { DocHeading } from "#build/rehype-heading-anchors";
-
-  export const frontmatter: unknown;
-  export const headings: DocHeading[];
-  const MDXContent: Component<Record<string, unknown>>;
-  export default MDXContent;
-}

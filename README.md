@@ -33,11 +33,11 @@ Set the `PORT` env variable to change the server port. It defaults to `3000`.
 
 ## Add a blog post
 
-Create `src/content/blog/<slug>.mdx`. The filename becomes the URL, so `hello-world.mdx` is published at `/blog/hello-world`.
+Create `src/content/blog/<slug>.md`. The filename becomes the URL, so `hello-world.md` is published at `/blog/hello-world`.
 
 Start with this frontmatter:
 
-```mdx
+```md
 ---
 title: A useful title
 description: A short description used in page metadata.
@@ -58,19 +58,17 @@ Useful optional fields:
 - `pfp` is the author's avatar URL.
 - `releases` lists related releases as `owner/repository@tag`. A release can belong to only one post.
 
-Put post images and videos in `src/assets/blog/`, then import them from the MDX file. Use `PostImage` or `PostVideo` so the browser reserves the correct space before the media loads.
+Put post images and videos in `public/blog/`. Use a media comment with explicit dimensions so the browser reserves the correct space before the file loads.
 
-```mdx
-import { PostImage } from "#app/components/content/Media";
-import screenshot from "#app/assets/blog/screenshot.png";
+```md
+<!-- ::post-image src="/blog/screenshot.png" alt="What the screenshot shows" width="1280" height="720" caption="Optional caption." -->
+```
 
-<PostImage
-  src={screenshot}
-  alt="What the screenshot shows"
-  width={1280}
-  height={720}
-  caption="Optional caption."
-/>
+Callouts use GitHub-style Markdown:
+
+```md
+> [!WARNING] Upgrade first
+> This release is not compatible with the previous version.
 ```
 
 Then run `pnpm check`. Invalid frontmatter and duplicate release IDs fail the build.

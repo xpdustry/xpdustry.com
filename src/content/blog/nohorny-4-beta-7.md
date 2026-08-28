@@ -11,8 +11,6 @@ releases:
   - xpdustry/nohorny@v4.0.0-beta.7
 ---
 
-import { Callout } from "#app/components/content/Callout";
-
 The week is ending, so it is time for a new NoHorny release. Say hello to **beta 7**.
 
 ### Accuracy improvements
@@ -25,9 +23,8 @@ The week is ending, so it is time for a new NoHorny release. Say hello to **beta
 - **The public model is tuned.** I finished tuning the model used by the public NoHorny server.
   Ambiguous images will no longer be marked `NSFW` but `WARN` instead.
 
-<Callout label="The short version">
-  All these changes now make automatically banning on an `NSFW` rating actually reliable.
-</Callout>
+> [!NOTE] The short version
+> All these changes now make automatically banning on an `NSFW` rating actually reliable.
 
 ### Everything else
 

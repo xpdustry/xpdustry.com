@@ -11,10 +11,6 @@ releases:
   - xpdustry/nohorny@v4.0.0-beta.1
 ---
 
-import { PostVideo } from "#app/components/content/Media";
-import showcase from "#app/assets/blog/nohorny-showcase.mp4";
-import showcasePoster from "#app/assets/blog/nohorny-showcase-poster.jpg";
-
 Excellent news, everyone: **NoHorny v4 beta** is now available. Just in time for Mindustry v8.
 
 This beta includes some major improvements:
@@ -27,20 +23,13 @@ This beta includes some major improvements:
 
 The moment the display is placed, I am banned:
 
-<PostVideo
-  src={showcase}
-  poster={showcasePoster}
-  width={1550}
-  height={911}
-  caption="The display goes down, I get banned, and the webhook image lands in Discord."
-  fallback={
-    <>
-      A screen recording: a player places an NSFW logic display, NoHorny deletes it and bans them,
-      and a Discord webhook alert arrives naming the player and the coordinates.{" "}
-      <a href={showcase}>Download the video</a> if your browser cannot play it.
-    </>
-  }
-/>
+<!-- ::start:post-video src="/blog/nohorny-showcase.mp4" poster="/blog/nohorny-showcase-poster.jpg" width="1550" height="911" caption="The display goes down, I get banned, and the webhook image lands in Discord." -->
+
+A screen recording: a player places an NSFW logic display, NoHorny deletes it and bans them, and a
+Discord webhook alert arrives naming the player and the coordinates.
+[Download the video](/blog/nohorny-showcase.mp4) if your browser cannot play it.
+
+<!-- ::end:post-video -->
 
 There are still a few things I want to polish before the full v4 release, especially logging and
 caching, but it is in a good enough state to use now. Feedback on the current beta would be very
