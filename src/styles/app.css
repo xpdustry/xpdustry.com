@@ -86,22 +86,33 @@
    shown at roughly 1.5x that, so the net stays fine without the browser
    stretching it far enough to go soft. The field is tall because it is now
    the only one on the page: it has to reach past the fold on its own, and
-   the fade is what ends it rather than its height. */
+   the fade is what ends it rather than its height.
+
+   The key ramp does not re-theme, so the two themes cannot share an ink. On
+   the dark ground the net is lighter than the page and reads as a glow, which
+   is what the ray itself looks like; on the light ground the same teal is
+   barely darker than the paper and washes out, so light mode inks the net
+   with the bottom of the ramp instead. The opacities differ for the same
+   reason: they are set to put the same distance between net and page. */
 .reticulate {
   block-size: 1600px;
-  opacity: 0.13;
+  opacity: 0.24;
   mask-image: linear-gradient(to bottom, #000 10%, transparent 88%);
+}
+
+.reticulate__net {
+  background: linear-gradient(100deg, var(--key-400), var(--key-500));
+  /* `mask-image` is set inline: it carries the hashed asset URL. */
+  mask-size: clamp(440px, 48vw, 760px);
+  mask-repeat: repeat;
 }
 
 [data-theme="dark"] .reticulate {
   opacity: 0.18;
 }
 
-.reticulate__net {
+[data-theme="dark"] .reticulate__net {
   background: linear-gradient(100deg, var(--key-200), var(--key-300) 45%, var(--key-400));
-  /* `mask-image` is set inline: it carries the hashed asset URL. */
-  mask-size: clamp(440px, 48vw, 760px);
-  mask-repeat: repeat;
 }
 
 /* Markdown emits bare elements, so article rhythm and contextual selectors
