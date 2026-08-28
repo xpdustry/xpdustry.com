@@ -86,3 +86,4 @@ Then run `pnpm check`. Invalid frontmatter and duplicate release IDs fail the bu
 - [ ] Nuke AI tests (oh my god gpt, why do you need to test EVERY BUTTON)
 - [ ] Nuke AI code comments (yes I know, water is wet and the earth is flat...)
 - [ ] Unslopify the CSS (I made great progress but more cleanup passes are needed)
+- [ ] Simplify the codegen tool
