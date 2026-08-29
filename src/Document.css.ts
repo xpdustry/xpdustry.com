@@ -13,6 +13,7 @@ export const body = style({
   backgroundColor: colors.page,
   color: colors.ink,
   fontFamily: type.sans,
+  fontSize: type.base,
   lineHeight: leading.body,
   textRendering: "optimizeLegibility",
   fontSynthesis: "none",
