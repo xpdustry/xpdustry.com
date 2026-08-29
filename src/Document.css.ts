@@ -3,7 +3,6 @@ import { colors, leading, type } from "#app/styles/theme.css";
 
 export const html = style({
   colorScheme: "light dark",
-  scrollBehavior: "smooth",
   scrollPaddingTop: "5.5rem",
   WebkitTextSizeAdjust: "100%",
 });

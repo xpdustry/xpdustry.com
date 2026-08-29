@@ -54,14 +54,6 @@ globalStyle("::selection", {
   color: palette.onAccent,
 });
 
-globalStyle("html", {
-  "@media": {
-    "(prefers-reduced-motion: reduce)": {
-      scrollBehavior: "auto",
-    },
-  },
-});
-
 globalStyle("*, *::before, *::after", {
   "@media": {
     "(prefers-reduced-motion: reduce)": {
