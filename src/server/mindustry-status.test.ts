@@ -115,6 +115,22 @@ describe("StatusService snapshots", () => {
     expect(service.snapshot.servers.map((entry) => entry.status)).toEqual(["online", "offline"]);
   });
 
+  test("does not report an offline server as a failed refresh", async () => {
+    const onError = vi.fn();
+    const service = new StatusService({
+      probe: probe(async () => {
+        throw new Error("offline");
+      }),
+      servers: [hub],
+      onError,
+    });
+
+    await service.refresh();
+
+    expect(service.snapshot.servers[0]?.status).toBe("offline");
+    expect(onError).not.toHaveBeenCalled();
+  });
+
   test("replaces stale online data after a failed cycle", async () => {
     let online = true;
     const service = new StatusService({
@@ -275,12 +291,13 @@ describe("StatusService scheduling", () => {
   test("a throwing reporter cannot stop the next cycle", async () => {
     const timers = fakeClock();
     const service = new StatusService({
-      probe: probe(async () => {
-        throw new Error("offline");
-      }),
+      probe: probe(),
       servers: [hub],
       clock: timers.clock,
       intervalMs: 1_000,
+      now: () => {
+        throw new Error("clock failed");
+      },
       onError: () => {
         throw new Error("reporter failed");
       },

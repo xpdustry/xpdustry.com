@@ -109,7 +109,6 @@ export class StatusService {
     const items = this.#definitions.map<ServerSnapshotItem>((server, index) => {
       const result = results[index];
       if (result.status === "fulfilled") return result.value;
-      this.#reportSafely(result.reason);
       return {
         slug: server.slug,
         label: server.label,
