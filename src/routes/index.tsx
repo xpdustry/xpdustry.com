@@ -53,10 +53,12 @@ function Hero() {
           </p>
 
           <div class={styles.actions}>
-            <ButtonLink variant="accent" href="#projects">
+            {/* target="_self" makes sure solid does not prevent
+                repeated scrolls when a link is already selected */}
+            <ButtonLink variant="accent" href="#projects" target="_self">
               Check out our projects
             </ButtonLink>
-            <ButtonLink variant="plain" href="#servers">
+            <ButtonLink variant="plain" href="#servers" target="_self">
               Join our Mindustry servers
             </ButtonLink>
           </div>

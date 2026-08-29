@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { layoutStyles } from "#app/styles/layout.css";
 import {
   colors,
@@ -11,6 +11,13 @@ import {
   type,
   weight,
 } from "#app/styles/theme.css";
+
+globalStyle("html:has(#projects:target, #servers:target)", {
+  scrollBehavior: "smooth",
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { scrollBehavior: "auto" },
+  },
+});
 
 export const content = style({
   position: "relative",

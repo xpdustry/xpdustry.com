@@ -84,7 +84,7 @@ describe("built pages", () => {
     expect(source).toContain("light-dark(#ebf0f4,#0b1218)");
     expect(source).toContain("data-theme=light");
     expect(source).toContain("data-theme=dark");
-    expect(source).not.toContain("scroll-behavior:smooth");
+    expect(source).toContain("html:has(#projects:target,#servers:target){scroll-behavior:smooth}");
     expect(source).toContain("markdown-alert");
     expect(source).toContain("post-media__frame");
     expect(source).toContain("@font-face");
