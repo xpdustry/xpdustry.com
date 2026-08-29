@@ -5,7 +5,6 @@ description: >-
   rating actually reliable.
 publishedAt: 2026-05-22
 author: phinner
-pfp: /phinner.svg
 topic: NoHorny
 releases:
   - xpdustry/nohorny@v4.0.0-beta.7

@@ -43,7 +43,6 @@ title: A useful title
 description: A short description used in page metadata.
 publishedAt: 2026-08-16
 author: phinner
-pfp: /phinner.svg
 topic: NoHorny
 ---
 
@@ -51,11 +50,11 @@ Write the post here.
 ```
 
 `title`, `description`, `publishedAt`, `author`, and `topic` are required. Dates use `YYYY-MM-DD`.
+`author` must match a username in `src/content/authors.ts`.
 
 Useful optional fields:
 
 - `updatedAt` is the last edit date.
-- `pfp` is the author's avatar URL.
 - `releases` lists related releases as `owner/repository@tag`. A release can belong to only one post.
 
 Put post images and videos in `public/blog/`. Use a media comment with explicit dimensions so the browser reserves the correct space before the file loads.
@@ -75,15 +74,7 @@ Then run `pnpm check`. Invalid frontmatter and duplicate release IDs fail the bu
 
 ## Attributions
 
-- [Noise texture](https://commons.wikimedia.org/wiki/File:512x512_Dissolve_Noise_Texture.png) (`src/assets/grain-250.png`).
 - [Lucky Fireant](https://uiverse.io/ui-kits/lucky-fireant-71-b2686726) (Great UI kit, makes the buttons fun to press).
 - [Fancy leopard pattern generator](https://github.com/mgmalheiros/reaction-diffusion)
   All I could find were goofy aah AI generators for this,
   until I found this absolute GEM from a Brazilian researcher. Say thank you to claude for porting it to js.
-
-## TODO
-
-- [ ] Nuke AI tests (oh my god gpt, why do you need to test EVERY BUTTON)
-- [ ] Nuke AI code comments (yes I know, water is wet and the earth is flat...)
-- [ ] Unslopify the CSS (I made great progress but more cleanup passes are needed)
-- [ ] Simplify the codegen tool

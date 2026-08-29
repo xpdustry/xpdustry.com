@@ -6,9 +6,11 @@ import {
 } from "@tanstack/markdown/extensions/comment-components";
 import { renderHtml } from "@tanstack/markdown/html";
 import { parseMarkdown } from "@tanstack/markdown/parser";
+import * as v from "valibot";
 import type { Plugin } from "vite";
 import { parse as parseYaml } from "yaml";
 import { ContentError, parseBlogFrontmatter, type BlogFrontmatter } from "../src/content/schema.ts";
+import { NonBlankStringSchema } from "../src/lib/schema.ts";
 
 export interface CompiledBlogMarkdown {
   frontmatter: BlogFrontmatter;
@@ -17,6 +19,27 @@ export interface CompiledBlogMarkdown {
 
 const MEDIA_NAMES = new Set(["post-image", "post-video"]);
 const extensions: MarkdownExtension[] = [calloutsExtension(), mediaMarkdownExtension()];
+const DimensionSchema = v.pipe(
+  v.string(),
+  v.toNumber("must be a number"),
+  v.integer("must be an integer"),
+  v.minValue(1, "must be at least 1"),
+  v.maxValue(10_000, "must be at most 10000"),
+);
+const ImageAttributesSchema = v.strictObject({
+  src: createMediaPathSchema([".png", ".jpg", ".jpeg", ".webp"]),
+  alt: NonBlankStringSchema,
+  width: DimensionSchema,
+  height: DimensionSchema,
+  caption: v.optional(v.string()),
+});
+const VideoAttributesSchema = v.strictObject({
+  src: createMediaPathSchema([".mp4"]),
+  poster: createMediaPathSchema([".png", ".jpg", ".jpeg", ".webp"]),
+  width: DimensionSchema,
+  height: DimensionSchema,
+  caption: v.optional(v.string()),
+});
 const markdownOptions: RenderOptions = {
   allowHtml: false,
   extensions,
@@ -28,7 +51,6 @@ const markdownOptions: RenderOptions = {
   },
 };
 
-/** Compiles one repository-owned blog post into data the app can import. */
 export function compileBlogMarkdown(file: string, source: string): CompiledBlogMarkdown {
   const document = parseMarkdown(source, markdownOptions);
 
@@ -38,7 +60,6 @@ export function compileBlogMarkdown(file: string, source: string): CompiledBlogM
   };
 }
 
-/** Turns imported blog Markdown into a plain ESM module during dev and build. */
 export function blogMarkdownPlugin(): Plugin {
   return {
     name: "xpdustry:blog-markdown",
@@ -90,14 +111,9 @@ function mediaMarkdownExtension(): MarkdownExtension {
 }
 
 function renderImage(node: ComponentNode): string {
-  assertOnly(node, ["src", "alt", "width", "height", "caption"]);
   if (node.children.length > 0) throw new Error("post-image cannot have body content");
 
-  const src = mediaPath(required(node, "src"), [".png", ".jpg", ".jpeg", ".webp"]);
-  const alt = required(node, "alt");
-  const width = dimension(required(node, "width"));
-  const height = dimension(required(node, "height"));
-  const caption = node.attributes.caption;
+  const { src, alt, width, height, caption } = parseMediaAttributes(node, ImageAttributesSchema);
 
   return [
     '<figure class="media post-media">',
@@ -110,14 +126,9 @@ function renderImage(node: ComponentNode): string {
 }
 
 function renderVideo(node: ComponentNode, fallback: string): string {
-  assertOnly(node, ["src", "poster", "width", "height", "caption"]);
   if (node.children.length === 0) throw new Error("post-video requires fallback content");
 
-  const src = mediaPath(required(node, "src"), [".mp4"]);
-  const poster = mediaPath(required(node, "poster"), [".png", ".jpg", ".jpeg", ".webp"]);
-  const width = dimension(required(node, "width"));
-  const height = dimension(required(node, "height"));
-  const caption = node.attributes.caption;
+  const { src, poster, width, height, caption } = parseMediaAttributes(node, VideoAttributesSchema);
 
   return [
     '<figure class="media post-media">',
@@ -132,35 +143,32 @@ function renderVideo(node: ComponentNode, fallback: string): string {
   ].join("");
 }
 
-function assertOnly(node: ComponentNode, allowed: readonly string[]): void {
-  const names = new Set(allowed);
-  for (const name of Object.keys(node.attributes)) {
-    if (!names.has(name)) throw new Error(`${node.name}: unsupported attribute ${name}`);
-  }
+function createMediaPathSchema(extensions: readonly string[]) {
+  return v.pipe(
+    v.string(),
+    v.check(
+      (value) => isMediaPath(value, extensions),
+      "must be a repository-owned blog media path",
+    ),
+  );
 }
 
-function required(node: ComponentNode, name: string): string {
-  const value = node.attributes[name];
-  if (!value) throw new Error(`${node.name}: missing ${name}`);
-  return value;
-}
-
-function mediaPath(value: string, extensions: readonly string[]): string {
+function isMediaPath(value: string, extensions: readonly string[]): boolean {
   const lower = value.toLowerCase();
-  const valid =
+  return (
     /^\/blog\/[a-z0-9][a-z0-9._/-]*$/i.test(value) &&
     !value.split("/").includes("..") &&
-    extensions.some((extension) => lower.endsWith(extension));
-  if (!valid) throw new Error(`invalid blog media path: ${value}`);
-  return value;
+    extensions.some((extension) => lower.endsWith(extension))
+  );
 }
 
-function dimension(value: string): number {
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 10_000) {
-    throw new Error(`invalid media dimension: ${value}`);
-  }
-  return parsed;
+function parseMediaAttributes<TSchema extends v.GenericSchema>(
+  node: ComponentNode,
+  schema: TSchema,
+): v.InferOutput<TSchema> {
+  const result = v.safeParse(schema, node.attributes);
+  if (result.success) return result.output;
+  throw new Error(`${node.name}: ${v.summarize(result.issues)}`);
 }
 
 function escapeAttribute(value: string): string {

@@ -1,50 +1,69 @@
-/**
- * The wire shape the poller produces and the pages read.
- *
- * These types cross the server/client line: SSR reads them straight out of
- * memory, the browser gets the identical JSON from `/api/servers`. Nothing
- * secret belongs in here: no resolved SRV targets, no ports.
- */
+import * as v from "valibot";
+import { servers, type ServerDefinition } from "#app/data/servers";
+import { NonBlankStringSchema } from "#app/lib/schema";
 
-import { servers } from "#app/data/servers";
-import type { ServerInfo } from "#app/server/mindustry-protocol";
-
-export type SnapshotState = "loading" | "ready" | "unavailable";
-
-export interface ServerSnapshotItem {
-  slug: string;
-  label: string;
-  /** The friendly alias only. Never the resolved host or port. */
-  hostname: string;
-  online: boolean;
-  polledAt: string;
-  pingMs?: number;
-  info?: ServerInfo;
-}
-
-export interface ServerSnapshot {
-  state: SnapshotState;
-  updatedAt: string | null;
-  servers: ServerSnapshotItem[];
-}
-
-/**
- * The state a cold process serves.
- *
- * Not literally empty: the snapshot is seeded from the local definitions, so
- * a page rendered before the first poll still has every server address on it.
- * Only the polled values are missing, and each card says so. That makes the
- * addresses copyable immediately and means nothing reflows when data lands.
- */
-
-export const EMPTY_SERVER_SNAPSHOT: ServerSnapshot = {
-  state: "loading",
-  updatedAt: null,
-  servers: servers.map((server) => ({
-    slug: server.slug,
-    label: server.label,
-    hostname: server.hostname,
-    online: false,
-    polledAt: "",
-  })),
+const ServerIdentityEntries = {
+  slug: NonBlankStringSchema,
+  label: NonBlankStringSchema,
+  hostname: NonBlankStringSchema,
 };
+
+export const ServerInfoSchema = v.strictObject({
+  name: v.string(),
+  description: v.string(),
+  map: v.string(),
+  mode: v.string(),
+  players: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  playerLimit: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  wave: v.pipe(v.number(), v.integer(), v.minValue(0)),
+  version: v.pipe(v.number(), v.integer()),
+  versionType: v.string(),
+});
+
+const PollingServerSchema = v.strictObject({
+  ...ServerIdentityEntries,
+  status: v.literal("polling"),
+});
+
+const OnlineServerSchema = v.strictObject({
+  ...ServerIdentityEntries,
+  status: v.literal("online"),
+  info: ServerInfoSchema,
+});
+
+const OfflineServerSchema = v.strictObject({
+  ...ServerIdentityEntries,
+  status: v.literal("offline"),
+});
+
+export const ServerSnapshotItemSchema = v.variant("status", [
+  PollingServerSchema,
+  OnlineServerSchema,
+  OfflineServerSchema,
+]);
+
+export const ServerSnapshotSchema = v.strictObject({
+  servers: v.array(ServerSnapshotItemSchema),
+});
+
+export type ServerInfo = v.InferOutput<typeof ServerInfoSchema>;
+export type ServerSnapshotItem = v.InferOutput<typeof ServerSnapshotItemSchema>;
+export type OnlineServerSnapshotItem = Extract<ServerSnapshotItem, { status: "online" }>;
+export type ServerStatus = ServerSnapshotItem["status"];
+export type ServerSnapshot = v.InferOutput<typeof ServerSnapshotSchema>;
+
+export function createServerSnapshot(
+  definitions: readonly ServerDefinition[],
+  status: Exclude<ServerStatus, "online">,
+): ServerSnapshot {
+  return {
+    servers: definitions.map((server) => ({ ...server, status })),
+  };
+}
+
+export function parseServerSnapshot(input: unknown): ServerSnapshot {
+  return v.parse(ServerSnapshotSchema, input);
+}
+
+export const POLLING_SERVER_SNAPSHOT = createServerSnapshot(servers, "polling");
+export const OFFLINE_SERVER_SNAPSHOT = createServerSnapshot(servers, "offline");

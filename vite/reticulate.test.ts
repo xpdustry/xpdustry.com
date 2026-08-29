@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { decode } from "fast-png";
 import { describe, expect, test } from "vitest";
 import { type Field, blurMask, runPhase, seedField, toMask } from "./reticulate.ts";
 
@@ -84,5 +87,30 @@ describe("blurMask", () => {
     const mask = new Uint8Array(36).fill(120);
 
     expect(Array.from(blurMask(mask, 6, 6, 2))).toEqual(Array.from(mask));
+  });
+});
+
+describe("generated reticulate mask", () => {
+  test("is a useful 400px grayscale-alpha tile", () => {
+    const file = fileURLToPath(new URL("../src/assets/reticulate.png", import.meta.url));
+    const image = decode(readFileSync(file));
+    let grayscaleIsWhite = true;
+    let minAlpha = 255;
+    let maxAlpha = 0;
+
+    for (let index = 0; index < image.data.length; index += 2) {
+      if (image.data[index] !== 255) grayscaleIsWhite = false;
+      minAlpha = Math.min(minAlpha, image.data[index + 1] ?? 0);
+      maxAlpha = Math.max(maxAlpha, image.data[index + 1] ?? 0);
+    }
+
+    expect({
+      width: image.width,
+      height: image.height,
+      depth: image.depth,
+      channels: image.channels,
+    }).toEqual({ width: 400, height: 400, depth: 8, channels: 2 });
+    expect(grayscaleIsWhite).toBe(true);
+    expect(minAlpha).toBeLessThan(maxAlpha);
   });
 });

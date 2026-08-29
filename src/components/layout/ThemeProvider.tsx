@@ -7,40 +7,58 @@ import {
   useContext,
 } from "solid-js";
 import {
-  applyTheme,
-  readStoredTheme,
-  systemTheme,
-  type ThemeChoice,
+  applyThemePreference,
+  readThemePreference,
+  resolveTheme,
+  THEME_QUERY,
+  type ResolvedTheme,
+  type ThemePreference,
 } from "#app/components/layout/theme";
 
 interface ThemeContextValue {
-  theme: Accessor<ThemeChoice | null>;
-  toggleTheme: () => void;
+  preference: Accessor<ThemePreference>;
+  resolved: Accessor<ResolvedTheme>;
+  setPreference: (preference: ThemePreference) => void;
+  toggle: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>();
 
-/** Owns the hydrated theme state shared by every theme control. */
 export function ThemeProvider(props: ParentProps) {
-  const [theme, setTheme] = createSignal<ThemeChoice | null>(null);
+  const [preference, setPreferenceSignal] = createSignal<ThemePreference>("system");
+  const [resolved, setResolved] = createSignal<ResolvedTheme>("light");
+  let media: MediaQueryList | undefined;
 
-  onSettled(() => {
-    const resolved =
-      (document.documentElement.dataset.theme as ThemeChoice | undefined) ??
-      readStoredTheme() ??
-      systemTheme();
-    setTheme(resolved);
-  });
-
-  const toggleTheme = () => {
-    const target = theme() === "dark" ? "light" : "dark";
-    applyTheme(target);
-    setTheme(target);
+  const sync = (next: ThemePreference) => {
+    if (!media) return;
+    setPreferenceSignal(next);
+    setResolved(resolveTheme(next, media));
+    applyThemePreference(next);
   };
 
-  return <ThemeContext value={{ theme, toggleTheme }}>{props.children}</ThemeContext>;
+  onSettled(() => {
+    media = window.matchMedia(THEME_QUERY);
+    sync(readThemePreference());
+
+    const handleSystemChange = () => {
+      if (preference() === "system") setResolved(resolveTheme("system", media!));
+    };
+    media.addEventListener("change", handleSystemChange);
+    return () => media?.removeEventListener("change", handleSystemChange);
+  });
+
+  const value: ThemeContextValue = {
+    preference,
+    resolved,
+    setPreference: sync,
+    toggle: () => sync(resolved() === "dark" ? "light" : "dark"),
+  };
+
+  return <ThemeContext value={value}>{props.children}</ThemeContext>;
 }
 
 export function useTheme(): ThemeContextValue {
-  return useContext(ThemeContext);
+  const context = useContext(ThemeContext);
+  if (!context) throw new Error("useTheme must be used inside ThemeProvider");
+  return context;
 }

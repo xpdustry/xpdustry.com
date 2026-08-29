@@ -1,32 +1,4 @@
-/**
- * Mindustry colour markup.
- *
- * Server names and descriptions arrive wearing Mindustry's bracket markup:
- * `[red]danger[]`, `[#ff8800]orange[]`, `[[literal`. This module turns that
- * into tokens so the site can strip the formatting and render the text in its
- * own palette.
- *
- * Written from the observable behaviour of these three, not from their source:
- *
- * - https://github.com/xpdustry/distributor/blob/master/distributor-common/src/main/java/com/xpdustry/distributor/common/component/codec/MindustryDecoderImpl.java
- * - https://github.com/Anuken/Arc/blob/master/arc-core/src/arc/graphics/Colors.java
- * - https://github.com/Anuken/Mindustry/blob/e8bf80a1d2d5e9cf339c2fbc2a82444bf6d779d7/core/src/mindustry/core/UI.java#L101
- *
- * The rules that matter:
- *
- * - `[[` is an escaped `[`.
- * - `[]` closes the innermost open colour.
- * - `[name]` opens a colour when `name` is known, and is literal text otherwise.
- * - `[#rrggbb]` opens a colour for the hex lengths Mindustry accepts.
- * - An unterminated `[` is literal text to the end of the input.
- */
-
-/**
- * Arc's registry, plus the five names Mindustry adds in `UI.loadColors()`.
- * Arc registers each name twice, uppercase with underscores and lowercase
- * without; matching is normalized instead, which accepts both spellings and
- * every casing between them.
- */
+// Arc and Mindustry color names, normalized to lowercase without underscores.
 const NAMED_COLORS: Readonly<Record<string, string>> = {
   clear: "000000",
   black: "000000",
@@ -74,7 +46,7 @@ const NAMED_COLORS: Readonly<Record<string, string>> = {
   violet: "ee82ee",
   maroon: "b03060",
 
-  // mindustry/core/UI.loadColors
+  // Mindustry additions to Arc's palette.
   accent: "ffd37f",
   unlaunched: "8982ed",
   highlight: "ffe0a5",
@@ -87,10 +59,6 @@ export type MarkupToken =
   | { type: "open"; color: string }
   | { type: "close" };
 
-/**
- * Splits markup into text runs and colour boundaries. Colours nest, so a
- * consumer that cares about them keeps its own stack; `close` pops one level.
- */
 export function tokenizeMindustryMarkup(input: string): MarkupToken[] {
   const tokens: MarkupToken[] = [];
   let pending = "";
@@ -120,7 +88,6 @@ export function tokenizeMindustryMarkup(input: string): MarkupToken[] {
 
     const close = input.indexOf("]", open);
     if (close === -1) {
-      // No terminator: the rest of the input, brackets included, is text.
       pending += input.slice(open);
       break;
     }
@@ -136,7 +103,6 @@ export function tokenizeMindustryMarkup(input: string): MarkupToken[] {
 
     const color = resolveColor(tag);
     if (color === undefined) {
-      // Unknown tags stay exactly as written; Mindustry draws them too.
       pending += input.slice(open, close + 1);
       continue;
     }
@@ -149,7 +115,6 @@ export function tokenizeMindustryMarkup(input: string): MarkupToken[] {
   return tokens;
 }
 
-/** Drops every colour boundary and keeps the readable text. */
 export function toPlainText(tokens: readonly MarkupToken[]): string {
   let out = "";
   for (const token of tokens) {
@@ -158,7 +123,6 @@ export function toPlainText(tokens: readonly MarkupToken[]): string {
   return out;
 }
 
-/** Convenience for the common case: markup in, readable text out. */
 export function stripMindustryMarkup(input: string): string {
   return toPlainText(tokenizeMindustryMarkup(input));
 }
@@ -169,11 +133,7 @@ function resolveColor(tag: string): string | undefined {
   return named;
 }
 
-/**
- * Mindustry accepts 1 to 6 hex digits (padded on the right) and 8 for RGBA,
- * but rejects 7 outright. Alpha is parsed and discarded: the site renders
- * these names in its own palette, never at the server's opacity.
- */
+// Mindustry accepts 1–6 or 8 hex digits and right-pads short forms; alpha is discarded.
 function parseHexColor(value: string): string | undefined {
   if (value.length === 0 || value.length === 7 || value.length > 8) return undefined;
   if (!/^[0-9a-fA-F]+$/.test(value)) return undefined;

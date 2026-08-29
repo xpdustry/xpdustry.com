@@ -1,4 +1,15 @@
-// Registers @testing-library/jest-dom's matchers (toHaveTextContent etc.)
-// with vitest's expect, including their types.
 import "@testing-library/jest-dom/vitest";
-if (typeof window !== "undefined") window.scrollTo = () => {};
+
+if (typeof window !== "undefined") {
+  window.scrollTo = () => {};
+  window.matchMedia ??= (query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  });
+}

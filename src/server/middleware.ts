@@ -1,12 +1,7 @@
-/**
- * The request chain in front of every render.
- *
- * `createAPIHandler` matches the `GET` exports under `src/routes`. The API
- * endpoints and `/healthz`. Anything it does not match falls through to the
- * page render.
- */
-
 import { createAPIHandler } from "filesystem-routing/api";
 import routes from "virtual:file-routes";
+import { initializeRuntime } from "#app/server/bootstrap";
+
+initializeRuntime();
 
 export default [createAPIHandler(routes)];

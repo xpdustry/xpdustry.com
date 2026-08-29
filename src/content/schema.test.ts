@@ -28,10 +28,12 @@ describe("parseBlogFrontmatter", () => {
     expect(parsed.publishedAt).toBe("2026-07-20T00:00:00.000Z");
   });
 
-  test("accepts an optional author picture", () => {
-    expect(parseBlogFrontmatter("a.md", { ...valid, pfp: "/phinner.svg" }).pfp).toBe(
-      "/phinner.svg",
-    );
+  test("accepts a leap day", () => {
+    const parsed = parseBlogFrontmatter("a.md", {
+      ...valid,
+      publishedAt: "2024-02-29",
+    });
+    expect(parsed.publishedAt).toBe("2024-02-29T00:00:00.000Z");
   });
 
   test.each(["title", "description", "publishedAt", "author", "topic"])(
@@ -46,8 +48,27 @@ describe("parseBlogFrontmatter", () => {
     expect(() => parseBlogFrontmatter("a.md", { ...valid, title: "   " })).toThrow(/title/);
   });
 
-  test.each(["yesterday", "2026-13-45", ""])("rejects the bad date %j", (publishedAt) => {
-    expect(() => parseBlogFrontmatter("a.md", { ...valid, publishedAt })).toThrow(/publishedAt/);
+  test("rejects an unknown author", () => {
+    expect(() => parseBlogFrontmatter("a.md", { ...valid, author: "someone-else" })).toThrow(
+      /author/,
+    );
+  });
+
+  test("rejects old duplicated author metadata", () => {
+    expect(() => parseBlogFrontmatter("a.md", { ...valid, pfp: "/phinner.svg" })).toThrow(/pfp/);
+  });
+
+  test.each(["yesterday", "2026-13-45", "2026-02-29", "2026-04-31", ""])(
+    "rejects the bad date %j",
+    (publishedAt) => {
+      expect(() => parseBlogFrontmatter("a.md", { ...valid, publishedAt })).toThrow(/publishedAt/);
+    },
+  );
+
+  test("rejects an invalid Date object", () => {
+    expect(() =>
+      parseBlogFrontmatter("a.md", { ...valid, publishedAt: new Date("invalid") }),
+    ).toThrow(/publishedAt/);
   });
 
   test("rejects an invalid updatedAt while allowing it to be absent", () => {

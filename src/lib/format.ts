@@ -1,9 +1,4 @@
-/**
- * Date formatting, fixed to en-GB so the server and the browser agree.
- *
- * Letting the runtime pick a locale would render one string during SSR and a
- * different one at hydration, which shows up as a flicker on every date.
- */
+// Pin locale and time zone so SSR and hydration render identical dates.
 
 const LONG = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",

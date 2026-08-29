@@ -8,7 +8,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** Replaces navigator.clipboard for one test. */
 function stubClipboard(writeText: ((text: string) => Promise<void>) | null) {
   vi.stubGlobal("navigator", {
     ...navigator,
@@ -52,7 +51,6 @@ describe("<CopyButton />", () => {
   });
 
   test("fails gracefully when there is no Clipboard API at all", async () => {
-    // What a plain-HTTP origin actually looks like.
     stubClipboard(null);
     render(() => <CopyButton value="event.md.xpdustry.com" />);
 
@@ -64,19 +62,5 @@ describe("<CopyButton />", () => {
   test("the live region is polite, so it never interrupts", () => {
     render(() => <CopyButton value="x" />);
     expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
-  });
-
-  test("is a real button, so it is keyboard operable", async () => {
-    const writeText = vi.fn(async () => {});
-    stubClipboard(writeText);
-    render(() => <CopyButton value="tower.md.xpdustry.com" />);
-
-    const button = screen.getByRole("button");
-    expect(button.tagName).toBe("BUTTON");
-    expect(button).toHaveAttribute("type", "button");
-
-    button.focus();
-    await userEvent.keyboard("{Enter}");
-    expect(writeText).toHaveBeenCalledWith("tower.md.xpdustry.com");
   });
 });

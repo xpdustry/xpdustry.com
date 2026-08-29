@@ -1,111 +1,138 @@
-import tailwindcss from "@tailwindcss/vite";
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import { routePathFromFile } from "filesystem-routing";
 import { fileRoutes } from "filesystem-routing/vite";
 import solid from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
 import { blogMarkdownPlugin } from "./vite/markdown.ts";
 
-// `/styleguide` is a visual regression fixture, not a page. Dropping it from
-// the route scan (rather than 404ing inside the component) keeps its fixtures
-// out of the production bundle entirely.
+// The styleguide is a development-only visual fixture.
 const devOnlyRoutes = ["/styleguide"];
 
-export default defineConfig(({ mode }) => ({
-  resolve: {
-    tsconfigPaths: true,
-  },
-  css: {
-    devSourcemap: true,
-  },
-  plugins: [
-    tailwindcss(),
-    blogMarkdownPlugin(),
-    // `extensions` makes vite-plugin-solid also compile the `?pick=` route
-    // modules the fileRoutes plugin emits because their ids end in a query
-    // string rather than a normal source extension.
-    solid({
-      start: { middleware: "src/server/middleware.ts" },
-      ssr: true,
-      extensions: [".jsx", ".tsx"],
-    }),
-    // vite-plugin-solid pins the SSR bundle to `server.js`, which collides
-    // with the authored Node entry added below and pushes one of them to an
-    // order-dependent `server2.js`. A later plugin's config wins the merge,
-    // so naming both entries after their input key is stated here.
-    {
-      name: "xpdustry:ssr-entry-names",
-      config: () => ({
-        environments: {
-          ssr: {
-            build: {
-              rollupOptions: { output: { entryFileNames: "[name].js" } },
+export default defineConfig(({ mode }) => {
+  return {
+    resolve: {
+      tsconfigPaths: true,
+    },
+    css: {
+      devSourcemap: true,
+    },
+    plugins: [
+      ...vanillaExtractPlugin(),
+      {
+        name: "xpdustry:vanilla-extract-hmr",
+        handleHotUpdate({ file, server }) {
+          if (!file.endsWith(".css.ts")) return;
+          server.ws.send({ type: "full-reload" });
+          return [];
+        },
+      },
+      blogMarkdownPlugin(),
+      // fileRoutes emits ?pick= module IDs, so Solid must compile TSX query modules.
+      solid({
+        start: {
+          middleware: "src/server/middleware.ts",
+          env: "src/config/env.ts",
+        },
+        ssr: true,
+        extensions: [".jsx", ".tsx"],
+      }),
+      // Name both SSR entries explicitly to avoid vite-plugin-solid's server.js collision.
+      {
+        name: "xpdustry:ssr-entry-names",
+        config: () => ({
+          environments: {
+            ssr: {
+              build: {
+                rollupOptions: { output: { entryFileNames: "[name].js" } },
+              },
+            },
+          },
+        }),
+      },
+      fileRoutes({
+        httpMethods: true,
+        // Eager routes let the catch-all set the HTTP status during SSR.
+        codeSplitting: false,
+        toPath: (routeFile) => {
+          const path = routePathFromFile(routeFile);
+          if (mode === "production" && devOnlyRoutes.includes(path)) return undefined;
+          return path;
+        },
+      }),
+    ],
+    server: {
+      port: 3000,
+    },
+    environments: {
+      ssr: {
+        build: {
+          rollupOptions: {
+            // Bundle the Node entry with SSR so the renderer shares its status runtime.
+            input: {
+              node: "src/server/node.ts",
+            },
+            onwarn(warning, warn) {
+              // This dynamic import keeps the Node runtime out of the client bundle.
+              if (
+                warning.code === "INEFFECTIVE_DYNAMIC_IMPORT" &&
+                warning.message.includes("src/server/runtime.ts") &&
+                warning.message.includes("src/data/queries.ts")
+              ) {
+                return;
+              }
+              warn(warning);
             },
           },
         },
-      }),
-    },
-    fileRoutes({
-      httpMethods: true,
-      // Ten pages of mostly-static content: the per-chunk overhead of
-      // splitting costs more than it saves, and eager route modules render
-      // inside the SSR shell pass, which is what lets the 404 route set a
-      // real 404 status before the head is committed.
-      codeSplitting: false,
-      toPath: (routeFile) => {
-        const path = routePathFromFile(routeFile);
-        if (mode === "production" && devOnlyRoutes.includes(path)) return undefined;
-        return path;
       },
-    }),
-  ],
-  server: {
-    port: 3000,
-  },
-  environments: {
-    ssr: {
-      build: {
-        rollupOptions: {
-          // The authored Node entry ships alongside the generated SSR handler
-          // so both live in one module graph: the runtime that owns the
-          // pollers and the renderer that reads their snapshots are then the
-          // same module instances, not two copies behind separate bundles.
-          input: {
-            node: "src/server/node.ts",
+    },
+    test: {
+      globals: false,
+      setupFiles: ["./vitest-setup.ts"],
+      isolate: true,
+      projects: [
+        {
+          extends: true,
+          test: {
+            name: "server",
+            environment: "node",
+            include: [
+              "src/{config,content,data,lib,server}/**/*.test.{ts,tsx}",
+              "vite/**/*.test.ts",
+            ],
+            exclude: ["src/server/integration.test.ts"],
           },
         },
-      },
+        {
+          extends: true,
+          test: {
+            name: "browser",
+            environment: "jsdom",
+            include: ["src/components/**/*.test.{ts,tsx}"],
+          },
+        },
+        {
+          extends: true,
+          test: {
+            name: "artifact",
+            environment: "node",
+            include: ["src/server/integration.test.ts"],
+          },
+        },
+        {
+          extends: true,
+          test: {
+            name: "hydration",
+            environment: "jsdom",
+            include: ["src/hydration.test.ts"],
+          },
+        },
+      ],
     },
-  },
-  test: {
-    globals: false,
-    setupFiles: ["./vitest-setup.ts"],
-    isolate: false,
-    // Server modules get plain Node; component tests get a DOM. Two projects
-    // rather than one environment per glob, because vitest 4 dropped
-    // environmentMatchGlobs.
-    projects: [
-      {
-        extends: true,
-        test: {
-          name: "server",
-          environment: "node",
-          include: ["src/{server,content,lib}/**/*.test.{ts,tsx}", "vite/**/*.test.ts"],
-        },
-      },
-      {
-        extends: true,
-        test: {
-          name: "browser",
-          environment: "jsdom",
-          include: ["src/components/**/*.test.{ts,tsx}"],
-        },
-      },
-    ],
-  },
-  build: {
-    target: "esnext",
-    sourcemap: true,
-    // Keep images as asset files instead of inlining them into the JS bundle.
-    assetsInlineLimit: 0,
-  },
-}));
+    build: {
+      target: "esnext",
+      sourcemap: true,
+      assetsInlineLimit: 0,
+    },
+  };
+});

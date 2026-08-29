@@ -1,6 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
 import type { ServerDefinition } from "#app/data/servers";
-import { StatusService, type StatusTransport } from "#app/server/mindustry-status";
+import type { ServerInfo } from "#app/data/snapshots";
+import {
+  StatusService,
+  type MindustryStatusProbe,
+  type ScheduledTask,
+  type StatusClock,
+} from "#app/server/mindustry-status";
 
 const hub: ServerDefinition = {
   slug: "hub",
@@ -12,203 +18,276 @@ const pvp: ServerDefinition = {
   label: "PvP",
   hostname: "pvp.md.xpdustry.com",
 };
+const info = {
+  name: "Hub",
+  description: "",
+  map: "Ground Zero",
+  mode: "survival",
+  players: 3,
+  playerLimit: 50,
+  wave: 1,
+  version: 159,
+  versionType: "official",
+} satisfies ServerInfo;
 
-/** The smallest well-formed reply a server can send. */
-function reply(name = "Hub", players = 3): Uint8Array {
-  const parts: number[] = [];
-  const encoder = new TextEncoder();
-  const string = (value: string) => {
-    const bytes = encoder.encode(value);
-    parts.push(bytes.length, ...bytes);
-  };
-  const i32 = (value: number) =>
-    parts.push((value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff);
-
-  string(name);
-  string("Ground Zero");
-  i32(players);
-  i32(1);
-  i32(159);
-  string("official");
-  parts.push(0);
-  i32(50);
-  string("");
-  string("");
-  parts.push(0x19, 0xa7);
-  return Uint8Array.from(parts);
+function probe(query: MindustryStatusProbe["query"] = async () => info): MindustryStatusProbe {
+  return { query };
 }
 
-function transport(overrides: Partial<StatusTransport> = {}): StatusTransport {
+function fakeClock() {
+  const pending: { handler: () => void; delayMs: number; task: ScheduledTask }[] = [];
+  const clock: StatusClock = {
+    schedule(handler, delayMs) {
+      const entry = {
+        handler,
+        delayMs,
+        task: { cancel: () => pending.splice(pending.indexOf(entry), 1) },
+      };
+      pending.push(entry);
+      return entry.task;
+    },
+  };
+
   return {
-    query: async () => reply(),
-    ...overrides,
+    clock,
+    get scheduled() {
+      return pending.map((entry) => entry.delayMs);
+    },
+    fire() {
+      const entry = pending.shift();
+      if (!entry) throw new Error("nothing scheduled");
+      entry.handler();
+    },
   };
 }
 
-describe("StatusService", () => {
-  test("starts loading, with every alias already listed and nothing claimed online", () => {
-    const service = new StatusService({
-      transport: transport(),
-      servers: [hub],
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+
+describe("StatusService snapshots", () => {
+  test("seeds a cold snapshot from the injected definitions", () => {
+    const service = new StatusService({ probe: probe(), servers: [pvp] });
+
+    expect(service.snapshot).toEqual({
+      servers: [
+        {
+          slug: "pvp",
+          label: "PvP",
+          hostname: "pvp.md.xpdustry.com",
+          status: "polling",
+        },
+      ],
     });
-    expect(service.snapshot.state).toBe("loading");
-    expect(service.snapshot.updatedAt).toBeNull();
-    // Seeded from the definitions so a cold render still shows the addresses.
-    expect(service.snapshot.servers.map((entry) => entry.hostname)).toContain(
-      "hub.md.xpdustry.com",
-    );
-    expect(service.snapshot.servers.every((entry) => !entry.online)).toBe(true);
-    expect(service.snapshot.servers.every((entry) => entry.info === undefined)).toBe(true);
   });
 
-  test("reports a server that answers as online, with decoded info and a ping", async () => {
+  test("publishes decoded status without endpoint details", async () => {
     const service = new StatusService({
-      transport: transport(),
-      servers: [hub],
-      monotonic: (() => {
-        let calls = 0;
-        return () => (calls++ === 0 ? 100 : 142);
-      })(),
-    });
-
-    await service.refresh();
-    const [server] = service.snapshot.servers;
-    expect(server.online).toBe(true);
-    expect(server.pingMs).toBe(42);
-    expect(server.info?.name).toBe("Hub");
-    expect(server.info?.players).toBe(3);
-  });
-
-  test("queries the friendly alias on Mindustry's default port", async () => {
-    const query = vi.fn(async () => reply());
-
-    await new StatusService({
-      transport: transport({ query }),
-      servers: [hub],
-    }).refresh();
-
-    expect(query).toHaveBeenCalledWith(
-      "hub.md.xpdustry.com",
-      6567,
-      expect.any(Uint8Array),
-      2000,
-      expect.any(AbortSignal),
-    );
-  });
-
-  test("never exposes the transport port in the snapshot", async () => {
-    const service = new StatusService({
-      transport: transport(),
+      probe: probe(),
       servers: [hub],
     });
 
     await service.refresh();
-    const serialised = JSON.stringify(service.snapshot);
-    expect(serialised).toContain("hub.md.xpdustry.com");
-    expect(serialised).not.toContain("6567");
-  });
 
-  test("reports offline when the alias does not answer", async () => {
-    const service = new StatusService({
-      transport: transport({ query: async () => Promise.reject(new Error("timeout")) }),
-      servers: [hub],
+    expect(service.snapshot.servers[0]).toMatchObject({
+      hostname: "hub.md.xpdustry.com",
+      status: "online",
+      info,
     });
-
-    await service.refresh();
-    expect(service.snapshot.servers[0]).toMatchObject({ online: false });
-    expect(service.snapshot.servers[0].info).toBeUndefined();
+    expect(JSON.stringify(service.snapshot)).not.toContain("6567");
   });
 
-  test.each([
-    ["a query timeout", { query: async () => Promise.reject(new Error("timeout")) }],
-    ["a socket error", { query: async () => Promise.reject(new Error("EACCES")) }],
-    ["a malformed reply", { query: async () => Uint8Array.from([1, 2, 3]) }],
-  ])("reports offline on %s", async (_label, overrides) => {
-    const onError = vi.fn();
+  test("one failed server does not affect the other results", async () => {
     const service = new StatusService({
-      transport: transport(overrides as Partial<StatusTransport>),
-      servers: [hub],
-      onError,
-    });
-
-    await service.refresh();
-    expect(service.snapshot.servers[0].online).toBe(false);
-    expect(onError).toHaveBeenCalled();
-  });
-
-  test("one failing server does not take the others offline", async () => {
-    const service = new StatusService({
-      transport: transport({
-        query: async (host) => (host === hub.hostname ? reply() : Promise.reject()),
+      probe: probe(async (hostname) => {
+        if (hostname === pvp.hostname) throw new Error("offline");
+        return info;
       }),
       servers: [hub, pvp],
     });
 
     await service.refresh();
-    expect(service.snapshot.servers.map((entry) => entry.online)).toEqual([true, false]);
+
+    expect(service.snapshot.servers.map((entry) => entry.status)).toEqual(["online", "offline"]);
   });
 
-  test("keeps the definition order regardless of which answers first", async () => {
+  test("replaces stale online data after a failed cycle", async () => {
+    let online = true;
     const service = new StatusService({
-      transport: transport({
-        query: async (host) => {
-          if (host === hub.hostname) await new Promise((resolve) => setTimeout(resolve, 10));
-          return reply();
-        },
+      probe: probe(async () => {
+        if (!online) throw new Error("offline");
+        return info;
       }),
+      servers: [hub],
+    });
+
+    await service.refresh();
+    online = false;
+    await service.refresh();
+
+    expect(service.snapshot.servers[0]).toEqual({
+      slug: "hub",
+      label: "Hub",
+      hostname: "hub.md.xpdustry.com",
+      status: "offline",
+    });
+  });
+
+  test("publishes a cycle only after every server settles", async () => {
+    const late = deferred<ServerInfo>();
+    const service = new StatusService({
+      probe: probe((hostname) =>
+        hostname === hub.hostname ? Promise.resolve(info) : late.promise,
+      ),
       servers: [hub, pvp],
     });
 
-    await service.refresh();
-    expect(service.snapshot.servers.map((entry) => entry.slug)).toEqual(["hub", "pvp"]);
+    const refresh = service.refresh();
+    await Promise.resolve();
+    expect(service.snapshot.servers.every((entry) => entry.status === "polling")).toBe(true);
+
+    late.resolve(info);
+    await refresh;
+    expect(service.snapshot.servers.every((entry) => entry.status === "online")).toBe(true);
   });
 
-  test("never marks a stale result online: a failed poll replaces the snapshot", async () => {
-    let up = true;
+  test("reports poll attempts and completed batches without a parallel readiness state", async () => {
+    const timestamps = [new Date("2026-08-29T10:00:00.000Z"), new Date("2026-08-29T10:00:01.000Z")];
     const service = new StatusService({
-      transport: transport({
-        query: async () => (up ? reply() : Promise.reject(new Error("timeout"))),
-      }),
+      probe: probe(),
       servers: [hub],
+      now: () => timestamps.shift() ?? new Date("2026-08-29T10:00:01.000Z"),
     });
 
     await service.refresh();
-    expect(service.snapshot.servers[0].online).toBe(true);
 
-    up = false;
-    await service.refresh();
-    expect(service.snapshot.servers[0].online).toBe(false);
+    expect(service.health).toEqual({
+      lastAttemptAt: "2026-08-29T10:00:00.000Z",
+      lastCompletedAt: "2026-08-29T10:00:01.000Z",
+    });
   });
 
-  test("an aborted cycle leaves the previous snapshot alone", async () => {
-    const controller = new AbortController();
-    const service = new StatusService({
-      transport: transport({
-        query: async () => {
-          controller.abort();
-          throw new Error("aborted");
-        },
-      }),
-      servers: [hub],
-      onError: () => {},
-    });
-
+  test("an aborted cycle leaves the previous snapshot intact", async () => {
+    const service = new StatusService({ probe: probe(), servers: [hub] });
     await service.refresh();
     const before = service.snapshot;
+    const controller = new AbortController();
+    controller.abort();
 
     await service.refresh(controller.signal);
+
     expect(service.snapshot).toBe(before);
   });
+});
 
-  test("stop leaves the poller stopped", () => {
+describe("StatusService scheduling", () => {
+  test("starts immediately and schedules after the cycle finishes", async () => {
+    const gate = deferred<ServerInfo>();
+    const timers = fakeClock();
+    const query = vi.fn(() => gate.promise);
     const service = new StatusService({
-      transport: transport(),
+      probe: probe(query),
       servers: [hub],
+      clock: timers.clock,
+      intervalMs: 1_000,
     });
+
+    service.start();
+    service.start();
+    expect(query).toHaveBeenCalledOnce();
+    expect(timers.scheduled).toEqual([]);
+
+    gate.resolve(info);
+    await vi.waitFor(() => expect(timers.scheduled).toEqual([1_000]));
+    timers.fire();
+    expect(query).toHaveBeenCalledTimes(2);
+  });
+
+  test("stop aborts an active cycle", async () => {
+    const timers = fakeClock();
+    let signal: AbortSignal | undefined;
+    const service = new StatusService({
+      probe: probe(async (_hostname, activeSignal) => {
+        signal = activeSignal;
+        return info;
+      }),
+      servers: [hub],
+      clock: timers.clock,
+    });
+
+    service.start();
+    expect(signal?.aborted).toBe(false);
+    service.stop();
+    expect(signal?.aborted).toBe(true);
+    expect(service.started).toBe(false);
+
+    await Promise.resolve();
+    expect(timers.scheduled).toEqual([]);
+  });
+
+  test("stop cancels a pending timer", async () => {
+    const timers = fakeClock();
+    const service = new StatusService({
+      probe: probe(),
+      servers: [hub],
+      clock: timers.clock,
+      intervalMs: 1_000,
+    });
+
+    service.start();
+    await vi.waitFor(() => expect(timers.scheduled).toEqual([1_000]));
+    service.stop();
+
+    expect(timers.scheduled).toEqual([]);
+  });
+
+  test("a stopped generation cannot schedule after a restart", async () => {
+    const first = deferred<ServerInfo>();
+    const second = deferred<ServerInfo>();
+    const timers = fakeClock();
+    const query = vi
+      .fn<MindustryStatusProbe["query"]>()
+      .mockImplementationOnce(() => first.promise)
+      .mockImplementationOnce(() => second.promise);
+    const service = new StatusService({
+      probe: probe(query),
+      servers: [hub],
+      clock: timers.clock,
+      intervalMs: 1_000,
+    });
+
     service.start();
     service.stop();
-    // A stopped service must not schedule further cycles; starting again is
-    // the caller's decision, not a side effect of stop.
-    expect(service.snapshot.state).toBeDefined();
+    service.start();
+    first.resolve(info);
+    await first.promise;
+    await Promise.resolve();
+    expect(timers.scheduled).toEqual([]);
+
+    second.resolve(info);
+    await vi.waitFor(() => expect(timers.scheduled).toEqual([1_000]));
+  });
+
+  test("a throwing reporter cannot stop the next cycle", async () => {
+    const timers = fakeClock();
+    const service = new StatusService({
+      probe: probe(async () => {
+        throw new Error("offline");
+      }),
+      servers: [hub],
+      clock: timers.clock,
+      intervalMs: 1_000,
+      onError: () => {
+        throw new Error("reporter failed");
+      },
+    });
+
+    service.start();
+
+    await vi.waitFor(() => expect(timers.scheduled).toEqual([1_000]));
   });
 });

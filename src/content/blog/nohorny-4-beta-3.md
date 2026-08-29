@@ -5,7 +5,6 @@ description: >-
   synchronous incremental grouping algorithm.
 publishedAt: 2026-04-23
 author: phinner
-pfp: /phinner.svg
 topic: NoHorny
 releases:
   - xpdustry/nohorny@v4.0.0-beta.3

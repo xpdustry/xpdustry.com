@@ -1,49 +1,41 @@
-/**
- * Theme resolution, shared by the inline bootstrap and the toggle.
- *
- * The bootstrap runs as a blocking classic script in <head> so the resolved
- * theme is on <html> before the first paint. Applying it after hydration
- * would flash the wrong theme on every load.
- */
-
-export type ThemeChoice = "light" | "dark";
+export type ThemePreference = "system" | "light" | "dark";
+export type ResolvedTheme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "xpdustry-theme";
+export const THEME_QUERY = "(prefers-color-scheme: dark)";
 
-/**
- * Stringified into the document head. It has to stay ES5-ish and free of any
- * import, because it runs before the bundle exists.
- */
-// TODO This smells...
-export const THEME_BOOTSTRAP = `(function(){try{
-var stored=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});
-var theme=stored==='light'||stored==='dark'?stored
-  :(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
-document.documentElement.dataset.theme=theme;
-}catch(e){document.documentElement.dataset.theme=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}})();`;
+export const THEME_BOOTSTRAP = `(function(){try{var t=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}}catch(e){}})();`;
 
-export function readStoredTheme(): ThemeChoice | null {
+export function readThemePreference(
+  storage: Pick<Storage, "getItem"> = localStorage,
+): ThemePreference {
   try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored === "light" || stored === "dark" ? stored : null;
+    const value = storage.getItem(THEME_STORAGE_KEY);
+    return value === "light" || value === "dark" ? value : "system";
   } catch {
-    // Private mode, or storage disabled. The system preference still works.
-    return null;
+    return "system";
   }
 }
 
-export function systemTheme(): ThemeChoice {
-  return typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+export function resolveTheme(
+  preference: ThemePreference,
+  media: Pick<MediaQueryList, "matches">,
+): ResolvedTheme {
+  return preference === "system" ? (media.matches ? "dark" : "light") : preference;
 }
 
-export function applyTheme(theme: ThemeChoice): void {
-  document.documentElement.dataset.theme = theme;
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch {
-    // Nothing to persist to. The choice still applies for this page.
+export function applyThemePreference(preference: ThemePreference): void {
+  const root = document.documentElement;
+  if (preference === "system") {
+    delete root.dataset.theme;
+    root.style.colorScheme = "light dark";
+  } else {
+    root.dataset.theme = preference;
+    root.style.colorScheme = preference;
   }
+
+  try {
+    if (preference === "system") localStorage.removeItem(THEME_STORAGE_KEY);
+    else localStorage.setItem(THEME_STORAGE_KEY, preference);
+  } catch {}
 }

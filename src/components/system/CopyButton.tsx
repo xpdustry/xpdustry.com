@@ -1,56 +1,40 @@
-/**
- * Copy-to-clipboard with an outcome the user can actually see.
- *
- * The Clipboard API needs a secure context and a permission that can be
- * refused, so the failure path is not exotic. It is what happens over plain
- * HTTP. When it fails the button says so and the text stays selectable, and
- * a polite live region announces either outcome to assistive technology.
- */
-
 import type { JSX } from "@solidjs/web";
 import { children, createSignal, onSettled, Show } from "solid-js";
 import { CheckIcon } from "#app/components/system/Icons";
-import { Button, type ButtonSize, type ButtonVariant } from "#app/components/system/Pressable";
+import {
+  Button,
+  type ButtonFormat,
+  type ButtonSize,
+  type ButtonVariant,
+} from "#app/components/system/Pressable";
+import { status } from "#app/components/system/CopyButton.css";
 
 export interface CopyButtonProps {
-  /** The exact text to copy. */
   value: string;
   label?: string;
-  /** What the live region says on success, e.g. `Copied survival.md.xpdustry.com`. */
   announcement?: string;
-  /**
-   * Square, with the label carried as the accessible name instead of set in
-   * type. The outcome still shows: the glyph becomes a tick on success, so
-   * the button reports it without a word of layout.
-   */
   icon?: boolean;
-  /** Full width, for a control that owns its row. */
   block?: boolean;
   variant?: ButtonVariant;
   size?: ButtonSize;
-  class?: string;
-  faceClass?: string;
+  format?: ButtonFormat;
   children?: JSX.Element;
 }
 
 type Outcome = "idle" | "copied" | "failed";
-
 const RESET_DELAY_MS = 2400;
 
 export function CopyButton(props: CopyButtonProps) {
-  // Resolved once. Reading props.children from more than one place would
-  // build the face again on every read, and the copy would report itself on
-  // a set of nodes the button had already thrown away.
-  const face = children(() => props.children);
+  const content = children(() => props.children);
   const [outcome, setOutcome] = createSignal<Outcome>("idle");
   const [message, setMessage] = createSignal("");
-
   let resetTimer: ReturnType<typeof setTimeout> | undefined;
+
   onSettled(() => () => clearTimeout(resetTimer));
 
-  const settle = (next: Outcome, announced: string) => {
+  const settle = (next: Outcome, announcement: string) => {
     setOutcome(next);
-    setMessage(announced);
+    setMessage(announcement);
     clearTimeout(resetTimer);
     resetTimer = setTimeout(() => {
       setOutcome("idle");
@@ -82,8 +66,7 @@ export function CopyButton(props: CopyButtonProps) {
         size={props.size ?? "sm"}
         icon={props.icon}
         block={props.block}
-        class={props.class}
-        faceClass={props.faceClass}
+        format={props.format}
         aria-label={props.icon || props.label !== undefined ? label() : undefined}
         title={props.icon ? label() : undefined}
         onClick={() => void copy()}
@@ -91,21 +74,17 @@ export function CopyButton(props: CopyButtonProps) {
         <Show
           when={props.icon}
           fallback={
-            // Children are the resting face: an address, a filename. Once the
-            // copy has settled the outcome takes the whole button, because a
-            // tick tucked beside unchanged content is easy to miss.
-            <Show when={outcome() === "idle" && face() !== undefined} fallback={label()}>
-              {face()}
+            <Show when={outcome() === "idle" && content() !== undefined} fallback={label()}>
+              {content()}
             </Show>
           }
         >
-          <Show when={outcome() === "copied"} fallback={face()}>
+          <Show when={outcome() === "copied"} fallback={content()}>
             <CheckIcon />
           </Show>
         </Show>
       </Button>
-      {/* Off-screen rather than hidden: a display:none region is not announced. */}
-      <span class="sr-only" role="status" aria-live="polite">
+      <span class={status} role="status" aria-live="polite">
         {message()}
       </span>
     </>

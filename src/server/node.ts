@@ -1,21 +1,13 @@
-/**
- * The production entry: a plain Node HTTP server around the SSR handler.
- *
- * It is bundled into the same module graph as the handler, so the pollers
- * started here are the same instances the renderer and the API routes read.
- * A separate process-level script importing the built bundle would get its
- * own copy of every module and poll twice.
- */
-
 import { createReadStream, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { env } from "virtual:env/server";
 import { handleRequest } from "virtual:solid-ssr-handler";
-import { getRuntime, readConfig, stopRuntime } from "#app/server/runtime";
+import { initializeRuntime } from "#app/server/bootstrap";
+import { stopRuntime } from "#app/server/runtime";
 
-/** How long in-flight responses get to finish after a shutdown signal. */
 const DRAIN_TIMEOUT_MS = 5000;
 
 const CLIENT_ROOT = resolve(import.meta.dirname, "../client");
@@ -42,11 +34,7 @@ const MIME_TYPES: Record<string, string> = {
   ".woff2": "font/woff2",
 };
 
-const config = readConfig();
-
-// Both pollers run their first cycle before the listener opens; requests that
-// arrive before it lands render the explicit loading state rather than waiting.
-const runtime = getRuntime();
+initializeRuntime();
 
 const server = createServer((req, res) => {
   void handle(req, res).catch((error) => {
@@ -62,10 +50,6 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
   await sendWebResponse(res, response);
 }
 
-/**
- * Serves the built client assets. Only paths that stay inside `dist/client`
- * after normalization are considered, so `..` in a URL cannot walk out of it.
- */
 async function serveStatic(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
 
@@ -114,7 +98,7 @@ async function serveStatic(req: IncomingMessage, res: ServerResponse): Promise<b
 }
 
 function toWebRequest(req: IncomingMessage): Request {
-  const host = req.headers.host ?? `localhost:${config.port}`;
+  const host = req.headers.host ?? `localhost:${env.PORT}`;
   const url = new URL(req.url ?? "/", `http://${host}`);
 
   const headers = new Headers();
@@ -129,7 +113,7 @@ function toWebRequest(req: IncomingMessage): Request {
     method: req.method,
     headers,
     body: hasBody ? (Readable.toWeb(req) as ReadableStream<Uint8Array>) : undefined,
-    // Node streams are not duplex-capable; this is required for a body.
+    // Node's Request constructor requires duplex when the body is a stream.
     ...(hasBody ? { duplex: "half" } : {}),
   } as RequestInit);
 }
@@ -143,8 +127,8 @@ async function sendWebResponse(res: ServerResponse, response: Response): Promise
   await Readable.fromWeb(response.body as Parameters<typeof Readable.fromWeb>[0]).pipe(res);
 }
 
-server.listen(config.port, "0.0.0.0", () => {
-  console.log(`[http] listening on http://0.0.0.0:${config.port}`);
+server.listen(env.PORT, "0.0.0.0", () => {
+  console.log(`[http] listening on http://0.0.0.0:${env.PORT}`);
 });
 
 let shuttingDown = false;
@@ -154,19 +138,14 @@ function shutdown(signal: string): void {
   shuttingDown = true;
   console.log(`[http] ${signal} received, draining`);
 
-  // Stop accepting connections first, then let the pollers go: a cycle that
-  // finishes during the drain is harmless, one that starts is not.
+  stopRuntime();
   server.close(() => {
-    runtime.stop();
-    stopRuntime();
     process.exit(0);
   });
   server.closeIdleConnections();
 
   setTimeout(() => {
     console.warn("[http] drain timed out, exiting anyway");
-    runtime.stop();
-    stopRuntime();
     process.exit(0);
   }, DRAIN_TIMEOUT_MS).unref();
 }

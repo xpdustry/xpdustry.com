@@ -1,32 +1,36 @@
 /**
- * The reticulate whipray (Himantura uarnak) pattern, as a bounded non-linear
- * Turing reaction-diffusion.
+ * The reticulate whipray pattern as a bounded, nonlinear Turing
+ * reaction-diffusion system.
  *
- * Ported from Malheiros' reference implementation for "The leopard never
- * changes its spots" (SIGGRAPH 2020), specifically the whipray experiment.
- * Two phases: a first run at a high diffusion ratio settles into round spots,
- * then a second run at a lower ratio while the tissue grows underneath pulls
- * those spots into the open network that gives the ray its name.
+ * Ported from Malheiros' Himantura uarnak experiment for "The leopard never
+ * changes its spots" (SIGGRAPH 2020):
+ * https://github.com/mgmalheiros/reaction-diffusion
  *
- * The convolution wraps, and growth only ever inserts duplicated rows and
- * columns, so the field stays periodic from end to end: the output tiles.
+ * The first phase uses a high diffusion ratio to settle into round spots. The
+ * second lowers that ratio while the tissue grows, pulling the spots into the
+ * open network that gives the ray its name.
+ *
+ * Convolution wraps at the edges, and growth inserts duplicated rows and
+ * columns. The field therefore remains periodic and the output tiles cleanly.
  */
 
-/** The 3x3 discrete Laplacian both morphogens diffuse through. */
+/** The 3x3 discrete Laplacian through which both morphogens diffuse. */
 const KERNEL = [1, 4, 1, 4, -20, 4, 1, 4, 1].map((weight) => weight / 6);
+/** The point where the reference colour ramp has faded into its ground. */
+const NET_CUTOFF = 0.34;
 
 export interface PhaseOptions {
-  /** Diffusion ratio between the two morphogens: high spots, low reticulates. */
+  /** Diffusion ratio between the morphogens. High values form spots, low values form nets. */
   ratio: number;
-  /** Overall diffusion scale, i.e. how coarse the pattern comes out. */
+  /** Overall diffusion scale, which controls the pattern's coarseness. */
   scale: number;
-  /** Integration speed. 40 in the notebook; dt is 0.01 * speed / 100. */
+  /** Integration speed. The reference uses 40 and dt = 0.01 * speed / 100. */
   speed: number;
-  /** Number of iterations to run. */
+  /** Number of integration steps. */
   steps: number;
-  /** Lower clamp on B. Holding it above zero is what bounds the model. */
+  /** Lower clamp on B. Keeping B above zero bounds the model. */
   floorB: number;
-  /** Insert one row and one column every `growEvery` steps, if set. */
+  /** Insert one row and one column at this interval when set. */
   growEvery?: number;
 }
 
@@ -38,9 +42,8 @@ export interface Field {
 }
 
 /**
- * Mulberry32. The notebook seeds numpy; we only need *a* reproducible stream,
- * and matching numpy's Mersenne bit for bit would buy nothing — the pattern is
- * an attractor of the model, not of the noise.
+ * Mulberry32 supplies reproducible noise. Matching NumPy's Mersenne Twister
+ * bit for bit would not change the model's attractor, only its initial noise.
  */
 function rng(seed: number): () => number {
   let state = seed >>> 0;
@@ -53,7 +56,7 @@ function rng(seed: number): () => number {
   };
 }
 
-/** The starting broth: A flat, B flat plus a hair of noise to break symmetry. */
+/** Start with flat A and add slight noise to B to break spatial symmetry. */
 export function seedField(size: number, random: () => number): Field {
   const cells = size * size;
   const a = new Float64Array(cells).fill(4);
@@ -63,8 +66,8 @@ export function seedField(size: number, random: () => number): Field {
 }
 
 /**
- * One wrapped convolution of `KERNEL` over `source`, the `mode='wrap'` half of
- * the notebook's `ndimage.convolve`.
+ * Convolve one field with the discrete Laplacian. Modulo indexing matches the
+ * reference implementation's wrapped boundary and keeps the result tileable.
  */
 function laplacian(source: Float64Array, out: Float64Array, width: number, height: number): void {
   for (let y = 0; y < height; y += 1) {
@@ -89,10 +92,9 @@ function laplacian(source: Float64Array, out: Float64Array, width: number, heigh
 }
 
 /**
- * Growth, the half of the paper that matters here: a new row and column of
- * tissue, each cell copied from a random point along its line so the existing
- * pattern is stretched rather than overwritten. Spots that were round drift
- * apart, and the reaction re-joins them as stripes.
+ * Grow the simulated tissue by one row and column. Each insertion duplicates
+ * a random point along its line, stretching the existing pattern without
+ * replacing it. Round spots drift apart and the reaction reconnects them.
  */
 function grow(field: Field, random: () => number): Field {
   const { a, b, width, height } = field;
@@ -101,8 +103,7 @@ function grow(field: Field, random: () => number): Field {
   const na = new Float64Array(w * h);
   const nb = new Float64Array(w * h);
 
-  // Vertical first: copy the old field in, then push a random suffix of each
-  // column down by one, which duplicates the row it was cut at.
+  // Insert a column first, then a row into that intermediate field.
   const ta = new Float64Array(w * height);
   const tb = new Float64Array(w * height);
   for (let y = 0; y < height; y += 1) {
@@ -131,7 +132,7 @@ function grow(field: Field, random: () => number): Field {
   return { a: na, b: nb, width: w, height: h };
 }
 
-/** Runs one phase of the model in place, returning the (possibly grown) field. */
+/** Advance one reaction-diffusion phase, returning the possibly grown field. */
 export function runPhase(field: Field, options: PhaseOptions, random: () => number): Field {
   const diffusionA = options.ratio * options.scale;
   const diffusionB = options.scale;
@@ -160,16 +161,13 @@ export function runPhase(field: Field, options: PhaseOptions, random: () => numb
   return current;
 }
 
-/** The two phases the notebook runs for Himantura uarnak. */
+/** The two phases used by the reference Himantura uarnak experiment. */
 export const RETICULATE_PHASES: readonly PhaseOptions[] = [
   { ratio: 30, scale: 3, speed: 40, steps: 4000, floorB: 2 },
   { ratio: 8, scale: 3, speed: 40, steps: 10000, floorB: 2, growEvery: 100 },
 ];
 
-/** Where the notebook's ramp has finished crossing from teal to its ground. */
-const NET_CUTOFF = 0.34;
-
-/** Runs the whole recipe and hands back the final B field. */
+/** Run the complete two-phase recipe and return its final morphogen fields. */
 export function reticulateField(size = 100, seed = 1): Field {
   const random = rng(seed);
   let field = seedField(size, random);
@@ -178,13 +176,12 @@ export function reticulateField(size = 100, seed = 1): Field {
 }
 
 /**
- * Turns the B field into an 8-bit coverage mask of the reticulation itself.
+ * Convert morphogen B into an 8-bit coverage mask of the reticulation.
  *
- * The notebook colours B through a ramp that is teal only at the very bottom
- * of the range and near-black across the rest, so the net you see is the thin
- * low-B set, not half the field. A linear inversion would paint the cells as
- * well as the lines; this reproduces the ramp's own falloff, and smoothsteps
- * it so the edges stay as soft on screen as they are in the plot.
+ * The reference colour ramp is bright only at the very bottom of B's range.
+ * The visible net is therefore the thin low-B set, not half the field. Linear
+ * inversion would fill the cells as well as their borders. This cutoff follows
+ * the reference ramp, then smoothstep softens the mask edges.
  */
 export function toMask(field: Field): Uint8Array {
   const { b } = field;
@@ -205,13 +202,9 @@ export function toMask(field: Field): Uint8Array {
 }
 
 /**
- * Softens a mask with three wrapped box passes, which is close enough to a
- * Gaussian for this and cheap enough to run on every pixel.
- *
- * Doing it here rather than with a CSS filter matters: `filter: blur()` on a
- * full-width background is a per-frame paint the compositor redoes on scroll,
- * and the whole point of baking the tile is that the page does no such work.
- * Wrapping keeps the tile seamless.
+ * Approximate a Gaussian blur with three wrapped horizontal and vertical box
+ * passes. Baking this into the asset avoids repainting a full-page CSS blur on
+ * scroll, while wrapping preserves a seamless tile.
  */
 export function blurMask(
   mask: Uint8Array,

@@ -1,143 +1,166 @@
-/**
- * Polls the Mindustry servers over SRV + UDP and keeps one in-memory snapshot.
- *
- * Two rules shape this file:
- *
- * - A server that does not answer this cycle is offline in this snapshot.
- *   Carrying an old "online" forward would show players a server they cannot
- *   join, which is worse than showing nothing.
- * - The endpoint list is the one in `data/servers.ts`. Nothing here ever
- *   takes a hostname or port from an HTTP request.
- */
-
 import { servers as defaultServers, type ServerDefinition } from "#app/data/servers";
 import {
-  EMPTY_SERVER_SNAPSHOT,
+  createServerSnapshot,
+  type OnlineServerSnapshotItem,
+  type ServerInfo,
   type ServerSnapshot,
   type ServerSnapshotItem,
 } from "#app/data/snapshots";
-import { decodeServerInfo, QUERY_PACKET } from "#app/server/mindustry-protocol";
-import { Poller, type PollerClock, type ServiceHealth } from "#app/server/poller";
 
-export const SERVER_POLL_INTERVAL_MS = 30 * 1000;
-export const QUERY_TIMEOUT_MS = 2000;
+export const SERVER_POLL_INTERVAL_MS = 30_000;
 
-export const DEFAULT_MINDUSTRY_PORT = 6567;
+export interface MindustryStatusProbe {
+  query: (hostname: string, signal: AbortSignal) => Promise<ServerInfo>;
+}
 
-/** The DNS and UDP seams, so tests never touch the network. */
-export interface StatusTransport {
-  query: (
-    host: string,
-    port: number,
-    packet: Uint8Array,
-    timeoutMs: number,
-    signal: AbortSignal,
-  ) => Promise<Uint8Array>;
+export interface ScheduledTask {
+  cancel: () => void;
+}
+
+export interface StatusClock {
+  schedule: (handler: () => void, delayMs: number) => ScheduledTask;
+}
+
+const systemClock: StatusClock = {
+  schedule(handler, delayMs) {
+    const timer = setTimeout(handler, delayMs);
+    return { cancel: () => clearTimeout(timer) };
+  },
+};
+
+export interface PollHealth {
+  lastAttemptAt: string | null;
+  lastCompletedAt: string | null;
 }
 
 export interface StatusServiceOptions {
-  transport: StatusTransport;
+  probe: MindustryStatusProbe;
   servers?: readonly ServerDefinition[];
   now?: () => Date;
-  monotonic?: () => number;
-  clock?: PollerClock;
+  clock?: StatusClock;
   intervalMs?: number;
   onError?: (error: unknown) => void;
 }
 
 export class StatusService {
-  #options: StatusServiceOptions;
-  #now: () => Date;
-  #monotonic: () => number;
-  #poller: Poller;
-  #snapshot: ServerSnapshot = EMPTY_SERVER_SNAPSHOT;
+  readonly #options: StatusServiceOptions;
+  readonly #definitions: readonly ServerDefinition[];
+  readonly #now: () => Date;
+  readonly #clock: StatusClock;
+  readonly #intervalMs: number;
+  #snapshot: ServerSnapshot;
   #lastAttemptAt: string | null = null;
-  #lastSuccessAt: string | null = null;
+  #lastCompletedAt: string | null = null;
+  #started = false;
+  #generation = 0;
+  #scheduled: ScheduledTask | null = null;
+  #controller: AbortController | null = null;
 
   constructor(options: StatusServiceOptions) {
     this.#options = options;
+    this.#definitions = options.servers ?? defaultServers;
     this.#now = options.now ?? (() => new Date());
-    this.#monotonic = options.monotonic ?? (() => performance.now());
-    this.#poller = new Poller({
-      intervalMs: options.intervalMs ?? SERVER_POLL_INTERVAL_MS,
-      run: (signal) => this.refresh(signal),
-      onError: options.onError,
-      clock: options.clock,
-    });
+    this.#clock = options.clock ?? systemClock;
+    this.#intervalMs = options.intervalMs ?? SERVER_POLL_INTERVAL_MS;
+    this.#snapshot = createServerSnapshot(this.#definitions, "polling");
   }
 
-  start(): void {
-    this.#poller.start();
-  }
-
-  stop(): void {
-    this.#poller.stop();
+  get started(): boolean {
+    return this.#started;
   }
 
   get snapshot(): ServerSnapshot {
     return this.#snapshot;
   }
 
-  get health(): ServiceHealth {
+  get health(): PollHealth {
     return {
-      state: this.#snapshot.state,
       lastAttemptAt: this.#lastAttemptAt,
-      lastSuccessAt: this.#lastSuccessAt,
+      lastCompletedAt: this.#lastCompletedAt,
     };
   }
 
-  /** Queries every server concurrently. Always resolves. */
-  async refresh(signal?: AbortSignal): Promise<void> {
-    const definitions = this.#options.servers ?? defaultServers;
-    const polledAt = this.#now().toISOString();
-    this.#lastAttemptAt = polledAt;
+  start(): void {
+    if (this.#started) return;
+    this.#started = true;
+    const generation = ++this.#generation;
+    void this.#cycle(generation);
+  }
 
+  stop(): void {
+    if (!this.#started) return;
+    this.#started = false;
+    this.#generation += 1;
+    this.#scheduled?.cancel();
+    this.#scheduled = null;
+    this.#controller?.abort();
+    this.#controller = null;
+  }
+
+  async refresh(signal?: AbortSignal): Promise<void> {
+    this.#lastAttemptAt = this.#now().toISOString();
+    const activeSignal = signal ?? new AbortController().signal;
     const results = await Promise.allSettled(
-      definitions.map((server) => this.#queryOne(server, signal)),
+      this.#definitions.map((server) => this.#queryOne(server, activeSignal)),
     );
 
-    // An aborted cycle must not overwrite the snapshot with a row of offline
-    // servers on the way out.
-    if (signal?.aborted) return;
+    if (activeSignal.aborted) return;
 
-    const items: ServerSnapshotItem[] = definitions.map((server, index) => {
+    const items = this.#definitions.map<ServerSnapshotItem>((server, index) => {
       const result = results[index];
-      if (result.status === "fulfilled") return { ...result.value, polledAt };
-      this.#options.onError?.(result.reason);
+      if (result.status === "fulfilled") return result.value;
+      this.#reportSafely(result.reason);
       return {
         slug: server.slug,
         label: server.label,
         hostname: server.hostname,
-        online: false,
-        polledAt,
+        status: "offline",
       };
     });
 
-    this.#snapshot = { state: "ready", updatedAt: polledAt, servers: items };
-    this.#lastSuccessAt = polledAt;
+    this.#snapshot = { servers: items };
+    this.#lastCompletedAt = this.#now().toISOString();
+  }
+
+  async #cycle(generation: number): Promise<void> {
+    const controller = new AbortController();
+    this.#controller = controller;
+
+    try {
+      await this.refresh(controller.signal);
+    } catch (error) {
+      if (this.#started && generation === this.#generation) this.#reportSafely(error);
+    }
+
+    if (!this.#started || generation !== this.#generation || this.#controller !== controller) {
+      return;
+    }
+
+    this.#controller = null;
+    this.#scheduled = this.#clock.schedule(() => {
+      this.#scheduled = null;
+      void this.#cycle(generation);
+    }, this.#intervalMs);
   }
 
   async #queryOne(
     server: ServerDefinition,
-    signal?: AbortSignal,
-  ): Promise<Omit<ServerSnapshotItem, "polledAt">> {
-    const startedAt = this.#monotonic();
-    const packet = await this.#options.transport.query(
-      server.hostname,
-      DEFAULT_MINDUSTRY_PORT,
-      QUERY_PACKET,
-      QUERY_TIMEOUT_MS,
-      signal ?? new AbortController().signal,
-    );
-    const pingMs = Math.round(this.#monotonic() - startedAt);
+    signal: AbortSignal,
+  ): Promise<OnlineServerSnapshotItem> {
+    const info = await this.#options.probe.query(server.hostname, signal);
 
     return {
       slug: server.slug,
       label: server.label,
       hostname: server.hostname,
-      online: true,
-      pingMs,
-      info: decodeServerInfo(packet),
+      status: "online",
+      info,
     };
+  }
+
+  #reportSafely(error: unknown): void {
+    try {
+      this.#options.onError?.(error);
+    } catch {}
   }
 }

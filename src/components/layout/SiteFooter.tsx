@@ -1,49 +1,37 @@
-import logoMonochrome from "#app/assets/logo-monochrome.svg";
 import { SITE } from "#app/data/site";
+import * as styles from "#app/components/layout/SiteFooter.css";
 
 export function SiteFooter() {
   return (
-    <footer class="relative border-t-2 border-line bg-page py-16">
-      <div class="footer-layout wrap grid gap-12">
-        <div class="flex flex-col items-start justify-between gap-8">
-          <a
-            class="inline-flex items-center gap-3 text-inherit no-underline"
-            href="/"
-            aria-label={`${SITE.name} home`}
-          >
-            <img class="size-8.5 dark:invert" src={logoMonochrome} alt="" width="34" height="34" />
-            <span class="text-lg leading-none font-extrabold tracking-tight stretch-110">
-              {SITE.name}
-            </span>
+    <footer class={styles.footer}>
+      <div class={styles.footerLayout}>
+        <div class={styles.identity}>
+          <a class={styles.brand} href="/" aria-label={`${SITE.name} home`}>
+            <span class={styles.logo} aria-hidden="true" />
+            <span class={styles.brandName}>{SITE.name}</span>
           </a>
-          <small class="block text-sm text-ink-faint">© 2026 {SITE.name}</small>
+          <small class={styles.copyright}>© 2026 {SITE.name}</small>
         </div>
 
-        {/* Two groups, split by what the link does: pages on this site, and
-            ways to reach the people behind it. The old third column held one
-            mailto under a heading that said "Contact" next to a heading that
-            said "Elsewhere", which named nothing a reader was looking for. */}
-        <div class="footer-nav-grid grid content-start gap-x-8 gap-y-6">
-          <div class="grid content-start gap-2">
-            <h2 class={footerHeading}>Site</h2>
-            <a class={footerLink} href="/">
+        <div class={styles.navigation}>
+          <div class={styles.linkGroup}>
+            <h2 class={styles.heading}>Site</h2>
+            <a class={styles.link} href="/">
               Home
             </a>
-            <a class={footerLink} href="/blog">
+            <a class={styles.link} href="/blog">
               Blog
             </a>
           </div>
-          <div class="grid content-start gap-2">
-            <h2 class={footerHeading}>Contact</h2>
-            <a class={footerLink} href={SITE.discord} rel="noreferrer">
+          <div class={styles.linkGroup}>
+            <h2 class={styles.heading}>Contact</h2>
+            <a class={styles.link} href={SITE.discord} rel="noreferrer">
               Discord
             </a>
-            <a class={footerLink} href={SITE.github} rel="noreferrer">
+            <a class={styles.link} href={SITE.github} rel="noreferrer">
               GitHub
             </a>
-            {/* The address itself, not the word "Email": one fewer click to
-                find out where a mail would go. */}
-            <a class={footerLink} href={`mailto:${SITE.email}`}>
+            <a class={styles.link} href={`mailto:${SITE.email}`}>
               {SITE.email}
             </a>
           </div>
@@ -52,8 +40,3 @@ export function SiteFooter() {
     </footer>
   );
 }
-
-const footerHeading =
-  "mb-1 font-mono text-data font-medium tracking-wider text-ink-faint uppercase";
-const footerLink =
-  "inline-flex min-h-6.5 items-center text-sm font-semibold text-ink-muted no-underline hover:text-ink hover:underline hover:underline-offset-3";

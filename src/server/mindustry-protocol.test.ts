@@ -132,12 +132,12 @@ describe("decodeServerInfo", () => {
     expect(() => decodeServerInfo(packet({ wave: -5 }))).toThrow(/wave/);
   });
 
-  test("rejects trailing bytes rather than guessing at a newer format", () => {
+  test("ignores metadata appended after the known packet fields", () => {
     const bytes = new Uint8Array([...packet(), 0, 0, 0]);
-    expect(() => decodeServerInfo(bytes)).toThrow(/trailing bytes/);
+    expect(decodeServerInfo(bytes)).toEqual(decodeServerInfo(packet()));
   });
 
-  test("consumes the trailing port without exposing it", () => {
+  test("consumes the unsigned port without exposing it", () => {
     // A server reporting a different port must not change anything the site
     // shows: the SRV result is the endpoint and the alias is the address.
     const decoded = decodeServerInfo(packet({ port: 65535 }));

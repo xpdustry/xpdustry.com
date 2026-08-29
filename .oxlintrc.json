@@ -1,18 +1,4 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": ["dist/**", "node_modules/**"],
-  "jsPlugins": [{ "name": "tailwind", "specifier": "eslint-plugin-tailwindcss" }],
-  "settings": {
-    "tailwindcss": {
-      "cssConfigPath": "src/styles/app.css"
-    }
-  },
-  "rules": {
-    "tailwind/enforces-negative-arbitrary-values": "warn",
-    "tailwind/enforces-shorthand": "warn",
-    "tailwind/important-modifier-suffix": "warn",
-    "tailwind/no-arbitrary-value": "error",
-    "tailwind/no-contradicting-classname": "error",
-    "tailwind/no-unnecessary-arbitrary-value": "warn"
-  }
+  "ignorePatterns": ["dist/**", "node_modules/**"]
 }

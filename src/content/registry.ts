@@ -1,13 +1,4 @@
-/**
- * The blog registry, built from compiled Markdown modules in this directory.
- *
- * `import.meta.glob` is eager because the whole corpus is four short posts:
- * an index page needs every post's frontmatter anyway, and lazily loading
- * four modules to list four titles costs more than it saves.
- *
- * Every invariant is checked at module evaluation, so a bad date or a
- * duplicate slug fails the build rather than rendering a broken page.
- */
+// Eager loading validates every post during the build.
 
 import { ContentError, type BlogFrontmatter } from "#app/content/schema";
 
@@ -31,7 +22,6 @@ export const postsBySlug: ReadonlyMap<string, BlogPost> = new Map(
   posts.map((post) => [post.slug, post]),
 );
 
-// Content invariant, checked at module evaluation like the rest of them.
 assertReleasesAreClaimedOnce();
 
 function buildPosts(): BlogPost[] {
@@ -50,33 +40,24 @@ function buildPosts(): BlogPost[] {
     });
   }
 
-  // Newest first, everywhere the list is used.
   return built.sort(
     (a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt),
   );
 }
 
-/**
- * No two posts may say they cover the same release.
- *
- * Nothing joins on these ids any more — the release box on a post page builds
- * its links from the id itself. This stays because two posts claiming one
- * release is still a mistake in the writing, and a build is a better place to
- * find out than a reader is.
- */
+function fileSlug(file: string): string {
+  return file.replace(/^.*\//, "").replace(/\.md$/, "");
+}
+
 function assertReleasesAreClaimedOnce(): void {
   const claimedBy = new Map<string, string>();
   for (const post of posts) {
     for (const id of post.frontmatter.releases ?? []) {
       const existing = claimedBy.get(id);
-      if (existing && existing !== post.slug) {
+      if (existing) {
         throw new ContentError(post.slug, `release ${id} is already claimed by ${existing}`);
       }
       claimedBy.set(id, post.slug);
     }
   }
-}
-
-function fileSlug(file: string): string {
-  return file.replace(/^.*\//, "").replace(/\.md$/, "");
 }

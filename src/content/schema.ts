@@ -1,49 +1,49 @@
-/** Build-time validation for repository content. */
-
 import * as v from "valibot";
+import { authorNames } from "#app/content/authors";
+import { NonBlankStringSchema } from "#app/lib/schema";
 
-const nonEmptyStringSchema = v.pipe(
+const IsoCalendarDateSchema = v.pipe(
   v.string(),
-  v.check((value) => value.trim() !== "", "must be a non-empty string"),
+  v.isoDate("must be an ISO date"),
+  v.check(isCalendarDate, "must be a valid calendar date"),
 );
 
-const dateSchema = v.pipe(
+const BlogFrontmatterDateSchema = v.pipe(
   v.union([
-    v.pipe(v.string(), v.isoDate("must be an ISO date")),
     v.pipe(
-      v.date(),
-      v.check((value) => !Number.isNaN(value.getTime()), "must be a valid date"),
+      IsoCalendarDateSchema,
+      v.transform((value) => new Date(`${value}T00:00:00.000Z`)),
     ),
+    v.date("must be a valid date"),
   ]),
-  v.transform((value) => new Date(value).toISOString()),
+  v.transform((value) => value.toISOString()),
 );
 
-const releaseIdSchema = v.pipe(
+const ReleaseIdSchema = v.pipe(
   v.string(),
   v.regex(/^[\w.-]+\/[\w.-]+@\S+$/, "must be owner/repo@tag"),
 );
 
-export const blogFrontmatterSchema = v.object(
+export const BlogFrontmatterSchema = v.strictObject(
   {
-    title: nonEmptyStringSchema,
-    description: nonEmptyStringSchema,
-    publishedAt: dateSchema,
-    updatedAt: v.optional(dateSchema),
-    author: nonEmptyStringSchema,
-    pfp: v.optional(nonEmptyStringSchema),
-    topic: nonEmptyStringSchema,
-    hero: v.optional(nonEmptyStringSchema),
+    title: NonBlankStringSchema,
+    description: NonBlankStringSchema,
+    publishedAt: BlogFrontmatterDateSchema,
+    updatedAt: v.optional(BlogFrontmatterDateSchema),
+    author: v.picklist(authorNames, "must be a known author"),
+    topic: NonBlankStringSchema,
+    hero: v.optional(NonBlankStringSchema),
     releases: v.optional(
       v.pipe(
-        v.array(releaseIdSchema),
-        v.check((ids) => new Set(ids).size === ids.length, "contains a duplicate id"),
+        v.array(ReleaseIdSchema),
+        v.checkItems((id, index, ids) => ids.indexOf(id) === index, "contains a duplicate id"),
       ),
     ),
   },
   "frontmatter is missing or is not a mapping",
 );
 
-export type BlogFrontmatter = v.InferOutput<typeof blogFrontmatterSchema>;
+export type BlogFrontmatter = v.InferOutput<typeof BlogFrontmatterSchema>;
 
 export class ContentError extends Error {
   constructor(file: string, message: string, options?: ErrorOptions) {
@@ -53,20 +53,12 @@ export class ContentError extends Error {
 }
 
 export function parseBlogFrontmatter(file: string, value: unknown): BlogFrontmatter {
-  return parseFrontmatter(blogFrontmatterSchema, file, value);
+  const result = v.safeParse(BlogFrontmatterSchema, value);
+  if (result.success) return result.output;
+  throw new ContentError(file, v.summarize(result.issues));
 }
 
-function parseFrontmatter<TSchema extends v.GenericSchema>(
-  schema: TSchema,
-  file: string,
-  value: unknown,
-): v.InferOutput<TSchema> {
-  try {
-    return v.parse(schema, value);
-  } catch (error) {
-    if (v.isValiError(error)) {
-      throw new ContentError(file, v.summarize(error.issues), { cause: error });
-    }
-    throw error;
-  }
+function isCalendarDate(value: string): boolean {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }

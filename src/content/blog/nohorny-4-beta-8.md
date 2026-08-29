@@ -5,7 +5,6 @@ description: >-
   incompatible with the public server. Discord alerts now arrive blurred.
 publishedAt: 2026-07-20
 author: phinner
-pfp: /phinner.svg
 topic: NoHorny
 releases:
   - xpdustry/nohorny@v4.0.0-beta.8

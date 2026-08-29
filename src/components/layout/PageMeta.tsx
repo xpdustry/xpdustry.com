@@ -10,9 +10,8 @@ export interface PageMetaProps {
   publishedAt?: string;
 }
 
-/** Title, description, canonical URL and the Open Graph pair, in one place. */
 export function PageMeta(props: PageMetaProps) {
-  const fullTitle = () => (props.title === SITE.name ? SITE.name : `${props.title} · ${SITE.name}`);
+  const fullTitle = () => (props.title === SITE.name ? SITE.name : `${props.title} - ${SITE.name}`);
   const url = () => `${SITE.origin}${props.path}`;
 
   return (

@@ -5,7 +5,6 @@ description: >-
   is provided by default, and tracking is near instant.
 publishedAt: 2026-04-13
 author: phinner
-pfp: /phinner.svg
 topic: NoHorny
 releases:
   - xpdustry/nohorny@v4.0.0-beta.1
