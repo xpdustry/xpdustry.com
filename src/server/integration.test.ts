@@ -12,7 +12,7 @@ let handleRequest: (request: Request) => Promise<Response>;
 process.env.XPD_DISABLE_STATUS = "1";
 
 async function get(path: string): Promise<Response> {
-  return handleRequest(new Request(`https://www.xpdustry.com${path}`));
+  return handleRequest(new Request(`https://xpdustry.com${path}`));
 }
 
 beforeAll(async () => {
@@ -20,6 +20,20 @@ beforeAll(async () => {
 });
 
 describe("built pages", () => {
+  test("publishes crawler metadata", async () => {
+    const [robots, sitemap] = await Promise.all([
+      readFile(`${clientRoot}robots.txt`, "utf8"),
+      readFile(`${clientRoot}sitemap.xml`, "utf8"),
+    ]);
+
+    expect(robots).toContain("Allow: /");
+    expect(robots).toContain("Sitemap: https://xpdustry.com/sitemap.xml");
+    expect(sitemap).toContain("<loc>https://xpdustry.com/</loc>");
+    expect(sitemap).toContain("<loc>https://xpdustry.com/blog</loc>");
+    expect(sitemap).toContain("<loc>https://xpdustry.com/blog/nohorny-4-beta-8</loc>");
+    expect(sitemap).not.toContain("styleguide");
+  });
+
   test.each([
     ["/", "Pretty cool Mindustry tools."],
     ["/blog", "Release notes"],
@@ -40,7 +54,7 @@ describe("built pages", () => {
 
     const html = await response.text();
     expect(html).toContain("this page does not exist");
-    expect(html).toContain('<link rel="canonical" href="https://www.xpdustry.com/no-such-page"');
+    expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/no-such-page"');
   });
 
   test("the development style guide is absent from production", async () => {
@@ -53,7 +67,7 @@ describe("built pages", () => {
 
     expect(titles).toEqual(["Blog - Xpdustry"]);
     expect(html).toContain('<meta name="description"');
-    expect(html).toContain('<link rel="canonical" href="https://www.xpdustry.com/blog"');
+    expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/blog"');
   });
 
   test("the theme override runs before styles load", async () => {

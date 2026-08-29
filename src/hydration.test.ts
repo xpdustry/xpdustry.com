@@ -15,7 +15,7 @@ let clientEntry: string;
 const execFileAsync = promisify(execFile);
 
 beforeAll(async () => {
-  const source = `const { handleRequest } = await import(${JSON.stringify(handlerPath)}); const response = await handleRequest(new Request("https://www.xpdustry.com/")); process.stdout.write(await response.text());`;
+  const source = `const { handleRequest } = await import(${JSON.stringify(handlerPath)}); const response = await handleRequest(new Request("https://xpdustry.com/")); process.stdout.write(await response.text());`;
   const result = await execFileAsync(process.execPath, ["--input-type=module", "--eval", source], {
     encoding: "utf8",
     env: { ...process.env, XPD_DISABLE_STATUS: "1" },

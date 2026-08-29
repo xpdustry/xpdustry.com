@@ -3,7 +3,9 @@ import { routePathFromFile } from "filesystem-routing";
 import { fileRoutes } from "filesystem-routing/vite";
 import solid from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
+import { SITE } from "./src/data/site.ts";
 import { blogMarkdownPlugin } from "./vite/markdown.ts";
+import { blogRoutes, sitemapPlugin } from "./vite/sitemap.ts";
 
 // The styleguide is a development-only visual fixture.
 const devOnlyRoutes = ["/styleguide"];
@@ -27,6 +29,14 @@ export default defineConfig(({ mode }) => {
         },
       },
       blogMarkdownPlugin(),
+      sitemapPlugin({
+        hostname: SITE.origin,
+        routes: async () => [
+          "/",
+          "/blog",
+          ...(await blogRoutes(new URL("./src/content/blog/", import.meta.url))),
+        ],
+      }),
       // fileRoutes emits ?pick= module IDs, so Solid must compile TSX query modules.
       solid({
         start: {

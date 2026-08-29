@@ -47,6 +47,7 @@
     "jsdom": "^30.0.1",
     "oxfmt": "^0.63.0",
     "oxlint": "^1.78.0",
+    "sitemap": "^9.0.1",
     "typescript": "^7.0.2",
     "vite": "^8.2.1",
     "vite-plugin-solid": "3.0.0-next.27",

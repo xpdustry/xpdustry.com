@@ -6,7 +6,7 @@ export const SITE = {
   github: "https://github.com/xpdustry",
   discord: "https://discord.xpdustry.com",
   email: "contact@xpdustry.com",
-  origin: "https://www.xpdustry.com",
+  origin: "https://xpdustry.com",
 } as const;
 
 export const NAV_LINKS = [

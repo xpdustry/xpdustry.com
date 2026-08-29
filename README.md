@@ -1,6 +1,6 @@
 # xpdustry website
 
-Source for [xpdustry.com](https://www.xpdustry.com).
+Source for [xpdustry.com](https://xpdustry.com).
 
 ## Run locally
 
