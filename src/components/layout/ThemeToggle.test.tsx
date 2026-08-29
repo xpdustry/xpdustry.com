@@ -73,6 +73,17 @@ describe("theme preference", () => {
 });
 
 describe("<ThemeToggle />", () => {
+  test("renders both theme icons so CSS can select the right one before hydration", () => {
+    render(() => (
+      <ThemeProvider>
+        <ThemeToggle />
+      </ThemeProvider>
+    ));
+
+    expect(document.querySelector('[data-theme-icon="light"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-theme-icon="dark"]')).toBeInTheDocument();
+  });
+
   test("follows system changes until the user makes a choice", async () => {
     const media = stubColorScheme(false);
     render(() => (
