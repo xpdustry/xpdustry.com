@@ -25,10 +25,10 @@ export function SiteFooter() {
           </div>
           <div class={styles.linkGroup}>
             <h2 class={styles.heading}>Contact</h2>
-            <a class={styles.link} href={SITE.discord} rel="noreferrer">
+            <a class={styles.link} href={SITE.discord} target="_blank" rel="noreferrer">
               Discord
             </a>
-            <a class={styles.link} href={SITE.github} rel="noreferrer">
+            <a class={styles.link} href={SITE.github} target="_blank" rel="noreferrer">
               GitHub
             </a>
             <a class={styles.link} href={`mailto:${SITE.email}`}>

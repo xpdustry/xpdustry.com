@@ -9,7 +9,12 @@ export interface ProjectCardProps {
 
 export function ProjectCard(props: ProjectCardProps) {
   return (
-    <CardLink faceClass={styles.face} href={repositoryUrl(props.project)} rel="noreferrer">
+    <CardLink
+      faceClass={styles.face}
+      href={repositoryUrl(props.project)}
+      target="_blank"
+      rel="noreferrer"
+    >
       <span class={styles.heading}>
         <span class={styles.mark}>
           <Show

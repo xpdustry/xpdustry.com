@@ -75,6 +75,7 @@ export function SiteHeader() {
             variant="accent"
             icon
             href={SITE.github}
+            target="_blank"
             rel="noreferrer"
             aria-label="Xpdustry on GitHub"
             title="GitHub"
@@ -85,6 +86,7 @@ export function SiteHeader() {
             variant="accent"
             icon
             href={SITE.discord}
+            target="_blank"
             rel="noreferrer"
             aria-label="Xpdustry on Discord"
             title="Discord"

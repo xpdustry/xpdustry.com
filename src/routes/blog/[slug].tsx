@@ -45,6 +45,7 @@ export default function BlogPost() {
                 <a
                   class={styles.author}
                   href={authors[entry().frontmatter.author].url}
+                  target="_blank"
                   rel="noreferrer"
                 >
                   <img
@@ -85,6 +86,7 @@ export default function BlogPost() {
                           size="sm"
                           variant="outline"
                           href={releaseUrl(id)}
+                          target="_blank"
                           rel="noreferrer"
                         >
                           Full changelog

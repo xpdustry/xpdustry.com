@@ -35,6 +35,18 @@ describe("compileBlogMarkdown", () => {
     expect(compiled.html).not.toContain("<script>");
   });
 
+  test("opens external links in a new tab while keeping site links in the same tab", () => {
+    const compiled = compileBlogMarkdown(
+      "src/content/blog/a-post.md",
+      `${frontmatter}\n\n[External](https://example.com/docs) and [internal](/blog).`,
+    );
+
+    expect(compiled.html).toContain(
+      '<a href="https://example.com/docs" target="_blank" rel="noreferrer">External</a>',
+    );
+    expect(compiled.html).toContain('<a href="/blog">internal</a>');
+  });
+
   test("renders repository-owned images and video", () => {
     const source = `${frontmatter}
 

@@ -56,8 +56,12 @@ export function compileBlogMarkdown(file: string, source: string): CompiledBlogM
 
   return {
     frontmatter: parseBlogFrontmatter(file, parseFrontmatter(file, document.frontmatter)),
-    html: renderHtml(document, markdownOptions),
+    html: openExternalLinksInNewTabs(renderHtml(document, markdownOptions)),
   };
+}
+
+function openExternalLinksInNewTabs(html: string): string {
+  return html.replaceAll(/<a href="https?:\/\/[^"]+"/g, '$& target="_blank" rel="noreferrer"');
 }
 
 export function blogMarkdownPlugin(): Plugin {
