@@ -123,4 +123,5 @@ export const media = {
   sm: "(min-width: 40rem)",
   md: "(min-width: 48rem)",
   lg: "(min-width: 64rem)",
+  desktop: "(hover: hover) and (pointer: fine)",
 } as const;

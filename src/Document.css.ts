@@ -2,6 +2,7 @@ import { style } from "@vanilla-extract/css";
 import { colors, leading, type } from "#app/styles/theme.css";
 
 export const html = style({
+  backgroundColor: colors.page,
   colorScheme: "light dark",
   scrollPaddingTop: "5.5rem",
   WebkitTextSizeAdjust: "100%",
