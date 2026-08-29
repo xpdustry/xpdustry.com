@@ -8,10 +8,10 @@ export const field = style({
   insetInline: 0,
   top: 0,
   zIndex: -1,
-  height: "100rem",
+  height: "min(100%, 100rem)",
   overflow: "hidden",
   opacity: 0.2,
-  maskImage: "linear-gradient(to bottom, #000 10%, transparent 88%)",
+  maskImage: "linear-gradient(to bottom, #000 10%, transparent 100%)",
 });
 
 export const net = style({
