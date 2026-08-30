@@ -19,22 +19,22 @@ export function Pager(props: PagerProps) {
   return (
     <Show when={props.previous || props.next}>
       <nav class={styles.pager} aria-label={props.label}>
-        <Show when={props.previous}>
+        <Show when={props.next}>
           {(entry) => (
             <CardLink faceClass={styles.face} href={entry().href}>
               <span class={styles.direction}>
                 {"<< "}
-                {props.previousLabel ?? "Previous"}
+                {props.nextLabel ?? "Next"}
               </span>
               <span class={styles.title}>{entry().title}</span>
             </CardLink>
           )}
         </Show>
-        <Show when={props.next}>
+        <Show when={props.previous}>
           {(entry) => (
-            <CardLink class={styles.next} faceClass={styles.nextFace} href={entry().href}>
+            <CardLink class={styles.previous} faceClass={styles.previousFace} href={entry().href}>
               <span class={styles.direction}>
-                {props.nextLabel ?? "Next"}
+                {props.previousLabel ?? "Previous"}
                 {" >>"}
               </span>
               <span class={styles.title}>{entry().title}</span>

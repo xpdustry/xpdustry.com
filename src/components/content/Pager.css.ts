@@ -15,7 +15,7 @@ export const pager = style({
 
 const pagerLinkRule = {
   display: "grid",
-  alignContent: "center",
+  alignContent: "start",
   gap: space.half,
   padding: `${space.four} ${space.six}`,
   textAlign: "left",
@@ -23,9 +23,9 @@ const pagerLinkRule = {
 
 export const face = style(pagerLinkRule);
 
-export const nextFace = style([pagerLinkRule, { textAlign: "right" }]);
+export const previousFace = style([pagerLinkRule, { textAlign: "right" }]);
 
-export const next = style({
+export const previous = style({
   "@media": { [media.sm]: { gridColumnStart: "2" } },
 });
 
