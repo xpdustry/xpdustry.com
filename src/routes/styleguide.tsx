@@ -16,7 +16,6 @@ import * as styles from "./styleguide.css";
 const VARIANTS = ["accent", "plain", "outline", "ghost", "signal", "danger"] as const;
 const SIZES = ["sm", "md", "lg"] as const;
 const FORCED = ["rest", "hover", "press", "disabled"] as const;
-const THEMES = ["light", "dark"] as const;
 
 export default function Styleguide() {
   return (
@@ -26,19 +25,15 @@ export default function Styleguide() {
         <header class={styles.header}>
           <h1 class={styles.pageTitle}>Style guide</h1>
           <p class={styles.lede}>
-            Every component and every meaningful state in both themes. This development route is
-            dropped from production, so a 404 there means the exclusion works.
+            Every component and every meaningful state in the active theme. Use the navbar toggle
+            to switch themes. This development route is dropped from production, so a 404 there
+            means the exclusion works.
           </p>
         </header>
 
-        <For each={THEMES}>
-          {(theme) => (
-            <section class={styles.themePanels[theme]} data-theme={theme}>
-              <h2 class={styles.themeLabel}>{theme}</h2>
-              <Fixtures />
-            </section>
-          )}
-        </For>
+        <section class={styles.themePanel}>
+          <Fixtures />
+        </section>
       </div>
     </>
   );
@@ -219,6 +214,10 @@ function Fixtures() {
           next={{ href: "#", title: "Install the plugin" }}
         />
         <Pager label="Style guide pager, end" next={{ href: "#", title: "Only a next link" }} />
+        <Pager
+          label="Style guide pager, beginning"
+          previous={{ href: "#", title: "Only a previous link" }}
+        />
       </Group>
 
       <Group title="Card link" stack>

@@ -26,14 +26,16 @@ export const page = style([
   layoutStyles.wrap,
   { paddingBlockStart: space.twelve, paddingBlockEnd: space.twentyFour },
 ]);
-export const header = style([layoutStyles.prose, { marginBlockEnd: space.twelve }]);
+export const header = style([layoutStyles.prose, { marginBlockEnd: space.sixteen }]);
 export const pageTitle = layoutStyles.pageTitle;
-export const lede = style([layoutStyles.lede, { color: colors.inkMuted }]);
+export const lede = style([
+  layoutStyles.lede,
+  { marginBlockStart: space.four, color: colors.inkMuted },
+]);
 export const note = style([layoutStyles.prose, { color: colors.inkMuted, fontSize: type.sm }]);
 
-const themePanel = style({
+export const themePanel = style({
   minWidth: 0,
-  marginBlockStart: space.twelve,
   padding: space.eight,
   borderWidth: "2px",
   borderStyle: "solid",
@@ -41,21 +43,6 @@ const themePanel = style({
   borderRadius: radii.twoXl,
   backgroundColor: colors.page,
   color: colors.ink,
-});
-
-export const themePanels = {
-  light: style([themePanel, { colorScheme: "light" }]),
-  dark: style([themePanel, { colorScheme: "dark" }]),
-} as const;
-
-export const themeLabel = style({
-  marginBlockEnd: space.eight,
-  color: colors.inkFaint,
-  fontFamily: type.mono,
-  fontSize: type.data,
-  letterSpacing: tracking.wider,
-  textTransform: "uppercase",
-  fontVariantNumeric: "tabular-nums",
 });
 
 export const fixtures = style({ display: "grid", minWidth: 0, gap: space.twelve });
