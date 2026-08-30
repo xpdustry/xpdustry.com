@@ -2,7 +2,7 @@
 
 import { ContentError, type BlogFrontmatter } from "#app/content/schema";
 
-interface MarkdownModule {
+export interface MarkdownModule {
   frontmatter: BlogFrontmatter;
   html: string;
 }

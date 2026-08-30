@@ -9,13 +9,9 @@ import { parseMarkdown } from "@tanstack/markdown/parser";
 import * as v from "valibot";
 import type { Plugin } from "vite";
 import { parse as parseYaml } from "yaml";
-import { ContentError, parseBlogFrontmatter, type BlogFrontmatter } from "../src/content/schema.ts";
-import { NonBlankStringSchema } from "../src/lib/schema.ts";
-
-export interface CompiledBlogMarkdown {
-  frontmatter: BlogFrontmatter;
-  html: string;
-}
+import { type MarkdownModule } from "#app/content/registry.ts";
+import { ContentError, parseBlogFrontmatter } from "#app/content/schema.ts";
+import { NonBlankStringSchema } from "#app/lib/schema.ts";
 
 const MEDIA_NAMES = new Set(["post-image", "post-video"]);
 const extensions: MarkdownExtension[] = [calloutsExtension(), mediaMarkdownExtension()];
@@ -51,7 +47,7 @@ const markdownOptions: RenderOptions = {
   },
 };
 
-export function compileBlogMarkdown(file: string, source: string): CompiledBlogMarkdown {
+export function compileBlogMarkdown(file: string, source: string): MarkdownModule {
   const document = parseMarkdown(source, markdownOptions);
 
   return {

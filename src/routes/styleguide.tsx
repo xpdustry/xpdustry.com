@@ -25,9 +25,9 @@ export default function Styleguide() {
         <header class={styles.header}>
           <h1 class={styles.pageTitle}>Style guide</h1>
           <p class={styles.lede}>
-            Every component and every meaningful state in the active theme. Use the navbar toggle
-            to switch themes. This development route is dropped from production, so a 404 there
-            means the exclusion works.
+            Every component and every meaningful state in the active theme. Use the navbar toggle to
+            switch themes. This development route is dropped from production, so a 404 there means
+            the exclusion works.
           </p>
         </header>
 
