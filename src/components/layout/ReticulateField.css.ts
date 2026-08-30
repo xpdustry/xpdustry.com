@@ -10,13 +10,21 @@ export const field = style({
   zIndex: -1,
   height: "100%",
   overflow: "hidden",
+  opacity: 0.2,
   selectors: {
-    ':where([data-theme="light"]) &': { opacity: 0.3 },
-    ':where([data-theme="dark"]) &': { opacity: 0.1 },
+    '[data-theme="light"] &': {
+      opacity: 0.2,
+    },
+    '[data-theme="dark"] &': {
+      opacity: 0.1,
+    },
   },
   "@media": {
-    ["(prefers-contrast: more)"]: {
-      opacity: 0,
+    "(prefers-color-scheme: dark)": {
+      opacity: 0.1,
+    },
+    "(prefers-contrast: more)": {
+      display: "none",
     },
   },
 });
