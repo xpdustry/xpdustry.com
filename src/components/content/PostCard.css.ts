@@ -29,10 +29,10 @@ export const topic = style([
 
 export const title = style({
   color: colors.ink,
-  fontSize: type.xl,
+  fontSize: type.lg,
   fontWeight: weight.bold,
   lineHeight: leading.tight,
-  "@media": { [media.sm]: { fontSize: type.twoXl } },
+  "@media": { [media.sm]: { fontSize: type.xl } },
 });
 
 export const meta = style({
