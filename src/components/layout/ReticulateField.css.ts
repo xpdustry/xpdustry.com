@@ -8,10 +8,17 @@ export const field = style({
   insetInline: 0,
   top: 0,
   zIndex: -1,
-  height: "min(100%, 100rem)",
+  height: "100%",
   overflow: "hidden",
-  opacity: 0.2,
-  maskImage: "linear-gradient(to bottom, #000 10%, transparent 100%)",
+  selectors: {
+    ':where([data-theme="light"]) &': { opacity: 0.3 },
+    ':where([data-theme="dark"]) &': { opacity: 0.1 },
+  },
+  "@media": {
+    ["(prefers-contrast: more)"]: {
+      opacity: 0,
+    },
+  },
 });
 
 export const net = style({
