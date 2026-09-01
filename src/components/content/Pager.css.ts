@@ -15,6 +15,7 @@ export const pager = style({
 
 const pagerLinkRule = {
   display: "grid",
+  justifyContent: "stretch",
   alignContent: "start",
   gap: space.half,
   padding: `${space.four} ${space.six}`,
@@ -38,6 +39,14 @@ export const direction = style({
 });
 
 export const title = style({
+  display: "-webkit-box",
+  blockSize: "2lh",
+  overflow: "hidden",
+  WebkitBoxOrient: "vertical",
+  WebkitLineClamp: 2,
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
+  // ^ allat just to have the fancy ellipsises
   color: colors.ink,
   fontWeight: weight.bold,
   lineHeight: leading.body,
