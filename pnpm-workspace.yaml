@@ -3,7 +3,7 @@ allowBuilds:
   cypress: false
 overrides:
   "@solidjs/babel-plugin": 2.0.0-rc.4
-  "@solidjs/compiler": 2.0.0-rc.4
+  "@solidjs/compiler": 2.0.0-rc.6
 minimumReleaseAgeExclude:
   - "@solidjs/babel-plugin@2.0.0-rc.4"
   - "@solidjs/compiler@2.0.0-rc.4"
