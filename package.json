@@ -31,7 +31,7 @@
     "@vanilla-extract/recipes": "^0.5.7",
     "filesystem-routing": "0.2.1",
     "simple-icons": "^16.28.0",
-    "solid-js": "2.0.0-rc.4",
+    "solid-js": "2.0.0-rc.6",
     "valibot": "^1.4.2"
   },
   "devDependencies": {
