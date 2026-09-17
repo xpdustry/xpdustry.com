@@ -1,7 +1,13 @@
 import { useLocation } from "@solidjs/router";
 import { For, Show, createEffect, createSignal, onSettled } from "solid-js";
 import { ThemeToggle } from "#app/components/layout/ThemeToggle";
-import { CloseIcon, DiscordIcon, GitHubIcon, MenuIcon } from "#app/components/system/Icons";
+import {
+  CloseIcon,
+  DiscordIcon,
+  GitHubIcon,
+  MavenIcon,
+  MenuIcon,
+} from "#app/components/system/Icons";
 import { Button, ButtonLink } from "#app/components/system/Pressable";
 import { NAV_LINKS, SITE } from "#app/data/site";
 import * as styles from "#app/components/layout/SiteHeader.css";
@@ -94,6 +100,19 @@ export function SiteHeader() {
             <DiscordIcon />
           </ButtonLink>
           <span class={styles.desktopControl}>
+            <ButtonLink
+              variant="plain"
+              icon
+              href={SITE.maven}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Xpdustry Maven repository"
+              title="Maven"
+            >
+              <MavenIcon />
+            </ButtonLink>
+          </span>
+          <span class={styles.desktopControl}>
             <ThemeToggle />
           </span>
 
@@ -132,6 +151,9 @@ export function SiteHeader() {
                 </ButtonLink>
               )}
             </For>
+            <ButtonLink block variant="plain" href={SITE.maven} target="_blank" rel="noreferrer">
+              Maven
+            </ButtonLink>
             <ThemeToggle block showLabel />
           </nav>
         </div>

@@ -31,6 +31,9 @@ export function SiteFooter() {
             <a class={styles.link} href={SITE.github} target="_blank" rel="noreferrer">
               GitHub
             </a>
+            <a class={styles.link} href={SITE.maven} target="_blank" rel="noreferrer">
+              Maven
+            </a>
             <a class={styles.link} href={`mailto:${SITE.email}`}>
               {SITE.email}
             </a>

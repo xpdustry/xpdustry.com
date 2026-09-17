@@ -5,6 +5,7 @@ export const SITE = {
     "We build open-source software for Mindustry, and also run the Chaotic Neutral Mindustry servers.",
   github: "https://github.com/xpdustry",
   discord: "https://discord.xpdustry.com",
+  maven: "https://maven.xpdustry.com",
   email: "contact@xpdustry.com",
   origin: "https://xpdustry.com",
 } as const;
