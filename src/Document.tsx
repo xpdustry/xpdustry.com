@@ -13,8 +13,9 @@ export default function Document(props: ParentProps) {
         <link rel="icon" href="/favicon.ico" sizes="48x48" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ebf0f4" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1218" />
+        {/* Link unfurlers (Discord, Slack) read the first theme-color and ignore `media`, so
+            this stays unconditional: a media-scoped tag before it would tint every embed rail. */}
+        <meta name="theme-color" content="#41c1ba" />
         <script>{THEME_BOOTSTRAP}</script>
         <HydrationScript />
       </head>

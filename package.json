@@ -27,9 +27,12 @@
     "@solidjs/meta": "1.0.0-next.2",
     "@solidjs/router": "2.0.0-next.23",
     "@solidjs/web": "2.0.0-rc.7",
+    "@takumi-rs/core": "2.14.0",
+    "@takumi-rs/helpers": "2.14.0",
     "@vanilla-extract/css": "^1.21.2",
     "@vanilla-extract/recipes": "^0.5.7",
     "filesystem-routing": "0.3.0",
+    "lucide": "1.47.0",
     "simple-icons": "^16.28.0",
     "solid-js": "2.0.0-rc.7",
     "valibot": "^1.4.2"

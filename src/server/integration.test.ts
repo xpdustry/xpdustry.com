@@ -96,3 +96,30 @@ describe("built API", () => {
     ).toBe(true);
   });
 });
+
+describe("built social cards", () => {
+  test("every page points at a card the server renders", async () => {
+    for (const path of ["/", "/blog", "/blog/nohorny-4-beta-8"]) {
+      const html = await (await get(path)).text();
+      const card = /<meta property="og:image" content="https:\/\/xpdustry\.com([^"]+)"/.exec(
+        html,
+      )?.[1];
+      expect(card, path).toMatch(/^\/og\/.+\.png$/);
+      // The home card reaches for GitHub, which the artifact suite must not depend on.
+      if (path === "/") continue;
+
+      const response = await get(card!);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toBe("image/png");
+      expect(response.headers.get("cache-control")).toContain("max-age=3600");
+      expect(new Uint8Array(await response.arrayBuffer()).subarray(1, 4)).toEqual(
+        new TextEncoder().encode("PNG"),
+      );
+    }
+  });
+
+  test("unknown cards are not rendered", async () => {
+    expect((await get("/og/blog/no-such-post.png")).status).toBe(404);
+    expect((await get("/og/home")).status).toBe(404);
+  });
+});

@@ -3,11 +3,11 @@
      class="xp-logo" role="img" aria-label="Xpdustry">
   <title>Xpdustry</title>
   <style>
-    .xp-w--cog { fill: var(--xp-cog-wall, #007f79); }
-    .xp-w--x   { fill: var(--xp-x-wall, #808080); }
-    .xp-f--cog { fill: var(--xp-cog, #00fff1); }
-    .xp-f--x   { fill: var(--xp-x, #ffffff); }
-    .xp-flood  { flood-color: var(--xp-outline, #30363b); }
+    .xp-w--cog { fill: #007f79; }
+    .xp-w--x   { fill: #808080; }
+    .xp-f--cog { fill: #00fff1; }
+    .xp-f--x   { fill: #ffffff; }
+    .xp-flood  { flood-color: #30363b; }
     .xp-f, .xp-w, .xp-cog-motion { transform-box: view-box; transform-origin: 536px 536px; }
     .xp-gap-motion { transform-box: fill-box; transform-origin: center; }
     .xp-layer[hidden] { display: none; }

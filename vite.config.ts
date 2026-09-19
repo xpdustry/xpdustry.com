@@ -1,6 +1,7 @@
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import { routePathFromFile } from "filesystem-routing";
 import { fileRoutes } from "filesystem-routing/vite";
+import { defaultServerConditions } from "vite";
 import solid from "vite-plugin-solid";
 import { defineConfig } from "vitest/config";
 import { SITE } from "./src/data/site.ts";
@@ -102,6 +103,10 @@ export default defineConfig(({ mode }) => {
       projects: [
         {
           extends: true,
+          // Node resolution: native packages hide behind the `browser` condition otherwise.
+          resolve: {
+            conditions: [...defaultServerConditions],
+          },
           test: {
             name: "server",
             environment: "node",

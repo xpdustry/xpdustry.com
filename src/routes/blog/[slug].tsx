@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { For, Show, createMemo } from "solid-js";
 import { Pager } from "#app/components/content/Pager";
 import { NotFound } from "#app/components/layout/NotFound";
-import { PageMeta } from "#app/components/layout/PageMeta";
+import { PageMeta, postCard } from "#app/components/layout/PageMeta";
 import { ButtonLink } from "#app/components/system/Pressable";
 import { authors } from "#app/content/authors";
 import { posts, postsBySlug } from "#app/content/registry";
@@ -34,7 +34,10 @@ export default function BlogPost() {
             description={entry().frontmatter.description}
             path={`/blog/${entry().slug}`}
             type="article"
+            image={postCard(entry().slug, entry().frontmatter.title)}
             publishedAt={entry().frontmatter.publishedAt}
+            updatedAt={entry().frontmatter.updatedAt}
+            authorUrl={authors[entry().frontmatter.author].url}
           />
 
           <div class={styles.page}>

@@ -10,6 +10,8 @@ export const SITE = {
   origin: "https://xpdustry.com",
 } as const;
 
+export const BLOG_DESCRIPTION = "Release notes and technical deep dives.";
+
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/blog", label: "Blog" },
