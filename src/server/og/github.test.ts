@@ -9,14 +9,13 @@ function answering(body: unknown, status = 200): typeof fetch {
 const repositories = projects.map((project, index) => ({
   full_name: project.repository,
   stargazers_count: 10 * (index + 1),
-  forks_count: index + 1,
 }));
 
 describe("repository stats", () => {
   test("sums the featured repositories and keeps the answer", async () => {
     const fetchImpl = answering(repositories);
-    await expect(readRepositoryStats(fetchImpl)).resolves.toEqual({ stars: 100, forks: 10 });
-    await expect(readRepositoryStats(fetchImpl)).resolves.toEqual({ stars: 100, forks: 10 });
+    await expect(readRepositoryStats(fetchImpl)).resolves.toEqual({ stars: 100 });
+    await expect(readRepositoryStats(fetchImpl)).resolves.toEqual({ stars: 100 });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
@@ -27,7 +26,7 @@ describe("repository stats", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       await expect(
         readRepositoryStats(answering({ message: "rate limited" }, 403)),
-      ).resolves.toEqual({ stars: 100, forks: 10 });
+      ).resolves.toEqual({ stars: 100 });
       expect(warn).toHaveBeenCalledWith(expect.stringContaining("403"));
     } finally {
       vi.useRealTimers();

@@ -1,4 +1,4 @@
-// Stars and forks for the home card, summed over the featured repositories.
+// Stars for the home card, summed over the featured repositories.
 //
 // Unauthenticated GitHub allows sixty calls an hour, so one answer is kept for
 // that long and every caller in between shares it. A failed refresh keeps the
@@ -8,13 +8,11 @@ import { projects } from "#app/data/projects";
 
 export interface RepositoryStats {
   stars: number;
-  forks: number;
 }
 
 interface Repository {
   full_name: string;
   stargazers_count: number;
-  forks_count: number;
 }
 
 const GITHUB_ORG = "xpdustry";
@@ -70,6 +68,5 @@ async function fetchStats(fetchImpl: typeof fetch): Promise<RepositoryStats> {
   const featured = projects.map((project) => byName.get(project.repository)!);
   return {
     stars: featured.reduce((total, repository) => total + repository.stargazers_count, 0),
-    forks: featured.reduce((total, repository) => total + repository.forks_count, 0),
   };
 }

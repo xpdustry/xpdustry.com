@@ -5,17 +5,7 @@
 // positioning, blend modes and masks, no grid or pseudo-elements.
 
 import type { JSX } from "@solidjs/web";
-import {
-  Calendar,
-  GitFork,
-  Newspaper,
-  Package,
-  Server,
-  Star,
-  Tag,
-  User,
-  type IconNode,
-} from "lucide";
+import { Calendar, Newspaper, Package, Server, Star, Tag, User, type IconNode } from "lucide";
 import type { ParentProps } from "solid-js";
 import logo from "#app/assets/logo.svg?raw";
 import texture from "#app/assets/reticulate.png?inline";
@@ -51,7 +41,7 @@ const ICON_GAP = 11;
 // lengths inline, so they scale by Archivo's zero advance, measured in takumi.
 const CH_BOLD = 0.6;
 const CH_REGULAR = 0.57;
-const DESCRIPTION_SIZE = 27;
+const DESCRIPTION_SIZE = 36;
 const host = SITE.origin.replace("https://", "");
 const logoUri = svgUri(logo.replace(/<\?xml[^>]*\?>/, ""));
 
@@ -218,9 +208,9 @@ function Description(props: ParentProps<{ chars: number }>) {
   return (
     <div
       style={{
-        "margin-top": "24px",
+        "margin-top": "26px",
         "font-size": `${DESCRIPTION_SIZE}px`,
-        "line-height": 1.45,
+        "line-height": 1.4,
         color: color.muted,
         "max-width": `${Math.round(props.chars * CH_REGULAR * DESCRIPTION_SIZE)}px`,
       }}
@@ -238,7 +228,7 @@ function titleScale(title: string): { size: number; chars: number } {
   return { size: 38, chars: 29 };
 }
 
-/** The stars and forks are dropped rather than faked when GitHub is unreachable. */
+/** The star count is dropped rather than faked when GitHub is unreachable. */
 export function HomeCard(props: { github: RepositoryStats | undefined }) {
   return (
     <Frame
@@ -246,7 +236,6 @@ export function HomeCard(props: { github: RepositoryStats | undefined }) {
         <>
           <Stat icon={Package} value={String(projects.length)} label="Projects" />
           {props.github && <Stat icon={Star} value={String(props.github.stars)} label="Stars" />}
-          {props.github && <Stat icon={GitFork} value={String(props.github.forks)} label="Forks" />}
           <Stat icon={Server} value={String(servers.length)} label="Servers" />
         </>
       }
@@ -292,9 +281,9 @@ export function PostCard(props: { post: CardPost }) {
       <div
         style={{
           "font-family": "Martian",
-          "font-size": "21px",
+          "font-size": "28px",
           color: color.faint,
-          "margin-bottom": "18px",
+          "margin-bottom": "20px",
         }}
       >
         {host}/blog/<span style={{ color: color.ink }}>{props.post.slug}</span>

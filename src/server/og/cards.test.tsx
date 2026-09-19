@@ -22,7 +22,7 @@ describe("card markup", () => {
   });
 
   test("the home card drops the GitHub counts when there are none", () => {
-    expect(toHtml(() => <HomeCard github={{ stars: 73, forks: 30 }} />)).toContain("Stars");
+    expect(toHtml(() => <HomeCard github={{ stars: 73 }} />)).toContain("Stars");
     expect(toHtml(() => <HomeCard github={undefined} />)).not.toContain("Stars");
     expect(toHtml(() => <HomeCard github={undefined} />)).toContain("Projects");
   });
