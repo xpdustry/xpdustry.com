@@ -52,7 +52,7 @@
     "vite": "^8.2.1",
     "vite-plugin-solid": "3.0.0-next.27",
     "vitest": "^5.0.0",
-    "yaml": "2.9.0"
+    "yaml": "2.9.1"
   },
   "browserslist": [
     "last 2 Chrome versions",
