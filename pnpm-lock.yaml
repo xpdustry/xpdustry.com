@@ -157,8 +157,8 @@ importers:
         specifier: ^5.3.0
         version: 5.3.0
       '@tanstack/markdown':
-        specifier: 0.0.13
-        version: 0.0.13
+        specifier: 0.0.16
+        version: 0.0.16
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.3
@@ -1195,8 +1195,8 @@ packages:
       react:
         optional: true
 
-  '@tanstack/markdown@0.0.13':
-    resolution: {integrity: sha512-ZSQP2ulBvlPzdpZeRheBJnaELo7e4ET/D/XrfgweHyqhhLMN5vUJJAUl7ufSRd7GlfO/vwdzjKPh0E0JwqJkDA==}
+  '@tanstack/markdown@0.0.16':
+    resolution: {integrity: sha512-2fGZd4VMBwV85lH5AA+Iad9DXU4/Cz+sb/P3honzrh/zqqoSYV/rXuJrG4cC7XJcpofhjbOWBL74AHf4WZrqTw==}
     peerDependencies:
       octane: '>=0.1.12'
       react: '>=18'
@@ -2813,7 +2813,7 @@ snapshots:
 
   '@takumi-rs/helpers@2.14.0': {}
 
-  '@tanstack/markdown@0.0.13': {}
+  '@tanstack/markdown@0.0.16': {}
 
   '@tybys/wasm-util@0.10.3':
     dependencies:
