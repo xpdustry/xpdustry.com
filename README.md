@@ -4,7 +4,7 @@ Source for [xpdustry.com](https://xpdustry.com), built with React and [TanStack 
 
 ## Develop
 
-You need Node 24 or newer and pnpm.
+You need Node 26 or newer and pnpm.
 
 ```bash
 corepack enable

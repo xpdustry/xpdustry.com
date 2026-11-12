@@ -49,7 +49,7 @@
     "@fontsource/golos-text": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/momo-trust-display": "^5.3.0",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vanilla-extract/css": "^1.21.3",
@@ -75,7 +75,7 @@
     "last 2 Safari versions"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "packageManager": "pnpm@12.18.0"
 }
