@@ -65,7 +65,7 @@ const BUILD_CONFIG = /^(?:vite|vitest)\.config\.ts$|^tsconfig\.json$|^gt\.config
 function sourceFingerprint(): string {
   const digest = createHash("sha256");
   const inputs = [...BUILD_INPUTS, ...readdirSync(REPO).filter((name) => BUILD_CONFIG.test(name))];
-  for (const input of inputs.sort()) {
+  for (const input of inputs.sort((a, b) => a.localeCompare(b))) {
     const root = join(REPO, input);
     const stats = statSync(root, { throwIfNoEntry: false });
     if (!stats) continue;
@@ -768,7 +768,7 @@ async function seo(accept: boolean) {
   for (const [path, page] of pages) {
     for (const href of page.links) if (!linked.has(href)) linked.set(href, path);
   }
-  for (const [href, source] of [...linked].sort()) {
+  for (const [href, source] of [...linked].sort(([a], [b]) => a.localeCompare(b))) {
     const { status, headers } = await get(base, href, english);
     const isFile = href.slice(href.lastIndexOf("/")).includes(".");
     if (status !== 200) {

@@ -49,25 +49,6 @@ function mount(text = "hub.md.xpdustry.com") {
   };
 }
 
-function fakeDocument(execCommand?: (command: string) => boolean) {
-  const field = {
-    value: "",
-    readOnly: false,
-    style: { cssText: "" },
-    select: vi.fn(),
-    setSelectionRange: vi.fn(),
-    remove: vi.fn(),
-  };
-  const button = { focus: vi.fn() };
-  const document = {
-    activeElement: button,
-    body: { append: vi.fn() },
-    createElement: () => field,
-    ...(execCommand && { execCommand: vi.fn(execCommand) }),
-  };
-  return { document, field, button };
-}
-
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => {
   react.unmount();
@@ -117,34 +98,8 @@ describe("useCopy", () => {
     expect(copier.state).toBe("failed");
   });
 
-  test("copies a selection when the clipboard API is missing", async () => {
+  test("says failed when the browser has no clipboard API", async () => {
     vi.stubGlobal("navigator", {});
-    const { document, field, button } = fakeDocument(() => true);
-    vi.stubGlobal("document", document);
-    const copier = mount();
-
-    await copier.copy();
-    expect(field.value).toBe("hub.md.xpdustry.com");
-    expect(document.execCommand).toHaveBeenCalledWith("copy");
-    expect(field.remove).toHaveBeenCalled();
-    expect(button.focus).toHaveBeenCalled();
-    expect(copier.state).toBe("copied");
-  });
-
-  test("says failed when the clipboard API is missing and the browser refuses the selection", async () => {
-    vi.stubGlobal("navigator", {});
-    const { document, field } = fakeDocument(() => false);
-    vi.stubGlobal("document", document);
-    const copier = mount();
-
-    await copier.copy();
-    expect(field.remove).toHaveBeenCalled();
-    expect(copier.state).toBe("failed");
-  });
-
-  test("says failed when there is no way to copy at all", async () => {
-    vi.stubGlobal("navigator", {});
-    vi.stubGlobal("document", fakeDocument().document);
     const copier = mount();
 
     await copier.copy();

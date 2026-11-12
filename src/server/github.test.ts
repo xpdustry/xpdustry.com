@@ -9,7 +9,7 @@ const repositories = projects.map((project, index) => ({
 
 function github(routes: Record<string, () => Response>): typeof fetch {
   return vi.fn(async (input: RequestInfo | URL) => {
-    const path = new URL(String(input)).pathname;
+    const path = new URL(input instanceof Request ? input.url : input).pathname;
     return routes[path]?.() ?? Response.json({ message: "Not Found" }, { status: 404 });
   });
 }

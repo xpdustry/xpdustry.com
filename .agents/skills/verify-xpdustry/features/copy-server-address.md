@@ -9,7 +9,7 @@ Mindustry has no join links, so the site's main action is copying a server addre
 - `copy-pill` copies the hub address from the header pill, which every page except the landing page shows.
 - `copy-confirm` shows a confirmation on the control and announces it to screen readers with the paste instructions.
 - `copy-fit` falls back to the short confirmation (`Copied`) when the long one does not fit the card.
-- `copy-failed` handles a refused write: the chip or pill turns red with a cross, screen readers hear `Could not copy. The address is …`, and the address is shown as text one click selects (on the gamemode card it replaces the player count; below 780px the pill shows it on two lines). Browsers without `navigator.clipboard`, as on plain http, copy through a hidden selection first and only fail if that is refused too.
+- `copy-failed` handles a refused write: the chip or pill turns red with a cross, screen readers hear `Could not copy. The address is …`, and the address is shown as text one click selects (on the gamemode card it replaces the player count; below 780px the pill shows it on two lines). Browsers without `navigator.clipboard`, as on plain http, fail the same way.
 
 ## How to get to it (user POV)
 
@@ -67,7 +67,7 @@ EOF
   });
   ```
 
-  For a missing API, replace the body with `Object.defineProperty(Navigator.prototype, "clipboard", { get: () => undefined })` (keep a reference first to read the clipboard): the copy must still land through the fallback. Add `document.execCommand = () => false` to see it fail. Expected: `#servers output` reads `Could not copy. The address is hub.md.xpdustry.com.`, clicking `#servers h2 + span` leaves `getSelection().toString()` equal to the address, and the header pill on `/blog` shows the address at 320px without squeezing the logo.
+  For a missing API, replace the body with `Object.defineProperty(Navigator.prototype, "clipboard", { get: () => undefined })`: the copy must fail the same way. Expected: `#servers output` reads `Could not copy. The address is hub.md.xpdustry.com.`, clicking `#servers h2 + span` leaves `getSelection().toString()` equal to the address, and the header pill on `/blog` shows the address at 320px without squeezing the logo.
 
 ## Gotchas
 

@@ -6,40 +6,16 @@ export type CopyState = "idle" | "copied" | "failed";
 const COPIED_MS = 1800;
 
 /**
- * Puts `text` on the clipboard and resolves to whether it got there. Browsers without the async
- * clipboard API, as on a page served over plain http, fall back to copying a selection.
+ * Puts `text` on the clipboard and resolves to whether it got there. A browser without the
+ * clipboard API, as on a page served over plain http, cannot copy: the address is shown instead.
  */
 export async function writeClipboard(text: string): Promise<boolean> {
-  // Called before any await, so the press that asked for the copy still counts as the gesture.
-  const clipboard = globalThis.navigator?.clipboard;
-  if (typeof clipboard?.writeText !== "function") return copySelection(text);
   try {
-    await clipboard.writeText(text);
+    await navigator.clipboard.writeText(text);
     return true;
   } catch {
     return false;
   }
-}
-
-function copySelection(text: string): boolean {
-  const document = globalThis.document;
-  if (typeof document?.execCommand !== "function") return false;
-  const focused = document.activeElement as HTMLElement | null;
-  const field = document.createElement("textarea");
-  field.value = text;
-  field.readOnly = true;
-  // 16px keeps iOS from zooming in on the field while it is selected.
-  field.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
-  document.body.append(field);
-  field.select();
-  field.setSelectionRange(0, text.length);
-  let copied = false;
-  try {
-    copied = document.execCommand("copy");
-  } catch {}
-  field.remove();
-  focused?.focus?.({ preventScroll: true });
-  return copied;
 }
 
 /**
