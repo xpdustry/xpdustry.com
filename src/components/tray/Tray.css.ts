@@ -21,7 +21,7 @@ export const tray = style({
   vars: {
     [tabWidth]: rem(484),
     [trayR]: `calc(${vars.r} + ${vars.gap})`,
-    [trayWidth]: "100cqw",
+    [trayWidth]: "100cqw"
   },
   position: "relative",
   isolation: "isolate",
@@ -33,8 +33,8 @@ export const tray = style({
     [narrow]: { vars: { [tabWidth]: rem(331) } },
     [media.phone]: { vars: { [tabWidth]: rem(293) } },
     [media.small]: { vars: { [tabWidth]: rem(245) } },
-    [tiny]: { vars: { [tabWidth]: rem(232) } },
-  },
+    [tiny]: { vars: { [tabWidth]: rem(232) } }
+  }
 });
 
 export const body = style({
@@ -44,8 +44,8 @@ export const body = style({
   borderRadius: `0 clamp(0px, ${trayWidth} - ${tabWidth} - ${slantHalf}, ${trayR}) ${trayR} ${trayR}`,
   background: vars.tray,
   "@container": {
-    [cramped]: { borderTopRightRadius: 0 },
-  },
+    [cramped]: { borderTopRightRadius: 0 }
+  }
 });
 
 export const tab = style({
@@ -68,7 +68,7 @@ export const tab = style({
     border: `solid ${vars.outline}`,
     borderWidth: "2px 0 0 2px",
     borderRadius: `${vars.r} 0 0`,
-    background: vars.tray,
+    background: vars.tray
   },
   "@container": {
     [cramped]: {
@@ -79,15 +79,15 @@ export const tab = style({
           right: "auto",
           width: trayWidth,
           borderRightWidth: 2,
-          borderTopRightRadius: vars.r,
-        },
-      },
-    },
+          borderTopRightRadius: vars.r
+        }
+      }
+    }
   },
   "@media": {
     [media.phone]: { gap: 10, paddingLeft: 10 },
-    [media.small]: { paddingLeft: 16 },
-  },
+    [media.small]: { paddingLeft: 16 }
+  }
 });
 
 export const slant = style({
@@ -99,19 +99,19 @@ export const slant = style({
   overflow: "visible",
   pointerEvents: "none",
   "@container": {
-    [cramped]: { display: "none" },
-  },
+    [cramped]: { display: "none" }
+  }
 });
 
 export const face = style({
-  fill: vars.tray,
+  fill: vars.tray
 });
 
 export const line = style({
   fill: "none",
   stroke: vars.outline,
   strokeWidth: 2,
-  vectorEffect: "non-scaling-stroke",
+  vectorEffect: "non-scaling-stroke"
 });
 
 export const icon = style({
@@ -125,22 +125,22 @@ export const icon = style({
   background: vars.tile,
   "@media": {
     [media.phone]: { width: 40, height: 40 },
-    [media.small]: { display: "none" },
-  },
+    [media.small]: { display: "none" }
+  }
 });
 
 globalStyle(`${icon} svg`, {
   width: 26,
   height: 26,
   "@media": {
-    [media.phone]: { width: 22, height: 22 },
-  },
+    [media.phone]: { width: 22, height: 22 }
+  }
 });
 
 export const titles = style({
   display: "grid",
   gap: 4,
-  minWidth: 0,
+  minWidth: 0
 });
 
 globalStyle(`${titles} h2`, {
@@ -148,23 +148,23 @@ globalStyle(`${titles} h2`, {
   lineHeight: leading.tight,
   letterSpacing: tracking.heading,
   "@media": {
-    [media.phone]: { fontSize: rem(font.h4) },
-  },
+    [media.phone]: { fontSize: rem(font.h4) }
+  }
 });
 
 export const subtitle = style({
   fontSize: rem(font.caption),
   color: vars.muted,
   "@media": {
-    [narrow]: { display: "none" },
-  },
+    [narrow]: { display: "none" }
+  }
 });
 
 /** What the tray holds, and the container its cards measure. */
 export const content = style({
   gridArea: "2 / 1",
   containerType: "inline-size",
-  padding: vars.gap,
+  padding: vars.gap
 });
 
 export const action = style({
@@ -172,35 +172,35 @@ export const action = style({
     [`${tab} > &`]: {
       position: "static",
       flex: "none",
-      marginLeft: "auto",
+      marginLeft: "auto"
     },
     [`${tab} > &::after`]: {
       content: '""',
       position: "absolute",
       inset: "0 0 -2px",
-      borderRadius: `${vars.r} ${vars.r} 0 0`,
+      borderRadius: `${vars.r} ${vars.r} 0 0`
     },
     [`${tab} > &:focus-visible`]: {
-      outline: "none",
-    },
-  },
+      outline: "none"
+    }
+  }
 });
 
 globalStyle(`${tab}:has(> ${action}) ${titles}`, {
-  marginRight: 4,
+  marginRight: 4
 });
 
 globalStyle(`${tab} > ${action} > span`, {
-  padding: 7,
+  padding: 7
 });
 
 globalStyle(`${tab}:has(> ${action}:focus-visible)`, {
   outline: `3px solid ${vars.t9}`,
-  outlineOffset: 2,
+  outlineOffset: 2
 });
 
 globalStyle(`${tab}:has(> ${action})`, {
   "@media": {
-    [media.phone]: { gap: 14 },
-  },
+    [media.phone]: { gap: 14 }
+  }
 });

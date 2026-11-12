@@ -12,8 +12,8 @@ globalFontFace(FACE.cyrillicDisplay, {
   fontWeight: DISPLAY_WEIGHT,
   sizeAdjust: GOLOS_TO_DISPLAY_SIZE,
   src: file(
-    `@fontsource/golos-text/files/golos-text-cyrillic-${CYRILLIC_DISPLAY_SOURCE_WEIGHT}-normal.woff2`,
-  ),
+    `@fontsource/golos-text/files/golos-text-cyrillic-${CYRILLIC_DISPLAY_SOURCE_WEIGHT}-normal.woff2`
+  )
 });
 
 globalFontFace(FACE.cyrillicText, {
@@ -21,14 +21,14 @@ globalFontFace(FACE.cyrillicText, {
   fontWeight: "400 900",
   src: file(
     "@fontsource-variable/golos-text/files/golos-text-cyrillic-wght-normal.woff2",
-    "woff2-variations",
-  ),
+    "woff2-variations"
+  )
 });
 
 for (const weight of [400, 500]) {
   globalFontFace(FACE.cyrillicMono, {
     ...companion,
     fontWeight: weight,
-    src: file(`@fontsource/ibm-plex-mono/files/ibm-plex-mono-cyrillic-${weight}-normal.woff2`),
+    src: file(`@fontsource/ibm-plex-mono/files/ibm-plex-mono-cyrillic-${weight}-normal.woff2`)
   });
 }

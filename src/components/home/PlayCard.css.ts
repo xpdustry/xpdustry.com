@@ -8,12 +8,12 @@ export const play = style({
   display: "flex",
   flexDirection: "column",
   padding: "22px 24px",
-  background: vars.a3,
+  background: vars.a3
 });
 
 export const label = style({
   fontSize: rem(font.small),
-  color: vars.a11,
+  color: vars.a11
 });
 
 /** The browser refused the copy: the address is for the visitor to select instead. */
@@ -32,16 +32,16 @@ export const address = style({
       zIndex: 2,
       alignSelf: "start",
       userSelect: "all",
-      cursor: "text",
-    },
-  },
+      cursor: "text"
+    }
+  }
 });
 
 export const how = style({
   marginTop: 6,
   fontSize: rem(font.caption),
   color: vars.a11,
-  textWrap: "balance",
+  textWrap: "balance"
 });
 
 export const online = style({
@@ -49,16 +49,16 @@ export const online = style({
   marginTop: "auto",
   paddingTop: 12,
   font: figures(),
-  color: vars.ink,
+  color: vars.ink
 });
 
 globalStyle(`${play} ${online}`, {
-  whiteSpace: "normal",
+  whiteSpace: "normal"
 });
 
 export const hint = style({
   color: vars.a11,
   selectors: {
-    [`${play}:has(> button:hover) &`]: { transform: "scale(1.08)" },
-  },
+    [`${play}:has(> button:hover) &`]: { transform: "scale(1.08)" }
+  }
 });

@@ -8,7 +8,7 @@ export const NEAR = 3;
 const LOOPS = 40;
 
 const drift = keyframes({
-  to: { transform: `translateY(-${TILE}px)` },
+  to: { transform: `translateY(-${TILE}px)` }
 });
 
 export const background = style({
@@ -21,24 +21,24 @@ export const background = style({
       content: '""',
       position: "absolute",
       inset: 0,
-      background: `0 0 / ${TILE}px`,
+      background: `0 0 / ${TILE}px`
     },
     "&::before": {
-      backgroundImage: 'url("../../assets/backdrop-far.webp")',
+      backgroundImage: 'url("../../assets/backdrop-far.webp")'
     },
     "&::after": {
-      backgroundImage: 'url("../../assets/backdrop-near.webp")',
+      backgroundImage: 'url("../../assets/backdrop-near.webp")'
     },
     "&[data-drift]::before, &[data-drift]::after": {
       bottom: -TILE,
-      willChange: "transform",
+      willChange: "transform"
     },
     "&[data-drift]::before": {
-      transform: "translateY(var(--far, 0))",
+      transform: "translateY(var(--far, 0))"
     },
     "&[data-drift]::after": {
-      transform: "translateY(var(--near, 0))",
-    },
+      transform: "translateY(var(--near, 0))"
+    }
   },
   "@media": {
     [media.motion]: {
@@ -49,19 +49,19 @@ export const background = style({
               bottom: -TILE,
               animation: `${drift} linear ${LOOPS} both`,
               animationDuration: "auto",
-              animationTimeline: "scroll(root)",
+              animationTimeline: "scroll(root)"
             },
             "&::before": {
-              animationRange: `0 ${TILE * FAR * LOOPS}px`,
+              animationRange: `0 ${TILE * FAR * LOOPS}px`
             },
             "&::after": {
-              animationRange: `0 ${TILE * NEAR * LOOPS}px`,
-            },
-          },
-        },
-      },
-    },
-  },
+              animationRange: `0 ${TILE * NEAR * LOOPS}px`
+            }
+          }
+        }
+      }
+    }
+  }
 });
 
 export const crown = style({
@@ -70,5 +70,5 @@ export const crown = style({
   zIndex: -1,
   height: CROWN.height,
   background: `url("../../assets/crown.webp") 50% 0 / ${CROWN.width}px ${CROWN.height}px repeat-x`,
-  pointerEvents: "none",
+  pointerEvents: "none"
 });

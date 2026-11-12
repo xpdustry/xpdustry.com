@@ -10,7 +10,7 @@ export function themed(theme: Topic): CSSProperties {
     ...assignInlineVars({
       [vars.muted]: theme.muted,
       [accent]: theme.accent,
-      [accentInk]: theme.chip.color,
-    }),
+      [accentInk]: theme.chip.color
+    })
   };
 }

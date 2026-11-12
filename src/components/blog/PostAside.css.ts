@@ -10,18 +10,18 @@ export const aside = style({
   gridTemplateColumns: "minmax(0, 1fr)",
   gap: vars.gap,
   "@media": {
-    [media.tablet]: { position: "static" },
-  },
+    [media.tablet]: { position: "static" }
+  }
 });
 
 export const panel = style({
-  padding: 22,
+  padding: 22
 });
 
 export const label = style({
   minWidth: 0,
   fontSize: rem(font.h4),
-  letterSpacing: tracking.title,
+  letterSpacing: tracking.title
 });
 
 export const release = style({
@@ -31,21 +31,21 @@ export const release = style({
   gap: 10,
   marginTop: 14,
   selectors: {
-    "& + &": { marginTop: 10 },
-  },
+    "& + &": { marginTop: 10 }
+  }
 });
 
 globalStyle(`${release} code`, {
   padding: "6px 9px",
   borderRadius: radius.sm,
   background: vars.n3,
-  font: `500 ${rem(font.caption)} ${vars.fontMono}`,
+  font: `500 ${rem(font.caption)} ${vars.fontMono}`
 });
 
 globalStyle(`${release} > a`, {
   maxWidth: "100%",
   marginLeft: "auto",
-  overflowWrap: "anywhere",
+  overflowWrap: "anywhere"
 });
 
 export const share = style({
@@ -53,5 +53,5 @@ export const share = style({
   flexWrap: "wrap",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 12,
+  gap: 12
 });

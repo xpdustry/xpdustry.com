@@ -46,7 +46,7 @@ const NOHORNY_THEME: ProjectTheme = {
   patches: PATCHES.nohornyCover,
   muted: "#f3d3e1",
   chip: { background: "#f9a3c7", color: "#3a0f22" },
-  accent: "#f9cfe1",
+  accent: "#f9cfe1"
 };
 
 /** In display order. */
@@ -57,7 +57,7 @@ export const projects: readonly Project[] = [
     repository: "xpdustry/nohorny",
     website: "https://nohorny.xpdustry.com",
     summary: msg(
-      "NoHorny is a Mindustry server plugin that detects and removes NSFW art drawn on logic displays and canvases.",
+      "NoHorny is a Mindustry server plugin that detects and removes NSFW art drawn on logic displays and canvases."
     ),
     icon: nohornyIcon,
     card: {
@@ -65,24 +65,24 @@ export const projects: readonly Project[] = [
       ground: NOHORNY_THEME.ground,
       patches: PATCHES.nohornyCard,
       muted: NOHORNY_THEME.muted,
-      screenshot: "/blog/nohorny-admin-overview-dark.webp",
+      screenshot: "/blog/nohorny-admin-overview-dark.webp"
     },
-    theme: NOHORNY_THEME,
+    theme: NOHORNY_THEME
   },
   {
     slug: "claj",
     name: "CLaJ",
     repository: "xpdustry/claj",
     summary: msg(
-      "CLaJ (Copy Link and Join) is a Mindustry mod that lets you play with your friends through a shared link.",
+      "CLaJ (Copy Link and Join) is a Mindustry mod that lets you play with your friends through a shared link."
     ),
     icon: clajIcon,
     card: {
       kind: "item",
       ground: "#d99d73",
       patches: PATCHES.clajCard,
-      symbol: PlugsConnected,
-    },
+      symbol: PlugsConnected
+    }
   },
   {
     slug: "toxopid",
@@ -93,8 +93,8 @@ export const projects: readonly Project[] = [
       kind: "item",
       ground: "#8da1e3",
       patches: PATCHES.toxopidCard,
-      symbol: Package,
-    },
+      symbol: Package
+    }
   },
   {
     slug: "distributor",
@@ -105,9 +105,9 @@ export const projects: readonly Project[] = [
       kind: "item",
       ground: "#e8dc80",
       patches: PATCHES.distributorCard,
-      symbol: Toolbox,
-    },
-  },
+      symbol: Toolbox
+    }
+  }
 ];
 
 export function repositoryUrl(project: Project): string {

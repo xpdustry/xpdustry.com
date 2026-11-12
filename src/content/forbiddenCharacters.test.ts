@@ -27,8 +27,8 @@ test("no en dash or em dash anywhere in the repository", () => {
     readFileSync(root + file, "utf8")
       .split("\n")
       .flatMap((line, index) =>
-        FORBIDDEN.test(line) ? [`${file}:${index + 1}: ${line.trim()}`] : [],
-      ),
+        FORBIDDEN.test(line) ? [`${file}:${index + 1}: ${line.trim()}`] : []
+      )
   );
   expect(found).toEqual([]);
 });

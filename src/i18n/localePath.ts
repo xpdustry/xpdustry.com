@@ -1,7 +1,7 @@
 import { DEFAULT_LOCALE, LOCALES } from "./locales.ts";
 
 const PREFIX = new RegExp(
-  `^/(${LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).join("|")})(?=/|$)`,
+  `^/(${LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).join("|")})(?=/|$)`
 );
 
 /** The locale a public path is prefixed with, if any: `/fr/blog` is `fr`. */

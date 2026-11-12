@@ -72,7 +72,7 @@ export function patches(
   color: string,
   inner: string,
   blobs: readonly Blob[],
-  tile: number = BASE.tile,
+  tile: number = BASE.tile
 ): Patches {
   return { color, inner, tile, blobs };
 }
@@ -102,8 +102,8 @@ export function seeded(patches: Patches, name: string, nudge = 0.05): Patches {
       x + (random() * 2 - 1) * nudge,
       y + (random() * 2 - 1) * nudge,
       radius,
-      Math.floor(random() * 8),
-    ]),
+      Math.floor(random() * 8)
+    ])
   };
 }
 
@@ -128,7 +128,7 @@ function generator(name: string) {
 export function blobSprite(
   { color, inner, tile, grow, shape = 0 }: Patches,
   radius: number,
-  grown = false,
+  grown = false
 ) {
   const size = Math.ceil(radius * (grow ?? 1) * 3.2);
   const name = `${color.slice(1)}-${inner.slice(1)}-${tile}-${radius}${shape ? `s${shape}` : ""}`;
@@ -141,8 +141,8 @@ export function blobSprite(
       color,
       inner,
       ...(shape && { seed: SHAPE_SEEDS[shape - 1]! }),
-      blobs: [[0.5, 0.5, (grown && grow ? radius * grow : radius) / size, 1]],
-    } satisfies TextureSettings,
+      blobs: [[0.5, 0.5, (grown && grow ? radius * grow : radius) / size, 1]]
+    } satisfies TextureSettings
   };
 }
 
@@ -151,7 +151,7 @@ export function blobSprites(patches: Patches) {
   return patches.blobs.flatMap(([, , radius]) =>
     patches.grow
       ? [blobSprite(patches, radius), blobSprite(patches, radius, true)]
-      : [blobSprite(patches, radius)],
+      : [blobSprite(patches, radius)]
   );
 }
 
@@ -163,7 +163,7 @@ export function spreadTiles(color: string, inner: string) {
   return {
     thin: { name: `${palette}-thin`, settings: { ...base, level: 0.3 } },
     thick: { name: `${palette}-thick`, settings: { ...base, level: 0.4 } },
-    solid: { name: `${palette}-solid`, settings: { ...base, reach: 0, inner, level: 1 } },
+    solid: { name: `${palette}-solid`, settings: { ...base, reach: 0, inner, level: 1 } }
   } as const satisfies Record<SpreadStage, { name: string; settings: TextureSettings }>;
 }
 
@@ -189,8 +189,8 @@ export function fringe(color: string, rising = false) {
       seamless: true,
       warp: 1,
       lumps: 90,
-      ramp: rising ? [0.2, 0.7] : [0.8, 0.3],
-    } satisfies TextureSettings,
+      ramp: rising ? [0.2, 0.7] : [0.8, 0.3]
+    } satisfies TextureSettings
   } as const;
 }
 

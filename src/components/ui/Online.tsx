@@ -5,7 +5,7 @@ import * as styles from "./Online.css";
 export function Online({
   offline = false,
   className,
-  children,
+  children
 }: {
   offline?: boolean;
   className?: string;

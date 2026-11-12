@@ -40,7 +40,7 @@ function wrappedLaplacian(
   source: Float64Array,
   out: Float64Array,
   width: number,
-  height: number,
+  height: number
 ): void {
   for (let y = 0; y < height; y += 1) {
     const up = ((y - 1 + height) % height) * width;
@@ -79,7 +79,7 @@ function heighten(
   source: Float64Array,
   width: number,
   height: number,
-  cuts: number[],
+  cuts: number[]
 ): Float64Array {
   const taller = new Float64Array(width * (height + 1));
   for (let x = 0; x < width; x += 1) {
@@ -129,7 +129,7 @@ function runPhase(field: Field, options: PhaseOptions, random: () => number): Fi
 
 const RETICULATE_PHASES: readonly PhaseOptions[] = [
   { ratio: 30, scale: 3, speed: 40, steps: 4000, floorB: 2 },
-  { ratio: 8, scale: 3, speed: 40, steps: 10000, floorB: 2, growEvery: 100 },
+  { ratio: 8, scale: 3, speed: 40, steps: 10000, floorB: 2, growEvery: 100 }
 ];
 
 /** Run the complete two-phase recipe and return its final morphogen fields. */
@@ -166,7 +166,7 @@ export function wrappedBoxBlur(
   mask: Uint8Array,
   width: number,
   height: number,
-  radius: number,
+  radius: number
 ): Uint8Array {
   let current = mask;
   for (let pass = 0; pass < 3; pass += 1) {
@@ -181,7 +181,7 @@ function boxPass(
   width: number,
   height: number,
   radius: number,
-  horizontal: boolean,
+  horizontal: boolean
 ): Uint8Array {
   const out = new Uint8Array(source.length);
   const length = horizontal ? width : height;

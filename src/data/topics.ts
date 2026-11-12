@@ -12,7 +12,7 @@ const DEFAULT_THEME: ProjectTheme = {
   patches: PATCHES.siteCover,
   muted: "#a2c2bf",
   chip: { background: "#c6f6f2", color: "#003331" },
-  accent: "#c6f6f2",
+  accent: "#c6f6f2"
 };
 
 export function topic(name: string): Topic {
@@ -21,6 +21,6 @@ export function topic(name: string): Topic {
     name,
     icon: project?.icon,
     website: project?.website,
-    ...(project?.theme ?? DEFAULT_THEME),
+    ...(project?.theme ?? DEFAULT_THEME)
   };
 }

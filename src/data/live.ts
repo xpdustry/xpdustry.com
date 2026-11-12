@@ -28,7 +28,7 @@ export function playerCount(servers: readonly ServerSnapshotItem[]): PlayerCount
   if (online.length > 0) {
     return {
       state: "online",
-      players: online.reduce((total, server) => total + server.info.players, 0),
+      players: online.reduce((total, server) => total + server.info.players, 0)
     };
   }
   return servers.some((server) => server.status === "polling")

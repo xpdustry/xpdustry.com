@@ -14,7 +14,7 @@ const info = {
   playerLimit: 50,
   wave: 1,
   version: 159,
-  versionType: "official",
+  versionType: "official"
 } satisfies ServerInfo;
 const live = () => new AbortController().signal;
 
@@ -24,15 +24,15 @@ test("one failed server does not affect the other results", async () => {
       query: async (hostname) => {
         if (hostname === pvp.hostname) throw new Error("offline");
         return info;
-      },
+      }
     },
     [hub, pvp],
-    live(),
+    live()
   );
 
   expect(snapshot.servers).toEqual([
     { ...hub, status: "online", info },
-    { ...pvp, status: "offline" },
+    { ...pvp, status: "offline" }
   ]);
 });
 
@@ -42,7 +42,7 @@ test("answers only once every server has settled", async () => {
   const pending = queryServers(
     { query: (hostname) => (hostname === hub.hostname ? Promise.resolve(info) : late.promise) },
     [hub, pvp],
-    live(),
+    live()
   ).then((snapshot) => {
     settled = true;
     return snapshot;
@@ -61,11 +61,11 @@ test("an aborted round throws instead of reporting everything offline", async ()
     {
       query: (_hostname, signal) =>
         new Promise((_resolve, reject) =>
-          signal.addEventListener("abort", () => reject(signal.reason)),
-        ),
+          signal.addEventListener("abort", () => reject(signal.reason))
+        )
     },
     [hub],
-    controller.signal,
+    controller.signal
   );
   controller.abort();
 

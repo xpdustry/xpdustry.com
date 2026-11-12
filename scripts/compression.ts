@@ -6,9 +6,9 @@ const COMPRESSORS: Record<Coding, () => Transform> = {
   br: () =>
     createBrotliCompress({
       flush: constants.BROTLI_OPERATION_FLUSH,
-      params: { [constants.BROTLI_PARAM_QUALITY]: 5 },
+      params: { [constants.BROTLI_PARAM_QUALITY]: 5 }
     }),
-  gzip: () => createGzip({ flush: constants.Z_SYNC_FLUSH }),
+  gzip: () => createGzip({ flush: constants.Z_SYNC_FLUSH })
 };
 
 /** The codings the server produces, in the order it prefers them when the client has no preference. */

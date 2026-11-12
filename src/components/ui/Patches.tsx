@@ -5,7 +5,7 @@ import * as styles from "./Patches.css";
 const SPRITES = import.meta.glob<string>("/src/assets/patches/*.webp", {
   eager: true,
   query: "?url",
-  import: "default",
+  import: "default"
 });
 
 /**
@@ -20,7 +20,7 @@ const SPRITES = import.meta.glob<string>("/src/assets/patches/*.webp", {
 export function Patches({
   patches,
   className,
-  priority = false,
+  priority = false
 }: {
   patches: PatchesData;
   className?: string;
@@ -32,9 +32,7 @@ export function Patches({
         const style: CSSProperties = {
           left: `${x * 100}%`,
           top: `${y * 100}%`,
-          transform: turn
-            ? `rotate(${(turn % 4) * 90}deg) scaleX(${turn < 4 ? 1 : -1})`
-            : undefined,
+          transform: turn ? `rotate(${(turn % 4) * 90}deg) scaleX(${turn < 4 ? 1 : -1})` : undefined
         };
         return (
           <span key={at}>
@@ -57,7 +55,7 @@ function Sprite({
   sprite,
   style,
   className,
-  priority = false,
+  priority = false
 }: {
   sprite: ReturnType<typeof blobSprite>;
   style: CSSProperties;

@@ -10,6 +10,6 @@ export interface Author {
 export const authors: Record<AuthorName, Author> = {
   phinner: {
     avatar: "/phinner.svg",
-    url: "https://github.com/phinner",
-  },
+    url: "https://github.com/phinner"
+  }
 };

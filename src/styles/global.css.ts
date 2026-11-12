@@ -7,17 +7,17 @@ globalStyle(":root", {
   background: "none",
   colorScheme: "light",
   WebkitTextSizeAdjust: "100%",
-  scrollPaddingTop: 16,
+  scrollPaddingTop: 16
 });
 
 globalStyle(":root[data-hydrated]", {
   "@media": {
-    [media.motion]: { scrollBehavior: "smooth" },
-  },
+    [media.motion]: { scrollBehavior: "smooth" }
+  }
 });
 
 globalStyle("*, *::before, *::after", {
-  boxSizing: "border-box",
+  boxSizing: "border-box"
 });
 
 globalStyle("body", {
@@ -31,46 +31,46 @@ globalStyle("body", {
   overflowWrap: "break-word",
   letterSpacing: "0.02em",
   fontSynthesisWeight: "none",
-  WebkitFontSmoothing: "antialiased",
+  WebkitFontSmoothing: "antialiased"
 });
 
 globalStyle("button, input", {
   font: "inherit",
-  color: "inherit",
+  color: "inherit"
 });
 
 globalStyle("h1, h2, h3, p, ul, ol, dl, dd, figure", {
-  margin: 0,
+  margin: 0
 });
 
 globalStyle("h1, h2, h3", {
-  fontWeight: "inherit",
+  fontWeight: "inherit"
 });
 
 globalStyle("ul, ol", {
   padding: 0,
-  listStyle: "none",
+  listStyle: "none"
 });
 
 globalStyle("a", {
-  color: "inherit",
+  color: "inherit"
 });
 
 globalStyle("img, svg, video, canvas", {
   display: "block",
-  maxWidth: "100%",
+  maxWidth: "100%"
 });
 
 globalStyle(":where(:focus-visible)", {
   outline: `3px solid ${vars.focus}`,
   outlineOffset: 3,
-  borderRadius: 4,
+  borderRadius: 4
 });
 
 globalStyle(".wrap", {
   width: "min(1180px, 100% - 2 * clamp(20px, 5vw, 56px))",
   marginInline: "auto",
-  padding: vars.gap,
+  padding: vars.gap
 });
 
 globalStyle(".sr-only", {
@@ -79,7 +79,7 @@ globalStyle(".sr-only", {
   height: 1,
   overflow: "hidden",
   clipPath: "inset(50%)",
-  whiteSpace: "nowrap",
+  whiteSpace: "nowrap"
 });
 
 globalStyle(".skip-link", {
@@ -91,18 +91,18 @@ globalStyle(".skip-link", {
   borderRadius: 10,
   background: vars.tile,
   color: vars.ink,
-  translate: "0 -200%",
+  translate: "0 -200%"
 });
 
 globalStyle(".skip-link:focus-visible", {
-  translate: "none",
+  translate: "none"
 });
 
 globalStyle("*, *::before, *::after", {
   "@media": {
     [media.still]: {
       animation: "none !important",
-      transition: "none !important",
-    },
-  },
+      transition: "none !important"
+    }
+  }
 });

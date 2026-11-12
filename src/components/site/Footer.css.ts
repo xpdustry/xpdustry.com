@@ -17,8 +17,8 @@ export const footer = style({
   marginTop: `calc(${ridgeHeight} + ${vars.group})`,
   background: vars.deep,
   "@media": {
-    [media.phone]: { vars: { [ridgeHeight]: "120px" } },
-  },
+    [media.phone]: { vars: { [ridgeHeight]: "120px" } }
+  }
 });
 
 export const ridge = style({
@@ -26,7 +26,7 @@ export const ridge = style({
   inset: "auto 0 calc(100% - 1px)",
   height: ridgeHeight,
   background: 'url("../../assets/ridge.webp") 50% 100% / auto 100% repeat-x',
-  pointerEvents: "none",
+  pointerEvents: "none"
 });
 
 export const inner = style({
@@ -37,24 +37,24 @@ export const inner = style({
       gridTemplateAreas: '"brand top" "copy links"',
       alignItems: "center",
       gap: "30px 32px",
-      padding: `40px calc(${vars.gap} + 6px) 64px`,
-    },
+      padding: `40px calc(${vars.gap} + 6px) 64px`
+    }
   },
   "@media": {
     [narrow]: {
       selectors: {
         [`${footer} &`]: {
           gridTemplateAreas: '"brand top" "links links" "copy copy"',
-          gap: "22px 16px",
-        },
-      },
+          gap: "22px 16px"
+        }
+      }
     },
     [media.phone]: {
       selectors: {
-        [`${footer} &`]: { paddingTop: 28, paddingBottom: 52 },
-      },
-    },
-  },
+        [`${footer} &`]: { paddingTop: 28, paddingBottom: 52 }
+      }
+    }
+  }
 });
 
 export const brand = style({
@@ -65,26 +65,26 @@ export const brand = style({
       justifySelf: "start",
       maxWidth: "100%",
       gap: 14,
-      lineHeight: leading.tight,
-    },
+      lineHeight: leading.tight
+    }
   },
   "@media": {
     [media.phone]: {
       selectors: {
-        [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${rem(font.h2)}` } },
-      },
+        [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${rem(font.h2)}` } }
+      }
     },
     [media.small]: {
       selectors: {
-        [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${rem(font.h3)}` }, gap: 10 },
-      },
-    },
-  },
+        [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${rem(font.h3)}` }, gap: 10 }
+      }
+    }
+  }
 });
 
 globalStyle(`${footer} ${brand} span`, {
   minWidth: 0,
-  letterSpacing: tracking.display,
+  letterSpacing: tracking.display
 });
 
 export const links = style({
@@ -94,8 +94,8 @@ export const links = style({
   justifyContent: "flex-end",
   gap: "8px 26px",
   "@media": {
-    [narrow]: { justifyContent: "flex-start" },
-  },
+    [narrow]: { justifyContent: "flex-start" }
+  }
 });
 
 globalStyle(`${links} a`, {
@@ -103,16 +103,16 @@ globalStyle(`${links} a`, {
   overflowWrap: "anywhere",
   textDecoration: "underline 2px transparent",
   textUnderlineOffset: 5,
-  transition: "text-decoration-color 0.13s",
+  transition: "text-decoration-color 0.13s"
 });
 
 globalStyle(`${links} a:hover`, {
-  textDecorationColor: vars.t9,
+  textDecorationColor: vars.t9
 });
 
 export const copyright = style({
   gridArea: "copy",
-  color: vars.deepInk,
+  color: vars.deepInk
 });
 
 export const top = style({
@@ -120,19 +120,19 @@ export const top = style({
     [`${footer} &`]: {
       gridArea: "top",
       justifySelf: "end",
-      marginTop: 0,
-    },
-  },
+      marginTop: 0
+    }
+  }
 });
 
 globalStyle(`${footer} ${top} > span`, {
   "@media": {
-    [media.phone]: { padding: 10 },
-  },
+    [media.phone]: { padding: 10 }
+  }
 });
 
 export const say = style({
   "@media": {
-    [media.phone]: { display: "none" },
-  },
+    [media.phone]: { display: "none" }
+  }
 });

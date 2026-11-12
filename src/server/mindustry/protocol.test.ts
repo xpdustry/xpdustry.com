@@ -14,7 +14,7 @@ function packet(
     description: string;
     modeName: string;
     port: number;
-  }> = {},
+  }> = {}
 ): Uint8Array {
   const fields = {
     name: "<CN> Survival",
@@ -28,7 +28,7 @@ function packet(
     description: "The best server",
     modeName: "",
     port: 6567,
-    ...overrides,
+    ...overrides
   };
 
   const parts: number[] = [];
@@ -67,7 +67,7 @@ describe("decodeServerInfo", () => {
       playerLimit: 50,
       wave: 142,
       version: 159,
-      versionType: "official",
+      versionType: "official"
     });
   });
 
@@ -75,8 +75,8 @@ describe("decodeServerInfo", () => {
     const decoded = decodeServerInfo(
       packet({
         name: "[accent]<CN>[] Survival",
-        map: "[#ff8800]Fungal Pass[]",
-      }),
+        map: "[#ff8800]Fungal Pass[]"
+      })
     );
     expect(decoded.name).toBe("<CN> Survival");
     expect(decoded.map).toBe("Fungal Pass");
@@ -84,7 +84,7 @@ describe("decodeServerInfo", () => {
 
   test("prefers a custom mode name over the gamemode ordinal", () => {
     expect(decodeServerInfo(packet({ mode: 0, modeName: "[red]Tower Defense[]" })).mode).toBe(
-      "Tower Defense",
+      "Tower Defense"
     );
   });
 
@@ -96,7 +96,7 @@ describe("decodeServerInfo", () => {
     "rejects a packet truncated to %i bytes",
     (length) => {
       expect(() => decodeServerInfo(packet().slice(0, length))).toThrow(MalformedPacketError);
-    },
+    }
   );
 
   test("rejects a string that claims more bytes than the protocol allows", () => {

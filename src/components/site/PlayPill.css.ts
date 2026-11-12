@@ -11,24 +11,24 @@ const narrow = upTo(780);
 const besideNavigation = "not all and (max-width: 77.5em)";
 
 export const pill = style({
-  whiteSpace: "nowrap",
+  whiteSpace: "nowrap"
 });
 
 globalStyle(`${pill} svg`, {
   width: 16,
-  height: 16,
+  height: 16
 });
 
 export const count = style({
   font: `500 ${rem(font.caption)} / ${leading.tight} ${vars.fontMono}`,
-  letterSpacing: 0,
+  letterSpacing: 0
 });
 
 export const waiting = style({
   "@media": {
     [narrow]: { gap: 0, fontSize: 0 },
-    [besideNavigation]: { gap: 0, fontSize: 0 },
-  },
+    [besideNavigation]: { gap: 0, fontSize: 0 }
+  }
 });
 
 const divided = style([
@@ -36,17 +36,17 @@ const divided = style([
   {
     marginLeft: -2,
     paddingLeft: 10,
-    borderLeft: `2px solid color-mix(in srgb, ${vars.onAmber} 16%, transparent)`,
-  },
+    borderLeft: `2px solid color-mix(in srgb, ${vars.onAmber} 16%, transparent)`
+  }
 ]);
 
 export const address = style([
   divided,
   {
     "@media": {
-      [narrow]: { display: "none" },
-    },
-  },
+      [narrow]: { display: "none" }
+    }
+  }
 ]);
 
 /**
@@ -64,23 +64,23 @@ export const failed = style({
       whiteSpace: "normal",
       margin: 0,
       padding: 0,
-      border: 0,
-    },
-  },
+      border: 0
+    }
+  }
 });
 
 /** The count, out of the way of the address after a refused copy. */
 export const aside = style({
   "@media": {
-    [narrow]: { display: "none" },
-  },
+    [narrow]: { display: "none" }
+  }
 });
 
 // Thinner padding leaves room for two lines within the pill's usual height.
 globalStyle(`button${pill}:has(${failed}) > span`, {
   "@media": {
-    [narrow]: { minHeight: 40, padding: "5px 12px", gap: 8 },
-  },
+    [narrow]: { minHeight: 40, padding: "5px 12px", gap: 8 }
+  }
 });
 
 export const brief = style([
@@ -88,7 +88,7 @@ export const brief = style([
   {
     display: "none",
     "@media": {
-      [narrow]: { display: "inline" },
-    },
-  },
+      [narrow]: { display: "inline" }
+    }
+  }
 ]);

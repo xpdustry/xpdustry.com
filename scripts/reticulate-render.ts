@@ -77,7 +77,7 @@ function resolve(settings: TextureSettings) {
     base: 0,
     seed: 11,
     blobs: [],
-    ...settings,
+    ...settings
   } satisfies TextureSettings & Record<string, unknown>;
 }
 
@@ -125,7 +125,7 @@ export function renderTexture(
   labyrinth: Labyrinth,
   settings: TextureSettings,
   width: number,
-  height: number,
+  height: number
 ): { pixels: Uint8ClampedArray<ArrayBuffer>; width: number; height: number } {
   const s = resolve(settings);
   const w = Math.ceil(s.repeat ?? width);

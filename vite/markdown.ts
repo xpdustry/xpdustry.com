@@ -3,12 +3,12 @@ import type {
   ComponentNode,
   MarkdownDocument,
   MarkdownExtension,
-  ParseOptions,
+  ParseOptions
 } from "@tanstack/markdown";
 import { calloutsExtension } from "@tanstack/markdown/extensions/callouts";
 import {
   parseCommentComponentBlock,
-  parseComponentComment,
+  parseComponentComment
 } from "@tanstack/markdown/extensions/comment-components";
 import { parseMarkdown } from "@tanstack/markdown/parser";
 import * as v from "valibot";
@@ -25,14 +25,14 @@ const DimensionSchema = v.pipe(
   v.toNumber("must be a number"),
   v.integer("must be an integer"),
   v.minValue(1, "must be at least 1"),
-  v.maxValue(10_000, "must be at most 10000"),
+  v.maxValue(10_000, "must be at most 10000")
 );
 const ImageAttributesSchema = v.strictObject({
   src: blogMediaPathSchema(IMAGE_EXTENSIONS),
   alt: NonBlankStringSchema,
   width: DimensionSchema,
   height: DimensionSchema,
-  caption: v.optional(v.string()),
+  caption: v.optional(v.string())
 });
 const VideoAttributesSchema = v.strictObject({
   src: blogMediaPathSchema([".mp4"]),
@@ -40,18 +40,18 @@ const VideoAttributesSchema = v.strictObject({
   poster: blogMediaPathSchema(IMAGE_EXTENSIONS),
   width: DimensionSchema,
   height: DimensionSchema,
-  caption: v.optional(v.string()),
+  caption: v.optional(v.string())
 });
 
 const MEDIA = {
   "post-image": { tagName: POST_ELEMENTS.image, schema: ImageAttributesSchema, body: false },
-  "post-video": { tagName: POST_ELEMENTS.video, schema: VideoAttributesSchema, body: true },
+  "post-video": { tagName: POST_ELEMENTS.video, schema: VideoAttributesSchema, body: true }
 } as const;
 
 const extensions: MarkdownExtension[] = [
   calloutsExtension(),
   mediaExtension(),
-  calloutElementExtension(),
+  calloutElementExtension()
 ];
 const parseOptions: ParseOptions = { extensions, frontmatter: true, headingIds: true };
 
@@ -60,7 +60,7 @@ export function compileBlogMarkdown(file: string, source: string): PostModule {
 
   return {
     frontmatter: parseBlogFrontmatter(file, parseFrontmatter(file, frontmatter)),
-    document: document satisfies MarkdownDocument,
+    document: document satisfies MarkdownDocument
   };
 }
 
@@ -79,14 +79,14 @@ export function blogMarkdownPlugin(): Plugin {
             `export const frontmatter = ${serialize(compiled.frontmatter)};`,
             ...(new URLSearchParams(id.split("?")[1]).has("frontmatter")
               ? []
-              : [`export const document = ${serialize(compiled.document)};`]),
+              : [`export const document = ${serialize(compiled.document)};`])
           ].join("\n"),
-          map: null,
+          map: null
         };
       } catch (error) {
         this.error(error instanceof Error ? error : new Error(String(error)));
       }
-    },
+    }
   };
 }
 
@@ -119,11 +119,11 @@ function mediaExtension(): MarkdownExtension {
       if (!result.success) throw new Error(`${node.name}: ${v.summarize(result.issues)}`);
       const properties = Object.fromEntries(
         Object.entries(result.output).flatMap(([key, value]) =>
-          value === undefined ? [] : [[key, String(value)]],
-        ),
+          value === undefined ? [] : [[key, String(value)]]
+        )
       );
       return { ...node, tagName: media.tagName, properties };
-    },
+    }
   };
 }
 
@@ -137,7 +137,7 @@ function calloutElementExtension(): MarkdownExtension {
           tagName: POST_ELEMENTS.callout,
           attributes: {},
           properties: { kind: node.kind, title: node.title },
-          children: convert(node.children),
+          children: convert(node.children)
         } satisfies ComponentNode;
       }
       if (node.type === "blockquote" || node.type === "component") {
@@ -150,7 +150,7 @@ function calloutElementExtension(): MarkdownExtension {
     name: "xpdustry:callout-elements",
     transformDocument(document) {
       return { ...document, children: convert(document.children) };
-    },
+    }
   };
 }
 

@@ -7,7 +7,7 @@ import * as styles from "./Message.css";
 export function Message({
   code,
   title,
-  children,
+  children
 }: {
   code: string;
   title: string;

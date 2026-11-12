@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     // Node resolution: native packages hide behind the `browser` condition otherwise.
-    conditions: [...defaultServerConditions],
+    conditions: [...defaultServerConditions]
   },
   plugins: [blogMarkdownPlugin(), vanillaExtractPlugin({ identifiers: "debug" })],
   test: {
@@ -19,17 +19,17 @@ export default defineConfig({
           environment: "node",
           include: ["src/**/*.test.{ts,tsx}", "vite/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
           exclude: ["src/server/integration.test.ts"],
-          css: { include: [/.+/] },
-        },
+          css: { include: [/.+/] }
+        }
       },
       {
         extends: true,
         test: {
           name: "artifact",
           environment: "node",
-          include: ["src/server/integration.test.ts"],
-        },
-      },
-    ],
-  },
+          include: ["src/server/integration.test.ts"]
+        }
+      }
+    ]
+  }
 });

@@ -10,12 +10,12 @@ export const post = style({
   alignItems: "start",
   gap: vars.gap,
   "@media": {
-    [media.tablet]: { gridTemplateColumns: "minmax(0, 1fr)" },
-  },
+    [media.tablet]: { gridTemplateColumns: "minmax(0, 1fr)" }
+  }
 });
 
 export const cover = style({
-  gridColumn: "1 / -1",
+  gridColumn: "1 / -1"
 });
 
 export const article = style({
@@ -25,15 +25,15 @@ export const article = style({
   gridTemplateColumns: "subgrid",
   gridTemplateRows: "subgrid",
   gridColumn: "1 / -1",
-  gridRow: "1 / 3",
+  gridRow: "1 / 3"
 });
 
 export const aside = style({
   gridColumn: 2,
   gridRow: 2,
   "@media": {
-    [media.tablet]: { gridColumn: 1, gridRow: 3 },
-  },
+    [media.tablet]: { gridColumn: 1, gridRow: 3 }
+  }
 });
 
 export const body = style({
@@ -42,8 +42,8 @@ export const body = style({
   minWidth: 0,
   padding: "44px 52px 52px",
   "@media": {
-    [media.phone]: { padding: "28px 22px" },
-  },
+    [media.phone]: { padding: "28px 22px" }
+  }
 });
 
 export const more = style({
@@ -51,13 +51,13 @@ export const more = style({
   gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
   gap: vars.gap,
   "@media": {
-    [threeUp]: { gridTemplateColumns: "1fr" },
-  },
+    [threeUp]: { gridTemplateColumns: "1fr" }
+  }
 });
 
 export const tile = style({
   minHeight: 230,
   "@media": {
-    [threeUp]: { minHeight: 200 },
-  },
+    [threeUp]: { minHeight: 200 }
+  }
 });

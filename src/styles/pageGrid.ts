@@ -7,8 +7,8 @@ export const PAGE_GRID = {
   gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
   gap: vars.gap,
   "@media": {
-    [media.tablet]: { gridTemplateColumns: "repeat(6, minmax(0, 1fr))" },
-  },
+    [media.tablet]: { gridTemplateColumns: "repeat(6, minmax(0, 1fr))" }
+  }
 } satisfies StyleRule;
 
 /**
@@ -19,6 +19,6 @@ export function pageGridWith({ "@media": queries, ...changes }: StyleRule): stri
   return style({
     ...PAGE_GRID,
     ...changes,
-    "@media": { ...PAGE_GRID["@media"], ...queries },
+    "@media": { ...PAGE_GRID["@media"], ...queries }
   });
 }

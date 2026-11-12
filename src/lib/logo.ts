@@ -19,7 +19,7 @@ export function frameRect(index: number) {
     left: (index % columns) * size,
     top: Math.floor(index / columns) * size,
     width: size,
-    height: size,
+    height: size
   };
 }
 
@@ -27,7 +27,7 @@ export function frameRect(index: number) {
 export function drawFrame(
   context: CanvasRenderingContext2D,
   sheet: HTMLImageElement,
-  index: number,
+  index: number
 ) {
   const { left, top, width, height } = frameRect(index);
   const { canvas } = context;

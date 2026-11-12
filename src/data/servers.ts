@@ -11,7 +11,7 @@ export const servers: readonly ServerDefinition[] = [
   { slug: "pvp", label: "PvP", hostname: "pvp.md.xpdustry.com" },
   { slug: "attack", label: "Attack", hostname: "attack.md.xpdustry.com" },
   { slug: "tower", label: "Tower Defense", hostname: "tower.md.xpdustry.com" },
-  { slug: "event", label: "Event", hostname: "event.md.xpdustry.com" },
+  { slug: "event", label: "Event", hostname: "event.md.xpdustry.com" }
 ];
 
 export const HUB = servers[0]!;

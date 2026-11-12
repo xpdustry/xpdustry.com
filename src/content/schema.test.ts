@@ -6,16 +6,16 @@ const valid = {
   description: "The last breaking change before the stable release.",
   publishedAt: "2026-07-20",
   author: "phinner",
-  topic: "NoHorny",
+  topic: "NoHorny"
 };
 
 test.each(["2024-02-29", new Date("2024-02-29T00:00:00Z")])(
   "normalizes YAML date input %s to UTC",
   (publishedAt) => {
     expect(parseBlogFrontmatter("a.md", { ...valid, publishedAt }).publishedAt).toBe(
-      "2024-02-29T00:00:00.000Z",
+      "2024-02-29T00:00:00.000Z"
     );
-  },
+  }
 );
 
 test.each(["2026-02-29", "2026-04-31"])("rejects calendar rollover for %s", (publishedAt) => {
@@ -26,8 +26,8 @@ test("rejects duplicate release references within a post", () => {
   expect(() =>
     parseBlogFrontmatter("a.md", {
       ...valid,
-      releases: ["xpdustry/nohorny@v1", "xpdustry/nohorny@v1"],
-    }),
+      releases: ["xpdustry/nohorny@v1", "xpdustry/nohorny@v1"]
+    })
   ).toThrow(/duplicate/);
 });
 

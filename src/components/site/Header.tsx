@@ -8,7 +8,7 @@ import {
   PlinthAnchor,
   PlinthButton,
   PlinthLink,
-  PlinthSectionLink,
+  PlinthSectionLink
 } from "#app/components/ui/Plinth";
 import type { PlayerCount } from "#app/data/live";
 import { SITE } from "#app/data/site";

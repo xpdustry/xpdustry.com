@@ -4,7 +4,7 @@ import type {
   ButtonHTMLAttributes,
   ComponentProps,
   ReactNode,
-  Ref,
+  Ref
 } from "react";
 import * as styles from "./Plinth.css";
 
@@ -29,7 +29,7 @@ function plinthClass({ tone = "teal", size = "md", icon, done, failed, className
     icon && styles.icon,
     done && styles.done,
     failed && styles.failed,
-    className,
+    className
   ]
     .filter(Boolean)
     .join(" ");

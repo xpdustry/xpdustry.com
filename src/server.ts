@@ -63,7 +63,7 @@ function withHeaders(response: Response, edit: (headers: Headers) => void): Resp
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers,
+    headers
   });
 }
 
@@ -90,5 +90,5 @@ export default createServerEntry({
       headers.set("cache-control", "private, no-cache");
       headers.append("vary", "accept-language, cookie, sec-fetch-site");
     });
-  },
+  }
 });

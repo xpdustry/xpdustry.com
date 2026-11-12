@@ -5,11 +5,11 @@ export const mark = style({
   margin: "-6px -4px -6px -8px",
   cursor: "pointer",
   userSelect: "none",
-  WebkitTouchCallout: "none",
+  WebkitTouchCallout: "none"
 });
 
 globalStyle(`${mark} img, ${mark} canvas`, {
   display: "block",
   width: "100%",
-  height: "auto",
+  height: "auto"
 });

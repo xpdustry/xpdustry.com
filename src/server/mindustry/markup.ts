@@ -10,8 +10,8 @@ const NAMED_COLORS: ReadonlySet<string> = new Set(
     "brown tan brick",
     "red scarlet crimson coral salmon pink magenta",
     "purple violet maroon",
-    "accent unlaunched highlight stat negstat",
-  ].flatMap((group) => group.split(" ")),
+    "accent unlaunched highlight stat negstat"
+  ].flatMap((group) => group.split(" "))
 );
 
 /** The text without its colour tags. Does not make it safe for HTML. */

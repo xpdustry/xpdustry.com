@@ -6,23 +6,23 @@ import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "#ap
 const IsoCalendarDateSchema = v.pipe(
   v.string(),
   v.isoDate("must be an ISO date"),
-  v.check(isCalendarDate, "must be a valid calendar date"),
+  v.check(isCalendarDate, "must be a valid calendar date")
 );
 
 const BlogFrontmatterDateSchema = v.pipe(
   v.union([
     v.pipe(
       IsoCalendarDateSchema,
-      v.transform((value) => new Date(`${value}T00:00:00.000Z`)),
+      v.transform((value) => new Date(`${value}T00:00:00.000Z`))
     ),
-    v.date("must be a valid date"),
+    v.date("must be a valid date")
   ]),
-  v.transform((value) => value.toISOString()),
+  v.transform((value) => value.toISOString())
 );
 
 const ReleaseIdSchema = v.pipe(
   v.string(),
-  v.regex(/^[\w.-]+\/[\w.-]+@\S+$/, "must be owner/repo@tag"),
+  v.regex(/^[\w.-]+\/[\w.-]+@\S+$/, "must be owner/repo@tag")
 );
 
 const BlogFrontmatterSchema = v.strictObject(
@@ -38,11 +38,11 @@ const BlogFrontmatterSchema = v.strictObject(
     releases: v.optional(
       v.pipe(
         v.array(ReleaseIdSchema),
-        v.checkItems((id, index, ids) => ids.indexOf(id) === index, "contains a duplicate id"),
-      ),
-    ),
+        v.checkItems((id, index, ids) => ids.indexOf(id) === index, "contains a duplicate id")
+      )
+    )
   },
-  "frontmatter is missing or is not a mapping",
+  "frontmatter is missing or is not a mapping"
 );
 
 export type BlogFrontmatter = v.InferOutput<typeof BlogFrontmatterSchema>;

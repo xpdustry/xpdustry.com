@@ -3,7 +3,7 @@ import { Resolver } from "node:dns/promises";
 import {
   decodeServerInfo,
   MalformedPacketError,
-  QUERY_PACKET,
+  QUERY_PACKET
 } from "#app/server/mindustry/protocol";
 import type { MindustryStatusProbe } from "#app/server/mindustry/status";
 
@@ -47,7 +47,7 @@ type SrvResolution = { kind: "direct-fallback" } | { kind: "authoritative"; reco
 class ProbeFailure extends Error {}
 
 export function createNodeMindustryProbe(
-  options: NodeMindustryProbeOptions = {},
+  options: NodeMindustryProbeOptions = {}
 ): NodeMindustryProbe {
   const resolver = new Resolver({ timeout: 2_000, tries: 2 });
   const resolveSrv = options.resolveSrv ?? ((service) => resolver.resolveSrv(service));
@@ -86,7 +86,7 @@ export function createNodeMindustryProbe(
               endpoint,
               exchange,
               endpointTimeoutMs,
-              operation.signal,
+              operation.signal
             );
             return decodeServerInfo(packet);
           } catch (error) {
@@ -120,7 +120,7 @@ export function createNodeMindustryProbe(
       active.clear();
       resolver.cancel();
       exchange.closeAll();
-    },
+    }
   };
 }
 
@@ -140,7 +140,7 @@ function describeFailure(phase: string, error: unknown): string {
 async function resolveRecords(
   hostname: string,
   resolveSrv: (service: string) => Promise<readonly SrvRecord[]>,
-  signal: AbortSignal,
+  signal: AbortSignal
 ): Promise<SrvResolution> {
   try {
     if (signal.aborted) throw abortError();
@@ -180,8 +180,8 @@ function orderSrvEndpoints(records: readonly SrvRecord[], random: () => number):
   return priorities.flatMap((priority) =>
     weightedOrder(
       records.filter((record) => record.priority === priority),
-      random,
-    ).map((record) => ({ hostname: record.name, port: record.port })),
+      random
+    ).map((record) => ({ hostname: record.name, port: record.port }))
   );
 }
 
@@ -226,7 +226,7 @@ async function attemptEndpoint(
   endpoint: Endpoint,
   exchange: EndpointExchange,
   timeoutMs: number,
-  parentSignal: AbortSignal,
+  parentSignal: AbortSignal
 ): Promise<Uint8Array> {
   const attempt = new AbortController();
   const stopForwarding = forwardAbort(parentSignal, attempt);
@@ -268,7 +268,7 @@ function withAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
       (error: unknown) => {
         signal.removeEventListener("abort", aborted);
         reject(error);
-      },
+      }
     );
   });
 }
@@ -340,7 +340,7 @@ function createUdpExchange(): EndpointExchange {
     closeAll() {
       for (const socket of open) closeSocket(socket);
       open.clear();
-    },
+    }
   };
 }
 

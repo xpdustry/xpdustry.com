@@ -8,7 +8,7 @@ export const FACE = {
   mono: "DM Mono",
   cyrillicDisplay: "Golos Display",
   cyrillicText: "Golos Text",
-  cyrillicMono: "Plex Mono Cyrillic",
+  cyrillicMono: "Plex Mono Cyrillic"
 } as const;
 
 /** The display face's one weight: heavy, under the name regular. */

@@ -17,10 +17,10 @@ export const online = style({
     height: 8,
     borderRadius: "50%",
     background: light,
-    boxShadow: `0 0 0 3px color-mix(in srgb, ${light} 22%, transparent)`,
-  },
+    boxShadow: `0 0 0 3px color-mix(in srgb, ${light} 22%, transparent)`
+  }
 });
 
 export const offline = style({
-  vars: { [light]: vars.n10 },
+  vars: { [light]: vars.n10 }
 });

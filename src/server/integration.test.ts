@@ -34,7 +34,7 @@ async function startProductionServer(): Promise<{ origin: string; stop: () => Pr
   const server = spawn(process.execPath, ["scripts/serve.ts"], {
     cwd: fileURLToPath(new URL("../../", import.meta.url)),
     env: { ...process.env, PORT: "0", HOST: "127.0.0.1", TEST: "" },
-    stdio: ["ignore", "pipe", "pipe"],
+    stdio: ["ignore", "pipe", "pipe"]
   });
   const exited = once(server, "exit");
   const stop = async () => {
@@ -96,13 +96,13 @@ describe("built pages", () => {
       expect(html).toContain("this page does not exist");
       expect(html).not.toContain('<link rel="canonical"');
       expect(html).toContain('<meta name="robots" content="noindex"');
-    },
+    }
   );
 
   test("home publishes a parseable website and organization graph", async () => {
     const html = await (await get("/")).text();
     const scripts = [
-      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g),
+      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)
     ];
     expect(scripts).toHaveLength(1);
     expect(JSON.parse(scripts[0]![1]!)).toMatchObject({
@@ -112,22 +112,22 @@ describe("built pages", () => {
         {
           "@type": "Organization",
           "@id": "https://xpdustry.com/#organization",
-          logo: "https://xpdustry.com/icon-512.png",
-        },
-      ],
+          logo: "https://xpdustry.com/icon-512.png"
+        }
+      ]
     });
   });
 
   test.each([
     ["nohorny-4-beta-1", "Say hello to NoHorny v4 beta 1"],
-    ["nohorny-4-beta-8", "NoHorny 4 Beta 8: Breaking changes and blurred alerts"],
+    ["nohorny-4-beta-8", "NoHorny 4 Beta 8: Breaking changes and blurred alerts"]
   ])("%s identifies the product and publishes post structured data", async (slug, title) => {
     const html = await (await get(`/blog/${slug}`)).text();
     expect(html).toContain(`<title>${title} - Xpdustry</title>`);
     expect(html).toContain(`<meta property="og:title" content="${title} - Xpdustry"`);
     expect(html).toContain(`<meta name="twitter:title" content="${title} - Xpdustry"`);
     const scripts = [
-      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g),
+      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)
     ];
     expect(scripts).toHaveLength(1);
     expect(JSON.parse(scripts[0]![1]!)).toMatchObject({
@@ -139,29 +139,29 @@ describe("built pages", () => {
           author: { "@type": "Person", name: "phinner", url: "https://github.com/phinner" },
           publisher: { "@id": "https://xpdustry.com/#organization" },
           image: `https://xpdustry.com/og/blog/${slug}.png`,
-          mainEntityOfPage: `https://xpdustry.com/blog/${slug}`,
+          mainEntityOfPage: `https://xpdustry.com/blog/${slug}`
         },
         {
           "@type": "BreadcrumbList",
           itemListElement: [
             { position: 1, name: "Home" },
             { position: 2, name: "Blog" },
-            { position: 3, name: title, item: `https://xpdustry.com/blog/${slug}` },
-          ],
-        },
-      ],
+            { position: 3, name: title, item: `https://xpdustry.com/blog/${slug}` }
+          ]
+        }
+      ]
     });
     const main = /<main\b[^>]*>([\s\S]*?)<\/main>/.exec(html)?.[1];
     const article = /<article\b[^>]*>([\s\S]*?)<\/article>/.exec(main ?? "")?.[1];
     expect(article).toMatch(
-      /<header\b[\s\S]*<h1[^>]*>[\s\S]*NoHorny[\s\S]*<\/h1>[\s\S]*<time[\s\S]*<\/header>/,
+      /<header\b[\s\S]*<h1[^>]*>[\s\S]*NoHorny[\s\S]*<\/h1>[\s\S]*<time[\s\S]*<\/header>/
     );
     const heading = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(article ?? "")?.[1];
     expect(
       heading
         ?.replace(/<[^>]*>/g, "")
         .replace(/\s+/g, " ")
-        .trim(),
+        .trim()
     ).toBe(title);
     expect(article).toContain("<p>");
     expect(main).toContain('id="more"');
@@ -176,7 +176,7 @@ describe("built pages", () => {
         expect(/href="([^"]+)"/.exec(link)?.[1]).toBe(path);
       }
       if (path === "/" || path === "/blog") expect(currentLinks.length).toBeGreaterThan(0);
-    },
+    }
   );
 
   test("route metadata replaces rather than duplicates document metadata", async () => {
@@ -197,7 +197,7 @@ describe("locales", () => {
       expect(html).toContain(`<html lang="${locale}"`);
       expect(html).toContain(`href="/${locale}/blog/nohorny-4-beta-8"`);
       expect(html).toContain(`<link rel="canonical" href="https://xpdustry.com/${locale}/blog"`);
-    },
+    }
   );
 
   test("every page names its other languages, to crawlers and in the sitemap", async () => {
@@ -206,13 +206,13 @@ describe("locales", () => {
       ["en", "/blog/nohorny-4-beta-8"],
       ["fr", "/fr/blog/nohorny-4-beta-8"],
       ["ru", "/ru/blog/nohorny-4-beta-8"],
-      ["x-default", "/blog/nohorny-4-beta-8"],
+      ["x-default", "/blog/nohorny-4-beta-8"]
     ]) {
       expect(html).toMatch(
         new RegExp(
           `<link rel="alternate" hrefLang="${lang}" href="https://xpdustry.com${path}"`,
-          "i",
-        ),
+          "i"
+        )
       );
     }
     const sitemap = await (await get("/sitemap.xml")).text();
@@ -249,7 +249,7 @@ describe("permanent redirects", () => {
       const response = await get(`${path}?q=a%20b&tag=one&tag=two`);
       expect(response.status).toBe(308);
       expect(response.headers.get("location")).toBe(`${path.slice(0, -1)}?q=a%20b&tag=one&tag=two`);
-    },
+    }
   );
 
   test("does not invent replacements for unknown images", async () => {
@@ -274,7 +274,7 @@ test("the production file server preserves every public URL from the previous si
     "/og.png",
     "/phinner.svg",
     "/robots.txt",
-    "/site.webmanifest",
+    "/site.webmanifest"
   ];
   const { origin, stop } = await startProductionServer();
   try {
@@ -294,7 +294,7 @@ test("the production file server preserves every public URL from the previous si
     for (const [accepted, coding] of [
       ["gzip;q=0", null],
       ["identity", null],
-      ["br;q=0.5, gzip", "gzip"],
+      ["br;q=0.5, gzip", "gzip"]
     ]) {
       const page = await fetch(`${origin}/`, { headers: { "accept-encoding": accepted! } });
       expect(page.headers.get("content-encoding"), accepted!).toBe(coding);
@@ -310,19 +310,19 @@ test("the production server runs from what the container image ships", async () 
   const root = new URL("../../", import.meta.url);
   const shipped = [
     ...(await readFile(new URL("Containerfile", root), "utf8")).matchAll(
-      /^COPY --from=build \S+ \/app\/(\S+)/gm,
-    ),
+      /^COPY --from=build \S+ \/app\/(\S+)/gm
+    )
   ].map(([, path]) => path);
   const imports = [
     ...(await readFile(new URL("scripts/serve.ts", root), "utf8")).matchAll(
-      /(?:from|import\()\s*["'](\.[^"']+)["']/g,
-    ),
+      /(?:from|import\()\s*["'](\.[^"']+)["']/g
+    )
   ].map(([, specifier]) => new URL(specifier, new URL("scripts/", root)).pathname);
   for (const imported of imports) {
     const path = imported.slice(root.pathname.length);
     expect(
       shipped.some((copied) => path === copied || path.startsWith(`${copied}/`)),
-      `${path} is imported by scripts/serve.ts but not copied into the image`,
+      `${path} is imported by scripts/serve.ts but not copied into the image`
     ).toBe(true);
   }
 });
@@ -334,7 +334,7 @@ describe("post body chunks", () => {
       const html = await (await get(path)).text();
       const preloads = [...html.matchAll(/<link[^>]*rel="modulepreload"[^>]*>/g)].join("\n");
       expect(preloads).not.toMatch(/nohorny-4-beta-\d+-/);
-    },
+    }
   );
 
   test("each post body remains a separate dynamic chunk", async () => {
@@ -368,12 +368,12 @@ describe("built API", () => {
     "server function %j is a plain 404",
     async (id) => {
       const response = await fetchApp(
-        new Request(`https://xpdustry.com/_serverFn/${id}`, { headers: sameOrigin }),
+        new Request(`https://xpdustry.com/_serverFn/${id}`, { headers: sameOrigin })
       );
       expect(response.status).toBe(404);
       expect(response.headers.has("set-cookie")).toBe(false);
       expect(await response.text()).toBe("Not Found");
-    },
+    }
   );
 
   test("every server function the build defines still answers", async () => {
@@ -387,7 +387,7 @@ describe("built API", () => {
     expect(ids.length).toBeGreaterThan(0);
     for (const id of ids) {
       const response = await fetchApp(
-        new Request(`https://xpdustry.com/_serverFn/${id}`, { headers: sameOrigin }),
+        new Request(`https://xpdustry.com/_serverFn/${id}`, { headers: sameOrigin })
       );
       expect(response.status, id).toBe(200);
     }
@@ -405,7 +405,7 @@ describe("built API", () => {
     expect(snapshot.servers.length).toBeGreaterThan(0);
     expect(snapshot).toEqual(await (await get("/api/servers")).json());
     expect(
-      snapshot.servers.every((server: { status: string }) => server.status === "polling"),
+      snapshot.servers.every((server: { status: string }) => server.status === "polling")
     ).toBe(true);
   });
 });
@@ -415,7 +415,7 @@ describe("built social cards", () => {
     for (const path of ["/", "/blog", "/blog/nohorny-4-beta-8"]) {
       const html = await (await get(path)).text();
       const card = /<meta property="og:image" content="https:\/\/xpdustry\.com([^"]+)"/.exec(
-        html,
+        html
       )?.[1];
       expect(card, path).toMatch(/^\/og\/.+\.png$/);
 
@@ -424,7 +424,7 @@ describe("built social cards", () => {
       expect(response.headers.get("content-type")).toBe("image/png");
       expect(response.headers.get("cache-control")).toContain("max-age=3600");
       expect(new Uint8Array(await response.arrayBuffer()).subarray(1, 4)).toEqual(
-        new TextEncoder().encode("PNG"),
+        new TextEncoder().encode("PNG")
       );
     }
   });
@@ -432,7 +432,7 @@ describe("built social cards", () => {
   test("a locale's pages point at cards in that locale, whatever the visitor prefers", async () => {
     const html = await (await get("/ru/blog")).text();
     expect(html).toContain(
-      '<meta property="og:image" content="https://xpdustry.com/ru/og/blog.png"',
+      '<meta property="og:image" content="https://xpdustry.com/ru/og/blog.png"'
     );
 
     const localized = await get("/ru/og/blog.png");
@@ -442,8 +442,8 @@ describe("built social cards", () => {
     const plain = new Uint8Array(await (await get("/og/home.png")).arrayBuffer());
     const preferring = await fetchApp(
       new Request("http://localhost/og/home.png", {
-        headers: { "accept-language": "ru", cookie: "generaltranslation.locale=ru" },
-      }),
+        headers: { "accept-language": "ru", cookie: "generaltranslation.locale=ru" }
+      })
     );
     expect(preferring.status).toBe(200);
     expect(new Uint8Array(await preferring.arrayBuffer())).toEqual(plain);
@@ -459,7 +459,7 @@ describe("what a visitor sends", () => {
   const hostile = {
     cookie:
       "generaltranslation.enable-i18n=false; generaltranslation.locale=ru; generaltranslation.region=US; generaltranslation.reset-locale=true",
-    "accept-language": "ru-RU,ru;q=0.9,fr;q=0.8",
+    "accept-language": "ru-RU,ru;q=0.9,fr;q=0.8"
   };
 
   test("cannot change what a shared cache keeps", async () => {
@@ -470,7 +470,7 @@ describe("what a visitor sends", () => {
       "/ru/og/blog.png",
       "/fr/og/blog/nohorny-4-beta-8.png",
       "/sitemap.xml",
-      "/api/servers",
+      "/api/servers"
     ];
     // A server of its own renders every card for the hostile request first, the way the first
     // visitor after a restart would, so a poisoned card would be the one it keeps.
@@ -497,14 +497,14 @@ describe("what a visitor sends", () => {
     async (path) => {
       const clean = await (await get(path)).text();
       const response = await fetchApp(
-        new Request(`https://xpdustry.com${path}`, { headers: hostile }),
+        new Request(`https://xpdustry.com${path}`, { headers: hostile })
       );
       expect(response.status).toBe(200);
       const html = await response.text();
       const title = (page: string) => /<title>([^<]*)<\/title>/.exec(page)?.[1];
       expect(title(html)).toBe(title(clean));
       expect(html).toContain(`<html lang="${path.slice(1, 3)}"`);
-    },
+    }
   );
 
   test("a link followed within the site to an unprefixed page reads in English", async () => {
@@ -514,9 +514,9 @@ describe("what a visitor sends", () => {
           "accept-language": "fr-FR,fr;q=0.9",
           cookie: "generaltranslation.locale=fr",
           "sec-fetch-site": "same-origin",
-          "sec-fetch-mode": "navigate",
-        },
-      }),
+          "sec-fetch-mode": "navigate"
+        }
+      })
     );
     expect(response.status).toBe(200);
     expect(await response.text()).toContain('<html lang="en"');
@@ -526,7 +526,7 @@ describe("what a visitor sends", () => {
   test("the first-visit redirect stays with the visitor it was chosen for", async () => {
     const visitors: Record<string, string>[] = [
       { "accept-language": "fr-FR,fr;q=0.9" },
-      { cookie: "generaltranslation.locale=ru" },
+      { cookie: "generaltranslation.locale=ru" }
     ];
     for (const headers of visitors) {
       const response = await fetchApp(new Request("https://xpdustry.com/blog", { headers }));

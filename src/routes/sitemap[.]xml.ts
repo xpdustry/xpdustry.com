@@ -13,21 +13,21 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/blog", lastmod: posts[0]?.frontmatter.publishedAt },
           ...posts.map((post) => ({
             path: `/blog/${post.slug}`,
-            lastmod: post.frontmatter.updatedAt ?? post.frontmatter.publishedAt,
-          })),
+            lastmod: post.frontmatter.updatedAt ?? post.frontmatter.publishedAt
+          }))
         ];
         const at = (path: string, locale: string) => `${SITE.origin}${withLocale(path, locale)}`;
         const urls = pages.flatMap(({ path, lastmod }) => {
           const alternates = [
             ...LOCALES.map(
               (locale) =>
-                `<xhtml:link rel="alternate" hreflang="${locale}" href="${at(path, locale)}"/>`,
+                `<xhtml:link rel="alternate" hreflang="${locale}" href="${at(path, locale)}"/>`
             ),
-            `<xhtml:link rel="alternate" hreflang="x-default" href="${at(path, DEFAULT_LOCALE)}"/>`,
+            `<xhtml:link rel="alternate" hreflang="x-default" href="${at(path, DEFAULT_LOCALE)}"/>`
           ].join("");
           const modified = lastmod ? `<lastmod>${lastmod.slice(0, 10)}</lastmod>` : "";
           return LOCALES.map(
-            (locale) => `  <url><loc>${at(path, locale)}</loc>${modified}${alternates}</url>`,
+            (locale) => `  <url><loc>${at(path, locale)}</loc>${modified}${alternates}</url>`
           );
         });
         const xml = [
@@ -35,15 +35,15 @@ export const Route = createFileRoute("/sitemap.xml")({
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
           ...urls,
           "</urlset>",
-          "",
+          ""
         ].join("\n");
         return new Response(xml, {
           headers: {
             "content-type": "application/xml; charset=utf-8",
-            "cache-control": "public, max-age=3600",
-          },
+            "cache-control": "public, max-age=3600"
+          }
         });
-      },
-    },
-  },
+      }
+    }
+  }
 });

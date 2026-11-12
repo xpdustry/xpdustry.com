@@ -17,7 +17,7 @@ interface LocaleInfo {
 const INFO: Record<string, LocaleInfo> = {
   en: { name: "English", format: "en-GB", openGraph: "en_US" },
   fr: { name: "Français", format: "fr-FR", openGraph: "fr_FR" },
-  ru: { name: "Русский", format: "ru-RU", openGraph: "ru_RU" },
+  ru: { name: "Русский", format: "ru-RU", openGraph: "ru_RU" }
 };
 
 export function localeInfo(locale: string): LocaleInfo {

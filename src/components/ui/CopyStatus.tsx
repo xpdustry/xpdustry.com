@@ -8,7 +8,7 @@ import type { CopyState } from "#app/lib/useCopy";
 export function CopyStatus({
   state,
   text,
-  copied,
+  copied
 }: {
   state: CopyState;
   text: string;

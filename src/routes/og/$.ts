@@ -13,10 +13,10 @@ export const Route = createFileRoute("/og/$")({
           headers: {
             "content-type": "image/png",
             "content-length": String(png.byteLength),
-            "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
-          },
+            "cache-control": "public, max-age=3600, stale-while-revalidate=86400"
+          }
         });
-      },
-    },
-  },
+      }
+    }
+  }
 });

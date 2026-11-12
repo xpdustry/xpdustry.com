@@ -75,7 +75,7 @@ function TabAction({ action }: { action: TrayAction }) {
     tone: "ink",
     size: "sm",
     className: styles.action,
-    "aria-label": action.label,
+    "aria-label": action.label
   } as const;
   return action.to !== undefined ? (
     <PlinthLink {...plinth} to={action.to} activeOptions={{ exact: true }}>

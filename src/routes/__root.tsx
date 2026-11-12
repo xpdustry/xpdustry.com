@@ -3,7 +3,7 @@ import {
   Scripts,
   createRootRoute,
   rootRouteId,
-  useMatch,
+  useMatch
 } from "@tanstack/react-router";
 import { getLocale, getTranslationsSnapshot, GTProvider, T } from "gt-tanstack-start";
 import { useEffect, type ReactNode } from "react";
@@ -29,7 +29,7 @@ export const Route = createRootRoute({
     const locale = getLocale();
     const [live, translations] = await Promise.all([
       getLiveData(),
-      getTranslationsSnapshot(locale),
+      getTranslationsSnapshot(locale)
     ]);
     return { live, locale, translations };
   },
@@ -37,7 +37,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: CROWN.settings.color },
+      { name: "theme-color", content: CROWN.settings.color }
     ],
     links: [
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
@@ -51,11 +51,11 @@ export const Route = createRootRoute({
         href,
         as: "image",
         type: "image/webp",
-        fetchPriority: FRAME_IMAGES.includes(href) ? ("high" as const) : ("low" as const),
-      })),
-    ],
+        fetchPriority: FRAME_IMAGES.includes(href) ? ("high" as const) : ("low" as const)
+      }))
+    ]
   }),
-  shellComponent: Document,
+  shellComponent: Document
 });
 
 /**

@@ -8,7 +8,7 @@ test("calls the function with serialized arguments and in-page expressions", () 
     },
     inPage("sink"),
     'a "quoted" label',
-    3,
+    3
   );
   const sink: string[] = [];
 

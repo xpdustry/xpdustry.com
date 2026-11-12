@@ -13,9 +13,9 @@ export const cover = style([
     minHeight: 300,
     padding: "40px 44px 34px",
     "@media": {
-      [media.phone]: { padding: "28px 24px" },
-    },
-  },
+      [media.phone]: { padding: "28px 24px" }
+    }
+  }
 ]);
 
 export const logo = style([
@@ -27,9 +27,9 @@ export const logo = style([
     width: 132,
     translate: "0 -50%",
     "@media": {
-      [media.tablet]: { display: "none" },
-    },
-  },
+      [media.tablet]: { display: "none" }
+    }
+  }
 ]);
 
 /**
@@ -45,20 +45,20 @@ export const crumbs = style({
   "::before": {
     content: '""',
     order: 1,
-    flexBasis: "100%",
-  },
+    flexBasis: "100%"
+  }
 });
 
 export const back = style({
-  gap: 4,
+  gap: 4
 });
 
 export const topic = style({
-  justifySelf: "start",
+  justifySelf: "start"
 });
 
 export const heading = style({
-  display: "contents",
+  display: "contents"
 });
 
 export const title = style({
@@ -72,20 +72,20 @@ export const title = style({
   letterSpacing: tracking.display,
   textWrap: "balance",
   "@media": {
-    [media.phone]: { fontSize: rem(font.h2) },
-  },
+    [media.phone]: { fontSize: rem(font.h2) }
+  }
 });
 
 export const description = style({
   maxWidth: "52ch",
   marginTop: 16,
   fontSize: rem(font.lead),
-  color: vars.muted,
+  color: vars.muted
 });
 
 export const byline = style({
   display: "flex",
   flexWrap: "wrap",
   gap: 10,
-  marginTop: 24,
+  marginTop: 24
 });

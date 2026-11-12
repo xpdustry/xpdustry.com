@@ -12,7 +12,7 @@ export const hero = style({
   flexDirection: "column",
   justifyContent: "center",
   padding: 34,
-  background: vars.t3,
+  background: vars.t3
 });
 
 const NAME_WIDTH_EM = 4.45;
@@ -21,21 +21,21 @@ const MARK_GAP_ALLOWANCE_PX = 26;
 
 export const brand = style({
   vars: {
-    [size]: `min(${fallbackVar(sizeMax, rem(96))}, calc((100cqi - ${MARK_GAP_ALLOWANCE_PX}px) / ${(NAME_WIDTH_EM + MARK_WIDTH_EM).toFixed(2)}))`,
+    [size]: `min(${fallbackVar(sizeMax, rem(96))}, calc((100cqi - ${MARK_GAP_ALLOWANCE_PX}px) / ${(NAME_WIDTH_EM + MARK_WIDTH_EM).toFixed(2)}))`
   },
   display: "flex",
   alignItems: "center",
   gap: 18,
   "@media": {
     [media.tablet]: { vars: { [sizeMax]: rem(72) } },
-    [media.phone]: { vars: { [sizeMax]: rem(52) }, gap: 12 },
-  },
+    [media.phone]: { vars: { [sizeMax]: rem(52) }, gap: 12 }
+  }
 });
 
 export const mark = style({
   selectors: {
-    [`${hero} &`]: { width: `calc(${size} * ${MARK_WIDTH_EM})` },
-  },
+    [`${hero} &`]: { width: `calc(${size} * ${MARK_WIDTH_EM})` }
+  }
 });
 
 globalStyle(`${brand} h1`, {
@@ -44,7 +44,7 @@ globalStyle(`${brand} h1`, {
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   color: vars.t12,
-  textWrap: "balance",
+  textWrap: "balance"
 });
 
 globalStyle(`${hero} p`, {
@@ -53,12 +53,12 @@ globalStyle(`${hero} p`, {
   fontSize: rem(font.lead),
   lineHeight: leading.text,
   color: vars.t12,
-  opacity: 0.85,
+  opacity: 0.85
 });
 
 export const actions = style({
   display: "flex",
   flexWrap: "wrap",
   gap: 10,
-  marginTop: 26,
+  marginTop: 26
 });

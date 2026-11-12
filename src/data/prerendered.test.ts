@@ -10,7 +10,7 @@ test.each(TEXTURES)("$file matches its settings", async (texture) => {
   expect(file, `${texture.file} is missing`).toBeDefined();
   expect([file!.info.width, file!.info.height]).toEqual([rendered.width, rendered.height]);
   expect(file!.data.equals(Buffer.from(rendered.pixels)), `${texture.file} is out of date`).toBe(
-    true,
+    true
   );
 });
 
@@ -21,7 +21,7 @@ test("the logo's frames match the logo", { timeout: 60_000 }, async () => {
   expect(file.data.equals(rendered.pixels), "logo-frames.webp is out of date").toBe(true);
 
   const resting = await sharp(rendered.pixels, {
-    raw: { width: rendered.width, height: rendered.height, channels: 4 },
+    raw: { width: rendered.width, height: rendered.height, channels: 4 }
   })
     .extract(restingFrame())
     .raw()

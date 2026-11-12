@@ -34,7 +34,7 @@ const DRIFT = inlineScript(
   media.motion,
   styles.TILE,
   styles.FAR,
-  styles.NEAR,
+  styles.NEAR
 );
 
 export function Background() {

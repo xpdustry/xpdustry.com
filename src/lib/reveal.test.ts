@@ -9,7 +9,7 @@ function browser({ loading = false, reduced = false, broken = false } = {}) {
   const block = { getBoundingClientRect: () => ({ top: 20, bottom: 100 }), animate };
   const document = {
     readyState: loading ? "loading" : "complete",
-    querySelectorAll: () => [block, block, block, block, block],
+    querySelectorAll: () => [block, block, block, block, block]
   };
   const addEventListener = vi.fn();
   return {
@@ -19,8 +19,8 @@ function browser({ loading = false, reduced = false, broken = false } = {}) {
       document,
       addEventListener,
       matchMedia: () => ({ matches: reduced }),
-      innerHeight: 800,
-    },
+      innerHeight: 800
+    }
   };
 }
 
@@ -41,7 +41,7 @@ describe("inline reveal", () => {
     runInNewContext(REVEAL, context);
     expect(animate).not.toHaveBeenCalled();
     expect(addEventListener).toHaveBeenCalledWith("DOMContentLoaded", expect.any(Function), {
-      once: true,
+      once: true
     });
     addEventListener.mock.calls[0]![1]();
     expect(animate).toHaveBeenCalled();

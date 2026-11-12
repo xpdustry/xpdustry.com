@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import {
   createNodeMindustryProbe,
   type EndpointExchange,
-  type SrvRecord,
+  type SrvRecord
 } from "#app/server/mindustry/transport";
 
 const friendly = "hub.md.xpdustry.com";
@@ -38,7 +38,7 @@ function record(name: string, priority: number, weight = 0, port = 6567): SrvRec
 
 function exchange(
   query: EndpointExchange["query"],
-  closeAll: EndpointExchange["closeAll"] = () => {},
+  closeAll: EndpointExchange["closeAll"] = () => {}
 ): EndpointExchange {
   return { query, closeAll };
 }
@@ -62,13 +62,13 @@ describe("createNodeMindustryProbe", () => {
       resolveSrv: async () => [
         record("last.example", 20),
         record("first.example", 10),
-        record("second.example", 10),
+        record("second.example", 10)
       ],
       exchange: exchange(async (endpoint) => {
         attempts.push(endpoint.hostname);
         throw new Error("offline");
       }),
-      random: () => 0,
+      random: () => 0
     });
 
     await expect(probe.query(friendly, signal())).rejects.toThrow("status query failed");
@@ -84,7 +84,7 @@ describe("createNodeMindustryProbe", () => {
         if (attempts.length === 1) throw new Error("offline");
         return packet();
       }),
-      random: () => 0.75,
+      random: () => 0.75
     });
 
     await expect(probe.query(friendly, signal())).resolves.toMatchObject({ name: "Hub" });
@@ -98,13 +98,13 @@ describe("createNodeMindustryProbe", () => {
       resolveSrv: async () => [
         record("first.example", 0),
         record("second.example", 0),
-        record("third.example", 0),
+        record("third.example", 0)
       ],
       exchange: exchange(async (endpoint) => {
         attempts.push(endpoint.hostname);
         throw new Error("offline");
       }),
-      random: () => rolls.shift() ?? 0,
+      random: () => rolls.shift() ?? 0
     });
 
     await expect(probe.query(friendly, signal())).rejects.toThrow();
@@ -118,7 +118,7 @@ describe("createNodeMindustryProbe", () => {
       exchange: exchange(async (endpoint) => {
         attempts.push(endpoint.hostname);
         throw new Error("offline");
-      }),
+      })
     });
 
     await expect(probe.query(friendly, signal())).rejects.toThrow();
@@ -132,8 +132,8 @@ describe("createNodeMindustryProbe", () => {
       "a DNS no-data result",
       async () => {
         throw Object.assign(new Error("no data"), { code: "ENODATA" });
-      },
-    ],
+      }
+    ]
   ])("uses the friendly host only for %s", async (_label, resolveSrv) => {
     const query = vi.fn(async () => packet());
     const probe = createNodeMindustryProbe({ resolveSrv, exchange: exchange(query) });
@@ -143,7 +143,7 @@ describe("createNodeMindustryProbe", () => {
     expect(query).toHaveBeenCalledWith(
       { hostname: friendly, port: 6567 },
       expect.any(Uint8Array),
-      expect.any(AbortSignal),
+      expect.any(AbortSignal)
     );
   });
 
@@ -151,7 +151,7 @@ describe("createNodeMindustryProbe", () => {
     const query = vi.fn(async () => packet());
     const probe = createNodeMindustryProbe({
       resolveSrv: async () => [record(".", 0)],
-      exchange: exchange(query),
+      exchange: exchange(query)
     });
 
     await expect(probe.query(friendly, signal())).rejects.toThrow("status query failed");
@@ -162,7 +162,7 @@ describe("createNodeMindustryProbe", () => {
     const query = vi.fn(async () => packet());
     const probe = createNodeMindustryProbe({
       resolveSrv: async () => [record("invalid.example", 0, 0, 0)],
-      exchange: exchange(query),
+      exchange: exchange(query)
     });
 
     await expect(probe.query(friendly, signal())).rejects.toThrow("status query failed");
@@ -177,13 +177,13 @@ describe("createNodeMindustryProbe", () => {
     const probe = createNodeMindustryProbe({
       resolveSrv: async () => [record("bad.example", 0), record("good.example", 0)],
       exchange: exchange(query),
-      random: () => 0,
+      random: () => 0
     });
 
     await expect(probe.query(friendly, signal())).resolves.toMatchObject({ name: "Backup" });
     expect(query.mock.calls.map(([endpoint]) => endpoint.hostname)).toEqual([
       "bad.example",
-      "good.example",
+      "good.example"
     ]);
   });
 
@@ -196,7 +196,7 @@ describe("createNodeMindustryProbe", () => {
         endpointSignal = activeSignal;
         started.resolve();
         return new Promise<Uint8Array>(() => {});
-      }),
+      })
     });
     const controller = new AbortController();
     const result = probe.query(friendly, controller.signal);
@@ -218,7 +218,7 @@ describe("createNodeMindustryProbe", () => {
         endpointSignal = activeSignal;
         started.resolve();
         return new Promise<Uint8Array>(() => {});
-      }, closeAll),
+      }, closeAll)
     });
     const result = probe.query(friendly, signal());
     await started.promise;
@@ -236,7 +236,7 @@ describe("createNodeMindustryProbe", () => {
       const probe = createNodeMindustryProbe({
         resolveSrv: () => new Promise(() => {}),
         exchange: exchange(async () => packet()),
-        timeoutMs: 50,
+        timeoutMs: 50
       });
       const result = probe.query(friendly, signal());
       const rejected = expect(result).rejects.toThrow("status query timed out");
@@ -254,7 +254,7 @@ describe("createNodeMindustryProbe", () => {
       resolveSrv: async () => [record("private-target.example", 0)],
       exchange: exchange(async () => {
         throw Object.assign(new Error("connect private-target.example"), { code: "ECONNREFUSED" });
-      }),
+      })
     });
 
     const result = probe.query(friendly, signal());

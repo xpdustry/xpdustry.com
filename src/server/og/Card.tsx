@@ -31,7 +31,7 @@ const color = {
   ink: "#eaf7f5",
   muted: "#a9d4cf",
   faint: "#78aaa5",
-  hair: "rgba(255,255,255,.14)",
+  hair: "rgba(255,255,255,.14)"
 } as const;
 
 export interface CardLanguage {
@@ -47,7 +47,7 @@ const LABEL = {
   latest: msg("Latest"),
   author: msg("Author"),
   published: msg("Published"),
-  topic: msg("Topic"),
+  topic: msg("Topic")
 };
 
 const DISPLAY = `${FACE.display}, ${FACE.cyrillicDisplay}`;
@@ -69,7 +69,7 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
         padding: "72px 80px 66px",
         background: color.ground,
         color: color.ink,
-        fontFamily: DISPLAY,
+        fontFamily: DISPLAY
       }}
     >
       <div
@@ -78,7 +78,7 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
           inset: 0,
           opacity: 0.12,
           background: `url(${texture}) 0 0 / 300px 300px`,
-          maskImage: "linear-gradient(115deg, transparent 22%, #000 78%)",
+          maskImage: "linear-gradient(115deg, transparent 22%, #000 78%)"
         }}
       />
       <div
@@ -87,7 +87,7 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 56,
+          gap: 56
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 760 }}>{children}</div>
@@ -108,7 +108,7 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
           right: 0,
           bottom: 0,
           height: 12,
-          background: color.accent,
+          background: color.accent
         }}
       />
     </div>
@@ -138,7 +138,7 @@ function Description({ children }: { children: ReactNode }) {
     marginTop: 26,
     fontSize: 34,
     lineHeight: 1.35,
-    color: color.muted,
+    color: color.muted
   };
   return <div style={style}>{children}</div>;
 }

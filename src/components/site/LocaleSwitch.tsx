@@ -40,7 +40,7 @@ const plainClick = (event: MouseEvent) =>
 export function LocaleList({
   id,
   popover,
-  className,
+  className
 }: {
   id?: string;
   popover?: boolean;

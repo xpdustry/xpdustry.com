@@ -18,5 +18,5 @@ const fromDisk: ServerMiddleware = (request, next) =>
 serve({
   fetch: async (request) => compressed(request, await app.default.fetch(request)),
   middleware: [fromDisk],
-  gracefulShutdown: true,
+  gracefulShutdown: true
 });

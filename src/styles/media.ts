@@ -11,7 +11,7 @@ export const media = {
   tablet: upTo(1100),
   motion: "(prefers-reduced-motion: no-preference)",
   still: "(prefers-reduced-motion: reduce)",
-  coarse: "(pointer: coarse)",
+  coarse: "(pointer: coarse)"
 } as const;
 
 /** A component's own turning point, where its content stops fitting: up to `width` px wide. */

@@ -12,7 +12,7 @@ function focusDestination(hash: string) {
   const main = document.getElementById("main");
   const target = [hash && document.getElementById(hash), main?.querySelector("h1"), main].find(
     (candidate): candidate is HTMLElement =>
-      candidate instanceof HTMLElement && candidate.getClientRects().length > 0,
+      candidate instanceof HTMLElement && candidate.getClientRects().length > 0
   );
   if (!target) return;
   const focusable = target.hasAttribute("tabindex");
@@ -44,7 +44,7 @@ export function RouteAnnouncer() {
           focusDestination(toLocation.hash);
         });
       }),
-    [router],
+    [router]
   );
 
   return (

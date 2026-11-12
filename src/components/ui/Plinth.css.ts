@@ -23,7 +23,7 @@ const palette = (colors: Palette) => ({
   [faceColor]: colors.face,
   [hoverColor]: colors.hover,
   [wall]: colors.wall,
-  [onColor]: colors.on,
+  [onColor]: colors.on
 });
 
 const teal: Palette = { face: vars.t9, hover: TEAL_HOVER, wall: vars.wall, on: vars.onTeal };
@@ -40,24 +40,24 @@ export const plinth = style({
   color: onColor,
   font: "inherit",
   textDecoration: "none",
-  cursor: "pointer",
+  cursor: "pointer"
 });
 
 export const tone = styleVariants({
   amber: {
-    vars: palette({ face: vars.a9, hover: AMBER_HOVER, wall: vars.amberWall, on: vars.onAmber }),
+    vars: palette({ face: vars.a9, hover: AMBER_HOVER, wall: vars.amberWall, on: vars.onAmber })
   },
-  ink: { vars: palette({ face: vars.tile, hover: vars.n3, wall: vars.outline, on: vars.ink }) },
+  ink: { vars: palette({ face: vars.tile, hover: vars.n3, wall: vars.outline, on: vars.ink }) }
 });
 
 export const done = style({});
 
 globalStyle(`${plinth}[aria-current]:not([href*="#"]), ${done}`, {
-  vars: palette({ ...teal, hover: teal.face }),
+  vars: palette({ ...teal, hover: teal.face })
 });
 
 export const failed = style({
-  vars: palette({ face: vars.alarm, hover: vars.alarm, wall: vars.alarmWall, on: vars.onAlarm }),
+  vars: palette({ face: vars.alarm, hover: vars.alarm, wall: vars.alarmWall, on: vars.onAlarm })
 });
 
 export const sm = style({});
@@ -81,16 +81,16 @@ export const face = style({
     [`${icon} > &`]: { padding: 8 },
     [`${plinth}:hover > &`]: {
       transform: `translateY(calc(${depth} * -1 - 2px))`,
-      backgroundColor: hoverColor,
+      backgroundColor: hoverColor
     },
     [`${plinth}:active > &`]: {
       transform: "none",
-      transitionDuration: "0.06s",
-    },
-  },
+      transitionDuration: "0.06s"
+    }
+  }
 });
 
 globalStyle(`${plinth} svg`, {
   width: 18,
-  height: 18,
+  height: 18
 });

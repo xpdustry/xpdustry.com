@@ -20,7 +20,7 @@ export const gamemodes: readonly Gamemode[] = [
     description: msg("The classic Mindustry experience. Defend against waves of enemy units."),
     icon: Shield,
     edge: EDGES.survival,
-    spread: SPREADS.survival,
+    spread: SPREADS.survival
   },
   {
     server: "pvp",
@@ -28,7 +28,7 @@ export const gamemodes: readonly Gamemode[] = [
     description: msg("Fight and destroy other players with your team."),
     icon: Sword,
     edge: EDGES.pvp,
-    spread: SPREADS.pvp,
+    spread: SPREADS.pvp
   },
   {
     server: "attack",
@@ -36,7 +36,7 @@ export const gamemodes: readonly Gamemode[] = [
     description: msg("Team up against a fortified enemy base and destroy its cores."),
     icon: Crosshair,
     edge: EDGES.attack,
-    spread: SPREADS.attack,
+    spread: SPREADS.attack
   },
   {
     server: "tower",
@@ -44,7 +44,7 @@ export const gamemodes: readonly Gamemode[] = [
     description: msg("Line the path with turrets and stop the enemies reaching your core."),
     icon: CastleTurret,
     edge: EDGES.tower,
-    spread: SPREADS.tower,
+    spread: SPREADS.tower
   },
   {
     server: "sandbox",
@@ -52,6 +52,6 @@ export const gamemodes: readonly Gamemode[] = [
     description: msg("Unlimited resources. Build and test anything you like."),
     icon: Cube,
     edge: EDGES.sandbox,
-    spread: SPREADS.sandbox,
-  },
+    spread: SPREADS.sandbox
+  }
 ];

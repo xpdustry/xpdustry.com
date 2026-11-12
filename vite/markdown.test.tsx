@@ -32,7 +32,7 @@ describe("compileBlogMarkdown", () => {
     const html = render("> [!WARNING] Upgrade first\n> Do not use <script>alert(1)</script>.");
 
     expect(html).toMatch(
-      /<aside class="[^"]*warning[^"]*"><span class="[^"]*">Upgrade first<\/span>/,
+      /<aside class="[^"]*warning[^"]*"><span class="[^"]*">Upgrade first<\/span>/
     );
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(html).not.toContain("<script>");
@@ -42,7 +42,7 @@ describe("compileBlogMarkdown", () => {
     const html = render("[External](https://example.com/docs) and [internal](/blog).");
 
     expect(html).toContain(
-      '<a href="https://example.com/docs" target="_blank" rel="noreferrer">External</a>',
+      '<a href="https://example.com/docs" target="_blank" rel="noreferrer">External</a>'
     );
     expect(html).toContain('<a href="/blog">internal</a>');
   });
@@ -60,7 +60,7 @@ A recording. [Download it.](/blog/demo.mp4)
     expect(html).toContain('alt="A &lt;screen&gt;"');
     expect(html).toContain("The alert &amp; details.");
     expect(html).toContain(
-      '<video controls="" muted="" playsInline="" preload="metadata" poster="/blog/poster.jpg"',
+      '<video controls="" muted="" playsInline="" preload="metadata" poster="/blog/poster.jpg"'
     );
     expect(html).toContain('<a href="/blog/demo.mp4">Download it.</a>');
   });
@@ -70,17 +70,14 @@ A recording. [Download it.](/blog/demo.mp4)
     '<!-- ::post-image src="/blog/../secret.png" alt="A" width="1" height="1" -->',
     '<!-- ::post-image src="/blog/a.png" alt="A" width="0" height="1" -->',
     '<!-- ::post-image src="/blog/a.png" alt="A" width="1" height="1" onclick="x" -->',
-    '<!-- ::start:post-video src="/blog/a.mp4" poster="/blog/a.png" width="1" height="1" -->\n<!-- ::end:post-video -->',
+    '<!-- ::start:post-video src="/blog/a.mp4" poster="/blog/a.png" width="1" height="1" -->\n<!-- ::end:post-video -->'
   ])("rejects unsafe or incomplete media syntax", (media) => {
     expect(() => compile(media)).toThrow();
   });
 
   test("includes the source path in invalid frontmatter errors", () => {
     expect(() =>
-      compileBlogMarkdown(
-        "src/content/blog/broken.md",
-        "---\ntitle: [unterminated\n---\n\nBroken.",
-      ),
+      compileBlogMarkdown("src/content/blog/broken.md", "---\ntitle: [unterminated\n---\n\nBroken.")
     ).toThrow(/^src\/content\/blog\/broken\.md:/);
   });
 });

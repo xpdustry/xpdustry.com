@@ -2,7 +2,7 @@
 const BASE = "/_serverFn/";
 
 const modules = import.meta.glob<Record<string, unknown>>("/src/**/*.functions.ts", {
-  eager: true,
+  eager: true
 });
 
 const hasPath = (value: unknown): value is { url: string } =>
@@ -13,7 +13,7 @@ export const SERVER_FUNCTION_PATHS: ReadonlySet<string> = new Set(
   Object.values(modules)
     .flatMap((exports) => Object.values(exports))
     .filter(hasPath)
-    .map((serverFn) => serverFn.url),
+    .map((serverFn) => serverFn.url)
 );
 
 /**
@@ -25,6 +25,6 @@ export function unknownServerFunction(request: Request): Response | undefined {
   if (!pathname.startsWith(BASE) || SERVER_FUNCTION_PATHS.has(pathname)) return undefined;
   return new Response("Not Found", {
     status: 404,
-    headers: { "content-type": "text/plain; charset=utf-8" },
+    headers: { "content-type": "text/plain; charset=utf-8" }
   });
 }

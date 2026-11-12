@@ -33,7 +33,7 @@ const react = vi.hoisted(() => {
         if (cleanup) cleanups.push(cleanup);
         return true;
       });
-    },
+    }
   };
 });
 vi.mock("react", () => react);
@@ -45,7 +45,7 @@ function mount(text = "hub.md.xpdustry.com") {
     get state() {
       return render().state;
     },
-    copy: () => render().copy(),
+    copy: () => render().copy()
   };
 }
 
@@ -74,7 +74,7 @@ describe("useCopy", () => {
 
   test("says failed when the write is rejected, and keeps saying it", async () => {
     vi.stubGlobal("navigator", {
-      clipboard: { writeText: () => Promise.reject(new DOMException("No", "NotAllowedError")) },
+      clipboard: { writeText: () => Promise.reject(new DOMException("No", "NotAllowedError")) }
     });
     const copier = mount();
 
@@ -89,8 +89,8 @@ describe("useCopy", () => {
       clipboard: {
         writeText: () => {
           throw new TypeError("Illegal invocation");
-        },
-      },
+        }
+      }
     });
     const copier = mount();
 
@@ -139,7 +139,7 @@ describe("useCopy", () => {
   test("a write that settles after unmounting changes nothing", async () => {
     let accept = () => {};
     vi.stubGlobal("navigator", {
-      clipboard: { writeText: () => new Promise<void>((resolve) => (accept = resolve)) },
+      clipboard: { writeText: () => new Promise<void>((resolve) => (accept = resolve)) }
     });
     const copier = mount();
     const pending = copier.copy();

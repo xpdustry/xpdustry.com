@@ -51,9 +51,9 @@ export const vars = createGlobalThemeContract(
     fontMono: "font-mono",
     easeOut: "ease-out",
     easeSpring: "ease-spring",
-    easeGrow: "ease-grow",
+    easeGrow: "ease-grow"
   },
-  (name) => name ?? "",
+  (name) => name ?? ""
 );
 
 createGlobalTheme(":root", vars, {
@@ -103,11 +103,11 @@ createGlobalTheme(":root", vars, {
   fontMono: `"${FACE.mono}", "${FACE.cyrillicMono}", ui-monospace, monospace`,
   easeOut: "cubic-bezier(0.22, 1, 0.36, 1)",
   easeSpring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
-  easeGrow: "cubic-bezier(0.3, 0.5, 0.4, 1)",
+  easeGrow: "cubic-bezier(0.3, 0.5, 0.4, 1)"
 });
 
 globalStyle(":root", {
   "@media": {
-    [media.phone]: { vars: { [vars.group]: "40px" } },
-  },
+    [media.phone]: { vars: { [vars.group]: "40px" } }
+  }
 });

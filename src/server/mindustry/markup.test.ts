@@ -12,7 +12,7 @@ test.each([
   ["[notacolour]x", "[notacolour]x"],
   ["wave [12", "wave [12"],
   ["[gold]Привет 🌍 日本[]", "Привет 🌍 日本"],
-  ["[red][]", ""],
+  ["[red][]", ""]
 ])("strips formatting without losing literal text: %s", (input, expected) => {
   expect(stripMindustryMarkup(input)).toBe(expected);
 });

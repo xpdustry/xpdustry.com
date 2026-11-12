@@ -16,7 +16,7 @@ export const popoverBox: StyleRule = {
   height: "auto",
   margin: 0,
   overflow: "visible",
-  color: "inherit",
+  color: "inherit"
 };
 
 /** A panel that drops from under its button: out of sight, focus and the accessibility tree. */
@@ -25,7 +25,7 @@ export const popoverShut: StyleRule = {
   opacity: 0,
   translate: "0 -8px",
   scale: "0.97",
-  transformOrigin: "top right",
+  transformOrigin: "top right"
 };
 
 /** Set from the moment a popover is asked to open or shut until its animation ends. */
@@ -38,7 +38,7 @@ export const popoverOpen: StyleRule = {
   visibility: "visible",
   opacity: 1,
   translate: "0",
-  scale: "1",
+  scale: "1"
 };
 
 /**
@@ -47,7 +47,7 @@ export const popoverOpen: StyleRule = {
  */
 export const popoverMoving = {
   [`&[${MOVING}]`]: { transition: popoverTransition },
-  [`&[${MOVING}]:popover-open`]: { transitionDelay: "0s" },
+  [`&[${MOVING}]:popover-open`]: { transitionDelay: "0s" }
 };
 
 /**
@@ -57,5 +57,5 @@ export const popoverMoving = {
  */
 export const popoverFallbackPlace = {
   top: `calc(${vars.gap} + 60px)`,
-  right: `calc(clamp(20px, 5vw, 56px) + ${vars.gap} + 6px)`,
+  right: `calc(clamp(20px, 5vw, 56px) + ${vars.gap} + 6px)`
 };

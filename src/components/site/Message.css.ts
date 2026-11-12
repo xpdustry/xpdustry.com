@@ -12,13 +12,13 @@ export const message = style({
   background: vars.t3,
   color: vars.t12,
   "@media": {
-    [media.phone]: { padding: "28px 24px" },
-  },
+    [media.phone]: { padding: "28px 24px" }
+  }
 });
 
 export const code = style({
   font: `500 ${rem(font.small)} ${vars.fontMono}`,
-  opacity: 0.8,
+  opacity: 0.8
 });
 
 export const title = style({
@@ -29,22 +29,22 @@ export const title = style({
   letterSpacing: tracking.display,
   textWrap: "balance",
   "@media": {
-    [media.phone]: { fontSize: rem(font.h1) },
-  },
+    [media.phone]: { fontSize: rem(font.h1) }
+  }
 });
 
 export const body = style({
   marginTop: 14,
   fontSize: rem(font.lead),
-  lineHeight: leading.snug,
+  lineHeight: leading.snug
 });
 
 globalStyle(`${body} > div`, {
   display: "flex",
   flexWrap: "wrap",
-  gap: 10,
+  gap: 10
 });
 
 globalStyle(`${body} > :last-child`, {
-  marginTop: 18,
+  marginTop: 18
 });

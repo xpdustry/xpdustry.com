@@ -14,7 +14,7 @@ const SPREAD = "--spread";
 const spreadVar = createGlobalVar(SPREAD, {
   syntax: "<length>",
   inherits: true,
-  initialValue: "0px",
+  initialValue: "0px"
 });
 
 const at = createVar();
@@ -26,41 +26,41 @@ export const spread = style({
   zIndex: -2,
   opacity: 0,
   pointerEvents: "none",
-  transition: `opacity 0.55s ${vars.easeOut}, ${SPREAD} 0s 0.55s`,
+  transition: `opacity 0.55s ${vars.easeOut}, ${SPREAD} 0s 0.55s`
 });
 
 globalStyle(`${spread} > i, ${spread}::before, ${spread}::after`, {
   content: '""',
   position: "absolute",
-  inset: 0,
+  inset: 0
 });
 
 const layer = (stage: keyof typeof tile, solidTo: string, clearFrom: string) => ({
   background: `${tile[stage]} 0 0 / 240px`,
-  mask: `radial-gradient(${at}, #000 ${solidTo}, transparent ${clearFrom})`,
+  mask: `radial-gradient(${at}, #000 ${solidTo}, transparent ${clearFrom})`
 });
 
 globalStyle(
   `${spread} > i`,
-  layer("solid", `calc(${spreadVar} - 110px)`, `calc(${spreadVar} - 92px)`),
+  layer("solid", `calc(${spreadVar} - 110px)`, `calc(${spreadVar} - 92px)`)
 );
 globalStyle(
   `${spread}::before`,
-  layer("thick", `calc(${spreadVar} - 52px)`, `calc(${spreadVar} - 38px)`),
+  layer("thick", `calc(${spreadVar} - 52px)`, `calc(${spreadVar} - 38px)`)
 );
 globalStyle(`${spread}::after`, layer("thin", `calc(${spreadVar} - 10px)`, spreadVar));
 
 export const on = style({
   vars: { [spreadVar]: `calc(${fallbackVar(reach, "700px")} + 120px)` },
   opacity: 1,
-  transition: `${SPREAD} 0.9s ${vars.easeGrow}, opacity 0.1s`,
+  transition: `${SPREAD} 0.9s ${vars.easeGrow}, opacity 0.1s`
 });
 
 globalStyle(`${spread}, ${on}`, {
   "@media": {
     [media.still]: {
       vars: { [spreadVar]: "4000px" },
-      transition: "opacity 0.15s",
-    },
-  },
+      transition: "opacity 0.15s"
+    }
+  }
 });

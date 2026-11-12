@@ -14,7 +14,7 @@ export function DiscordCard({
   children,
   counts,
   compact = false,
-  className,
+  className
 }: {
   title: string;
   children: ReactNode;
@@ -42,7 +42,7 @@ export function DiscordCard({
           <small className={styles.counts}>
             {gt("{online} online, {members} members", {
               online: formatNumber(counts.online, locale),
-              members: formatNumber(counts.members, locale),
+              members: formatNumber(counts.members, locale)
             })}
           </small>
         )}

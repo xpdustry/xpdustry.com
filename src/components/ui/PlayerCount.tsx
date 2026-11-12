@@ -7,7 +7,7 @@ import { formatNumber } from "#app/lib/format";
 export function PlayerCount({
   count,
   className,
-  bare = false,
+  bare = false
 }: {
   count: Count;
   className?: string;

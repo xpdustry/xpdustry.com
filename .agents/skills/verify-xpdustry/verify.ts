@@ -20,7 +20,7 @@ import {
   readlinkSync,
   rmSync,
   statSync,
-  writeFileSync,
+  writeFileSync
 } from "node:fs";
 import { createServer } from "node:net";
 import { dirname, join, relative } from "node:path";
@@ -116,7 +116,7 @@ async function get(base: string, path: string, headers: Record<string, string> =
   const answer: Answer = {
     status: response.status,
     headers: Object.fromEntries(response.headers),
-    body: Buffer.from(await response.arrayBuffer()),
+    body: Buffer.from(await response.arrayBuffer())
   };
   return answer;
 }
@@ -128,7 +128,7 @@ function freePort(): Promise<number> {
     probe.listen(0, "127.0.0.1", () => {
       const address = probe.address();
       probe.close(() =>
-        typeof address === "object" && address ? resolve(address.port) : reject(),
+        typeof address === "object" && address ? resolve(address.port) : reject()
       );
     });
   });
@@ -155,10 +155,10 @@ async function launch(live: boolean) {
       ...process.env,
       PORT: String(port),
       HOST: "127.0.0.1",
-      ...(live ? {} : { XPD_DISABLE_STATUS: "1" }),
+      ...(live ? {} : { XPD_DISABLE_STATUS: "1" })
     },
     stdio: ["ignore", log, log],
-    detached: true,
+    detached: true
   });
   server.unref();
   const instance: Instance = {
@@ -166,7 +166,7 @@ async function launch(live: boolean) {
     base: `http://127.0.0.1:${port}`,
     live,
     source: sourceFingerprint(),
-    started: new Date().toISOString(),
+    started: new Date().toISOString()
   };
   writeFileSync(STATE, `${JSON.stringify(instance, null, 2)}\n`);
 
@@ -176,7 +176,7 @@ async function launch(live: boolean) {
     try {
       const english = { "accept-language": "en" };
       const pages = await Promise.all(
-        ["/", "/fr/blog"].map((path) => get(instance.base, path, english)),
+        ["/", "/fr/blog"].map((path) => get(instance.base, path, english))
       );
       if (pages.every((page) => page.status === 200)) {
         console.log(`ready: ${instance.base}  (status polling ${live ? "on" : "off"})`);
@@ -234,12 +234,12 @@ async function stop() {
 
 async function withBrowser<T>(use: (browser: Browser) => Promise<T>): Promise<T> {
   const { chromium } = await import("playwright").catch(() =>
-    fail("Playwright is not installed; run `pnpm install`"),
+    fail("Playwright is not installed; run `pnpm install`")
   );
   const browser = await chromium
     .launch()
     .catch((error: Error) =>
-      fail(`${error.message.split("\n")[0]}\nrun \`pnpm exec playwright install chromium\``),
+      fail(`${error.message.split("\n")[0]}\nrun \`pnpm exec playwright install chromium\``)
     );
   try {
     return await use(browser);
@@ -298,7 +298,7 @@ async function run(label: string) {
           viewport: { width, height },
           locale: language,
           reducedMotion: "reduce",
-          permissions: ["clipboard-read", "clipboard-write"],
+          permissions: ["clipboard-read", "clipboard-write"]
         });
         contexts.push(context);
         return context.newPage();
@@ -311,7 +311,7 @@ async function run(label: string) {
         const tree = await page.locator("body").ariaSnapshot();
         writeFileSync(
           join(evidence, `${name}.aria.txt`),
-          `${page.url()}\n${await page.title()}\n\n${tree}\n`,
+          `${page.url()}\n${await page.title()}\n\n${tree}\n`
         );
       },
       save(name: string, content: string | Uint8Array) {
@@ -323,7 +323,7 @@ async function run(label: string) {
           .join(" ");
         console.log(line);
         transcript.push(line);
-      },
+      }
     };
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const drive = new AsyncFunction(`{ ${Object.keys(helpers).join(", ")} }`, code);
@@ -397,7 +397,7 @@ function layoutIssues(): string[] {
   }
   for (const element of document.querySelectorAll("main *, footer *")) {
     const hasText = [...element.childNodes].some(
-      (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+      (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim()
     );
     if (!hasText || element.closest(".sr-only")) continue;
     if (getComputedStyle(element).visibility === "hidden") continue;
@@ -434,7 +434,7 @@ function overflowIssues(): string[] {
       return true;
     });
     const widest = unclipped.sort(
-      (one, other) => other.getBoundingClientRect().right - one.getBoundingClientRect().right,
+      (one, other) => other.getBoundingClientRect().right - one.getBoundingClientRect().right
     )[0];
     const from = widest
       ? `, ${region(widest)}: ${label(widest) || widest.tagName.toLowerCase()}`
@@ -459,7 +459,7 @@ function overflowIssues(): string[] {
     for (let element: Element | null = parent; element && element !== document.body;) {
       const style = getComputedStyle(element);
       const [clipsX, clipsY] = [style.overflowX, style.overflowY].map((axis) =>
-        /hidden|clip/.test(axis),
+        /hidden|clip/.test(axis)
       );
       // A box of a pixel or two is the visually hidden pattern, not a clipped label.
       if ((clipsX || clipsY) && element.clientWidth > 2 && element.clientHeight > 2) {
@@ -470,7 +470,7 @@ function overflowIssues(): string[] {
         const cut = lines.some(
           (line) =>
             (clipsX && (line.left < left - 2 || line.right > right + 2)) ||
-            (clipsY && (line.top < top - 2 || line.bottom > bottom + 2)),
+            (clipsY && (line.top < top - 2 || line.bottom > bottom + 2))
         );
         if (cut) {
           found.add(`text clipped, ${region(parent)}: ${label(parent)}`);
@@ -498,7 +498,7 @@ function fixedText(): string[] {
   const found = new Set<string>();
   for (const [element, before] of sizes) {
     const hasText = [...element.childNodes].some(
-      (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+      (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim()
     );
     if (!hasText || before >= 24 || !element.isConnected || element.closest(".sr-only")) continue;
     const after = Number.parseFloat(getComputedStyle(element).fontSize);
@@ -511,7 +511,7 @@ function fixedText(): string[] {
           ? "footer"
           : "header";
       found.add(
-        `text ignores the font size setting, ${where}: ${(element.textContent ?? "").trim().slice(0, 40)}`,
+        `text ignores the font size setting, ${where}: ${(element.textContent ?? "").trim().slice(0, 40)}`
       );
     }
   }
@@ -525,7 +525,7 @@ const TEXT_SPACING =
 
 const nextFrame = (page: Page) =>
   page.evaluate(
-    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
   );
 
 /**
@@ -534,7 +534,7 @@ const nextFrame = (page: Page) =>
  */
 async function textSettingIssues(page: Page): Promise<[string, string[]][]> {
   const results: [string, string[]][] = [
-    ["", [...(await page.evaluate(layoutIssues)), ...(await page.evaluate(overflowIssues))]],
+    ["", [...(await page.evaluate(layoutIssues)), ...(await page.evaluate(overflowIssues))]]
   ];
 
   // The browser's own font size setting, doubled. Breakpoints in rem follow it.
@@ -544,7 +544,7 @@ async function textSettingIssues(page: Page): Promise<[string, string[]][]> {
   await nextFrame(page);
   results.push([
     "text 200%",
-    [...(await page.evaluate(overflowIssues)), ...(await page.evaluate(fixedText))],
+    [...(await page.evaluate(overflowIssues)), ...(await page.evaluate(fixedText))]
   ]);
   await browser.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
   await browser.detach();
@@ -552,7 +552,7 @@ async function textSettingIssues(page: Page): Promise<[string, string[]][]> {
   for (const [name, css] of [
     // Text doubled while every breakpoint stays put: the worst case of a text-only zoom.
     ["text zoom 200%", ":root { font-size: 200% }"],
-    ["text spacing", TEXT_SPACING],
+    ["text spacing", TEXT_SPACING]
   ]) {
     const sheet = await page.addStyleTag({ content: css });
     await nextFrame(page);
@@ -571,7 +571,7 @@ async function audit(locales: string[]) {
       for (const width of WIDTHS) {
         const context = await browser.newContext({
           viewport: { width, height: 900 },
-          reducedMotion: "reduce",
+          reducedMotion: "reduce"
         });
         const page = await context.newPage();
         for (const path of PAGES) {
@@ -591,7 +591,7 @@ async function audit(locales: string[]) {
   report("audit", [
     ...issues,
     `audit: ${issues.length} issue(s) across ${renders} page renders, ` +
-      `each under 4 text settings (${locales.join(", ")})`,
+      `each under 4 text settings (${locales.join(", ")})`
   ]);
   if (issues.length > 0) process.exitCode = 1;
 }
@@ -600,7 +600,7 @@ async function audit(locales: string[]) {
 function crawlerView() {
   const contents = (selector: string) =>
     [...document.querySelectorAll(selector)].map(
-      (element) => element.getAttribute("content") ?? "",
+      (element) => element.getAttribute("content") ?? ""
     );
   const meta: Record<string, string[]> = {};
   for (const element of document.querySelectorAll("meta[name], meta[property]")) {
@@ -615,29 +615,29 @@ function crawlerView() {
     description: contents('meta[name="description"]')[0] ?? "",
     meta,
     canonicals: [...document.querySelectorAll('link[rel="canonical"]')].map((link) =>
-      link.getAttribute("href"),
+      link.getAttribute("href")
     ),
     alternates: Object.fromEntries(
       [...document.querySelectorAll('link[rel="alternate"][hreflang]')].map((link) => [
         link.getAttribute("hreflang") ?? "",
-        link.getAttribute("href") ?? "",
-      ]),
+        link.getAttribute("href") ?? ""
+      ])
     ),
     headings: [...document.querySelectorAll("h1")].map((heading) =>
-      heading.textContent.trim().replaceAll(/\s+/g, " "),
+      heading.textContent.trim().replaceAll(/\s+/g, " ")
     ),
     structuredData: [...document.querySelectorAll('script[type="application/ld+json"]')].map(
-      (script) => script.textContent,
+      (script) => script.textContent
     ),
     links: [
       ...new Set(
         [...document.querySelectorAll("a[href^='/']")].map(
-          (link) => link.getAttribute("href")!.split("#")[0] || "/",
-        ),
-      ),
+          (link) => link.getAttribute("href")!.split("#")[0] || "/"
+        )
+      )
     ],
     imagesWithoutAlt: document.querySelectorAll("img:not([alt])").length,
-    words: (main?.textContent ?? "").split(/\s+/).filter(Boolean).length,
+    words: (main?.textContent ?? "").split(/\s+/).filter(Boolean).length
   };
 }
 
@@ -652,7 +652,7 @@ async function seo(accept: boolean) {
   const { base, live } = healthyInstance();
   if (live)
     fail(
-      "`seo` compares page text with the baseline, which live counts change; use a default launch",
+      "`seo` compares page text with the baseline, which live counts change; use a default launch"
     );
   const english = { "accept-language": "en" };
   const problems: string[] = [];
@@ -660,7 +660,7 @@ async function seo(accept: boolean) {
   const sitemap = await get(base, "/sitemap.xml");
   if (sitemap.status !== 200) fail(`/sitemap.xml answered ${sitemap.status}`);
   const paths = [...sitemap.body.toString().matchAll(/<loc>([^<]+)<\/loc>/g)].map(
-    ([, location]) => location!.slice(ORIGIN.length) || "/",
+    ([, location]) => location!.slice(ORIGIN.length) || "/"
   );
   const robots = (await get(base, "/robots.txt")).body.toString();
   if (!robots.includes(`Sitemap: ${ORIGIN}/sitemap.xml`) || /^Disallow: \/\s*$/m.test(robots)) {
@@ -703,7 +703,7 @@ async function seo(accept: boolean) {
     }
     if (page.description.length < DESCRIPTION.min || page.description.length > DESCRIPTION.max) {
       say(
-        `description is ${page.description.length} characters (want ${DESCRIPTION.min}-${DESCRIPTION.max})`,
+        `description is ${page.description.length} characters (want ${DESCRIPTION.min}-${DESCRIPTION.max})`
       );
     }
     for (const [name, values] of Object.entries(page.meta)) {
@@ -760,7 +760,7 @@ async function seo(accept: boolean) {
       card,
       structuredData: types.sort().join(", "),
       words: page.words,
-      links: page.links.length,
+      links: page.links.length
     };
   }
 
@@ -793,7 +793,7 @@ async function seo(accept: boolean) {
         for (const key of [...new Set([...Object.keys(old), ...Object.keys(now)])].sort()) {
           if (old[key] !== now[key]) {
             changes.push(
-              `${path}: ${key} was ${JSON.stringify(old[key])}, now ${JSON.stringify(now[key])}`,
+              `${path}: ${key} was ${JSON.stringify(old[key])}, now ${JSON.stringify(now[key])}`
             );
           }
         }
@@ -805,7 +805,7 @@ async function seo(accept: boolean) {
     ...problems.map((line) => `PROBLEM ${line}`),
     ...changes.map((line) => `CHANGED ${line}`),
     `seo: ${pages.size} pages, ${linked.size} internal links, ` +
-      `${problems.length} problem(s), ${changes.length} change(s) from the baseline`,
+      `${problems.length} problem(s), ${changes.length} change(s) from the baseline`
   ]);
   if (problems.length + changes.length > 0) process.exitCode = 1;
 }
@@ -817,7 +817,7 @@ const commands: Record<string, () => Promise<void>> = {
   run: () => run(rest[0] ?? "drive"),
   audit: () => audit(rest.length > 0 ? rest : LOCALES),
   seo: () => seo(rest.includes("--accept")),
-  stop,
+  stop
 };
 
 try {

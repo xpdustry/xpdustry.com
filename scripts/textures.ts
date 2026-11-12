@@ -7,7 +7,7 @@ const webp = (pixels: Buffer | Uint8ClampedArray, width: number, height: number)
   sharp(pixels, { raw: { width, height, channels: 4 } }).webp({
     lossless: true,
     exact: true,
-    effort: 6,
+    effort: 6
   });
 const target = (file: string) => new URL(file, ASSETS).pathname;
 

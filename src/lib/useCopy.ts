@@ -32,7 +32,7 @@ export function useCopy(text: string) {
       attempt.current++;
       clearTimeout(timer.current);
     },
-    [],
+    []
   );
 
   const copy = async () => {

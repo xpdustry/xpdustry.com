@@ -6,7 +6,7 @@ export const artLogo = createVar();
 
 export const art = style({
   isolation: "isolate",
-  overflow: "hidden",
+  overflow: "hidden"
 });
 
 export const logo = style({
@@ -15,5 +15,5 @@ export const logo = style({
   left: "50%",
   width: fallbackVar(artLogo, "96px"),
   translate: "-50% 0",
-  filter: `drop-shadow(0 6px 0 ${logoShadow})`,
+  filter: `drop-shadow(0 6px 0 ${logoShadow})`
 });

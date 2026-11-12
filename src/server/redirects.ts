@@ -4,16 +4,16 @@ const convertedBlogImages = [
   "nohorny-admin-requests-dark",
   "nohorny-discord-alert",
   "nohorny-request-dark",
-  "nohorny-site-hero-dark",
+  "nohorny-site-hero-dark"
 ];
 
 export const LEGACY_MEDIA_REDIRECTS: ReadonlyMap<string, string> = new Map([
   ...convertedBlogImages.map((name): [string, string] => [
     `/blog/${name}.png`,
-    `/blog/${name}.webp`,
+    `/blog/${name}.webp`
   ]),
   ["/blog/nohorny-showcase-poster.jpg", "/blog/nohorny-showcase-poster.webp"],
-  ["/og.png", "/og/home.png"],
+  ["/og.png", "/og/home.png"]
 ]);
 
 export function requestRedirect(request: Request): Response | undefined {
@@ -27,7 +27,7 @@ export function requestRedirect(request: Request): Response | undefined {
   if (/^\/blog(?:\/[^/]+)?\/$/.test(withoutLocale(url.pathname))) {
     return new Response(null, {
       status: 308,
-      headers: { location: url.pathname.slice(0, -1) + url.search },
+      headers: { location: url.pathname.slice(0, -1) + url.search }
     });
   }
 }

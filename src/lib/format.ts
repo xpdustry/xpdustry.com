@@ -17,8 +17,8 @@ const long = cached(
       day: "numeric",
       month: "long",
       year: "numeric",
-      timeZone: "UTC",
-    }),
+      timeZone: "UTC"
+    })
 );
 const short = cached(
   (tag) =>
@@ -26,8 +26,8 @@ const short = cached(
       day: "2-digit",
       month: "short",
       year: "numeric",
-      timeZone: "UTC",
-    }),
+      timeZone: "UTC"
+    })
 );
 const number = cached((tag) => new Intl.NumberFormat(tag));
 

@@ -62,7 +62,7 @@ function Tile({
   ground,
   patches,
   className,
-  children,
+  children
 }: {
   href: string;
   ground?: string;

@@ -16,12 +16,12 @@ export const tile = style({
   flexDirection: "column",
   justifyContent: "end",
   padding: `${padFoot} ${pad}`,
-  color: vars.ink,
+  color: vars.ink
 });
 
 export const variant = styleVariants({
   big: {
-    vars: { ...roomy, [fade]: "54px", [artLogo]: "112px", [artTop]: "40px" },
+    vars: { ...roomy, [fade]: "54px", [artLogo]: "112px", [artTop]: "40px" }
   },
   small: {
     vars: {
@@ -29,18 +29,18 @@ export const variant = styleVariants({
       [artLogo]: "56px",
       [artTop]: "14px",
       [pad]: "20px",
-      [padFoot]: "16px",
+      [padFoot]: "16px"
     },
     "@media": {
-      [media.phone]: { vars: { [artTop]: "54px" } },
-    },
+      [media.phone]: { vars: { [artTop]: "54px" } }
+    }
   },
   listing: {
     vars: { ...roomy, [fade]: "46px", [artLogo]: "96px", [artTop]: "26px" },
     "@media": {
-      [media.phone]: { vars: { [artTop]: "54px" } },
-    },
-  },
+      [media.phone]: { vars: { [artTop]: "54px" } }
+    }
+  }
 });
 
 export const foot = style({
@@ -54,12 +54,12 @@ export const foot = style({
   background: 'url("../../assets/fade.webp") 0 0 / 240px',
   mask: [
     `url("../../assets/fringe/f7fdfd-rise.webp") ${fallbackVar(fray, "0")} 0 / 486px 48px repeat-x`,
-    "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat",
+    "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat"
   ].join(", "),
   selectors: {
     [`${tile}:nth-child(2n) &`]: { vars: { [fray]: "-210px" } },
-    [`${tile}:nth-child(3n) &`]: { vars: { [fray]: "-95px" } },
-  },
+    [`${tile}:nth-child(3n) &`]: { vars: { [fray]: "-95px" } }
+  }
 });
 
 export const photo = style({
@@ -72,45 +72,45 @@ export const photo = style({
   objectPosition: "left top",
   transition: `scale 0.6s ${vars.easeOut}`,
   selectors: {
-    [`${tile}:hover &`]: { scale: "1.04" },
-  },
+    [`${tile}:hover &`]: { scale: "1.04" }
+  }
 });
 
 export const chip = style({
   alignSelf: "start",
-  marginBottom: "auto",
+  marginBottom: "auto"
 });
 
 export const title = style({
   fontSize: rem(font.h4),
   lineHeight: leading.heading,
-  textWrap: "balance",
+  textWrap: "balance"
 });
 
 export const byline = style({
   marginTop: 8,
   fontSize: rem(font.caption),
-  color: vars.muted,
+  color: vars.muted
 });
 
 globalStyle(`${variant.big} ${title}`, {
   maxWidth: "20ch",
   fontSize: rem(font.h2),
   "@media": {
-    [media.phone]: { fontSize: rem(font.h3) },
-  },
+    [media.phone]: { fontSize: rem(font.h3) }
+  }
 });
 
 globalStyle(`${variant.small} ${title}`, {
-  fontSize: rem(font.lead),
+  fontSize: rem(font.lead)
 });
 
 globalStyle(`${variant.small} ${byline}`, {
-  marginTop: 4,
+  marginTop: 4
 });
 
 globalStyle(`${variant.listing} ${title}`, {
-  fontSize: rem(font.h3),
+  fontSize: rem(font.h3)
 });
 
 export const description = style({
@@ -118,9 +118,9 @@ export const description = style({
   marginTop: 8,
   fontSize: rem(font.small),
   lineHeight: leading.snug,
-  color: vars.muted,
+  color: vars.muted
 });
 
 globalStyle(`${variant.listing} ${byline}`, {
-  marginTop: 10,
+  marginTop: 10
 });

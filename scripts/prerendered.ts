@@ -15,13 +15,13 @@ export interface Prerendered {
 }
 
 const unique = (textures: Prerendered[]) => [
-  ...new Map(textures.map((texture) => [texture.file, texture])).values(),
+  ...new Map(textures.map((texture) => [texture.file, texture])).values()
 ];
 
 export const TEXTURES: readonly Prerendered[] = [
   ...Object.entries(BACKDROP).map(([layer, settings]) => ({
     file: `backdrop-${layer}.webp`,
-    settings,
+    settings
   })),
   { file: "crown.webp", ...CROWN },
   { file: "ridge.webp", ...RIDGE },
@@ -32,26 +32,26 @@ export const TEXTURES: readonly Prerendered[] = [
         file: `patches/${name}.webp`,
         settings,
         width: size,
-        height: size,
-      })),
-    ),
+        height: size
+      }))
+    )
   ),
   ...unique(
     Object.values(SPREADS).flatMap((spread) =>
       Object.values(spread).map(({ name, settings }) => ({
         file: `spread/${name}.webp`,
-        settings,
-      })),
-    ),
+        settings
+      }))
+    )
   ),
   ...unique(
     FRINGES.map(({ name, settings, width, height }) => ({
       file: `fringe/${name}.webp`,
       settings,
       width,
-      height,
-    })),
-  ),
+      height
+    }))
+  )
 ];
 
 /** The folders that only hold textures from `TEXTURES`, so files nothing renders are deleted. */

@@ -43,7 +43,7 @@ function PostVideo({
   width,
   height,
   caption,
-  children,
+  children
 }: MediaProps & { poster: string; webm?: string }) {
   return (
     <figure>
@@ -78,7 +78,7 @@ const components = {
   a: Anchor,
   [POST_ELEMENTS.callout]: Callout,
   [POST_ELEMENTS.image]: PostImage,
-  [POST_ELEMENTS.video]: PostVideo,
+  [POST_ELEMENTS.video]: PostVideo
 } satisfies MarkdownComponents;
 
 export function PostBody({ document }: { document: MarkdownDocument }) {

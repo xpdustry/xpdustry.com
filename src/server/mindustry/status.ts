@@ -18,10 +18,10 @@ export function pollingSnapshot(servers: readonly ServerDefinition[]): ServerSna
 export async function queryServers(
   probe: MindustryStatusProbe,
   servers: readonly ServerDefinition[],
-  signal: AbortSignal,
+  signal: AbortSignal
 ): Promise<ServerSnapshot> {
   const results = await Promise.allSettled(
-    servers.map((server) => probe.query(server.hostname, signal)),
+    servers.map((server) => probe.query(server.hostname, signal))
   );
   signal.throwIfAborted();
   return {
@@ -30,6 +30,6 @@ export async function queryServers(
       return result.status === "fulfilled"
         ? { ...server, status: "online", info: result.value }
         : { ...server, status: "offline" };
-    }),
+    })
   };
 }

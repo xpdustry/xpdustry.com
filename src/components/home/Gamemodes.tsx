@@ -19,7 +19,7 @@ import * as styles from "./Gamemodes.css";
 const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
   eager: true,
   query: "?url",
-  import: "default",
+  import: "default"
 });
 
 export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
@@ -50,7 +50,7 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
 function Mode({
   mode,
   server,
-  seen,
+  seen
 }: {
   mode: Gamemode;
   server?: ServerSnapshotItem;
@@ -107,7 +107,7 @@ function Mode({
         <span
           className={`${styles.edge} ${styles.below}`}
           style={{
-            backgroundImage: `url("${FRINGES[`/src/assets/fringe/${mode.edge.below.name}.webp`]}")`,
+            backgroundImage: `url("${FRINGES[`/src/assets/fringe/${mode.edge.below.name}.webp`]}")`
           }}
         />
       </span>
@@ -153,7 +153,7 @@ function Mode({
         state={state}
         text={hostname}
         copied={gt("Copied {address}. Paste it in Play, Join game, Add server.", {
-          address: hostname,
+          address: hostname
         })}
       />
     </li>

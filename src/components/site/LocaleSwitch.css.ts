@@ -4,7 +4,7 @@ import {
   popoverFallbackPlace,
   popoverMoving,
   popoverOpen,
-  popoverShut,
+  popoverShut
 } from "#app/components/site/popover";
 import { media } from "#app/styles/media";
 import { font, leading, radius, rem } from "#app/styles/scale";
@@ -12,18 +12,18 @@ import { vars } from "#app/styles/theme.css";
 
 export const wrapper = style({
   position: "relative",
-  display: "flex",
+  display: "flex"
 });
 
 const code = {
   font: `500 ${rem(font.caption)} / ${leading.tight} ${vars.fontMono}`,
-  textTransform: "uppercase",
+  textTransform: "uppercase"
 } as const;
 
 const ANCHOR = "--locale-switch";
 
 export const button = style({
-  anchorName: ANCHOR,
+  anchorName: ANCHOR
 });
 
 globalStyle(`${button} > span`, {
@@ -32,13 +32,13 @@ globalStyle(`${button} > span`, {
   placeItems: "center",
   width: 40,
   height: 40,
-  padding: 0,
+  padding: 0
 });
 
 export const list = style({
   display: "flex",
   flexDirection: "column",
-  gap: 2,
+  gap: 2
 });
 
 const top = `calc(anchor(${ANCHOR} bottom) + 10px)`;
@@ -61,14 +61,14 @@ export const panel = style({
     "&:popover-open": {
       ...popoverOpen,
       top: [popoverFallbackPlace.top, top],
-      right: [popoverFallbackPlace.right, right],
-    },
+      right: [popoverFallbackPlace.right, right]
+    }
   },
   "@media": {
     [media.motion]: {
-      selectors: popoverMoving,
-    },
-  },
+      selectors: popoverMoving
+    }
+  }
 });
 
 export const option = style({
@@ -87,17 +87,17 @@ export const option = style({
   cursor: "pointer",
   selectors: {
     "&:hover": { background: "rgb(255 255 255 / 0.08)" },
-    '&[aria-current="true"]': { color: vars.t9, cursor: "default" },
+    '&[aria-current="true"]': { color: vars.t9, cursor: "default" }
   },
   "@media": {
-    [media.coarse]: { paddingBlock: 11 },
-  },
+    [media.coarse]: { paddingBlock: 11 }
+  }
 });
 
 export const codeLabel = style({
   ...code,
   minWidth: "2ch",
-  color: vars.deepInk,
+  color: vars.deepInk
 });
 
 export { codeLabel as code };
@@ -105,5 +105,5 @@ export { codeLabel as code };
 export const tick = style({
   width: 16,
   height: 16,
-  marginLeft: "auto",
+  marginLeft: "auto"
 });

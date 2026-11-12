@@ -24,13 +24,13 @@ export function getRouter() {
       output: ({ url }) => {
         url.pathname = withLocale(url.pathname, getLocale());
         return url;
-      },
+      }
     },
     scrollRestoration: restoreScrollOnlyInBrowser,
     scrollRestorationBehavior: "instant",
     defaultPreload: "intent",
     defaultErrorComponent: ErrorPage,
-    defaultNotFoundComponent: NotFound,
+    defaultNotFoundComponent: NotFound
   });
 }
 

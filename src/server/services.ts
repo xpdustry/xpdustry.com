@@ -24,17 +24,17 @@ export class Services {
   readonly status = new Poller<ServerSnapshot>({
     name: "servers",
     intervalMs: 30_000,
-    load: (signal) => queryServers(this.#probe, servers, signal),
+    load: (signal) => queryServers(this.#probe, servers, signal)
   });
   readonly discord = new Poller<DiscordCounts>({
     name: "discord",
     intervalMs: 5 * 60_000,
-    load: (signal) => fetchDiscordCounts(SITE.discordInvite, signal),
+    load: (signal) => fetchDiscordCounts(SITE.discordInvite, signal)
   });
   readonly github = new Poller<GitHubStats>({
     name: "github",
     intervalMs: 60 * 60_000,
-    load: (signal) => fetchGitHubStats(signal),
+    load: (signal) => fetchGitHubStats(signal)
   });
 
   start(): void {
@@ -58,7 +58,7 @@ export class Services {
     return {
       servers: this.servers,
       discord: this.discord.value,
-      releases: this.github.value?.releases ?? {},
+      releases: this.github.value?.releases ?? {}
     };
   }
 
@@ -68,7 +68,7 @@ export class Services {
       uptimeSeconds: Math.round((Date.now() - this.#startedAt) / 1000),
       servers: this.status.health,
       discord: this.discord.health,
-      github: this.github.health,
+      github: this.github.health
     };
   }
 }

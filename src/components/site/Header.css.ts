@@ -5,7 +5,7 @@ import {
   popoverFallbackPlace,
   popoverMoving,
   popoverOpen,
-  popoverShut,
+  popoverShut
 } from "#app/components/site/popover";
 import { media } from "#app/styles/media";
 import { radius } from "#app/styles/scale";
@@ -38,16 +38,16 @@ export const header = style({
   gap: "10px 22px",
   padding: `6px 6px ${below}`,
   "@media": {
-    [narrow]: { columnGap: 10 },
-  },
+    [narrow]: { columnGap: 10 }
+  }
 });
 
 globalStyle(`${header} ${tone.ink}`, {
-  vars: { [wall]: vars.deepWall },
+  vars: { [wall]: vars.deepWall }
 });
 
 globalStyle(`${header} svg`, {
-  flex: "none",
+  flex: "none"
 });
 
 /** Its margin keeps the controls at the right, as does the header's end alignment once they wrap. */
@@ -55,7 +55,7 @@ export const brand = style({
   position: "relative",
   flex: "none",
   marginRight: "auto",
-  anchorName: BRAND,
+  anchorName: BRAND
 });
 
 globalStyle(`${brand} span`, {
@@ -66,9 +66,9 @@ globalStyle(`${brand} span`, {
       height: 1,
       overflow: "hidden",
       clipPath: "inset(50%)",
-      whiteSpace: "nowrap",
-    },
-  },
+      whiteSpace: "nowrap"
+    }
+  }
 });
 
 const top = `calc(anchor(${ANCHOR} bottom) + 10px)`;
@@ -109,9 +109,9 @@ export const nav = style({
         "&:popover-open": {
           ...popoverOpen,
           top: [popoverFallbackPlace.top, top],
-          right: [popoverFallbackPlace.right, right],
-        },
-      },
+          right: [popoverFallbackPlace.right, right]
+        }
+      }
     },
     /*
      * Without JavaScript nothing shuts a menu left open while the window widens past the fold, and
@@ -123,52 +123,52 @@ export const nav = style({
           position: "absolute",
           top: `anchor(${BRAND} center)`,
           left: `calc(anchor(${BRAND} right) + 22px)`,
-          translate: "0 -50%",
-        },
-      },
+          translate: "0 -50%"
+        }
+      }
     },
     [`${folded} and ${media.motion}`]: {
-      selectors: popoverMoving,
-    },
-  },
+      selectors: popoverMoving
+    }
+  }
 });
 
 globalStyle(`${nav} > a > span`, {
   padding: "7px 14px",
   "@media": {
-    [folded]: { flex: 1, padding: "10px 14px" },
-  },
+    [folded]: { flex: 1, padding: "10px 14px" }
+  }
 });
 
 const end = style({
   selectors: {
-    [`${header} &`]: { marginLeft: -12 },
-  },
+    [`${header} &`]: { marginLeft: -12 }
+  }
 });
 
 globalStyle(`${header} ${end} > span`, {
-  padding: 9,
+  padding: 9
 });
 
 export const play = style({
   selectors: {
-    [`${header} &`]: { marginLeft: "auto" },
-  },
+    [`${header} &`]: { marginLeft: "auto" }
+  }
 });
 
 globalStyle(`${header} ${play} > span`, {
   gap: 10,
-  padding: "10px 13px 10px 14px",
+  padding: "10px 13px 10px 14px"
 });
 
 export const language = style({
   selectors: {
     [`${header} &`]: { marginLeft: "auto" },
-    [`${header} ${play} ~ &`]: { marginLeft: -12 },
+    [`${header} ${play} ~ &`]: { marginLeft: -12 }
   },
   "@media": {
-    [narrow]: { display: "none" },
-  },
+    [narrow]: { display: "none" }
+  }
 });
 
 export const languages = style({
@@ -177,9 +177,9 @@ export const languages = style({
     [narrow]: {
       display: "flex",
       paddingTop: 10,
-      borderTop: `2px solid ${vars.deepWall}`,
-    },
-  },
+      borderTop: `2px solid ${vars.deepWall}`
+    }
+  }
 });
 
 export const github = style([
@@ -187,10 +187,10 @@ export const github = style([
   {
     "@media": {
       [narrow]: {
-        selectors: { [`${header} &`]: { display: "none" } },
-      },
-    },
-  },
+        selectors: { [`${header} &`]: { display: "none" } }
+      }
+    }
+  }
 ]);
 
 export const toggle = style([
@@ -198,32 +198,32 @@ export const toggle = style([
   {
     anchorName: ANCHOR,
     selectors: {
-      [`${header} &`]: { display: "none" },
+      [`${header} &`]: { display: "none" }
     },
     "@media": {
       [folded]: {
-        selectors: { [`${header} &`]: { order: 1, display: "inline-flex" } },
+        selectors: { [`${header} &`]: { order: 1, display: "inline-flex" } }
       },
       [narrow]: {
         selectors: {
           [`${header} &`]: { marginLeft: "auto" },
-          [`${header}:has(${play}) &`]: { marginLeft: 0 },
-        },
-      },
-    },
-  },
+          [`${header}:has(${play}) &`]: { marginLeft: 0 }
+        }
+      }
+    }
+  }
 ]);
 
 export const whenShut = style({
   selectors: {
-    [`${header}:has(${nav}:popover-open) &`]: { display: "none" },
-  },
+    [`${header}:has(${nav}:popover-open) &`]: { display: "none" }
+  }
 });
 
 export const whenOpen = style({
   selectors: {
-    [`${header}:not(:has(${nav}:popover-open)) &`]: { display: "none" },
-  },
+    [`${header}:not(:has(${nav}:popover-open)) &`]: { display: "none" }
+  }
 });
 
 /**
@@ -233,12 +233,12 @@ export const whenOpen = style({
  */
 globalStyle(`${toggle}::after, ${play}::after, ${language} > button::after, ${github}::after`, {
   "@media": {
-    [media.coarse]: { content: '""', position: "absolute", inset: "-6px -4px -2px" },
-  },
+    [media.coarse]: { content: '""', position: "absolute", inset: "-6px -4px -2px" }
+  }
 });
 
 globalStyle(`${brand}::after`, {
   "@media": {
-    [media.coarse]: { content: '""', position: "absolute", inset: -2 },
-  },
+    [media.coarse]: { content: '""', position: "absolute", inset: -2 }
+  }
 });

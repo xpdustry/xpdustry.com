@@ -8,14 +8,14 @@ export const big = style({
   gridColumn: "span 6",
   gridRow: "span 4",
   "@media": {
-    [media.phone]: { minHeight: 400 },
-  },
+    [media.phone]: { minHeight: 400 }
+  }
 });
 
 export const small = style({
   gridColumn: "span 6",
   gridRow: "span 2",
   "@media": {
-    [media.phone]: { minHeight: 240 },
-  },
+    [media.phone]: { minHeight: 240 }
+  }
 });

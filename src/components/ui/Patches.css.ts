@@ -6,7 +6,7 @@ const GROW = "--grow";
 const grow = createGlobalVar(GROW, {
   syntax: "<number>",
   inherits: true,
-  initialValue: "0.45",
+  initialValue: "0.45"
 });
 
 export const patches = style({});
@@ -17,13 +17,13 @@ globalStyle(`:where(${patches})`, {
   zIndex: -1,
   overflow: "hidden",
   borderRadius: "inherit",
-  pointerEvents: "none",
+  pointerEvents: "none"
 });
 
 globalStyle(`${patches} img`, {
   position: "absolute",
   maxWidth: "none",
-  translate: "-50% -50%",
+  translate: "-50% -50%"
 });
 
 export const grown = style({
@@ -33,7 +33,7 @@ export const grown = style({
     [`:is(a, button):is(:hover, :focus-visible) &, ${cover}:is(:hover, :focus-visible) ~ ${patches} &`]:
       {
         vars: { [grow]: "1" },
-        transition: `${GROW} 1.2s ${vars.easeGrow}`,
-      },
-  },
+        transition: `${GROW} 1.2s ${vars.easeGrow}`
+      }
+  }
 });

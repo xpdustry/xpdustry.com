@@ -10,7 +10,7 @@ export const moving = {
   onBeforeToggle: (event: ToggleEvent<HTMLElement>) => event.currentTarget.setAttribute(MOVING, ""),
   onTransitionEnd: (event: TransitionEvent<HTMLElement>) => {
     if (event.target === event.currentTarget) event.currentTarget.removeAttribute(MOVING);
-  },
+  }
 };
 
 /**
@@ -44,7 +44,7 @@ export function useShutPopovers(within: RefObject<HTMLElement | null>, folds: re
     for (const query of queries) query.addEventListener("change", shutStill);
     const unsubscribe = router.subscribe(
       "onBeforeNavigate",
-      (event) => event.hrefChanged && shutAnimated(),
+      (event) => event.hrefChanged && shutAnimated()
     );
     return () => {
       header?.removeEventListener("click", followed);

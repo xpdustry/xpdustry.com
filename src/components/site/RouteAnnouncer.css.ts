@@ -4,5 +4,5 @@ import { globalStyle, style } from "@vanilla-extract/css";
 export const landing = style({});
 
 globalStyle(`${landing}:focus`, {
-  outline: "none",
+  outline: "none"
 });

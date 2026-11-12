@@ -6,24 +6,24 @@ import { blogMarkdownPlugin } from "./vite/markdown.ts";
 
 export default defineConfig({
   server: {
-    port: 3000,
+    port: 3000
   },
   resolve: {
-    tsconfigPaths: true,
+    tsconfigPaths: true
   },
   plugins: [
     blogMarkdownPlugin(),
     vanillaExtractPlugin(),
     tanstackStart({
       importProtection: {
-        client: { files: ["**/*.server.*", "**/src/server/**"] },
-      },
+        client: { files: ["**/*.server.*", "**/src/server/**"] }
+      }
     }),
     // TanStack Start requires its plugin before React's.
-    viteReact(),
+    viteReact()
   ],
   build: {
     sourcemap: true,
-    assetsInlineLimit: 0,
-  },
+    assetsInlineLimit: 0
+  }
 });

@@ -26,7 +26,7 @@ export function homeStructuredData(locale: string = DEFAULT_LOCALE): JsonLd {
         name: SITE.name,
         url: home,
         inLanguage: locale,
-        publisher: { "@id": ORGANIZATION_ID },
+        publisher: { "@id": ORGANIZATION_ID }
       },
       {
         "@type": "Organization",
@@ -35,16 +35,16 @@ export function homeStructuredData(locale: string = DEFAULT_LOCALE): JsonLd {
         url: `${SITE.origin}/`,
         logo: `${SITE.origin}/icon-512.png`,
         email: SITE.email,
-        sameAs: [SITE.github, SITE.discord],
-      },
-    ],
+        sameAs: [SITE.github, SITE.discord]
+      }
+    ]
   };
 }
 
 export function postStructuredData(
   post: Pick<Post, "slug" | "frontmatter">,
   locale: string,
-  m: Translate,
+  m: Translate
 ): JsonLd {
   const at = (path: string) => `${SITE.origin}${withLocale(path, locale)}`;
   const { description, author, publishedAt, updatedAt } = post.frontmatter;
@@ -64,16 +64,16 @@ export function postStructuredData(
         image: `${SITE.origin}${postCard(post.slug, title).url}`,
         author: { "@type": "Person", name: author, url: authors[author].url },
         publisher: { "@id": ORGANIZATION_ID },
-        mainEntityOfPage: url,
+        mainEntityOfPage: url
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: m(CRUMB.home), item: at("/") },
           { "@type": "ListItem", position: 2, name: m(CRUMB.blog), item: at("/blog") },
-          { "@type": "ListItem", position: 3, name: title, item: url },
-        ],
-      },
-    ],
+          { "@type": "ListItem", position: 3, name: title, item: url }
+        ]
+      }
+    ]
   };
 }

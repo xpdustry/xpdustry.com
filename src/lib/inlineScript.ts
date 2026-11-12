@@ -17,7 +17,7 @@ export function inlineScript<Args extends unknown[]>(
   const serialized = args.map((arg) =>
     typeof arg === "object" && arg !== null && "expression" in arg
       ? (arg as Expression).expression
-      : JSON.stringify(arg),
+      : JSON.stringify(arg)
   );
   return `(${standalone.toString()})(${serialized.join(", ")})`;
 }

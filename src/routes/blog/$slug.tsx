@@ -38,11 +38,11 @@ export const Route = createFileRoute("/blog/$slug")({
       publishedAt,
       updatedAt,
       authorUrl: authors[author].url,
-      jsonLd: postStructuredData(post, locale, await getMessages()),
+      jsonLd: postStructuredData(post, locale, await getMessages())
     });
     return { ...head, links: [...head.links, ...fontPreloads(["text"], locale)] };
   },
-  component: PostPage,
+  component: PostPage
 });
 
 function PostPage() {

@@ -6,8 +6,8 @@ export const Route = createFileRoute("/api/servers")({
     handlers: {
       GET: () =>
         Response.json(services().servers, {
-          headers: { "cache-control": "public, max-age=15, stale-while-revalidate=30" },
-        }),
-    },
-  },
+          headers: { "cache-control": "public, max-age=15, stale-while-revalidate=30" }
+        })
+    }
+  }
 });

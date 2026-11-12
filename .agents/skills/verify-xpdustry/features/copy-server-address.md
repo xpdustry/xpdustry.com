@@ -59,10 +59,10 @@ EOF
     const real = navigator.clipboard;
     window.realClipboard = {
       readText: () => real.readText(),
-      writeText: real.writeText.bind(real),
+      writeText: real.writeText.bind(real)
     };
     Object.defineProperty(real, "writeText", {
-      value: () => Promise.reject(new DOMException("Denied", "NotAllowedError")),
+      value: () => Promise.reject(new DOMException("Denied", "NotAllowedError"))
     });
   });
   ```

@@ -18,25 +18,25 @@ const RawServerInfoSchema = v.object({
     v.number(),
     v.integer("gamemode ordinal must be an integer"),
     v.minValue(0, "gamemode ordinal is out of range"),
-    v.maxValue(GAMEMODES.length - 1, "gamemode ordinal is out of range"),
+    v.maxValue(GAMEMODES.length - 1, "gamemode ordinal is out of range")
   ),
   modeName: v.string(),
   players: v.pipe(
     v.number(),
     v.integer("player count must be an integer"),
     v.minValue(0, "player count is out of range"),
-    v.maxValue(MAX_PLAYERS, "player count is out of range"),
+    v.maxValue(MAX_PLAYERS, "player count is out of range")
   ),
   playerLimit: v.pipe(
     v.number(),
     v.integer("player limit must be an integer"),
     v.minValue(0, "player limit is out of range"),
-    v.maxValue(MAX_PLAYERS, "player limit is out of range"),
+    v.maxValue(MAX_PLAYERS, "player limit is out of range")
   ),
   wave: v.pipe(v.number(), v.integer(), v.minValue(0, "wave is out of range")),
   version: v.pipe(v.number(), v.integer()),
   versionType: v.string(),
-  port: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(65535)),
+  port: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(65535))
 });
 
 type RawServerInfo = v.InferOutput<typeof RawServerInfoSchema>;
@@ -117,7 +117,7 @@ export function decodeServerInfo(packet: Uint8Array): ServerInfo {
     wave,
     version,
     versionType,
-    port,
+    port
   });
 
   const mode =
@@ -132,7 +132,7 @@ export function decodeServerInfo(packet: Uint8Array): ServerInfo {
     playerLimit: raw.playerLimit,
     wave: raw.wave,
     version: raw.version,
-    versionType: stripMindustryMarkup(raw.versionType),
+    versionType: stripMindustryMarkup(raw.versionType)
   };
 }
 

@@ -5,7 +5,7 @@ import * as styles from "./Spread.css";
 const TILES = import.meta.glob<string>("/src/assets/spread/*.webp", {
   eager: true,
   query: "?url",
-  import: "default",
+  import: "default"
 });
 
 const tile = (tiles: SpreadTiles | undefined, stage: SpreadStage) =>
@@ -26,7 +26,7 @@ export function Spread({
   tiles,
   on,
   origin,
-  reach,
+  reach
 }: {
   tiles?: SpreadTiles;
   on: boolean;
@@ -40,7 +40,7 @@ export function Spread({
     [styles.tile.solid]: tile(tiles, "solid"),
     [styles.x]: origin && `${origin[0]}px`,
     [styles.y]: origin && `${origin[1]}px`,
-    [styles.reach]: reach === undefined ? undefined : `${reach}px`,
+    [styles.reach]: reach === undefined ? undefined : `${reach}px`
   });
   return (
     <span className={`${styles.spread} ${on ? styles.on : ""}`} style={style} aria-hidden="true">

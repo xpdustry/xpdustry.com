@@ -17,16 +17,16 @@ export const lead = style([
     padding: `${pad.block}px ${pad.inline}px`,
     "@media": {
       [media.tablet]: { gridTemplateColumns: "1fr" },
-      [media.phone]: { padding: `${padPhone.block}px ${padPhone.inline}px` },
-    },
-  },
+      [media.phone]: { padding: `${padPhone.block}px ${padPhone.inline}px` }
+    }
+  }
 ]);
 
 export const text = style({
   display: "flex",
   flexDirection: "column",
   justifyContent: "flex-end",
-  minWidth: 0,
+  minWidth: 0
 });
 
 export const tags = style({
@@ -34,7 +34,7 @@ export const tags = style({
   flexWrap: "wrap",
   gap: 8,
   alignSelf: "flex-start",
-  marginBottom: "auto",
+  marginBottom: "auto"
 });
 
 globalStyle(`${lead} h2`, {
@@ -44,14 +44,14 @@ globalStyle(`${lead} h2`, {
   letterSpacing: tracking.display,
   textWrap: "balance",
   "@media": {
-    [media.phone]: { fontSize: rem(font.h2) },
-  },
+    [media.phone]: { fontSize: rem(font.h2) }
+  }
 });
 
 globalStyle(`${lead} p`, {
   maxWidth: "46ch",
   marginTop: 14,
-  color: vars.muted,
+  color: vars.muted
 });
 
 export const byline = style({
@@ -61,7 +61,7 @@ export const byline = style({
   gap: 9,
   marginTop: 20,
   fontSize: rem(font.small),
-  color: vars.muted,
+  color: vars.muted
 });
 
 export const shot = style({
@@ -76,8 +76,8 @@ export const shot = style({
   background: vars.stage,
   "@media": {
     [media.tablet]: { minHeight: 260 },
-    [media.phone]: { margin: `0 -${padPhone.inline + 2}px -${padPhone.block + 2}px 0` },
-  },
+    [media.phone]: { margin: `0 -${padPhone.inline + 2}px -${padPhone.block + 2}px 0` }
+  }
 });
 
 globalStyle(`${shot} img`, {
@@ -88,11 +88,11 @@ globalStyle(`${shot} img`, {
   objectFit: "cover",
   objectPosition: "left top",
   transformOrigin: "left top",
-  transition: `scale 0.6s ${vars.easeOut}`,
+  transition: `scale 0.6s ${vars.easeOut}`
 });
 
 globalStyle(`${lead}:hover ${shot} img`, {
-  scale: "1.03",
+  scale: "1.03"
 });
 
 export const logo = style([
@@ -102,7 +102,7 @@ export const logo = style([
     justifySelf: "center",
     width: 168,
     "@media": {
-      [media.tablet]: { display: "none" },
-    },
-  },
+      [media.tablet]: { display: "none" }
+    }
+  }
 ]);

@@ -5,7 +5,7 @@ import {
   LIFT,
   frameIndex,
   frameOffset,
-  frameRect,
+  frameRect
 } from "../src/lib/logo.ts";
 
 const LAYER = 0.96;
@@ -18,12 +18,12 @@ function reliefLogo(source: string): (offset: number) => string {
   for (const part of ["cog", "x"]) {
     template = template.replace(
       new RegExp(`(<g class="xp-w xp-w--${part}"[^>]*>).*?(</g>)`, "s"),
-      `$1{{${part}}}$2`,
+      `$1{{${part}}}$2`
     );
   }
   const steps = Array.from(
     { length: Math.round(DEPTH / LAYER) + Math.round(LIFT / LAYER) + 1 },
-    (_, index) => (Math.round(DEPTH / LAYER) - index) * LAYER,
+    (_, index) => (Math.round(DEPTH / LAYER) - index) * LAYER
   );
 
   return (offset) => {
@@ -31,7 +31,7 @@ function reliefLogo(source: string): (offset: number) => string {
       steps
         .map(
           (t) =>
-            `<use href="#xp-${part}" transform="translate(0 ${Math.max(t, offset).toFixed(2)})"/>`,
+            `<use href="#xp-${part}" transform="translate(0 ${Math.max(t, offset).toFixed(2)})"/>`
         )
         .join("");
     return template
@@ -39,7 +39,7 @@ function reliefLogo(source: string): (offset: number) => string {
       .replace("{{x}}", layers("x"))
       .replaceAll(
         '<g class="xp-f ',
-        `<g transform="translate(0 ${offset.toFixed(2)})" class="xp-f `,
+        `<g transform="translate(0 ${offset.toFixed(2)})" class="xp-f `
       );
   };
 }
@@ -53,13 +53,13 @@ export async function renderLogoFrames(source: string) {
       sharp(Buffer.from(logoAt(frameOffset(index))), { density: (72 * size) / 1072 })
         .resize(size, size)
         .png()
-        .toBuffer(),
-    ),
+        .toBuffer()
+    )
   );
   const width = size * columns;
   const height = size * Math.ceil(count / columns);
   const pixels = await sharp({
-    create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    create: { width, height, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } }
   })
     .composite(frames.map((input, index) => ({ input, ...frameRect(index) })))
     .raw()

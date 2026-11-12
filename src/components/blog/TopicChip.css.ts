@@ -14,15 +14,15 @@ export const tone = styleVariants({
     borderRadius: radius.sm,
     background: face,
     color: ink,
-    fontSize: rem(font.caption),
+    fontSize: rem(font.caption)
   },
-  cover: [pill, accented],
+  cover: [pill, accented]
 });
 
 globalStyle(`${tone.card} img`, {
-  width: 16,
+  width: 16
 });
 
 globalStyle(`${tone.cover} img`, {
-  width: 20,
+  width: 20
 });

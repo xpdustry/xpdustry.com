@@ -18,7 +18,7 @@ export interface Post {
 const frontmatters = import.meta.glob<BlogFrontmatter>("./blog/*/*.md", {
   query: "?frontmatter",
   import: "frontmatter",
-  eager: true,
+  eager: true
 });
 const documents = import.meta.glob<MarkdownDocument>("./blog/*/*.md", { import: "document" });
 
@@ -26,10 +26,10 @@ const byLocale = buildPosts();
 
 /** Newest first, in the default locale. */
 export const posts: readonly Post[] = [...(byLocale.get(DEFAULT_LOCALE)?.values() ?? [])].sort(
-  (a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt),
+  (a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt)
 );
 export const postsBySlug: ReadonlyMap<string, Post> = new Map(
-  posts.map((post) => [post.slug, post]),
+  posts.map((post) => [post.slug, post])
 );
 
 assertReleasesAreClaimedOnce();

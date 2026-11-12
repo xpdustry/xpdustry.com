@@ -8,13 +8,13 @@ export function cards(rowHeight: number) {
   const cards = pageGridWith({
     gridAutoRows: `minmax(${rowHeight}px, auto)`,
     "@media": {
-      [media.phone]: { display: "flex", flexDirection: "column" },
-    },
+      [media.phone]: { display: "flex", flexDirection: "column" }
+    }
   });
   globalStyle(`:where(${cards}) > *`, {
     "@media": {
-      [media.phone]: { minHeight: 180 },
-    },
+      [media.phone]: { minHeight: 180 }
+    }
   });
   return cards;
 }

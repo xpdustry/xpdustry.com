@@ -12,15 +12,15 @@ export const brand = style({
   alignItems: "center",
   gap: 10,
   color: "inherit",
-  textDecoration: "none",
+  textDecoration: "none"
 });
 
 globalStyle(`${brand} img`, {
   width: mark,
-  height: "auto",
+  height: "auto"
 });
 
 globalStyle(`${brand} span`, {
   fontSize: name,
-  letterSpacing: tracking.heading,
+  letterSpacing: tracking.heading
 });

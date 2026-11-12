@@ -30,7 +30,7 @@ export function postCard(slug: string, title: string): PageImage {
 export function postTitle({
   title,
   topic,
-  topicVersion,
+  topicVersion
 }: Pick<BlogFrontmatter, "title" | "topic" | "topicVersion">): string {
   if (title.toLowerCase().includes(topic.toLowerCase())) return title;
   return `${topic}${topicVersion ? ` ${topicVersion}` : ""} ${title}`;
@@ -72,7 +72,7 @@ export function seo(page: PageSeo) {
       { property: "og:locale", content: localeInfo(locale).openGraph },
       ...LOCALES.filter((other) => other !== locale).map((other) => ({
         property: "og:locale:alternate",
-        content: localeInfo(other).openGraph,
+        content: localeInfo(other).openGraph
       })),
       { property: "og:title", content: title },
       { property: "og:description", content: page.description },
@@ -91,20 +91,20 @@ export function seo(page: PageSeo) {
         ? [{ property: "article:published_time", content: page.publishedAt }]
         : []),
       ...(page.updatedAt ? [{ property: "article:modified_time", content: page.updatedAt }] : []),
-      ...(page.authorUrl ? [{ property: "article:author", content: page.authorUrl }] : []),
+      ...(page.authorUrl ? [{ property: "article:author", content: page.authorUrl }] : [])
     ],
     links: [
       { rel: "canonical", href: url },
       ...LOCALES.map((other) => ({ rel: "alternate", hrefLang: other, href: urlIn(other) })),
-      { rel: "alternate", hrefLang: "x-default", href: urlIn(DEFAULT_LOCALE) },
+      { rel: "alternate", hrefLang: "x-default", href: urlIn(DEFAULT_LOCALE) }
     ],
     scripts: page.jsonLd
       ? [
           {
             type: "application/ld+json",
-            children: JSON.stringify(page.jsonLd).replace(/</g, "\\u003c"),
-          },
+            children: JSON.stringify(page.jsonLd).replace(/</g, "\\u003c")
+          }
         ]
-      : [],
+      : []
   };
 }

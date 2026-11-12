@@ -8,7 +8,7 @@ import display from "@fontsource/momo-trust-display/files/momo-trust-display-lat
 const FILES = {
   display: { latin: display, cyrillic: cyrillicDisplay },
   mono: { latin: mono, cyrillic: cyrillicMono },
-  text: { latin: text, cyrillic: cyrillicText },
+  text: { latin: text, cyrillic: cyrillicText }
 };
 
 const CYRILLIC_LOCALES = new Set(["ru"]);
@@ -22,15 +22,13 @@ const CYRILLIC_LOCALES = new Set(["ru"]);
 export function fontPreloads(faces: readonly (keyof typeof FILES)[], locale: string) {
   return faces
     .flatMap((face) =>
-      CYRILLIC_LOCALES.has(locale)
-        ? [FILES[face].latin, FILES[face].cyrillic]
-        : [FILES[face].latin],
+      CYRILLIC_LOCALES.has(locale) ? [FILES[face].latin, FILES[face].cyrillic] : [FILES[face].latin]
     )
     .map((href) => ({
       rel: "preload",
       href,
       as: "font",
       type: "font/woff2",
-      crossOrigin: "anonymous" as const,
+      crossOrigin: "anonymous" as const
     }));
 }

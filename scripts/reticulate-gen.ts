@@ -25,11 +25,11 @@ const png = encode(
     height: field.height,
     data: greyAlpha(mask),
     channels: 2,
-    depth: 8,
+    depth: 8
   },
-  { zlib: { level: 9 } },
+  { zlib: { level: 9 } }
 );
 writeFileSync(target, png);
 console.log(
-  `${field.width}x${field.height} in ${((Date.now() - started) / 1000).toFixed(1)}s -> ${target}`,
+  `${field.width}x${field.height} in ${((Date.now() - started) / 1000).toFixed(1)}s -> ${target}`
 );

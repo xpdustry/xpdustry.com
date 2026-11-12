@@ -24,10 +24,10 @@ export const Route = createFileRoute("/")({
       description: m(SITE.description),
       path: "/",
       image: siteCard(m),
-      jsonLd: homeStructuredData(locale),
+      jsonLd: homeStructuredData(locale)
     });
   },
-  component: Home,
+  component: Home
 });
 
 function Home() {

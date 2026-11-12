@@ -21,10 +21,10 @@ export const Route = createFileRoute("/blog/")({
       fullTitle: true,
       description: m(BLOG_DESCRIPTION),
       path: "/blog",
-      image: blogCard(m),
+      image: blogCard(m)
     });
   },
-  component: BlogIndex,
+  component: BlogIndex
 });
 
 function BlogIndex() {

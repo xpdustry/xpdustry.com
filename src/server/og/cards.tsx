@@ -15,7 +15,7 @@ import {
   HomeCard,
   PostCard,
   type CardLanguage,
-  type CardPost,
+  type CardPost
 } from "#app/server/og/Card";
 import { services } from "#app/server/services";
 import { DISPLAY_WEIGHT, FACE } from "#app/styles/fonts";
@@ -26,18 +26,18 @@ const FONTS = [
   { name: FACE.display, data: bytes(momo), weight: DISPLAY_WEIGHT },
   { name: FACE.mono, data: bytes(dmMono), weight: 400 },
   { name: FACE.cyrillicDisplay, data: bytes(golosBold), weight: DISPLAY_WEIGHT },
-  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 },
+  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 }
 ];
 
 const iconData = import.meta.glob<string>("/src/assets/brand/*", {
   query: "?inline",
   import: "default",
-  eager: true,
+  eager: true
 });
 const iconUrls = import.meta.glob<string>("/src/assets/brand/*", {
   query: "?url",
   import: "default",
-  eager: true,
+  eager: true
 });
 const inlineIcons = new Map(Object.entries(iconUrls).map(([file, url]) => [url, iconData[file]!]));
 
@@ -55,7 +55,7 @@ function cardPosts(locale: string): CardPost[] {
       author: post.frontmatter.author,
       topic: post.frontmatter.topic,
       publishedAt: post.frontmatter.publishedAt,
-      icon: inlineIcon(topic(post.frontmatter.topic).icon),
+      icon: inlineIcon(topic(post.frontmatter.topic).icon)
     };
   });
 }
