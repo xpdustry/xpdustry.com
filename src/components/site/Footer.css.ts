@@ -1,8 +1,8 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { onDeep } from "#app/components/site/deep";
-import { RIDGE } from "#app/data/textures";
 import { media, upTo } from "#app/styles/media";
 import { font, leading, rem, tracking } from "#app/styles/scale";
+import { RIDGE } from "#app/textures/page";
 import { mark, name } from "#app/components/site/Brand.css";
 import { vars } from "#app/styles/theme.css";
 
@@ -25,7 +25,7 @@ export const ridge = style({
   position: "absolute",
   inset: "auto 0 calc(100% - 1px)",
   height: ridgeHeight,
-  background: 'url("../../assets/ridge.webp") 50% 100% / auto 100% repeat-x',
+  background: 'url("../../textures/assets/ridge.webp") 50% 100% / auto 100% repeat-x',
   pointerEvents: "none"
 });
 

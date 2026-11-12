@@ -3,11 +3,11 @@ import { getLocale, getMessages, T, useGT, useMessages, useLocale } from "gt-tan
 import { LeadPost } from "#app/components/blog/LeadPost";
 import { PostTile } from "#app/components/blog/PostTile";
 import { DiscordCard } from "#app/components/site/DiscordCard";
-import { Patches } from "#app/components/ui/Patches";
 import { posts, translated } from "#app/content/registry";
-import { PATCHES } from "#app/data/patches";
 import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/data/site";
 import { blogCard, seo } from "#app/lib/seo";
+import { PATCHES } from "#app/textures/cards";
+import { Patches } from "#app/textures/Patches";
 import * as styles from "#app/components/blog/BlogIndex.css";
 import * as card from "#app/components/ui/Card.css";
 import { grid } from "#app/styles/layout.css";

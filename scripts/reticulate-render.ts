@@ -1,4 +1,4 @@
-import type { TextureSettings } from "../src/lib/textures.ts";
+import type { TextureSettings } from "../src/textures/texture.ts";
 
 /** The labyrinth tile, as alpha in 0..1, `size` px square. */
 export interface Labyrinth {

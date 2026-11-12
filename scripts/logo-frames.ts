@@ -8,6 +8,10 @@ import {
   frameRect
 } from "../src/lib/logo.ts";
 
+/** The logo the frames are drawn from, and the folder the frames are written to. */
+export const LOGO = new URL("../src/assets/logo.svg", import.meta.url);
+export const FRAMES = new URL("../src/assets/", import.meta.url);
+
 const LAYER = 0.96;
 
 function reliefLogo(source: string): (offset: number) => string {

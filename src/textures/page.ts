@@ -1,4 +1,4 @@
-import { spreadTiles, type TextureSettings } from "../lib/textures.ts";
+import { spreadTiles, type TextureSettings } from "./texture.ts";
 
 const DEEP = "#083230";
 

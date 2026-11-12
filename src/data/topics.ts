@@ -1,5 +1,5 @@
-import { PATCHES } from "#app/data/patches";
 import { projectForTopic, type ProjectTheme } from "#app/data/projects";
+import { PATCHES } from "#app/textures/cards";
 
 export interface Topic extends ProjectTheme {
   name: string;

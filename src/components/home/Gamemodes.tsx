@@ -4,19 +4,19 @@ import { useId, useLayoutEffect, useRef, useState, type MouseEvent } from "react
 import { Tray } from "#app/components/tray/Tray";
 import { CopyStatus } from "#app/components/ui/CopyStatus";
 import { Hostname } from "#app/components/ui/Hostname";
-import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
-import { Spread, spreadFrom } from "#app/components/ui/Spread";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
 import { findServer, playerCount } from "#app/data/live";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
 import { Check, Copy, GameController, X } from "#app/lib/icons";
 import { useCopy } from "#app/lib/useCopy";
 import { useSeen } from "#app/lib/useSeen";
+import { Patches } from "#app/textures/Patches";
+import { Spread, spreadFrom } from "#app/textures/Spread";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Gamemodes.css";
 
-const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
+const FRINGES = import.meta.glob<string>("/src/textures/assets/fringe/*.webp", {
   eager: true,
   query: "?url",
   import: "default"
@@ -107,7 +107,7 @@ function Mode({
         <span
           className={`${styles.edge} ${styles.below}`}
           style={{
-            backgroundImage: `url("${FRINGES[`/src/assets/fringe/${mode.edge.below.name}.webp`]}")`
+            backgroundImage: `url("${FRINGES[`/src/textures/assets/fringe/${mode.edge.below.name}.webp`]}")`
           }}
         />
       </span>

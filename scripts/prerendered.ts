@@ -1,12 +1,12 @@
 import sharp from "sharp";
-import { FRINGES, PATCHES, SPREADS } from "../src/data/patches.ts";
-import { BACKDROP, CROWN, FADE, RIDGE } from "../src/data/textures.ts";
-import { blobSprites, type TextureSettings } from "../src/lib/textures.ts";
+import { FRINGES, PATCHES, SPREADS } from "../src/textures/cards.ts";
+import { BACKDROP, CROWN, FADE, RIDGE } from "../src/textures/page.ts";
+import { blobSprites, type TextureSettings } from "../src/textures/texture.ts";
 import { renderTexture, toLabyrinth } from "./reticulate-render.ts";
 
-export const ASSETS = new URL("../src/assets/", import.meta.url);
+export const ASSETS = new URL("../src/textures/assets/", import.meta.url);
 
-/** A texture's file, under `src/assets`, and what renders it: its settings at its size, if fixed. */
+/** A texture's file, under `src/textures/assets`, and what renders it: its settings at its size, if fixed. */
 export interface Prerendered {
   file: string;
   settings: TextureSettings;
@@ -58,8 +58,8 @@ export const TEXTURES: readonly Prerendered[] = [
 export const RENDERED_FOLDERS = ["patches", "spread", "fringe"] as const;
 
 /** Decodes an asset into RGBA pixels. */
-export const readPixels = (file: string) =>
-  sharp(new URL(file, ASSETS).pathname).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+export const readPixels = (file: string, folder: URL = ASSETS) =>
+  sharp(new URL(file, folder).pathname).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 
 const reticulate = await readPixels("reticulate.png");
 const labyrinth = toLabyrinth(reticulate.data, reticulate.info.channels, reticulate.info.width);

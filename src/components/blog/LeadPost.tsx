@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { T, useLocale } from "gt-tanstack-start";
 import logo from "#app/assets/logo.svg";
-import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
 import { topic } from "#app/data/topics";
 import { formatDate } from "#app/lib/format";
-import { seeded } from "#app/lib/textures";
+import { Patches } from "#app/textures/Patches";
+import { seeded } from "#app/textures/texture";
 import { themed } from "./themed";
 import { TopicChip } from "./TopicChip";
 import * as card from "#app/components/ui/Card.css";

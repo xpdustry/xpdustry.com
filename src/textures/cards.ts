@@ -1,4 +1,4 @@
-import { fringe, growing, patches, shaped, spreadTiles, type Blob } from "../lib/textures.ts";
+import { fringe, growing, patches, shaped, spreadTiles, type Blob } from "./texture.ts";
 
 const LIGHT_TEAL = ["#86d8cf", "#a6e7e0"] as const;
 const DEEP_TEAL = ["#104643", "#0c3c39"] as const;

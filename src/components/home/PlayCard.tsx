@@ -1,13 +1,13 @@
 import { T, useGT } from "gt-tanstack-start";
 import { CopyStatus } from "#app/components/ui/CopyStatus";
 import { Hostname } from "#app/components/ui/Hostname";
-import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import type { PlayerCount as Count } from "#app/data/live";
-import { PATCHES } from "#app/data/patches";
 import { HUB } from "#app/data/servers";
 import { Check, Copy, X } from "#app/lib/icons";
 import { useCopy } from "#app/lib/useCopy";
+import { PATCHES } from "#app/textures/cards";
+import { Patches } from "#app/textures/Patches";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./PlayCard.css";
 

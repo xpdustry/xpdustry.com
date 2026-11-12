@@ -15,7 +15,7 @@ function greyAlpha(alpha: Uint8Array): Uint8Array {
 const START_SIZE = 300;
 const BLUR_RADIUS_PX = 2;
 
-const target = fileURLToPath(new URL("../src/assets/reticulate.png", import.meta.url));
+const target = fileURLToPath(new URL("../src/textures/assets/reticulate.png", import.meta.url));
 const started = Date.now();
 const field = reticulateField(START_SIZE, 1);
 const mask = wrappedBoxBlur(toMask(field), field.width, field.height, BLUR_RADIUS_PX);

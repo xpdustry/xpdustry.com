@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import sharp from "sharp";
-import { renderLogoFrames, restingFrame } from "./logo-frames.ts";
+import { FRAMES, LOGO, renderLogoFrames, restingFrame } from "./logo-frames.ts";
 import { ASSETS, RENDERED_FOLDERS, TEXTURES, render } from "./prerendered.ts";
 
 const webp = (pixels: Buffer | Uint8ClampedArray, width: number, height: number) =>
@@ -23,10 +23,12 @@ for (const texture of TEXTURES) {
   await webp(pixels, width, height).toFile(target(texture.file));
 }
 
-const sheet = await renderLogoFrames(readFileSync(new URL("logo.svg", ASSETS), "utf8"));
-await webp(sheet.pixels, sheet.width, sheet.height).toFile(target("logo-frames.webp"));
+const sheet = await renderLogoFrames(readFileSync(LOGO, "utf8"));
+await webp(sheet.pixels, sheet.width, sheet.height).toFile(
+  new URL("logo-frames.webp", FRAMES).pathname
+);
 await webp(sheet.pixels, sheet.width, sheet.height)
   .extract(restingFrame())
-  .toFile(target("logo-relief.webp"));
+  .toFile(new URL("logo-relief.webp", FRAMES).pathname);
 
 console.log(`${TEXTURES.length} textures and the logo's frames`);

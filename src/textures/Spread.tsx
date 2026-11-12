@@ -1,15 +1,15 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import type { SpreadStage, SpreadTiles } from "#app/lib/textures";
+import type { SpreadStage, SpreadTiles } from "./texture";
 import * as styles from "./Spread.css";
 
-const TILES = import.meta.glob<string>("/src/assets/spread/*.webp", {
+const TILES = import.meta.glob<string>("/src/textures/assets/spread/*.webp", {
   eager: true,
   query: "?url",
   import: "default"
 });
 
 const tile = (tiles: SpreadTiles | undefined, stage: SpreadStage) =>
-  tiles && `url("${TILES[`/src/assets/spread/${tiles[stage].name}.webp`]}")`;
+  tiles && `url("${TILES[`/src/textures/assets/spread/${tiles[stage].name}.webp`]}")`;
 
 /** Where a spread starts, in px from its parent's top left corner. */
 export type SpreadOrigin = readonly [x: number, y: number];

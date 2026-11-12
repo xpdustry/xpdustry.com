@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
-import { blobSprite, type Patches as PatchesData } from "#app/lib/textures";
+import { blobSprite, type Patches as PatchesData } from "./texture";
 import * as styles from "./Patches.css";
 
-const SPRITES = import.meta.glob<string>("/src/assets/patches/*.webp", {
+const SPRITES = import.meta.glob<string>("/src/textures/assets/patches/*.webp", {
   eager: true,
   query: "?url",
   import: "default"
@@ -65,7 +65,7 @@ function Sprite({
   return (
     <img
       className={className}
-      src={SPRITES[`/src/assets/patches/${sprite.name}.webp`]}
+      src={SPRITES[`/src/textures/assets/patches/${sprite.name}.webp`]}
       width={sprite.size}
       height={sprite.size}
       alt=""

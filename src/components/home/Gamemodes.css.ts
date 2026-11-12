@@ -32,7 +32,7 @@ export const mode = style({
       position: "absolute",
       inset: 0,
       zIndex: -2,
-      background: 'url("../../assets/fade.webp") 0 -60px / 240px'
+      background: 'url("../../textures/assets/fade.webp") 0 -60px / 240px'
     }
   },
   "@container": {

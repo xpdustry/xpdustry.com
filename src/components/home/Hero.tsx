@@ -1,10 +1,10 @@
 import { T } from "gt-tanstack-start";
 import { PressableLogo } from "#app/components/home/PressableLogo";
-import { Patches } from "#app/components/ui/Patches";
 import { PlinthAnchor, PlinthSectionLink } from "#app/components/ui/Plinth";
-import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
 import { GitHub } from "#app/lib/icons";
+import { PATCHES } from "#app/textures/cards";
+import { Patches } from "#app/textures/Patches";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Hero.css";
 

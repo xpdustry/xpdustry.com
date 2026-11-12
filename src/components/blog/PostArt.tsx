@@ -1,8 +1,8 @@
 import logo from "#app/assets/logo.svg";
-import { Patches } from "#app/components/ui/Patches";
 import type { Post } from "#app/content/registry";
 import { topic } from "#app/data/topics";
-import { seeded } from "#app/lib/textures";
+import { Patches } from "#app/textures/Patches";
+import { seeded } from "#app/textures/texture";
 import * as styles from "./PostArt.css";
 
 export function PostArt({ post, className }: { post: Post; className?: string }) {

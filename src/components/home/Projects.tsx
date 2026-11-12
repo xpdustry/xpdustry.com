@@ -1,14 +1,14 @@
 import { T, useGT, useMessages } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { Tray } from "#app/components/tray/Tray";
-import { Patches } from "#app/components/ui/Patches";
 import type { LiveData } from "#app/data/live";
-import { PATCHES } from "#app/data/patches";
 import { projects, repositoryUrl, type Project } from "#app/data/projects";
 import { SITE } from "#app/data/site";
 import { versionOf } from "#app/lib/format";
 import { GitHub, PuzzlePiece } from "#app/lib/icons";
-import type { Patches as PatchSet } from "#app/lib/textures";
+import { PATCHES } from "#app/textures/cards";
+import { Patches } from "#app/textures/Patches";
+import type { Patches as PatchSet } from "#app/textures/texture";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Projects.css";
 

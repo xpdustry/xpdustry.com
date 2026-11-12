@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Patches } from "#app/components/ui/Patches";
-import { PATCHES } from "#app/data/patches";
+import { PATCHES } from "#app/textures/cards";
+import { Patches } from "#app/textures/Patches";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Message.css";
 
