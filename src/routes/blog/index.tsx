@@ -1,40 +1,65 @@
-import { For, Show } from "solid-js";
-import { PostCard } from "#app/components/content/PostCard";
-import { BLOG_CARD, PageMeta } from "#app/components/layout/PageMeta";
-import { posts } from "#app/content/registry";
-import { BLOG_DESCRIPTION } from "#app/data/site";
-import * as styles from "./index.css";
+import { createFileRoute } from "@tanstack/react-router";
+import { getLocale, getMessages, T, useGT, useMessages, useLocale } from "gt-tanstack-start";
+import { posts, translated } from "#app/blog/content/registry";
+import { LeadPost } from "#app/blog/LeadPost";
+import { PostTile } from "#app/blog/PostTile";
+import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/blog/titles";
+import { blogCard, seo } from "#app/seo/meta";
+import { DiscordCard } from "#app/status/DiscordCard";
+import { PATCHES } from "#app/textures/cards";
+import { Patches } from "#app/textures/Patches";
+import * as styles from "#app/blog/BlogIndex.css";
+import * as card from "#app/ui/Card.css";
+import { grid } from "#app/ui/styles/layout.css";
 
-export default function BlogIndex() {
+export const Route = createFileRoute("/blog/")({
+  head: async () => {
+    const m = await getMessages();
+    return seo({
+      locale: getLocale(),
+      title: m(BLOG_TITLE),
+      fullTitle: true,
+      description: m(BLOG_DESCRIPTION),
+      path: "/blog",
+      image: blogCard(m)
+    });
+  },
+  component: BlogIndex
+});
+
+function BlogIndex() {
+  const gt = useGT();
+  const m = useMessages();
+  const locale = useLocale();
+  const [latest, ...earlier] = posts.map((post) => translated(post, locale));
   return (
-    <>
-      <PageMeta title="Blog" description={BLOG_DESCRIPTION} path="/blog" image={BLOG_CARD} />
-      <div class={styles.page}>
-        <header class={styles.header}>
-          <h1 class={styles.pageTitle}>Blog</h1>
-          <p class={styles.lede}>{BLOG_DESCRIPTION}</p>
-        </header>
-
-        <Show when={posts.length > 0} fallback={<EmptyPosts />}>
-          <div class={styles.posts}>
-            <For each={posts}>
-              {(post) => (
-                <article class={styles.article}>
-                  <PostCard post={post} />
-                </article>
-              )}
-            </For>
-          </div>
-        </Show>
-      </div>
-    </>
-  );
-}
-
-function EmptyPosts() {
-  return (
-    <div class={styles.empty}>
-      <span class={styles.emptyTitle}>Nothing published yet</span>
-    </div>
+    <main id="main" className={grid}>
+      <section className={`${card.card} ${styles.intro} reveal`}>
+        <Patches patches={PATCHES.blogIntro} />
+        <h1>
+          <T>Blog</T>
+        </h1>
+        <p>{m(BLOG_DESCRIPTION)}</p>
+      </section>
+      <DiscordCard title={gt("Questions about a release?")} className={`${styles.ask} reveal`}>
+        <T>Ask in our Discord.</T>
+      </DiscordCard>
+      {latest ? (
+        <LeadPost post={latest} className={`${styles.wide} reveal`} />
+      ) : (
+        <p className={styles.empty}>
+          <T>Nothing published yet.</T>
+        </p>
+      )}
+      {earlier.map((post) => (
+        <PostTile
+          key={post.slug}
+          post={post}
+          variant="listing"
+          heading="h2"
+          className={`${styles.tile} reveal`}
+        />
+      ))}
+    </main>
   );
 }

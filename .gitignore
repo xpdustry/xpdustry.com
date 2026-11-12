@@ -1,12 +1,7 @@
 # Build output
 
 dist
-.wrangler
-.output
-.vercel
-.netlify
-.vinxi
-app.config.timestamp_*.js
+.tanstack
 
 # Environment
 .env
@@ -25,3 +20,7 @@ app.config.timestamp_*.js
 # System Files
 .DS_Store
 Thumbs.db
+
+# Verification runs (.agents/skills/verify-xpdustry)
+.verify
+.fallow/
