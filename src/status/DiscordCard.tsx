@@ -9,12 +9,18 @@ import type { DiscordCounts } from "./live";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./DiscordCard.css";
 
+/** The card's two sizes: the compact one sits in a narrow column, under smaller patches. */
+const SIZES = {
+  regular: { className: "", patches: PATCHES.discord },
+  compact: { className: styles.compact, patches: PATCHES.discordCompact }
+};
+
 export function DiscordCard({
   title,
   children,
   counts,
   compact = false,
-  className
+  className = ""
 }: {
   title: string;
   children: ReactNode;
@@ -23,14 +29,13 @@ export function DiscordCard({
   compact?: boolean;
   className?: string;
 }) {
-  const gt = useGT();
-  const locale = useLocale();
+  const size = SIZES[compact ? "compact" : "regular"];
   return (
     <a
       href={SITE.discord}
-      className={`${card.card} ${styles.discord} ${compact ? styles.compact : ""} ${className ?? ""}`}
+      className={`${card.card} ${styles.discord} ${size.className} ${className}`}
     >
-      <Patches patches={compact ? PATCHES.discordCompact : PATCHES.discord} />
+      <Patches patches={size.patches} />
       <Discord className={styles.glyph} />
       <span className={`${card.hint} ${styles.go}`}>
         <ArrowUpRight />
@@ -38,15 +43,21 @@ export function DiscordCard({
       <span>
         <strong className={styles.title}>{title}</strong>
         <span className={styles.say}>{children}</span>
-        {counts && (
-          <small className={styles.counts}>
-            {gt("{online} online, {members} members", {
-              online: formatNumber(counts.online, locale),
-              members: formatNumber(counts.members, locale)
-            })}
-          </small>
-        )}
+        {counts && <Presence counts={counts} />}
       </span>
     </a>
+  );
+}
+
+function Presence({ counts }: { counts: DiscordCounts }) {
+  const gt = useGT();
+  const locale = useLocale();
+  return (
+    <small className={styles.counts}>
+      {gt("{online} online, {members} members", {
+        online: formatNumber(counts.online, locale),
+        members: formatNumber(counts.members, locale)
+      })}
+    </small>
   );
 }
