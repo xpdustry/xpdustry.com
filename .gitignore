@@ -20,3 +20,6 @@ dist
 # System Files
 .DS_Store
 Thumbs.db
+
+# Verification runs (.agents/skills/verify-xpdustry)
+.verify

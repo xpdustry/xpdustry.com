@@ -20,6 +20,8 @@ Run the full test and type-check suite with:
 pnpm check
 ```
 
+Before shipping, agents prove the built site behaves for a visitor with the [`verify-xpdustry` skill](.agents/skills/verify-xpdustry/SKILL.md): it serves the production build, drives it in a browser in every language, and keeps the evidence in `.verify/`.
+
 ## Compile and run
 
 ```bash

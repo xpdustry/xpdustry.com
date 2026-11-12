@@ -1,0 +1,212 @@
+{
+  "/": {
+    "title": "Xpdustry: Mindustry plugins and Chaotic Neutral servers",
+    "description": "We build open-source software for Mindustry, and also run the Chaotic Neutral Mindustry servers.",
+    "h1": "Xpdustry",
+    "canonical": "https://xpdustry.com/",
+    "card": "/og/home.png",
+    "structuredData": "Organization, WebSite",
+    "words": 230,
+    "links": 5
+  },
+  "/fr": {
+    "title": "Xpdustry : plugins Mindustry et serveurs Chaotic Neutral",
+    "description": "On développe des logiciels open source pour Mindustry et on gère aussi les serveurs Mindustry Chaotic Neutral.",
+    "h1": "Xpdustry",
+    "canonical": "https://xpdustry.com/fr",
+    "card": "/fr/og/home.png",
+    "structuredData": "Organization, WebSite",
+    "words": 269,
+    "links": 5
+  },
+  "/ru": {
+    "title": "Xpdustry: плагины Mindustry и серверы Chaotic Neutral",
+    "description": "Делаем программы с открытым исходным кодом для Mindustry и держим серверы Chaotic Neutral.",
+    "h1": "Xpdustry",
+    "canonical": "https://xpdustry.com/ru",
+    "card": "/ru/og/home.png",
+    "structuredData": "Organization, WebSite",
+    "words": 215,
+    "links": 5
+  },
+  "/blog": {
+    "title": "Xpdustry blog: Mindustry plugin news, guides and release notes",
+    "description": "Release notes, guides and articles about Xpdustry Mindustry mods and plugins.",
+    "h1": "Blog",
+    "canonical": "https://xpdustry.com/blog",
+    "card": "/og/blog.png",
+    "structuredData": "",
+    "words": 151,
+    "links": 7
+  },
+  "/fr/blog": {
+    "title": "Blog Xpdustry : plugins Mindustry, guides et notes de version",
+    "description": "Notes de version, guides et articles sur les mods et plugins Mindustry de Xpdustry.",
+    "h1": "Blog",
+    "canonical": "https://xpdustry.com/fr/blog",
+    "card": "/fr/og/blog.png",
+    "structuredData": "",
+    "words": 176,
+    "links": 7
+  },
+  "/ru/blog": {
+    "title": "Блог Xpdustry: новости плагинов Mindustry, гайды и списки изменений",
+    "description": "Списки изменений, гайды и статьи о модах и плагинах Xpdustry для Mindustry.",
+    "h1": "Блог",
+    "canonical": "https://xpdustry.com/ru/blog",
+    "card": "/ru/og/blog.png",
+    "structuredData": "",
+    "words": 138,
+    "links": 7
+  },
+  "/blog/nohorny-4-beta-11": {
+    "title": "NoHorny 4 Beta 11: Admin panel and expanded tracking - Xpdustry",
+    "description": "NoHorny now covers tiled displays, sorters and illuminators, and gets a website with request pages and an admin panel. Likely the last beta before v4.",
+    "h1": "NoHorny 4 Beta 11: Admin panel and expanded tracking",
+    "canonical": "https://xpdustry.com/blog/nohorny-4-beta-11",
+    "card": "/og/blog/nohorny-4-beta-11.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 299,
+    "links": 5
+  },
+  "/fr/blog/nohorny-4-beta-11": {
+    "title": "NoHorny 4 Bêta 11 : panneau d’admin et suivi étendu - Xpdustry",
+    "description": "NoHorny gère les écrans modulaires, trieurs et illuminateurs, et s’offre un site avec pages de requêtes et panneau d’admin. Sans doute la dernière bêta avant la v4.",
+    "h1": "NoHorny 4 Bêta 11 : panneau d’admin et suivi étendu",
+    "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-11",
+    "card": "/fr/og/blog/nohorny-4-beta-11.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 328,
+    "links": 5
+  },
+  "/ru/blog/nohorny-4-beta-11": {
+    "title": "NoHorny 4 Бета 11: админ-панель и поддержка новых блоков - Xpdustry",
+    "description": "NoHorny теперь проверяет бесшовные логические дисплеи, сортировщики и осветители. Появился сайт со страницами запросов и админ-панелью. Вероятно, последняя бета перед v4.",
+    "h1": "NoHorny 4 Бета 11: админ-панель и поддержка новых блоков",
+    "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-11",
+    "card": "/ru/og/blog/nohorny-4-beta-11.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 272,
+    "links": 5
+  },
+  "/blog/nohorny-4-beta-8": {
+    "title": "NoHorny 4 Beta 8: Breaking changes and blurred alerts - Xpdustry",
+    "description": "Tracked buildings are rendered locally now, which makes beta 7 clients incompatible with the public server. Discord alerts now arrive blurred.",
+    "h1": "NoHorny 4 Beta 8: Breaking changes and blurred alerts",
+    "canonical": "https://xpdustry.com/blog/nohorny-4-beta-8",
+    "card": "/og/blog/nohorny-4-beta-8.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 197,
+    "links": 5
+  },
+  "/fr/blog/nohorny-4-beta-8": {
+    "title": "NoHorny 4 Bêta 8 : incompatibilité et alertes floutées - Xpdustry",
+    "description": "Le rendu des bâtiments suivis se fait désormais en local : les clients bêta 7 sont incompatibles avec le serveur public. Les alertes Discord sont floutées.",
+    "h1": "NoHorny 4 Bêta 8 : incompatibilité et alertes floutées",
+    "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-8",
+    "card": "/fr/og/blog/nohorny-4-beta-8.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 218,
+    "links": 5
+  },
+  "/ru/blog/nohorny-4-beta-8": {
+    "title": "NoHorny 4 Бета 8: несовместимость и размытые уведомления - Xpdustry",
+    "description": "Отслеживаемые постройки теперь отрисовываются локально, поэтому клиенты беты 7 несовместимы с публичным сервером. Картинки в уведомлениях Discord теперь размыты.",
+    "h1": "NoHorny 4 Бета 8: несовместимость и размытые уведомления",
+    "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-8",
+    "card": "/ru/og/blog/nohorny-4-beta-8.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 178,
+    "links": 5
+  },
+  "/blog/nohorny-4-beta-7": {
+    "title": "NoHorny 4 Beta 7: Automatic bans are reliable now - Xpdustry",
+    "description": "Two accuracy changes, and together they make automatically banning on an NSFW rating actually reliable.",
+    "h1": "NoHorny 4 Beta 7: Automatic bans are reliable now",
+    "canonical": "https://xpdustry.com/blog/nohorny-4-beta-7",
+    "card": "/og/blog/nohorny-4-beta-7.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 225,
+    "links": 5
+  },
+  "/fr/blog/nohorny-4-beta-7": {
+    "title": "NoHorny 4 Bêta 7 : des bannissements automatiques fiables - Xpdustry",
+    "description": "Deux améliorations de la précision qui, ensemble, rendent enfin fiables les bannissements automatiques sur la base d’un verdict NSFW.",
+    "h1": "NoHorny 4 Bêta 7 : des bannissements automatiques fiables",
+    "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-7",
+    "card": "/fr/og/blog/nohorny-4-beta-7.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 243,
+    "links": 5
+  },
+  "/ru/blog/nohorny-4-beta-7": {
+    "title": "NoHorny 4 Бета 7: автобанам теперь можно доверять - Xpdustry",
+    "description": "Два улучшения точности, благодаря которым автоматический бан за оценку NSFW наконец стал надёжным.",
+    "h1": "NoHorny 4 Бета 7: автобанам теперь можно доверять",
+    "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-7",
+    "card": "/ru/og/blog/nohorny-4-beta-7.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 188,
+    "links": 5
+  },
+  "/blog/nohorny-4-beta-3": {
+    "title": "NoHorny 4 Beta 3: Incremental grouping - Xpdustry",
+    "description": "How NoHorny went from scanning the whole map in a background thread to a synchronous incremental grouping algorithm.",
+    "h1": "NoHorny 4 Beta 3: Incremental grouping",
+    "canonical": "https://xpdustry.com/blog/nohorny-4-beta-3",
+    "card": "/og/blog/nohorny-4-beta-3.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 269,
+    "links": 5
+  },
+  "/fr/blog/nohorny-4-beta-3": {
+    "title": "NoHorny 4 Bêta 3 : regroupement incrémental - Xpdustry",
+    "description": "Comment NoHorny est passé du balayage de toute la carte dans un thread en arrière-plan à un algorithme de regroupement incrémental synchrone.",
+    "h1": "NoHorny 4 Bêta 3 : regroupement incrémental",
+    "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-3",
+    "card": "/fr/og/blog/nohorny-4-beta-3.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 279,
+    "links": 5
+  },
+  "/ru/blog/nohorny-4-beta-3": {
+    "title": "NoHorny 4 Бета 3: инкрементальная группировка - Xpdustry",
+    "description": "Как NoHorny перешёл от сканирования всей карты в фоновом потоке к синхронному алгоритму инкрементальной группировки.",
+    "h1": "NoHorny 4 Бета 3: инкрементальная группировка",
+    "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-3",
+    "card": "/ru/og/blog/nohorny-4-beta-3.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 220,
+    "links": 5
+  },
+  "/blog/nohorny-4-beta-1": {
+    "title": "Say hello to NoHorny v4 beta 1 - Xpdustry",
+    "description": "No more manual setup with an external NSFW detection service. A hosted server is provided by default, and tracking is near instant.",
+    "h1": "Say hello to NoHorny v4 beta 1",
+    "canonical": "https://xpdustry.com/blog/nohorny-4-beta-1",
+    "card": "/og/blog/nohorny-4-beta-1.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 243,
+    "links": 6
+  },
+  "/fr/blog/nohorny-4-beta-1": {
+    "title": "NoHorny v4 bêta 1 est là ! - Xpdustry",
+    "description": "Plus besoin de configurer manuellement un service externe de détection NSFW. Un serveur hébergé est fourni par défaut et le suivi est quasi instantané.",
+    "h1": "NoHorny v4 bêta 1 est là !",
+    "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-1",
+    "card": "/fr/og/blog/nohorny-4-beta-1.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 272,
+    "links": 6
+  },
+  "/ru/blog/nohorny-4-beta-1": {
+    "title": "Встречай первую бету NoHorny v4 - Xpdustry",
+    "description": "Больше не нужно вручную подключать внешний сервис распознавания NSFW. Публичный сервер доступен по умолчанию, а отслеживание почти мгновенное.",
+    "h1": "Встречай первую бету NoHorny v4",
+    "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-1",
+    "card": "/ru/og/blog/nohorny-4-beta-1.png",
+    "structuredData": "BlogPosting, BreadcrumbList",
+    "words": 212,
+    "links": 6
+  }
+}
