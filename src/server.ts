@@ -38,6 +38,24 @@ function askForDefaultLanguageWhenNoneStated(request: Request): void {
   }
 }
 
+/**
+ * A link followed within the site to an unprefixed page is a choice of English: every link on a
+ * translated page carries its prefix except the switch to English. Reading the browser's own
+ * account of the navigation lets that choice hold without scripts and with cookies blocked, where a
+ * stored French or Russian preference would send the visitor straight back.
+ */
+function choseEnglish(request: Request): boolean {
+  return (
+    request.headers.get("sec-fetch-site") === "same-origin" &&
+    request.headers.get("sec-fetch-mode") === "navigate"
+  );
+}
+
+function askForEnglish(request: Request): void {
+  request.headers.set("cookie", `${LOCALE_COOKIE}=${DEFAULT_LOCALE}`);
+  request.headers.set("accept-language", DEFAULT_LOCALE);
+}
+
 function withHeaders(response: Response, edit: (headers: Headers) => void): Response {
   const headers = new Headers(response.headers);
   edit(headers);
@@ -62,13 +80,14 @@ export default createServerEntry({
 
     keepOnlyLocaleCookie(request);
     askForDefaultLanguageWhenNoneStated(request);
+    if (!pathLocale(pathname) && choseEnglish(request)) askForEnglish(request);
     const response = await handler.fetch(request, opts);
     if (pathLocale(pathname) || response.headers.has("cache-control")) return response;
 
     // An unprefixed page is English or a redirect to the visitor's language, chosen per visitor.
     return withHeaders(response, (headers) => {
       headers.set("cache-control", "private, no-cache");
-      headers.append("vary", "accept-language, cookie");
+      headers.append("vary", "accept-language, cookie, sec-fetch-site");
     });
   },
 });

@@ -465,6 +465,22 @@ describe("what a visitor sends", () => {
     },
   );
 
+  test("a link followed within the site to an unprefixed page reads in English", async () => {
+    const response = await fetchApp(
+      new Request("https://xpdustry.com/blog", {
+        headers: {
+          "accept-language": "fr-FR,fr;q=0.9",
+          cookie: "generaltranslation.locale=fr",
+          "sec-fetch-site": "same-origin",
+          "sec-fetch-mode": "navigate",
+        },
+      }),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('<html lang="en"');
+    expect(response.headers.get("set-cookie")).toContain("generaltranslation.locale=en");
+  });
+
   test("the first-visit redirect stays with the visitor it was chosen for", async () => {
     const visitors: Record<string, string>[] = [
       { "accept-language": "fr-FR,fr;q=0.9" },
