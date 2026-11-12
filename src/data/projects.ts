@@ -1,6 +1,6 @@
 import clajIcon from "#app/assets/brand/claj.png";
 import nohornyIcon from "#app/assets/brand/nohorny.svg";
-import { Package, PlugsConnected, Toolbox, type Icon } from "#app/components/ui/Icons";
+import { Package, PlugsConnected, Toolbox, type Icon } from "#app/lib/icons";
 import { PATCHES } from "#app/data/patches";
 import type { Patches } from "#app/data/textures";
 

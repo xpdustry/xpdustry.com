@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Brand } from "#app/components/site/Brand";
 import { PlayPill } from "#app/components/site/PlayPill";
-import { GitHub, List, X } from "#app/components/ui/Icons";
+import { GitHub, List, X } from "#app/lib/icons";
 import {
   PlinthAnchor,
   PlinthButton,
@@ -10,7 +10,7 @@ import {
 } from "#app/components/ui/Plinth";
 import type { PlayerCount } from "#app/data/live";
 import { SITE } from "#app/data/site";
-import styles from "./Header.module.css";
+import * as styles from "./Header.css";
 
 /**
  * Wide, the pages in a row beside the brand; narrower, behind a menu button, in a panel that
@@ -44,7 +44,7 @@ export function Header({ players }: { players: PlayerCount }) {
   const shut = () => setOpen(false);
   return (
     <header ref={header} className={`${styles.header} reveal`}>
-      <Brand />
+      <Brand className={styles.brand} />
       {/* before the pages, so Tab goes from it into them; it sits last by `order` */}
       <PlinthButton
         ref={toggle}

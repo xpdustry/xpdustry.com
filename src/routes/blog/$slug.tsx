@@ -4,12 +4,13 @@ import { PostBody } from "#app/components/blog/PostBody";
 import { PostCover } from "#app/components/blog/PostCover";
 import { PostTile } from "#app/components/blog/PostTile";
 import { Tray } from "#app/components/tray/Tray";
-import { Newspaper } from "#app/components/ui/Icons";
+import { Newspaper } from "#app/lib/icons";
 import { authors } from "#app/content/authors";
 import { nearbyPosts, postsBySlug } from "#app/content/registry";
 import { postCard, postTitle, seo } from "#app/lib/seo";
 import { postStructuredData } from "#app/lib/structuredData";
-import styles from "#app/components/blog/PostPage.module.css";
+import * as styles from "#app/components/blog/PostPage.css";
+import * as card from "#app/components/ui/Card.css";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
@@ -48,7 +49,7 @@ function PostPage() {
       <div className={styles.post}>
         <article className={styles.article}>
           <PostCover post={post} className={`${styles.cover} reveal`} />
-          <div className={`${styles.body} reveal`}>
+          <div className={`${card.card} ${styles.body} reveal`}>
             <PostBody document={document} />
           </div>
         </article>

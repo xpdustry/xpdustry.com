@@ -1,0 +1,52 @@
+import { globalStyle, style } from "@vanilla-extract/css";
+import { media } from "#app/styles/media";
+import { font, leading, tracking } from "#app/styles/scale";
+import { vars } from "#app/styles/theme.css";
+
+export const message = style({
+  minHeight: 360,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-end",
+  padding: "34px 38px",
+  background: vars.t3,
+  color: vars.t12,
+  "@media": {
+    [media.phone]: { padding: "28px 24px" },
+  },
+});
+
+export const code = style({
+  font: `500 ${font.small}px ${vars.fontMono}`,
+  opacity: 0.8,
+});
+
+export const title = style({
+  marginTop: 10,
+  maxWidth: "16ch",
+  fontSize: font.display,
+  lineHeight: leading.tight,
+  letterSpacing: tracking.display,
+  textWrap: "balance",
+  "@media": {
+    [media.phone]: { fontSize: font.h1 },
+  },
+});
+
+export const body = style({
+  marginTop: 14,
+  fontSize: font.lead,
+  lineHeight: leading.snug,
+});
+
+// a row of buttons
+globalStyle(`${body} > div`, {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 10,
+});
+
+// the way on
+globalStyle(`${body} > :last-child`, {
+  marginTop: 18,
+});

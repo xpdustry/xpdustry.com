@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import logo from "#app/assets/logo.svg";
 import { SITE } from "#app/data/site";
-import styles from "./Brand.module.css";
+import * as styles from "./Brand.css";
 
-/** The logo and the name, home. Size it with `--mark` and `--name` on `className`. */
+/** The logo and the name, home. Size it with the `mark` and `name` vars of `Brand.css` on `className`. */
 export function Brand({ className }: { className?: string }) {
   return (
     <Link to="/" className={`${styles.brand} ${className ?? ""}`}>

@@ -1,22 +1,19 @@
-import styles from "./Background.module.css";
-
-/** Scroll per 900 px tile of drift: the far layer moves at a sixth of the page's speed, the near at a third. */
-const FAR = 6;
-const NEAR = 3;
+import { media } from "#app/styles/media";
+import * as styles from "./Background.css";
 
 /**
  * Where scroll-driven animations are missing (Firefox), drifts the backdrop from a scroll
  * listener instead. Inlined after the backdrop, so it runs as the page parses: the backdrop is in
  * place on a reload's first paint rather than at hydration. Self-contained, as it is stringified.
  */
-function drift(element: HTMLElement, far: number, near: number) {
+function drift(element: HTMLElement, query: string, tile: number, far: number, near: number) {
   if (CSS.supports("animation-timeline: scroll()")) return;
-  const motion = matchMedia("(prefers-reduced-motion: no-preference)");
+  const motion = matchMedia(query);
   let frame = 0;
   const update = () => {
     frame = 0;
-    element.style.setProperty("--far", `${-((scrollY / far) % 900)}px`);
-    element.style.setProperty("--near", `${-((scrollY / near) % 900)}px`);
+    element.style.setProperty("--far", `${-((scrollY / far) % tile)}px`);
+    element.style.setProperty("--near", `${-((scrollY / near) % tile)}px`);
   };
   const scroll = () => {
     frame ||= requestAnimationFrame(update);
@@ -35,7 +32,7 @@ function drift(element: HTMLElement, far: number, near: number) {
   motion.addEventListener("change", toggle);
 }
 
-const DRIFT = `(${drift.toString()})(document.currentScript.previousElementSibling, ${FAR}, ${NEAR})`;
+const DRIFT = `(${drift.toString()})(document.currentScript.previousElementSibling, ${JSON.stringify(media.motion)}, ${styles.TILE}, ${styles.FAR}, ${styles.NEAR})`;
 
 /**
  * The page's backdrop, painted from CSS with the page: dark colonies far behind and lighter ones

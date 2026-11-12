@@ -1,4 +1,5 @@
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { blogMarkdownPlugin } from "./vite/markdown.ts";
@@ -12,6 +13,7 @@ export default defineConfig({
   },
   plugins: [
     blogMarkdownPlugin(),
+    vanillaExtractPlugin(),
     tanstackStart({
       importProtection: {
         // Everything under src/server polls, opens sockets or holds secrets.

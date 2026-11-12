@@ -1,9 +1,9 @@
 import { CopyButton } from "#app/components/ui/CopyButton";
-import { Check, Copy } from "#app/components/ui/Icons";
+import { Check, Copy } from "#app/lib/icons";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import type { PlayerCount as Count } from "#app/data/live";
 import { HUB } from "#app/data/servers";
-import styles from "./PlayPill.module.css";
+import * as styles from "./PlayPill.css";
 
 /** The hub's address on every page, with how many are playing there; a press copies it. */
 export function PlayPill({ players, className }: { players: Count; className?: string }) {

@@ -1,16 +1,19 @@
+import type { ReactNode } from "react";
 import { Tray } from "#app/components/tray/Tray";
-import { GitHub, PuzzlePiece } from "#app/components/ui/Icons";
+import { GitHub, PuzzlePiece } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import type { LiveData } from "#app/data/live";
 import { PATCHES } from "#app/data/patches";
 import { projects, repositoryUrl, type Project } from "#app/data/projects";
 import { SITE } from "#app/data/site";
+import type { Patches as PatchSet } from "#app/data/textures";
 import { versionOf } from "#app/lib/format";
-import card from "#app/components/ui/Card.module.css";
-import styles from "./Projects.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./Projects.css";
+
+type CardOf<Kind extends Project["card"]["kind"]> = Extract<Project["card"], { kind: Kind }>;
 
 export function Projects({ releases }: { releases: LiveData["releases"] }) {
-  const items = projects.filter((project) => project.card.kind === "item");
   return (
     <Tray
       id="projects"
@@ -19,78 +22,104 @@ export function Projects({ releases }: { releases: LiveData["releases"] }) {
       subtitle="Plugins, mods and tooling we maintain"
       action={{ href: SITE.github, label: "GitHub" }}
     >
-      <div className={styles.grid}>
-        {projects.map((project) =>
-          project.card.kind === "featured" ? (
-            <Featured key={project.slug} project={project} release={releases[project.slug]} />
+      <div className={styles.projects}>
+        {projects.map((project) => {
+          const { card } = project;
+          return card.kind === "featured" ? (
+            <Featured
+              key={project.slug}
+              project={project}
+              card={card}
+              release={releases[project.slug]}
+            />
           ) : (
             <Item
               key={project.slug}
               project={project}
+              card={card}
               release={releases[project.slug]}
-              // between tablet and desktop the first item spans the row, the rest pair up
-              className={project === items[0] ? styles.lead : undefined}
             />
-          ),
-        )}
-        <a href={SITE.github} className={`${card.card} spot ${styles.more}`}>
-          <Patches patches={PATCHES.moreCard} />
+          );
+        })}
+        <Tile href={SITE.github} patches={PATCHES.moreCard} className={styles.more}>
           <GitHub className={styles.symbol} />
           <h3>Much more</h3>
           <p>Everything we make is public on GitHub.</p>
-        </a>
+        </Tile>
       </div>
     </Tray>
   );
 }
 
-function Version({ tag, className }: { tag?: string; className: string }) {
-  return tag ? <span className={className}>{versionOf(tag)}</span> : null;
-}
-
-function Featured({ project, release }: { project: Project; release?: string }) {
-  if (project.card.kind !== "featured") return null;
-  const { ground, patches, muted, screenshot } = project.card;
+/** A linked card, on its own ground when it has one, with its patches. */
+function Tile({
+  href,
+  ground,
+  patches,
+  className,
+  children,
+}: {
+  href: string;
+  ground?: string;
+  patches: PatchSet;
+  className: string;
+  children: ReactNode;
+}) {
   return (
-    <a
-      href={project.website ?? repositoryUrl(project)}
-      className={`${card.card} spot ${styles.featured}`}
-      style={{ background: ground }}
-    >
+    <a href={href} className={`${card.card} spot ${className}`} style={{ background: ground }}>
       <Patches patches={patches} />
-      <span className={styles.top}>
-        {project.icon && <img src={project.icon} alt="" />}
-        <h3>{project.name}</h3>
-        <Version tag={release} className={styles.version} />
-      </span>
-      <p style={{ color: muted }}>{project.summary}</p>
-      <img className={styles.screenshot} src={screenshot} alt="" loading="lazy" decoding="async" />
+      {children}
     </a>
   );
 }
 
-function Item({
-  project,
-  release,
-  className,
-}: {
+interface CardProps<Kind extends Project["card"]["kind"]> {
   project: Project;
+  card: CardOf<Kind>;
   release?: string;
-  className?: string;
-}) {
-  if (project.card.kind !== "item") return null;
-  const { ground, patches, symbol: Glyph } = project.card;
+}
+
+function Version({ tag }: { tag?: string }) {
+  return tag ? <span className={styles.version}>{versionOf(tag)}</span> : null;
+}
+
+function Featured({ project, card, release }: CardProps<"featured">) {
   return (
-    <a
+    <Tile
       href={project.website ?? repositoryUrl(project)}
-      className={`${card.card} spot ${styles.item} ${className ?? ""}`}
-      style={{ background: ground }}
+      ground={card.ground}
+      patches={card.patches}
+      className={styles.featured}
     >
-      <Patches patches={patches} />
+      <span className={styles.top}>
+        {project.icon && <img src={project.icon} alt="" />}
+        <h3>{project.name}</h3>
+        <Version tag={release} />
+      </span>
+      <p style={{ color: card.muted }}>{project.summary}</p>
+      <img
+        className={styles.screenshot}
+        src={card.screenshot}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
+    </Tile>
+  );
+}
+
+function Item({ project, card: { symbol: Glyph, ...card }, release }: CardProps<"item">) {
+  return (
+    <Tile
+      href={project.website ?? repositoryUrl(project)}
+      ground={card.ground}
+      patches={card.patches}
+      className={styles.item}
+    >
       <Glyph className={styles.symbol} />
       <h3>{project.name}</h3>
       <p>{project.summary}</p>
-      <Version tag={release} className={styles.version} />
-    </a>
+      <Version tag={release} />
+    </Tile>
   );
 }

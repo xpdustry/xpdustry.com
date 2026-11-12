@@ -2,20 +2,22 @@ import { useEffect, useRef } from "react";
 import relief from "#app/assets/logo-relief.webp";
 import { DEPTH, LIFT, drawFrame, frameIndex } from "#app/lib/logo";
 import { loadLogoFrames } from "#app/lib/relief";
-import styles from "./PressableLogo.module.css";
+import { media } from "#app/styles/media";
+import * as styles from "./PressableLogo.css";
 
 const ease = (t: number) => 1 - (1 - t) ** 4; // close to the plinths' cubic-bezier(.22,1,.36,1)
 
 /**
- * The logo as a plinth: it rises on hover, presses flat, and pops back up, drawn from the relief
- * logo's pre-rendered frames.
+ * The logo as a plinth: it rises under the pointer, presses flat, and pops back up, drawn from the
+ * relief logo's pre-rendered frames. A toy for the pointer alone: pressing it does nothing, so it
+ * is no button, and hidden from assistive tech beside the name it stands next to.
  */
 export function PressableLogo({ className }: { className?: string }) {
-  const button = useRef<HTMLButtonElement>(null);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const mark = button.current!;
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mark = ref.current!;
+    const still = matchMedia(media.still).matches;
     const size = Math.round(104 * Math.min(3, devicePixelRatio || 1));
     const abort = new AbortController();
     let raf = 0;
@@ -63,28 +65,13 @@ export function PressableLogo({ className }: { className?: string }) {
         raf ||= requestAnimationFrame(tick);
       };
 
-      const on = (type: string, listener: (event: Event) => void) =>
+      const on = (type: string, listener: () => void) =>
         mark.addEventListener(type, listener, { signal: abort.signal });
       on("pointerenter", () => ((hover = true), go()));
       on("pointerleave", () => ((hover = held = false), go()));
       on("pointerdown", () => ((held = true), go()));
       on("pointerup", () => ((held = false), go()));
       on("pointercancel", () => ((held = false), go()));
-      on("keydown", (event) => {
-        const key = (event as KeyboardEvent).key;
-        if ((key === " " || key === "Enter") && !(event as KeyboardEvent).repeat) {
-          event.preventDefault();
-          held = true;
-          go();
-        }
-      });
-      on("keyup", (event) => {
-        const key = (event as KeyboardEvent).key;
-        if (key === " " || key === "Enter") {
-          held = false;
-          go();
-        }
-      });
       draw();
     })();
 
@@ -95,14 +82,9 @@ export function PressableLogo({ className }: { className?: string }) {
   }, []);
 
   return (
-    <button
-      ref={button}
-      type="button"
-      className={`${styles.mark} ${className ?? ""}`}
-      aria-label="Press the logo"
-    >
+    <span ref={ref} className={`${styles.mark} ${className ?? ""}`} aria-hidden="true">
       {/* at rest, until the frames are ready */}
-      <img src={relief} alt="" width={320} height={320} fetchPriority="high" />
-    </button>
+      <img src={relief} alt="" width={320} height={320} draggable={false} fetchPriority="high" />
+    </span>
   );
 }

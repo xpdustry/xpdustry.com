@@ -36,7 +36,7 @@ Set `XPD_DISABLE_STATUS=1` to stop the server from polling the Mindustry servers
 ## Where things are
 
 - `src/routes`: the pages, plus the server routes (`/api/servers`, `/healthz`, `/og/*`, `/sitemap.xml`).
-- `src/components`: the UI, one CSS module per component. Design tokens live in `src/styles/global.css`.
+- `src/components`: the UI, each with its styles beside it as a vanilla-extract `.css.ts` file. `src/styles` holds what they share: the design tokens (`theme.css.ts`), the type and corner scales (`scale.ts`), the media queries (`media.ts`) and the page grid (`layout.css.ts`).
 - `src/data`: the projects, gamemodes and servers the home page shows, and the site's links.
 - `src/content`: the blog posts and their authors.
 - `src/server`: everything that only runs on the server: the Mindustry status poller, the Discord and GitHub

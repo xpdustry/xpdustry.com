@@ -15,8 +15,13 @@ import { Footer } from "#app/components/site/Footer";
 import { Header } from "#app/components/site/Header";
 import { playerCount } from "#app/data/live";
 import { getLiveData } from "#app/data/live.functions";
+import { CROWN } from "#app/data/textures";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/lib/reveal";
 import { useSpotlight } from "#app/lib/useSpotlight";
+import "@fontsource/momo-trust-display/400.css";
+import "@fontsource-variable/momo-trust-sans/wght.css";
+import "@fontsource/dm-mono/400.css";
+import "@fontsource/dm-mono/500.css";
 import "#app/styles/global.css";
 
 export const Route = createRootRoute({
@@ -27,7 +32,7 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       // the deep teal the top of the page frays out of
-      { name: "theme-color", content: "#083230" },
+      { name: "theme-color", content: CROWN.settings.color },
     ],
     links: [
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },

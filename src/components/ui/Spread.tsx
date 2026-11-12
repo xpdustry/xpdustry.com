@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
 import type { SpreadStage, SpreadTiles } from "#app/data/textures";
-import styles from "./Spread.module.css";
+import * as styles from "./Spread.css";
 
 const TILES = import.meta.glob<string>("/src/assets/spread/*.webp", {
   eager: true,
@@ -31,13 +31,14 @@ export function Spread({
   /** How far the farthest corner is from `origin`, in px. */
   reach?: number;
 }) {
-  const style = {
-    "--thin": tile(tiles, "thin"),
-    "--thick": tile(tiles, "thick"),
-    "--solid": tile(tiles, "solid"),
-    ...(origin && { "--x": `${origin[0]}px`, "--y": `${origin[1]}px` }),
-    ...(reach !== undefined && { "--reach": `${reach}px` }),
-  } as CSSProperties;
+  const style = assignInlineVars({
+    [styles.tile.thin]: tile(tiles, "thin"),
+    [styles.tile.thick]: tile(tiles, "thick"),
+    [styles.tile.solid]: tile(tiles, "solid"),
+    [styles.x]: origin && `${origin[0]}px`,
+    [styles.y]: origin && `${origin[1]}px`,
+    [styles.reach]: reach === undefined ? undefined : `${reach}px`,
+  });
   return (
     <span className={`${styles.spread} ${on ? styles.on : ""}`} style={style} aria-hidden="true">
       <i />

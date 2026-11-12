@@ -1,0 +1,161 @@
+import { globalStyle, style } from "@vanilla-extract/css";
+import { media } from "#app/styles/media";
+import { font, leading, radius, tracking } from "#app/styles/scale";
+import { cards, figures } from "./shared";
+import { vars } from "#app/styles/theme.css";
+
+/** A pane of white over a project's own colour. */
+const glass = "rgb(255 255 255 / 0.12)";
+
+export const projects = cards(104);
+
+export const version = style({
+  padding: "6px 8px",
+  borderRadius: radius.sm,
+  font: figures(),
+});
+
+/** The featured project: wide and dark, with a screenshot of it at work rising out of the bottom. */
+export const featured = style({
+  gridColumn: "span 6",
+  gridRow: "span 4",
+  display: "flex",
+  flexDirection: "column",
+  padding: 24,
+  color: "#fff",
+  "@media": {
+    // the screenshot only peeks in
+    [media.phone]: { height: 300 },
+  },
+});
+
+export const top = style({
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+});
+
+globalStyle(`${top} img`, {
+  width: 34,
+});
+
+globalStyle(`${featured} h3`, {
+  fontSize: font.h2,
+  letterSpacing: tracking.display,
+});
+
+globalStyle(`${featured} ${version}`, {
+  marginLeft: "auto",
+  background: glass,
+});
+
+globalStyle(`${featured} p`, {
+  maxWidth: "40ch",
+  marginTop: 8,
+  fontSize: font.small,
+  lineHeight: leading.snug,
+});
+
+/** In the flow, under the summary however many lines that runs to; the card cuts it off. */
+export const screenshot = style({
+  flex: "none",
+  alignSelf: "flex-start",
+  width: "calc(100% + 44px)",
+  maxWidth: "none",
+  marginTop: 19,
+  border: `1px solid ${glass}`,
+  borderRadius: radius.md,
+  boxShadow: "0 20px 50px -18px rgb(0 0 0 / 0.7)",
+  transition: `translate 0.45s ${vars.easeOut}`,
+  selectors: {
+    [`${featured}:hover &`]: { translate: "0 -8px" },
+  },
+});
+
+/** A small card: a project in a Mindustry item's colours, or the one pointing at all the rest. */
+const small = style({
+  gridColumn: "span 3",
+  gridRow: "span 2",
+  display: "flex",
+  flexDirection: "column",
+});
+
+globalStyle(`${small} h3`, {
+  fontSize: font.h3,
+  lineHeight: leading.tight,
+  letterSpacing: tracking.display,
+});
+
+globalStyle(`${small} p`, {
+  fontSize: font.small,
+  lineHeight: leading.snug,
+});
+
+/** The others, each with an icon of what it does. */
+export const item = style([
+  small,
+  {
+    padding: 22,
+    color: "#1a1310",
+  },
+]);
+
+// between tablet and desktop the first item spans the row, the rest pair up
+globalStyle(`${item}:nth-child(1 of ${item})`, {
+  "@media": {
+    [media.tablet]: { gridColumn: "span 6" },
+  },
+});
+
+globalStyle(`${item} p`, {
+  maxWidth: "26ch",
+  marginTop: 8,
+  opacity: 0.86,
+  "@media": {
+    [media.phone]: { marginBottom: 12 },
+  },
+});
+
+globalStyle(`${item} ${version}`, {
+  alignSelf: "start",
+  marginTop: "auto",
+  background: "rgb(255 255 255 / 0.45)",
+});
+
+export const more = style([
+  small,
+  {
+    gap: 6,
+    padding: 24,
+    background: vars.deep,
+    color: vars.onDeep,
+    "@media": {
+      [media.tablet]: { gridColumn: "span 6" },
+    },
+  },
+]);
+
+globalStyle(`${more} p`, {
+  maxWidth: "24ch",
+  color: vars.deepInk,
+});
+
+export const symbol = style({
+  position: "absolute",
+  right: 16,
+  bottom: 14,
+  width: 58,
+  height: 58,
+  transform: "rotate(-8deg)",
+  filter: "drop-shadow(0 5px 0 rgb(0 0 0 / 0.16))",
+  transition: `transform 0.45s ${vars.easeSpring}`,
+  selectors: {
+    [`${small}:hover &`]: { transform: "rotate(0deg) translateY(-8px) scale(1.06)" },
+  },
+});
+
+globalStyle(`${more} ${symbol}`, {
+  width: 52,
+  height: 52,
+  filter: "drop-shadow(0 5px 0 rgb(0 0 0 / 0.35))",
+});

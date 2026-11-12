@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import { ArrowUpRight, Discord } from "#app/components/ui/Icons";
+import { ArrowUpRight, Discord } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import type { DiscordCounts } from "#app/data/live";
 import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
-import card from "#app/components/ui/Card.module.css";
-import styles from "./DiscordCard.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./DiscordCard.css";
 
 const number = new Intl.NumberFormat("en-US");
 
@@ -33,7 +33,7 @@ export function DiscordCard({
       <Patches patches={compact ? PATCHES.discordCompact : PATCHES.discord} />
       <Discord className={styles.glyph} />
       <span className={styles.go}>
-        <ArrowUpRight strokeWidth={2.4} />
+        <ArrowUpRight />
       </span>
       <span>
         <strong className={styles.title}>{title}</strong>

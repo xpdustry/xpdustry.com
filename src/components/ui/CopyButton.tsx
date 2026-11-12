@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Check, Copy } from "#app/components/ui/Icons";
+import { Check, Copy } from "#app/lib/icons";
 import { PlinthButton, type PlinthStyle } from "#app/components/ui/Plinth";
 
 const SHOWN_MS = 1400;
@@ -30,20 +30,35 @@ export function CopyButton({ text, label, children, tone = "ink", className }: C
     timer.current = setTimeout(() => setCopied(false), SHOWN_MS);
   };
 
-  const style = { tone, size: "sm", className, onClick: copy } as const;
+  // a text button names itself and says "Copied"; the others turn teal and need `label`
+  const named = typeof children !== "function" && Boolean(children);
+  const face =
+    typeof children === "function" ? (
+      children(copied)
+    ) : children ? (
+      copied ? (
+        "Copied"
+      ) : (
+        children
+      )
+    ) : copied ? (
+      <Check />
+    ) : (
+      <Copy />
+    );
   return (
     <>
-      {typeof children === "function" ? (
-        <PlinthButton {...style} done={copied} aria-label={label} title="Copy address">
-          {children(copied)}
-        </PlinthButton>
-      ) : children ? (
-        <PlinthButton {...style}>{copied ? "Copied" : children}</PlinthButton>
-      ) : (
-        <PlinthButton {...style} icon done={copied} aria-label={label} title="Copy address">
-          {copied ? <Check /> : <Copy />}
-        </PlinthButton>
-      )}
+      <PlinthButton
+        tone={tone}
+        size="sm"
+        icon={!children}
+        done={!named && copied}
+        className={className}
+        onClick={copy}
+        {...(!named && { "aria-label": label, title: "Copy address" })}
+      >
+        {face}
+      </PlinthButton>
       <output className="sr-only">{copied ? `Copied ${text}` : ""}</output>
     </>
   );

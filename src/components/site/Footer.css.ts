@@ -1,0 +1,142 @@
+import { createVar, globalStyle, style } from "@vanilla-extract/css";
+import { onDeep } from "#app/components/site/deep";
+import { RIDGE } from "#app/data/textures";
+import { media, upTo } from "#app/styles/media";
+import { font, leading, tracking } from "#app/styles/scale";
+import { mark, name } from "#app/components/site/Brand.css";
+import { vars } from "#app/styles/theme.css";
+
+/** Where the links drop under the brand. */
+const narrow = upTo(900);
+/** Where the brand shrinks once more. */
+const small = upTo(430);
+
+/** How tall the ridge stands over the footer: as rendered, and scaled down on a phone. */
+const ridgeHeight = createVar();
+
+export const footer = style({
+  ...onDeep,
+  vars: { ...onDeep.vars, [ridgeHeight]: `${RIDGE.height}px` },
+  position: "relative",
+  marginTop: `calc(${ridgeHeight} + ${vars.group})`,
+  background: vars.deep,
+  "@media": {
+    [media.phone]: { vars: { [ridgeHeight]: "120px" } },
+  },
+});
+
+/** The deep teal's top edge, a ridge of colonies; `pnpm textures` renders it from `RIDGE`. */
+export const ridge = style({
+  position: "absolute",
+  inset: "auto 0 calc(100% - 1px)",
+  height: ridgeHeight,
+  background: 'url("../../assets/ridge.webp") 50% 100% / auto 100% repeat-x',
+  pointerEvents: "none",
+});
+
+export const inner = style({
+  selectors: {
+    [`${footer} &`]: {
+      display: "grid",
+      // the brand and the way back up, then the small print and the links on one line under them
+      gridTemplateColumns: "1fr auto",
+      gridTemplateAreas: '"brand top" "copy links"',
+      alignItems: "center",
+      gap: "30px 32px",
+      padding: `40px calc(${vars.gap} + 6px) 64px`,
+    },
+  },
+  "@media": {
+    [narrow]: {
+      selectors: {
+        [`${footer} &`]: {
+          gridTemplateAreas: '"brand top" "links links" "copy copy"',
+          gap: "22px 16px",
+        },
+      },
+    },
+    [media.phone]: {
+      selectors: {
+        [`${footer} &`]: { paddingTop: 28, paddingBottom: 52 },
+      },
+    },
+  },
+});
+
+export const brand = style({
+  selectors: {
+    [`${footer} &`]: {
+      vars: { [mark]: "52px", [name]: `${font.h1}px` },
+      gridArea: "brand",
+      justifySelf: "start",
+      gap: 14,
+      lineHeight: leading.tight,
+    },
+  },
+  "@media": {
+    [media.phone]: {
+      selectors: {
+        [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${font.h2}px` } },
+      },
+    },
+    [small]: {
+      selectors: {
+        [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${font.h3}px` }, gap: 10 },
+      },
+    },
+  },
+});
+
+globalStyle(`${footer} ${brand} span`, {
+  letterSpacing: tracking.display,
+});
+
+export const links = style({
+  gridArea: "links",
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "flex-end",
+  gap: "8px 26px",
+  "@media": {
+    [narrow]: { justifyContent: "flex-start" },
+  },
+});
+
+globalStyle(`${links} a`, {
+  color: "inherit",
+  textDecoration: "underline 2px transparent",
+  textUnderlineOffset: 5,
+  transition: "text-decoration-color 0.13s",
+});
+
+globalStyle(`${links} a:hover`, {
+  textDecorationColor: vars.t9,
+});
+
+export const copyright = style({
+  gridArea: "copy",
+  whiteSpace: "nowrap",
+  color: vars.deepInk,
+});
+
+export const top = style({
+  selectors: {
+    [`${footer} &`]: {
+      gridArea: "top",
+      justifySelf: "end",
+      marginTop: 0,
+    },
+  },
+});
+
+globalStyle(`${footer} ${top} > span`, {
+  "@media": {
+    [media.phone]: { padding: 10 },
+  },
+});
+
+export const say = style({
+  "@media": {
+    [media.phone]: { display: "none" },
+  },
+});

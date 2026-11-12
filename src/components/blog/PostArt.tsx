@@ -3,7 +3,7 @@ import { Patches } from "#app/components/ui/Patches";
 import type { Post } from "#app/content/registry";
 import { seeded } from "#app/data/textures";
 import { topic } from "#app/data/topics";
-import styles from "./PostArt.module.css";
+import * as styles from "./PostArt.css";
 
 /** A post's hero, or where it has none, its cover's colours and patches under its project's logo. */
 export function PostArt({ post, className }: { post: Post; className?: string }) {

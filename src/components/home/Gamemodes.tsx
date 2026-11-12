@@ -1,21 +1,15 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-} from "react";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { Tray } from "#app/components/tray/Tray";
-import { Check, Copy, GameController } from "#app/components/ui/Icons";
+import { Check, Copy, GameController } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import { Spread, spreadFrom } from "#app/components/ui/Spread";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
 import { findServer, playerCount } from "#app/data/live";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
-import card from "#app/components/ui/Card.module.css";
-import styles from "./Gamemodes.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./Gamemodes.css";
 
 const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
   eager: true,
@@ -101,7 +95,7 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
   return (
     <li
       className={`${card.card} ${styles.mode} ${landed ? styles.copied : ""} ${failed ? styles.failed : ""}`}
-      style={{ "--tint": mode.edge.side.color } as CSSProperties}
+      style={assignInlineVars({ [styles.tint]: mode.edge.side.color })}
     >
       {/* the mode's colour, ending in a frayed edge instead of a line */}
       <span className={styles.tinted} aria-hidden="true">

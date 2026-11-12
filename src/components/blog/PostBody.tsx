@@ -2,7 +2,7 @@ import type { MarkdownDocument } from "@tanstack/markdown";
 import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
 import type { ComponentProps, ReactNode } from "react";
 import { POST_ELEMENTS } from "#app/content/elements";
-import styles from "./PostBody.module.css";
+import * as styles from "./PostBody.css";
 
 // The custom elements `vite/markdown.ts` emits, with the string properties it validated.
 interface CalloutProps {
@@ -21,7 +21,7 @@ interface MediaProps {
 
 function Callout({ kind, title, children }: CalloutProps) {
   return (
-    <aside className={`${styles.callout} ${styles[kind] ?? styles.note}`}>
+    <aside className={kind === "warning" ? `${styles.callout} ${styles.warning}` : styles.callout}>
       <span className={styles.label}>{title}</span>
       {children}
     </aside>

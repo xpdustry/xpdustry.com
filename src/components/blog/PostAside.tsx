@@ -5,7 +5,8 @@ import type { Post } from "#app/content/registry";
 import { projectForTopic } from "#app/data/projects";
 import { SITE } from "#app/data/site";
 import { parseReleaseId, releaseLabel, releaseUrl } from "#app/lib/releases";
-import styles from "./PostAside.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./PostAside.css";
 
 /** Beside a post: the releases it covers, a link to share, and where to ask about it. */
 export function PostAside({ post, className }: { post: Post; className?: string }) {
@@ -14,7 +15,7 @@ export function PostAside({ post, className }: { post: Post; className?: string 
   return (
     <aside className={`${styles.aside} ${className ?? ""}`}>
       {releases.length > 0 && (
-        <section className={styles.panel} aria-label="This post covers">
+        <section className={`${card.card} ${styles.panel}`} aria-label="This post covers">
           <p className={styles.label}>This post covers</p>
           {releases.map((id) => {
             const release = parseReleaseId(id);
@@ -40,7 +41,10 @@ export function PostAside({ post, className }: { post: Post; className?: string 
           })}
         </section>
       )}
-      <section className={`${styles.panel} ${styles.share}`} aria-label="Share this post">
+      <section
+        className={`${card.card} ${styles.panel} ${styles.share}`}
+        aria-label="Share this post"
+      >
         <p className={styles.label}>Share this post</p>
         <CopyButton text={`${SITE.origin}/blog/${post.slug}`} label="Copy the link to this post">
           Copy link

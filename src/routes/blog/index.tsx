@@ -7,8 +7,9 @@ import { posts } from "#app/content/registry";
 import { PATCHES } from "#app/data/patches";
 import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/data/site";
 import { BLOG_CARD, seo } from "#app/lib/seo";
-import styles from "#app/components/blog/BlogIndex.module.css";
-import card from "#app/components/ui/Card.module.css";
+import * as styles from "#app/components/blog/BlogIndex.css";
+import * as card from "#app/components/ui/Card.css";
+import { grid } from "#app/styles/layout.css";
 
 export const Route = createFileRoute("/blog/")({
   head: () =>
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/blog/")({
 function BlogIndex() {
   const [latest, ...earlier] = posts;
   return (
-    <main id="main" className={styles.blog}>
+    <main id="main" className={grid}>
       <section className={`${card.card} spot ${styles.intro} reveal`}>
         <Patches patches={PATCHES.blogIntro} />
         <h1>Blog</h1>
@@ -35,7 +36,7 @@ function BlogIndex() {
         Ask in our Discord.
       </DiscordCard>
       {latest ? (
-        <LeadPost post={latest} className={`${styles.lead} reveal`} />
+        <LeadPost post={latest} className={`${styles.wide} reveal`} />
       ) : (
         <p className={styles.empty}>Nothing published yet.</p>
       )}

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { blobSprite, type Patches as PatchesData } from "#app/data/textures";
-import styles from "./Patches.module.css";
+import * as styles from "./Patches.css";
 
 const SPRITES = import.meta.glob<string>("/src/assets/patches/*.webp", {
   eager: true,

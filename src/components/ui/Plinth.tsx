@@ -6,7 +6,7 @@ import type {
   ReactNode,
   Ref,
 } from "react";
-import styles from "./Plinth.module.css";
+import * as styles from "./Plinth.css";
 
 export interface PlinthStyle {
   /** Teal for the main action, amber for playing, ink for the rest. */
@@ -14,15 +14,15 @@ export interface PlinthStyle {
   size?: "md" | "sm";
   /** A square button around a single icon; give it an `aria-label`. */
   icon?: boolean;
-  /** Teal, as after a copy. */
+  /** Teal and still, as after a copy. */
   done?: boolean;
   className?: string;
 }
 
-export function plinthClass({ tone = "teal", size = "md", icon, done, className }: PlinthStyle) {
+function plinthClass({ tone = "teal", size = "md", icon, done, className }: PlinthStyle) {
   return [
     styles.plinth,
-    tone !== "teal" && styles[tone],
+    tone !== "teal" && styles.tone[tone],
     size === "sm" && styles.sm,
     icon && styles.icon,
     done && styles.done,

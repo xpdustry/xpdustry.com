@@ -1,8 +1,8 @@
 import type { LinkComponentProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ArrowRight, ArrowUpRight, type Icon } from "#app/components/ui/Icons";
+import { ArrowRight, ArrowUpRight, type Icon } from "#app/lib/icons";
 import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
-import styles from "./Tray.module.css";
+import * as styles from "./Tray.css";
 
 type TrayAction = { label: string } & (
   | { to: LinkComponentProps["to"]; href?: never }
@@ -17,7 +17,6 @@ interface TrayProps {
   subtitle?: ReactNode;
   /** The tab's button, which the whole tab answers to. */
   action?: TrayAction;
-  className?: string;
   children: ReactNode;
 }
 
@@ -50,9 +49,9 @@ const SLANT_FACE = `${slantPath(0)}V${SLANT.height}H0Z`;
  * A folder of cards: a tray with a tab on its top-left, drawn in CSS around the tab's fixed
  * width, so it is whole before any script runs.
  */
-export function Tray({ id, icon: Icon, title, subtitle, action, className, children }: TrayProps) {
+export function Tray({ id, icon: Icon, title, subtitle, action, children }: TrayProps) {
   return (
-    <section id={id} className={`${styles.tray} reveal ${className ?? ""}`}>
+    <section id={id} className={`${styles.tray} reveal`}>
       <span className={styles.body} aria-hidden="true" />
       <header className={styles.tab}>
         <svg className={styles.slant} width={SLANT.width} height={SLANT.height} aria-hidden="true">
@@ -66,31 +65,27 @@ export function Tray({ id, icon: Icon, title, subtitle, action, className, child
           <h2>{title}</h2>
           {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
         </span>
-        {action?.to !== undefined && (
-          <PlinthLink
-            tone="ink"
-            size="sm"
-            className={styles.action}
-            to={action.to}
-            activeOptions={{ exact: true }}
-            aria-label={action.label}
-          >
-            <ArrowRight />
-          </PlinthLink>
-        )}
-        {action?.href !== undefined && (
-          <PlinthAnchor
-            tone="ink"
-            size="sm"
-            className={styles.action}
-            href={action.href}
-            aria-label={action.label}
-          >
-            <ArrowUpRight />
-          </PlinthAnchor>
-        )}
+        {action && <TabAction action={action} />}
       </header>
       {children}
     </section>
+  );
+}
+
+function TabAction({ action }: { action: TrayAction }) {
+  const plinth = {
+    tone: "ink",
+    size: "sm",
+    className: styles.action,
+    "aria-label": action.label,
+  } as const;
+  return action.to !== undefined ? (
+    <PlinthLink {...plinth} to={action.to} activeOptions={{ exact: true }}>
+      <ArrowRight />
+    </PlinthLink>
+  ) : (
+    <PlinthAnchor {...plinth} href={action.href}>
+      <ArrowUpRight />
+    </PlinthAnchor>
   );
 }

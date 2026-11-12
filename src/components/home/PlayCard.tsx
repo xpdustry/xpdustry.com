@@ -4,8 +4,8 @@ import { PlayerCount } from "#app/components/ui/PlayerCount";
 import type { PlayerCount as Count } from "#app/data/live";
 import { PATCHES } from "#app/data/patches";
 import { HUB } from "#app/data/servers";
-import card from "#app/components/ui/Card.module.css";
-import styles from "./PlayCard.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./PlayCard.css";
 
 /** The hub's address, to paste into the game, and how many are playing across the servers. */
 export function PlayCard({ players, className }: { players: Count; className?: string }) {

@@ -6,8 +6,8 @@ import type { Post } from "#app/content/registry";
 import { PATCHES } from "#app/data/patches";
 import { seeded } from "#app/data/textures";
 import { formatDate } from "#app/lib/format";
-import card from "#app/components/ui/Card.module.css";
-import styles from "./PostTile.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./PostTile.css";
 
 interface PostTileProps {
   post: Post;
@@ -29,7 +29,7 @@ export function PostTile({ post, variant, heading: Heading = "h3", className }: 
     <Link
       to="/blog/$slug"
       params={{ slug: post.slug }}
-      className={`${card.card} spot ${styles.tile} ${styles[variant]} ${className ?? ""}`}
+      className={`${card.card} spot ${styles.tile} ${styles.variant[variant]} ${className ?? ""}`}
     >
       <PostArt post={post} className={styles.photo} />
       <TopicChip name={topic} className={styles.chip} />

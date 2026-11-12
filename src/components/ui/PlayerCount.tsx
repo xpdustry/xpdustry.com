@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Online } from "#app/components/ui/Online";
 import type { PlayerCount as Count } from "#app/data/live";
 
@@ -12,15 +11,15 @@ export function PlayerCount({
 }: {
   count: Count;
   className?: string;
-  /** Follows the number; hide it visually with a span of your own if the space is tight. */
-  unit?: ReactNode | ((players: number) => ReactNode);
+  /** Follows the number. */
+  unit?: string;
 }) {
   if (count.state === "online") {
     return (
       <Online className={className}>
         <span>
           {number.format(count.players)}
-          {typeof unit === "function" ? unit(count.players) : unit}
+          {unit}
         </span>
       </Online>
     );

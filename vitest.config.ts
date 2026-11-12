@@ -1,3 +1,4 @@
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import { defaultServerConditions } from "vite";
 import { defineConfig } from "vitest/config";
 import { blogMarkdownPlugin } from "./vite/markdown.ts";
@@ -8,7 +9,7 @@ export default defineConfig({
     // Node resolution: native packages hide behind the `browser` condition otherwise.
     conditions: [...defaultServerConditions],
   },
-  plugins: [blogMarkdownPlugin()],
+  plugins: [blogMarkdownPlugin(), vanillaExtractPlugin({ identifiers: "debug" })],
   css: {
     // readable class names, so tests can assert on them
     modules: { generateScopedName: "[local]" },

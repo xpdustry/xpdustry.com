@@ -1,4 +1,4 @@
-import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/components/ui/Icons";
+import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/lib/icons";
 import { EDGES, SPREADS } from "#app/data/patches";
 import type { Fringe, Patches, SpreadTiles } from "#app/data/textures";
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import styles from "./Online.module.css";
+import * as styles from "./Online.css";
 
 /** `children` with a status light before it, green unless `offline`. */
 export function Online({
@@ -11,9 +11,6 @@ export function Online({
   className?: string;
   children: ReactNode;
 }) {
-  return (
-    <span className={`${styles.online} ${offline ? styles.offline : ""} ${className ?? ""}`}>
-      {children}
-    </span>
-  );
+  const classes = [styles.online, offline && styles.offline, className];
+  return <span className={classes.filter(Boolean).join(" ")}>{children}</span>;
 }

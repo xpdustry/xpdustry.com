@@ -1,11 +1,11 @@
 import { PressableLogo } from "#app/components/home/PressableLogo";
-import { GitHub } from "#app/components/ui/Icons";
+import { GitHub } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import { PlinthAnchor, PlinthSectionLink } from "#app/components/ui/Plinth";
 import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
-import card from "#app/components/ui/Card.module.css";
-import styles from "./Hero.module.css";
+import * as card from "#app/components/ui/Card.css";
+import * as styles from "./Hero.css";
 
 export function Hero({ className }: { className?: string }) {
   return (

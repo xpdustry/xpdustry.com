@@ -1,8 +1,8 @@
 import { PostTile } from "#app/components/blog/PostTile";
 import { Tray } from "#app/components/tray/Tray";
-import { Newspaper } from "#app/components/ui/Icons";
+import { Newspaper } from "#app/lib/icons";
 import { posts } from "#app/content/registry";
-import styles from "./News.module.css";
+import * as styles from "./News.css";
 
 /** The latest post as the headline, and the two before it. */
 export function News() {
@@ -16,7 +16,7 @@ export function News() {
       subtitle="Release notes and updates from the team"
       action={{ to: "/blog", label: "All posts" }}
     >
-      <div className={styles.grid}>
+      <div className={styles.posts}>
         <PostTile post={latest} variant="big" className={styles.big} />
         {earlier.map((post) => (
           <PostTile key={post.slug} post={post} variant="small" className={styles.small} />

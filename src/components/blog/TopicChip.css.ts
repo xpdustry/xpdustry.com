@@ -1,0 +1,30 @@
+import { createVar, globalStyle, styleVariants } from "@vanilla-extract/css";
+import { font, radius } from "#app/styles/scale";
+import { accented, pill } from "./themed.css";
+
+/** The topic's chip colours, which the component sets from its theme. */
+export const face = createVar();
+export const ink = createVar();
+
+/** On a light card, in the topic's chip colours; on its cover, a pill in its accent. */
+export const tone = styleVariants({
+  card: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "4px 9px 4px 5px",
+    borderRadius: radius.sm,
+    background: face,
+    color: ink,
+    fontSize: font.caption,
+  },
+  cover: [pill, accented],
+});
+
+globalStyle(`${tone.card} img`, {
+  width: 16,
+});
+
+globalStyle(`${tone.cover} img`, {
+  width: 20,
+});
