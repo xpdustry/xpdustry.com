@@ -7,11 +7,11 @@ import {
 } from "@tanstack/react-router";
 import { getLocale, getTranslationsSnapshot, GTProvider, T } from "gt-tanstack-start";
 import { useEffect, type ReactNode } from "react";
-import { Background } from "#app/components/site/Background";
-import { Footer } from "#app/components/site/Footer";
-import { Header } from "#app/components/site/Header";
-import { RouteAnnouncer } from "#app/components/site/RouteAnnouncer";
-import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/lib/reveal";
+import { Background } from "#app/shell/Background";
+import { Footer } from "#app/shell/Footer";
+import { Header } from "#app/shell/Header";
+import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/shell/reveal";
+import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
 import { playerCount } from "#app/status/live";
 import { getLiveData } from "#app/status/live.functions";
 import { CROWN } from "#app/textures/page";

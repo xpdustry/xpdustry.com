@@ -6,8 +6,8 @@ import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, test } from "vitest";
 import { LEGACY_MEDIA_REDIRECTS } from "#app/seo/server/redirects";
 
-const entryPath = fileURLToPath(new URL("../../dist/server/server.js", import.meta.url));
-const clientRoot = fileURLToPath(new URL("../../dist/client/", import.meta.url));
+const entryPath = fileURLToPath(new URL("../dist/server/server.js", import.meta.url));
+const clientRoot = fileURLToPath(new URL("../dist/client/", import.meta.url));
 let fetchApp: (request: Request) => Promise<Response>;
 
 process.env.XPD_DISABLE_STATUS = "1";
@@ -32,7 +32,7 @@ async function digest(response: Response): Promise<string> {
 /** A fresh `scripts/serve.ts` on a free port, with caches of its own. */
 async function startProductionServer(): Promise<{ origin: string; stop: () => Promise<void> }> {
   const server = spawn(process.execPath, ["scripts/serve.ts"], {
-    cwd: fileURLToPath(new URL("../../", import.meta.url)),
+    cwd: fileURLToPath(new URL("../", import.meta.url)),
     env: { ...process.env, PORT: "0", HOST: "127.0.0.1", TEST: "" },
     stdio: ["ignore", "pipe", "pipe"]
   });
@@ -307,7 +307,7 @@ test("the production file server preserves every public URL from the previous si
 });
 
 test("the production server runs from what the container image ships", async () => {
-  const root = new URL("../../", import.meta.url);
+  const root = new URL("../", import.meta.url);
   const shipped = [
     ...(await readFile(new URL("Containerfile", root), "utf8")).matchAll(
       /^COPY --from=build \S+ \/app\/(\S+)/gm
@@ -340,7 +340,7 @@ describe("post body chunks", () => {
   test("each post body remains a separate dynamic chunk", async () => {
     const files = await readdir(`${clientRoot}assets`);
     const bodies = files.filter((file) => /^nohorny-4-beta-\d+-[^.]+\.js$/.test(file));
-    const posts = await readdir(new URL("../blog/posts/", import.meta.url), { recursive: true });
+    const posts = await readdir(new URL("./blog/posts/", import.meta.url), { recursive: true });
     expect(bodies).toHaveLength(posts.filter((file) => file.endsWith(".md")).length);
     for (const body of bodies) {
       expect(await readFile(`${clientRoot}assets/${body}`, "utf8")).toContain("children");
@@ -377,7 +377,7 @@ describe("built API", () => {
   );
 
   test("every server function the build defines still answers", async () => {
-    const assets = fileURLToPath(new URL("../../dist/server/assets/", import.meta.url));
+    const assets = fileURLToPath(new URL("../dist/server/assets/", import.meta.url));
     const ids: string[] = [];
     for (const file of await readdir(assets)) {
       if (!file.endsWith(".js")) continue;

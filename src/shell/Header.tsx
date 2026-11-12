@@ -3,12 +3,12 @@ import { T, useGT } from "gt-tanstack-start";
 import { useId, useRef } from "react";
 import { Brand } from "#app/brand/Brand";
 import { SITE } from "#app/brand/site";
-import { LocaleList, LocaleSwitch } from "#app/components/site/LocaleSwitch";
-import { PlayPill } from "#app/components/site/PlayPill";
-import { moving, useShutPopovers } from "#app/lib/usePopovers";
 import type { PlayerCount } from "#app/status/live";
 import { GitHub, List, X } from "#app/ui/icons";
 import { PlinthAnchor, PlinthButton, PlinthLink, PlinthSectionLink } from "#app/ui/Plinth";
+import { LocaleList, LocaleSwitch } from "./LocaleSwitch";
+import { PlayPill } from "./PlayPill";
+import { moving, useShutPopovers } from "./usePopovers";
 import * as styles from "./Header.css";
 
 const FOLDS = [styles.folded, styles.narrow];

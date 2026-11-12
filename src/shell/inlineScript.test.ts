@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { inPage, inlineScript } from "#app/lib/inlineScript";
+import { inPage, inlineScript } from "./inlineScript";
 
 test("calls the function with serialized arguments and in-page expressions", () => {
   const script = inlineScript(

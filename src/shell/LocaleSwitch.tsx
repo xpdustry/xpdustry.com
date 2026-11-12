@@ -3,9 +3,9 @@ import { useGT, useLocale, useSetLocale } from "gt-tanstack-start";
 import { useId, type MouseEvent } from "react";
 import { withLocale } from "#app/i18n/localePath";
 import { LOCALES, localeInfo } from "#app/i18n/locales";
-import { moving } from "#app/lib/usePopovers";
 import { Check } from "#app/ui/icons";
 import { PlinthButton } from "#app/ui/Plinth";
+import { moving } from "./usePopovers";
 import * as styles from "./LocaleSwitch.css";
 
 /** The page's language as a button, opening the list of the languages the site is served in. */

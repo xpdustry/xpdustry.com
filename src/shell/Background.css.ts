@@ -24,10 +24,10 @@ export const background = style({
       background: `0 0 / ${TILE}px`
     },
     "&::before": {
-      backgroundImage: 'url("../../textures/assets/backdrop-far.webp")'
+      backgroundImage: 'url("../textures/assets/backdrop-far.webp")'
     },
     "&::after": {
-      backgroundImage: 'url("../../textures/assets/backdrop-near.webp")'
+      backgroundImage: 'url("../textures/assets/backdrop-near.webp")'
     },
     "&[data-drift]::before, &[data-drift]::after": {
       bottom: -TILE,
@@ -69,6 +69,6 @@ export const crown = style({
   inset: "0 0 auto",
   zIndex: -1,
   height: CROWN.height,
-  background: `url("../../textures/assets/crown.webp") 50% 0 / ${CROWN.width}px ${CROWN.height}px repeat-x`,
+  background: `url("../textures/assets/crown.webp") 50% 0 / ${CROWN.width}px ${CROWN.height}px repeat-x`,
   pointerEvents: "none"
 });

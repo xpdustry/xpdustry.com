@@ -1,8 +1,8 @@
-import { inlineScript } from "#app/lib/inlineScript";
 import far from "#app/textures/assets/backdrop-far.webp";
 import near from "#app/textures/assets/backdrop-near.webp";
 import crown from "#app/textures/assets/crown.webp";
 import ridge from "#app/textures/assets/ridge.webp";
+import { inlineScript } from "./inlineScript";
 
 export const FRAME_IMAGES = [crown, ridge];
 export const REVEAL_IMAGES = [...FRAME_IMAGES, far, near];

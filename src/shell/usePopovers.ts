@@ -1,6 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
 import { useEffect, type RefObject, type ToggleEvent, type TransitionEvent } from "react";
-import { MOVING } from "#app/components/site/popover";
+import { MOVING } from "./popover";
 
 /**
  * A popover's handlers that mark it as moving while the visitor opens or shuts it, so that it

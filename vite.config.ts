@@ -16,7 +16,7 @@ export default defineConfig({
     vanillaExtractPlugin(),
     tanstackStart({
       importProtection: {
-        client: { files: ["**/*.server.*", "**/src/server/**", "**/src/*/server/**"] }
+        client: { files: ["**/*.server.*", "**/src/*/server/**"] }
       }
     }),
     // TanStack Start requires its plugin before React's.

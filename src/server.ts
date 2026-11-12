@@ -2,7 +2,7 @@ import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { pathLocale, withoutLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { requestRedirect } from "#app/seo/server/redirects";
-import { unknownServerFunction } from "#app/server/serverFunctions";
+import { unknownServerFunction } from "#app/shell/server/serverFunctions";
 import { startServices } from "#app/status/server/services";
 
 startServices();

@@ -1,7 +1,7 @@
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { T, useGT } from "gt-tanstack-start";
-import { Message } from "#app/components/site/Message";
 import { PlinthButton, PlinthLink } from "#app/ui/Plinth";
+import { Message } from "./Message";
 
 export function ErrorPage({ reset }: ErrorComponentProps) {
   const router = useRouter();

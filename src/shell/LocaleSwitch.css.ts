@@ -1,13 +1,13 @@
 import { globalStyle, style } from "@vanilla-extract/css";
+import { media } from "#app/ui/styles/media";
+import { font, leading, radius, rem } from "#app/ui/styles/scale";
 import {
   popoverBox,
   popoverFallbackPlace,
   popoverMoving,
   popoverOpen,
   popoverShut
-} from "#app/components/site/popover";
-import { media } from "#app/ui/styles/media";
-import { font, leading, radius, rem } from "#app/ui/styles/scale";
+} from "./popover";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const wrapper = style({

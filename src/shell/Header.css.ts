@@ -1,14 +1,14 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { onDeep } from "#app/components/site/deep";
+import { media } from "#app/ui/styles/media";
+import { radius } from "#app/ui/styles/scale";
+import { onDeep } from "./onDeep";
 import {
   popoverBox,
   popoverFallbackPlace,
   popoverMoving,
   popoverOpen,
   popoverShut
-} from "#app/components/site/popover";
-import { media } from "#app/ui/styles/media";
-import { radius } from "#app/ui/styles/scale";
+} from "./popover";
 import { tone, wall } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
