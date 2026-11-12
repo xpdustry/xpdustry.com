@@ -37,8 +37,15 @@ function slantPath(inset: number): string {
   );
 }
 
-const SLANT_LINE = slantPath(1);
-const SLANT_FACE = `${slantPath(0)}V${SLANT.height}H0Z`;
+/**
+ * How far the slant runs into the body's top border, below and past its end. The browser rounds
+ * the SVG's edges and the border's on their own, so pieces that only met edge to edge would leave
+ * a hairline of the other between them at some device pixel ratios.
+ */
+const OVERLAP = 2;
+
+const SLANT_LINE = `${slantPath(1)}H${SLANT.width + OVERLAP}`;
+const SLANT_FACE = `${slantPath(0)}V${SLANT.height + OVERLAP}H0Z`;
 
 export function Tray({ id, icon: Icon, title, subtitle, action, children }: TrayProps) {
   return (
