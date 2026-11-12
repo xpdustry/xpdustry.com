@@ -13,5 +13,10 @@ export function postTitle({
   topicVersion
 }: Pick<BlogFrontmatter, "title" | "topic" | "topicVersion">): string {
   if (title.toLowerCase().includes(topic.toLowerCase())) return title;
-  return `${topic}${topicVersion ? ` ${topicVersion}` : ""} ${title}`;
+  return `${topicLabel(topic, topicVersion)} ${title}`;
+}
+
+/** A topic as its chip names it: "NoHorny 4", or "NoHorny" when the post gives no version. */
+export function topicLabel(topic: string, version?: string): string {
+  return version ? `${topic} ${version}` : topic;
 }
