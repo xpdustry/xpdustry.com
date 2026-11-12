@@ -3,8 +3,9 @@ import { media } from "./media";
 import { font, rem } from "./scale";
 import { vars } from "./theme.css";
 
+/** The canvas shows past either end of the page when it bounces, so it matches the crown and footer. */
 globalStyle(":root", {
-  background: "none",
+  background: vars.deep,
   colorScheme: "light",
   WebkitTextSizeAdjust: "100%",
   scrollPaddingTop: 16
@@ -21,9 +22,9 @@ globalStyle("*, *::before, *::after", {
 });
 
 globalStyle("body", {
+  position: "relative",
   margin: 0,
   minHeight: "100vh",
-  background: vars.page,
   color: vars.ink,
   fontFamily: vars.fontDisplay,
   fontSize: rem(font.text),

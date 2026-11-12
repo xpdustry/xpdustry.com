@@ -58,8 +58,8 @@ export const Route = createRootRoute({
 });
 
 /**
- * The colour a browser shows before the stylesheet arrives, in place of white. The stylesheet's own
- * `:root` rule outranks `:where()` and clears it, so the body's background reaches the canvas.
+ * The colour a browser shows before the stylesheet arrives, in place of white. It is the same deep
+ * green the stylesheet's own `:root` rule gives the canvas.
  */
 const UNSTYLED_CANVAS = `:where(html){background:${CROWN.settings.color}}`;
 

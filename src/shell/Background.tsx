@@ -30,7 +30,7 @@ function drift(element: HTMLElement, query: string, tile: number, far: number, n
 
 const DRIFT = inlineScript(
   drift,
-  inPage("document.currentScript.previousElementSibling"),
+  inPage("document.currentScript.previousElementSibling.firstElementChild"),
   media.motion,
   styles.TILE,
   styles.FAR,
@@ -40,12 +40,9 @@ const DRIFT = inlineScript(
 export function Background() {
   return (
     <>
-      <div
-        className={styles.background}
-        data-backdrop=""
-        aria-hidden="true"
-        suppressHydrationWarning
-      />
+      <div className={styles.clip} aria-hidden="true">
+        <div className={styles.background} suppressHydrationWarning />
+      </div>
       <script dangerouslySetInnerHTML={{ __html: DRIFT }} />
       <div className={styles.crown} data-crown="" aria-hidden="true" />
     </>
