@@ -6,7 +6,7 @@ description: >-
 publishedAt: 2026-07-20
 author: phinner
 topic: NoHorny
-hero: /blog/nohorny-admin-overview-dark.png
+hero: /blog/nohorny-admin-overview-dark.webp
 releases:
   - xpdustry/nohorny@v4.0.0-beta.8
 ---
@@ -24,7 +24,7 @@ This Monday morning, I give you NoHorny **beta 8**.
 - **Discord alerts are now blurred**, thanks to Discord components v2.
 - **A bunch of bugfixes.**
 
-<!-- ::post-image src="/blog/nohorny-discord-alert.png" alt="A Discord alert from NoHorny listing the author, coordinates, rating and confidence, with the rendered image hidden behind a spoiler" width="799" height="741" caption="The blurred alert, thanks to Discord components v2." -->
+<!-- ::post-image src="/blog/nohorny-discord-alert.webp" alt="A Discord alert from NoHorny listing the author, coordinates, rating and confidence, with the rendered image hidden behind a spoiler" width="799" height="741" caption="The blurred alert, thanks to Discord components v2." -->
 
 I also laid the groundwork for the last beta builds.
 Built-in auth and an admin panel are coming very soon. Now, back to work.

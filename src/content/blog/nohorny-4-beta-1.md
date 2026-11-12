@@ -22,7 +22,7 @@ This beta includes some major improvements:
 
 The moment the display is placed, I am banned:
 
-<!-- ::start:post-video src="/blog/nohorny-showcase.mp4" poster="/blog/nohorny-showcase-poster.jpg" width="1550" height="911" caption="The display goes down, I get banned, and the webhook image lands in Discord." -->
+<!-- ::start:post-video src="/blog/nohorny-showcase.mp4" webm="/blog/nohorny-showcase.webm" poster="/blog/nohorny-showcase-poster.webp" width="1550" height="911" caption="The display goes down, I get banned, and the webhook image lands in Discord." -->
 
 A screen recording: a player places an NSFW logic display, NoHorny deletes it and bans them, and a
 Discord webhook alert arrives naming the player and the coordinates.

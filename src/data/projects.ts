@@ -73,7 +73,7 @@ export const projects: readonly Project[] = [
       ground: NOHORNY_THEME.ground,
       piece: ["#4d2238", "#3b1b2c"],
       muted: NOHORNY_THEME.muted,
-      screenshot: "/blog/nohorny-admin-overview-dark.png",
+      screenshot: "/blog/nohorny-admin-overview-dark.webp",
     },
     theme: NOHORNY_THEME,
   },

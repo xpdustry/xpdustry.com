@@ -23,5 +23,8 @@ export default defineConfig({
   ],
   build: {
     sourcemap: true,
+    // no images inlined as data URIs: the page is server-rendered, so each would ship twice, in
+    // the HTML and in the JavaScript, instead of once as a file every page shares from the cache
+    assetsInlineLimit: 0,
   },
 });

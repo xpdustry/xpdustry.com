@@ -39,16 +39,18 @@ function PostImage({ src, alt, width, height, caption }: MediaProps & { alt: str
 
 function PostVideo({
   src,
+  webm,
   poster,
   width,
   height,
   caption,
   children,
-}: MediaProps & { poster: string }) {
+}: MediaProps & { poster: string; webm?: string }) {
   return (
     <figure>
       {/* oxlint-disable-next-line jsx-a11y/media-has-caption -- silent screen recordings, described by their fallback */}
       <video controls preload="metadata" poster={poster} width={width} height={height}>
+        {webm && <source src={webm} type='video/webm; codecs="av01.0.08M.10"' />}
         <source src={src} type="video/mp4" />
         {children}
       </video>

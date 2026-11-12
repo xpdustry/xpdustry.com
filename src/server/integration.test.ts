@@ -49,7 +49,7 @@ describe("built pages", () => {
   test("a post renders its body on the server", async () => {
     const html = await (await get("/blog/nohorny-4-beta-8")).text();
     expect(html).toContain("Breaking change");
-    expect(html).toMatch(/<img src="\/blog\/nohorny-discord-alert\.png"/);
+    expect(html).toMatch(/<img src="\/blog\/nohorny-discord-alert\.webp"/);
   });
 
   test.each(["/no-such-page", "/blog/no-such-post"])(

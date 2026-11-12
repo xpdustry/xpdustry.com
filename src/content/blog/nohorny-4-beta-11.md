@@ -6,7 +6,7 @@ description: >-
 publishedAt: 2026-10-07
 author: phinner
 topic: NoHorny
-hero: /blog/nohorny-site-hero-dark.png
+hero: /blog/nohorny-site-hero-dark.webp
 releases:
   - xpdustry/nohorny@v4.0.0-beta.9
   - xpdustry/nohorny@v4.0.0-beta.10
@@ -36,13 +36,13 @@ But **MOST IMPORTANTLY**, I finally added a decent frontend for NoHorny:
 
 - And the long awaited admin panel. Besides the request list, filter and search, you have access to very useful stats.
 
-<!-- ::post-image src="/blog/nohorny-site-hero-dark.png" alt="The NoHorny homepage hero, with the tagline on the left and a live counter of 78,380 classified images on the right" width="2880" height="1800" caption="The new NoHorny homepage, with live statistics." -->
+<!-- ::post-image src="/blog/nohorny-site-hero-dark.webp" alt="The NoHorny homepage hero, with the tagline on the left and a live counter of 78,380 classified images on the right" width="2880" height="1800" caption="The new NoHorny homepage, with live statistics." -->
 
-<!-- ::post-image src="/blog/nohorny-request-dark.png" alt="A public request page showing a blurred image flagged as NSFW, the verdict, the classifier chain with vit and sight-engine scores, and request details" width="2880" height="1800" caption="A classification request page, linked from Discord alerts." -->
+<!-- ::post-image src="/blog/nohorny-request-dark.webp" alt="A public request page showing a blurred image flagged as NSFW, the verdict, the classifier chain with vit and sight-engine scores, and request details" width="2880" height="1800" caption="A classification request page, linked from Discord alerts." -->
 
-<!-- ::post-image src="/blog/nohorny-admin-overview-dark.png" alt="The admin panel activity view, with safe, warn, NSFW and failed counts, a daily bar chart over 30 days, and breakdowns by network and client version" width="2880" height="1800" caption="The admin panel overview." -->
+<!-- ::post-image src="/blog/nohorny-admin-overview-dark.webp" alt="The admin panel activity view, with safe, warn, NSFW and failed counts, a daily bar chart over 30 days, and breakdowns by network and client version" width="2880" height="1800" caption="The admin panel overview." -->
 
-<!-- ::post-image src="/blog/nohorny-admin-requests-dark.png" alt="The admin panel request list with filters by verdict and date, and rows showing the image, verdict, request id, client version, server and timing" width="2880" height="1800" caption="Browsing and filtering requests in the admin panel." -->
+<!-- ::post-image src="/blog/nohorny-admin-requests-dark.webp" alt="The admin panel request list with filters by verdict and date, and rows showing the image, verdict, request id, client version, server and timing" width="2880" height="1800" caption="Browsing and filtering requests in the admin panel." -->
 
 This is it folks, if all goes well, this is the last beta build before the final release of NoHorny 4.
 

@@ -40,6 +40,8 @@ const ImageAttributesSchema = v.strictObject({
 });
 const VideoAttributesSchema = v.strictObject({
   src: blogMediaPathSchema([".mp4"]),
+  /** An AV1 WebM of the same video, offered first: much smaller, where the browser plays it. */
+  webm: v.optional(blogMediaPathSchema([".webm"])),
   poster: blogMediaPathSchema(IMAGE_EXTENSIONS),
   width: DimensionSchema,
   height: DimensionSchema,
