@@ -54,12 +54,13 @@ export const Route = createRootRoute({
         type: "font/woff2",
         crossOrigin: "anonymous" as const,
       })),
+      // The backdrop's layers are many times the crown's weight, so they yield to the first screen.
       ...REVEAL_IMAGES.map((href) => ({
         rel: "preload",
         href,
         as: "image",
         type: "image/webp",
-        ...(FRAME_IMAGES.includes(href) && { fetchPriority: "high" as const }),
+        fetchPriority: FRAME_IMAGES.includes(href) ? ("high" as const) : ("low" as const),
       })),
     ],
   }),

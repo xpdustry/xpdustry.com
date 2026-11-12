@@ -11,7 +11,7 @@ import * as styles from "./Hero.css";
 export function Hero({ className }: { className?: string }) {
   return (
     <section className={`${card.card} spot ${styles.hero} ${className ?? ""}`}>
-      <Patches patches={PATCHES.hero} />
+      <Patches patches={PATCHES.hero} priority />
       <div className={styles.brand}>
         <PressableLogo className={styles.mark} />
         <h1>{SITE.name}</h1>

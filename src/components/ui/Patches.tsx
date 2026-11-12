@@ -12,8 +12,20 @@ const SPRITES = import.meta.glob<string>("/src/assets/patches/*.webp", {
  * A card's patches of labyrinth, each blob a sprite `pnpm textures` rendered, so they paint with
  * the page. By default they fill their positioned parent, behind the content. Growing patches
  * lay each blob's grown sprite over it, uncovered from the middle out while the card is hovered.
+ *
+ * A card whose sprites are the largest thing on the first screen passes `priority`: they load at
+ * once and ahead of other images, instead of when layout finds them near the viewport. Its grown
+ * sprites still wait. Elsewhere it only takes bandwidth from the fonts the first screen needs.
  */
-export function Patches({ patches, className }: { patches: PatchesData; className?: string }) {
+export function Patches({
+  patches,
+  className,
+  priority = false,
+}: {
+  patches: PatchesData;
+  className?: string;
+  priority?: boolean;
+}) {
   return (
     <span className={`${styles.patches} ${className ?? ""}`} aria-hidden="true">
       {patches.blobs.map(([x, y, radius, turn = 0], at) => {
@@ -26,7 +38,7 @@ export function Patches({ patches, className }: { patches: PatchesData; classNam
         };
         return (
           <span key={at}>
-            <Sprite sprite={blobSprite(patches, radius)} style={style} />
+            <Sprite sprite={blobSprite(patches, radius)} style={style} priority={priority} />
             {patches.grow && (
               <Sprite
                 sprite={blobSprite(patches, radius, true)}
@@ -45,10 +57,12 @@ function Sprite({
   sprite,
   style,
   className,
+  priority = false,
 }: {
   sprite: ReturnType<typeof blobSprite>;
   style: CSSProperties;
   className?: string;
+  priority?: boolean;
 }) {
   return (
     <img
@@ -57,8 +71,9 @@ function Sprite({
       width={sprite.size}
       height={sprite.size}
       alt=""
-      loading="lazy"
-      decoding="async"
+      loading={priority ? undefined : "lazy"}
+      decoding={priority ? undefined : "async"}
+      fetchPriority={priority ? "high" : undefined}
       style={style}
     />
   );
