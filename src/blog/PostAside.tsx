@@ -5,7 +5,7 @@ import { DiscordCard } from "#app/status/DiscordCard";
 import { CopyButton } from "#app/ui/copy/CopyButton";
 import { PlinthAnchor } from "#app/ui/Plinth";
 import type { Post } from "./content/registry";
-import { parseReleaseId, releaseLabel, releaseUrl } from "./releases";
+import { releaseLabel, releaseUrl } from "./releases";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./PostAside.css";
 
@@ -20,27 +20,20 @@ export function PostAside({ post, className }: { post: Post; className?: string 
           <p className={styles.label}>
             <T>This post covers</T>
           </p>
-          {releases.map((id) => {
-            const release = parseReleaseId(id);
-            const label =
-              release && release.repository === project?.repository
-                ? release.tag
-                : releaseLabel(id);
-            return (
-              <div key={id} className={styles.release}>
-                <code>{label}</code>
-                <PlinthAnchor
-                  tone="ink"
-                  size="sm"
-                  href={releaseUrl(id)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <T>Changelog</T>
-                </PlinthAnchor>
-              </div>
-            );
-          })}
+          {releases.map((id) => (
+            <div key={id} className={styles.release}>
+              <code>{releaseLabel(id, project?.repository)}</code>
+              <PlinthAnchor
+                tone="ink"
+                size="sm"
+                href={releaseUrl(id)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <T>Changelog</T>
+              </PlinthAnchor>
+            </div>
+          ))}
         </section>
       )}
       <section
