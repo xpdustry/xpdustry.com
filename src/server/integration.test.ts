@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -21,6 +22,45 @@ beforeAll(async () => {
   };
   fetchApp = (request) => entry.default.fetch(request);
 });
+
+async function digest(response: Response): Promise<string> {
+  return createHash("sha256")
+    .update(new Uint8Array(await response.arrayBuffer()))
+    .digest("hex");
+}
+
+/** A fresh `scripts/serve.ts` on a free port, with caches of its own. */
+async function startProductionServer(): Promise<{ origin: string; stop: () => Promise<void> }> {
+  const server = spawn(process.execPath, ["scripts/serve.ts"], {
+    cwd: fileURLToPath(new URL("../../", import.meta.url)),
+    env: { ...process.env, PORT: "0", HOST: "127.0.0.1", TEST: "" },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const exited = once(server, "exit");
+  const stop = async () => {
+    server.kill();
+    await exited;
+  };
+  try {
+    const origin = await new Promise<string>((resolve, reject) => {
+      let output = "";
+      server.stdout.on("data", (chunk) => {
+        output += String(chunk);
+        const address = /http:\/\/127\.0\.0\.1:\d+/.exec(output)?.[0];
+        if (address) resolve(address);
+      });
+      server.stderr.on("data", (chunk) => {
+        output += String(chunk);
+      });
+      server.once("error", reject);
+      server.once("exit", () => reject(new Error(`File server exited: ${output}`)));
+    });
+    return { origin, stop };
+  } catch (error) {
+    await stop();
+    throw error;
+  }
+}
 
 describe("built pages", () => {
   test("publishes crawler metadata", async () => {
@@ -236,26 +276,8 @@ test("the production file server preserves every public URL from the previous si
     "/robots.txt",
     "/site.webmanifest",
   ];
-  const server = spawn(process.execPath, ["scripts/serve.ts"], {
-    cwd: fileURLToPath(new URL("../../", import.meta.url)),
-    env: { ...process.env, PORT: "0", HOST: "127.0.0.1", TEST: "" },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  const exited = once(server, "exit");
+  const { origin, stop } = await startProductionServer();
   try {
-    const origin = await new Promise<string>((resolve, reject) => {
-      let output = "";
-      server.stdout.on("data", (chunk) => {
-        output += String(chunk);
-        const address = /http:\/\/127\.0\.0\.1:\d+/.exec(output)?.[0];
-        if (address) resolve(address);
-      });
-      server.stderr.on("data", (chunk) => {
-        output += String(chunk);
-      });
-      server.once("error", reject);
-      server.once("exit", () => reject(new Error(`File server exited: ${output}`)));
-    });
     for (const path of legacyFiles) {
       const response = await fetch(`${origin}${path}`, { method: "HEAD", redirect: "manual" });
       const target = LEGACY_MEDIA_REDIRECTS.get(path);
@@ -269,8 +291,7 @@ test("the production file server preserves every public URL from the previous si
     expect(slash.status).toBe(308);
     expect(slash.headers.get("location")).toBe("/blog?q=a%20b");
   } finally {
-    server.kill();
-    await exited;
+    await stop();
   }
 });
 
@@ -390,4 +411,57 @@ describe("built social cards", () => {
     expect((await get("/og/blog/no-such-post.png")).status).toBe(404);
     expect((await get("/og/home")).status).toBe(404);
   });
+});
+
+describe("what a visitor sends", () => {
+  const hostile = {
+    cookie:
+      "generaltranslation.enable-i18n=false; generaltranslation.locale=ru; generaltranslation.region=US; generaltranslation.reset-locale=true",
+    "accept-language": "ru-RU,ru;q=0.9,fr;q=0.8",
+  };
+
+  test("cannot change what a shared cache keeps", async () => {
+    const shared = [
+      "/og/home.png",
+      "/fr/og/home.png",
+      "/fr/og/blog.png",
+      "/ru/og/blog.png",
+      "/fr/og/blog/nohorny-4-beta-8.png",
+      "/sitemap.xml",
+      "/api/servers",
+    ];
+    // A server of its own renders every card for the hostile request first, the way the first
+    // visitor after a restart would, so a poisoned card would be the one it keeps.
+    const { origin, stop } = await startProductionServer();
+    try {
+      for (const path of shared) {
+        const poisoned = await fetch(`${origin}${path}`, { headers: hostile });
+        const clean = await get(path);
+        expect(poisoned.status, path).toBe(200);
+        expect(poisoned.headers.get("cache-control"), path).toMatch(/^public\b/);
+        for (const response of [poisoned, clean]) {
+          expect(response.headers.get("set-cookie"), path).toBeNull();
+          expect(response.headers.get("vary") ?? "", path).not.toMatch(/cookie|accept-language/i);
+        }
+        expect(await digest(poisoned), path).toBe(await digest(clean));
+      }
+    } finally {
+      await stop();
+    }
+  }, 30_000);
+
+  test.each(["/fr", "/ru/blog", "/fr/blog/nohorny-4-beta-8"])(
+    "%s is in the language of its address, whatever cookies say",
+    async (path) => {
+      const clean = await (await get(path)).text();
+      const response = await fetchApp(
+        new Request(`https://xpdustry.com${path}`, { headers: hostile }),
+      );
+      expect(response.status).toBe(200);
+      const html = await response.text();
+      const title = (page: string) => /<title>([^<]*)<\/title>/.exec(page)?.[1];
+      expect(title(html)).toBe(title(clean));
+      expect(html).toContain(`<html lang="${path.slice(1, 3)}"`);
+    },
+  );
 });
