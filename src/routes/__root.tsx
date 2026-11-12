@@ -12,11 +12,10 @@ import { Footer } from "#app/shell/Footer";
 import { Header } from "#app/shell/Header";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/shell/reveal";
 import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
-import { playerCount } from "#app/status/live";
+import { shellData } from "#app/shell/shellData";
 import { getLiveData } from "#app/status/live.functions";
 import { CROWN } from "#app/textures/page";
 import { fontPreloads } from "#app/ui/styles/fontPreloads";
-import gtConfig from "../../gt.config.json";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
@@ -44,7 +43,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
-      ...fontPreloads(["display", "mono"], loaderData?.locale ?? gtConfig.defaultLocale),
+      ...fontPreloads(["display", "mono"], shellData(loaderData).locale),
       // The backdrop's layers are many times the crown's weight, so they yield to the first screen.
       ...REVEAL_IMAGES.map((href) => ({
         rel: "preload",
@@ -80,9 +79,9 @@ function SkipLink() {
 
 function Document({ children }: { children: ReactNode }) {
   useSmoothScrollOnceHydrated();
-  const loaded = useMatch({ from: rootRouteId, select: (match) => match.loaderData });
-  const live = loaded?.live;
-  const locale = loaded?.locale ?? gtConfig.defaultLocale;
+  const { locale, translations, players } = shellData(
+    useMatch({ from: rootRouteId, select: (match) => match.loaderData })
+  );
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -92,11 +91,11 @@ function Document({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: REVEAL }} />
       </head>
       <body>
-        <GTProvider locale={locale} translations={loaded?.translations ?? {}}>
+        <GTProvider locale={locale} translations={translations}>
           <SkipLink />
           <Background />
           <div className="wrap">
-            <Header players={live ? playerCount(live.servers.servers) : { state: "polling" }} />
+            <Header players={players} />
             {children}
           </div>
           <Footer />
