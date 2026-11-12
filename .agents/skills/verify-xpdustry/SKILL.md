@@ -31,7 +31,7 @@ Ready is the line `ready: http://127.0.0.1:<port>`. The instance is recorded in 
 - Without `--live` the server makes no outside requests: player counts read "Checking" and the Discord and GitHub figures are absent. Use this for everything except [live status](features/live-status.md).
 - With `--live` it queries the real Mindustry servers, Discord and the GitHub API every 30 seconds. Those are public, read-only requests.
 - One instance per checkout; `launch` refuses while one runs. Separate checkouts get separate ports and never collide.
-- The site has no database, accounts or seed data. Content is the Markdown under `src/content/blog/` and the strings in `src/_gt/`, all compiled into the build.
+- The site has no database, accounts or seed data. Content is the Markdown under `src/blog/posts/` and the strings in `src/_gt/`, all compiled into the build.
 - Never drive the developer's `pnpm dev` server or the deployed site with these recipes.
 
 ## Doctor
@@ -91,7 +91,7 @@ The design checks, at the default size only: a navigation item that wraps, a hea
 
 - `page scrolls sideways by Npx, <region>: <text>` names the widest element that is not inside a clipping box, and whether it is in the header, `main` or the footer.
 - `text clipped, <region>: <text>` is text cut off by a box with hidden overflow: a fixed height, `nowrap`, an ellipsis, a word too long for its column. Text that is visually hidden on purpose (`.sr-only`, transparent, a 1px box) is skipped.
-- `text ignores the font size setting, <region>: <text>` is text under 24px that kept its size when the browser's font size doubled: a font size in px. Font sizes go through `rem()` from `src/styles/scale.ts`, breakpoints through `media` and `upTo` from `src/styles/media.ts`, container queries through `narrowerThan`.
+- `text ignores the font size setting, <region>: <text>` is text under 24px that kept its size when the browser's font size doubled: a font size in px. Font sizes go through `rem()` from `src/ui/styles/scale.ts`, breakpoints through `media` and `upTo` from `src/ui/styles/media.ts`, container queries through `narrowerThan`.
 
 It prints one line per finding, as `<width> <url>[, <setting>]: <what>`, and exits 1 if there is any. It is the check for visible text; `seo` does not notice a label that wraps. Run it after every change to `src/_gt/*.json`, to a heading, or to layout styles. A full run takes about a minute and a half.
 
@@ -107,7 +107,7 @@ $V seo --accept   # record the current state as the new baseline
 
 It needs the default launch and refuses a `--live` one, because live counts change the page text it compares.
 
-Run it after any change to routes, `src/lib/seo.ts`, `src/lib/structuredData.ts`, the sitemap, page headings, posts or `src/_gt/*.json`.
+Run it after any change to routes, `src/seo/meta.ts`, `src/seo/structuredData.ts`, the sitemap, page headings, posts or `src/_gt/*.json`.
 
 ## Evidence
 

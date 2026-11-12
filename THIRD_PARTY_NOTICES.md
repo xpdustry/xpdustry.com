@@ -2,7 +2,7 @@
 
 ## Phosphor Icons
 
-The icons in `src/lib/icons.tsx`, other than the GitHub and Discord marks, are the bold
+The icons in `src/ui/icons.tsx`, other than the GitHub and Discord marks, are the bold
 weight of [Phosphor](https://github.com/phosphor-icons/core).
 
 MIT License

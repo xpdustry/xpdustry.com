@@ -1,6 +1,6 @@
 # Blog
 
-Release notes and articles, written as Markdown in `src/content/blog/<locale>/`. The index lists every post newest first; a post page renders its text, images, video and callouts, and offers the neighbouring posts.
+Release notes and articles, written as Markdown in `src/blog/posts/<locale>/`. The index lists every post newest first; a post page renders its text, images, video and callouts, and offers the neighbouring posts.
 
 ## Sub-features
 
@@ -27,7 +27,7 @@ const oneLine = (text) => text.split(/\s+/).join(" ");
 const page = await newPage({ width: 1280 });
 await go(page, "/blog");
 const links = await page.locator('main a[href^="/blog/"]').evaluateAll((els) => els.map((el) => el.getAttribute("href")));
-print("blog-index:", new Set(links).size, "posts"); // equals the number of files in src/content/blog/en
+print("blog-index:", new Set(links).size, "posts"); // equals the number of files in src/blog/posts/en
 
 await page.locator('main a[href="/blog/nohorny-4-beta-8"]').first().click();
 await page.getByRole("heading", { level: 1, name: "Beta 8" }).waitFor();
@@ -46,7 +46,7 @@ print("blog-missing:", (await get("/blog/nope")).status, slash.status, slash.hea
 EOF
 ```
 
-- **Expected.** The Russian heading is in Cyrillic and the date reads like `20 июля 2026 г.`; a Russian page that shows the English title means the file under `src/content/blog/ru/` is missing or failed validation at build time.
+- **Expected.** The Russian heading is in Cyrillic and the date reads like `20 июля 2026 г.`; a Russian page that shows the English title means the file under `src/blog/posts/ru/` is missing or failed validation at build time.
   Variants:
 
 - **A new post.** Replace the slug and the heading name with the new post's; check its images load (`await page.locator("main figure img").evaluateAll((els) => els.every((el) => el.complete && el.naturalWidth > 0))`) after scrolling, since they load lazily.
