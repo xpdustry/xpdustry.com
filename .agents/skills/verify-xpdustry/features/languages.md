@@ -72,6 +72,7 @@ EOF
 ```
 
 - **Fit.** Run `$V audit` afterwards; a language switch that works but wraps the navigation is not done.
+- **Storage blocked.** A visitor whose browser drops cookies keeps the address's language after hydration. Make the context with `browser.newContext()`, add an init script that replaces `Document.prototype.cookie` with a getter returning `""` and a setter that does nothing, and makes `window.localStorage` throw. Then open `/fr`, `/ru` and `/fr/blog/nohorny-4-beta-11`, wait for the network to settle plus two seconds, and print `<html lang>`, `document.title` and the `h1`: they stay French or Russian. Follow a post link from `/fr/blog` too; it lands under `/fr`.
 
 ## Gotchas
 
