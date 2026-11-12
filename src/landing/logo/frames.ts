@@ -12,6 +12,18 @@ export const frameOffset = (index: number) => -LIFT + index * STEP;
 export const frameIndex = (offset: number) =>
   Math.max(0, Math.min(LOGO_FRAME_SHEET.count - 1, Math.round((offset + LIFT) / STEP)));
 
+/** Whether the pointer is over the logo, and whether it is pressing it. */
+export interface Pointer {
+  hover: boolean;
+  held: boolean;
+}
+
+/** The press the logo heads for under the pointer, and in how many ms: a press is quick. */
+export function pressMotion({ hover, held }: Pointer) {
+  if (held) return { offset: DEPTH, duration: 60 };
+  return { offset: hover ? -LIFT : 0, duration: 190 };
+}
+
 /** Where frame `index` sits in the sheet. */
 export function frameRect(index: number) {
   const { size, columns } = LOGO_FRAME_SHEET;
