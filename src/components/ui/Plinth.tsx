@@ -16,16 +16,19 @@ export interface PlinthStyle {
   icon?: boolean;
   /** Teal and still, as after a copy. */
   done?: boolean;
+  /** Red and still, as after a copy the browser refused. */
+  failed?: boolean;
   className?: string;
 }
 
-function plinthClass({ tone = "teal", size = "md", icon, done, className }: PlinthStyle) {
+function plinthClass({ tone = "teal", size = "md", icon, done, failed, className }: PlinthStyle) {
   return [
     styles.plinth,
     tone !== "teal" && styles.tone[tone],
     size === "sm" && styles.sm,
     icon && styles.icon,
     done && styles.done,
+    failed && styles.failed,
     className,
   ]
     .filter(Boolean)
@@ -88,13 +91,18 @@ export function PlinthButton({
   size,
   icon,
   done,
+  failed,
   className,
   children,
   type = "button",
   ...props
 }: ButtonProps) {
   return (
-    <button type={type} className={plinthClass({ tone, size, icon, done, className })} {...props}>
+    <button
+      type={type}
+      className={plinthClass({ tone, size, icon, done, failed, className })}
+      {...props}
+    >
       <Face>{children}</Face>
     </button>
   );

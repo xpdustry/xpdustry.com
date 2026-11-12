@@ -1,14 +1,17 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
+import { useId, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { Tray } from "#app/components/tray/Tray";
+import { CopyStatus } from "#app/components/ui/CopyStatus";
+import { Hostname } from "#app/components/ui/Hostname";
 import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import { Spread, spreadFrom } from "#app/components/ui/Spread";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
 import { findServer, playerCount } from "#app/data/live";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
-import { Check, Copy, GameController } from "#app/lib/icons";
+import { Check, Copy, GameController, X } from "#app/lib/icons";
+import { useCopy } from "#app/lib/useCopy";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Gamemodes.css";
 
@@ -17,9 +20,6 @@ const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
   query: "?url",
   import: "default",
 });
-
-const COPIED_MS = 1800;
-const FAILED_MS = 6000;
 
 export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
   const gt = useGT();
@@ -39,57 +39,51 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
   );
 }
 
-interface Copied extends ReturnType<typeof spreadFrom> {
-  ok: boolean;
-}
-
 function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem }) {
   const gt = useGT();
   const m = useMessages();
   const count = playerCount(server ? [server] : []);
   const hostname = server?.hostname ?? "";
-  const [copied, setCopied] = useState<Copied>();
-  const [shown, setShown] = useState(false);
+  const { state, copy } = useCopy(hostname);
+  const [spread, setSpread] = useState<ReturnType<typeof spreadFrom>>();
   const [brief, setBrief] = useState(false);
   const said = useRef<HTMLSpanElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
+  const mark = useRef<HTMLSpanElement>(null);
+  const ids = useId();
 
   useLayoutEffect(() => {
     const line = said.current;
-    if (shown && line && line.scrollWidth > line.clientWidth) setBrief(true);
-  }, [shown, copied]);
+    if (state === "copied" && line && line.scrollWidth > line.clientWidth) setBrief(true);
+  }, [state, spread]);
 
-  const copy = async (event: MouseEvent<HTMLButtonElement>) => {
-    const box = event.currentTarget.closest("li")!.getBoundingClientRect();
-    const mark = event.currentTarget.lastElementChild!.getBoundingClientRect();
+  const press = (event: MouseEvent<HTMLButtonElement>) => {
+    const box = event.currentTarget.parentElement!.getBoundingClientRect();
+    const spot = mark.current!.getBoundingClientRect();
     const [x, y] = event.detail
       ? [event.clientX, event.clientY]
-      : [mark.left + mark.width / 2, mark.top + mark.height / 2];
-    const origin = [x - box.left, y - box.top] as const;
-    // no clipboard at all, as on a page served without https, fails like a refused write
-    const ok = await Promise.resolve()
-      .then(() => navigator.clipboard.writeText(hostname))
-      .then(
-        () => true,
-        () => false,
-      );
-    setCopied({ ok, ...spreadFrom(origin, box.width, box.height) });
+      : [spot.left + spot.width / 2, spot.top + spot.height / 2];
+    setSpread(spreadFrom([x - box.left, y - box.top], box.width, box.height));
     setBrief(false);
-    setShown(true);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => setShown(false), ok ? COPIED_MS : FAILED_MS);
+    void copy();
   };
 
-  const landed = shown && copied?.ok === true;
-  const failed = shown && copied?.ok === false;
+  const copied = state === "copied";
+  const failed = state === "failed";
   const empty = count.state === "online" && count.players === 0;
   const Icon = mode.icon;
   return (
     <li
-      className={`${card.card} ${styles.mode} ${landed ? styles.copied : ""} ${failed ? styles.failed : ""}`}
+      className={`${card.card} ${styles.mode} ${copied ? styles.copied : ""} ${failed ? styles.failed : ""}`}
       style={assignInlineVars({ [styles.tint]: mode.edge.side.color })}
     >
+      <button
+        type="button"
+        className={card.cover}
+        aria-labelledby={`${ids}name ${ids}line ${ids}action`}
+        title={gt("Copy {address}", { address: hostname })}
+        disabled={!hostname}
+        onClick={press}
+      />
       <span className={styles.tinted} aria-hidden="true">
         <span className={`${styles.edge} ${styles.side}`}>
           <Patches patches={mode.edge.side} className={styles.patches} />
@@ -101,47 +95,46 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
           }}
         />
       </span>
-      <Spread tiles={mode.spread} on={landed} origin={copied?.origin} reach={copied?.reach} />
-      <h3 className={styles.head}>
-        <button
-          type="button"
-          className={styles.band}
-          title={gt("Copy {address}", { address: hostname })}
-          disabled={!hostname}
-          onClick={copy}
+      <Spread tiles={mode.spread} on={copied} origin={spread?.origin} reach={spread?.reach} />
+      <div className={styles.band}>
+        <Icon className={styles.icon} />
+        <div className={styles.id}>
+          <h3 id={`${ids}name`} className={styles.name}>
+            {m(mode.name)}
+          </h3>
+          <span id={`${ids}line`} className={styles.line}>
+            <PlayerCount count={count} className={`${styles.count} ${empty ? styles.empty : ""}`} />
+            <span ref={said} className={styles.said} aria-hidden="true">
+              {failed ? (
+                <Hostname name={hostname} />
+              ) : brief ? (
+                gt("Copied")
+              ) : (
+                gt("Copied, paste it in Join game")
+              )}
+            </span>
+          </span>
+          <span id={`${ids}action`} hidden>
+            <T>. Copy the server address</T>
+          </span>
+        </div>
+        <span
+          ref={mark}
+          className={`${card.chip} ${styles.mark} ${failed ? card.failed : ""}`}
+          aria-hidden="true"
         >
-          <Icon className={styles.icon} />
-          <span className={styles.id}>
-            <span className={styles.name}>{m(mode.name)}</span>
-            <span className={styles.line}>
-              <PlayerCount
-                count={count}
-                className={`${styles.count} ${empty ? styles.empty : ""}`}
-              />
-              <span ref={said} className={styles.said} aria-hidden="true">
-                {copied?.ok === false
-                  ? hostname
-                  : brief
-                    ? gt("Copied")
-                    : gt("Copied, paste it in Join game")}
-              </span>
-            </span>
-            <span className="sr-only">
-              <T>. Copy the server address</T>
-            </span>
-          </span>
-          <span className={styles.mark} aria-hidden="true">
-            <Copy className={styles.glyph} />
-            <Check className={styles.tick} />
-          </span>
-        </button>
-      </h3>
+          {failed ? <X /> : <Copy className={styles.glyph} />}
+          <Check className={styles.tick} />
+        </span>
+      </div>
       <p className={styles.about}>{m(mode.description)}</p>
-      <output className="sr-only">
-        {landed &&
-          gt("Copied {address}. Paste it in Play, Join game, Add server.", { address: hostname })}
-        {failed && gt("Could not copy. The address is {address}.", { address: hostname })}
-      </output>
+      <CopyStatus
+        state={state}
+        text={hostname}
+        copied={gt("Copied {address}. Paste it in Play, Join game, Add server.", {
+          address: hostname,
+        })}
+      />
     </li>
   );
 }

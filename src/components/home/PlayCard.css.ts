@@ -1,5 +1,4 @@
-import { createContainer, keyframes, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
+import { createContainer, style } from "@vanilla-extract/css";
 import { font, leading, tracking } from "#app/styles/scale";
 import { figures } from "./shared";
 import { vars } from "#app/styles/theme.css";
@@ -20,6 +19,9 @@ export const label = style({
   color: vars.a11,
 });
 
+/** The browser refused the copy: the address is for the visitor to select instead. */
+export const failed = style({});
+
 export const address = style({
   marginTop: "auto",
   font: `500 clamp(16px, calc(100cqi / 11.8), 30px) / ${leading.heading} ${vars.fontMono}`,
@@ -28,6 +30,16 @@ export const address = style({
   whiteSpace: "nowrap",
   "@container": {
     [`${card} (max-width: 180px)`]: { whiteSpace: "normal" },
+  },
+  selectors: {
+    // Above the button covering the card, so a press selects the address instead of copying.
+    [`${failed} &`]: {
+      position: "relative",
+      zIndex: 2,
+      alignSelf: "start",
+      userSelect: "all",
+      cursor: "text",
+    },
   },
 });
 
@@ -46,22 +58,9 @@ export const online = style({
   color: vars.ink,
 });
 
-export const copied = style({});
-
-const pop = keyframes({
-  "0%": { scale: "0.9" },
-  "45%": { scale: "1.12" },
-  "100%": { scale: "1" },
-});
-
 export const hint = style({
   color: vars.a11,
   selectors: {
     [`${play}:has(> button:hover) &`]: { transform: "scale(1.08)" },
-    [`${copied} &`]: {
-      background: vars.t9,
-      color: vars.onTeal,
-      "@media": { [media.motion]: { animation: `${pop} 0.5s ${vars.easeOut}` } },
-    },
   },
 });

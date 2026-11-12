@@ -1,4 +1,5 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle, keyframes, style } from "@vanilla-extract/css";
+import { media } from "#app/styles/media";
 import { radius } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
@@ -29,22 +30,63 @@ export const cover = style({
   },
 });
 
-/** The icon in a clickable card's corner that says what a press does: leave, or copy. */
-export const hint = style({
-  position: "absolute",
-  top: 16,
-  right: 16,
+/** A square around an icon that says what a press does, and then how it went. */
+export const chip = style({
   display: "grid",
   placeItems: "center",
   width: 34,
   height: 34,
   borderRadius: radius.md,
-  background: "color-mix(in srgb, currentColor 14%, transparent)",
   pointerEvents: "none",
-  transition: `transform 0.25s ${vars.easeSpring}`,
 });
 
-globalStyle(`${hint} svg`, {
+globalStyle(`${chip} svg`, {
   width: 18,
   height: 18,
+});
+
+/** The chip in a clickable card's corner: leave, or copy. */
+export const hint = style([
+  chip,
+  {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    background: "color-mix(in srgb, currentColor 14%, transparent)",
+    transition: `transform 0.25s ${vars.easeSpring}`,
+  },
+]);
+
+const pop = keyframes({
+  "0%": { scale: "0.9" },
+  "45%": { scale: "1.12" },
+  "100%": { scale: "1" },
+});
+
+const shake = keyframes({
+  "0%, 100%": { translate: "0" },
+  "20%, 60%": { translate: "-3px" },
+  "40%, 80%": { translate: "3px" },
+});
+
+/** A chip after its copy landed. Doubled up to win over the colours of a card's own chip. */
+export const copied = style({
+  selectors: {
+    [`${chip}&`]: {
+      background: vars.t9,
+      color: vars.onTeal,
+      "@media": { [media.motion]: { animation: `${pop} 0.5s ${vars.easeOut}` } },
+    },
+  },
+});
+
+/** A chip after the browser refused the copy. */
+export const failed = style({
+  selectors: {
+    [`${chip}&`]: {
+      background: vars.alarm,
+      color: vars.onAlarm,
+      "@media": { [media.motion]: { animation: `${shake} 0.4s ${vars.easeOut}` } },
+    },
+  },
 });

@@ -26,7 +26,6 @@ export const mode = style({
   display: "grid",
   gridTemplateColumns: `${bandWidth} minmax(0, 1fr)`,
   alignItems: "center",
-  cursor: "pointer",
   selectors: {
     "&::before": {
       content: "",
@@ -104,32 +103,13 @@ export const patches = style({
   overflow: "visible",
 });
 
-export const head = style({
-  alignSelf: "stretch",
-  display: "grid",
-});
-
 export const band = style({
+  alignSelf: "stretch",
   display: "grid",
   gridTemplateColumns: "104px minmax(0, 1fr) auto",
   alignItems: "center",
   minHeight: 92,
   padding: "0 16px 0 0",
-  border: 0,
-  background: "none",
-  color: vars.ink,
-  textAlign: "left",
-  cursor: "inherit",
-  selectors: {
-    "&::after": {
-      content: "",
-      position: "absolute",
-      inset: 0,
-    },
-    "&:focus-visible": {
-      outline: "none",
-    },
-  },
   "@container": {
     [narrow]: {
       gridTemplateColumns: "84px minmax(0, 1fr) auto",
@@ -146,12 +126,7 @@ export const band = style({
   },
 });
 
-globalStyle(`${mode}:has(${band}:focus-visible)`, {
-  outline: `3px solid ${vars.focus}`,
-  outlineOffset: 3,
-});
-
-globalStyle(`${mode}:has(${band}:disabled)`, {
+globalStyle(`${mode} > button:disabled`, {
   cursor: "default",
 });
 
@@ -242,11 +217,16 @@ export const said = style({
   translate: "0 110%",
   opacity: 0,
   selectors: {
+    // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
+      position: "relative",
+      zIndex: 2,
       font: figures(1.25),
       letterSpacing: 0,
       whiteSpace: "normal",
       overflowWrap: "anywhere",
+      userSelect: "all",
+      cursor: "text",
     },
   },
   "@media": {
@@ -268,8 +248,8 @@ globalStyle(`:is(${copied}, ${failed}) ${said}`, {
 });
 
 export const mark = style({
-  display: "grid",
-  marginLeft: 10,
+  // The chip is wider than its icon; the margins keep the band laid out around the icon alone.
+  margin: "-8px -8px -8px 2px",
 });
 
 globalStyle(`${mark} svg`, {

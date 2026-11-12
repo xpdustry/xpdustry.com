@@ -1,56 +1,48 @@
 import { useGT } from "gt-tanstack-start";
 import type { ReactNode } from "react";
+import { CopyStatus } from "#app/components/ui/CopyStatus";
 import { PlinthButton, type PlinthStyle } from "#app/components/ui/Plinth";
-import { Check, Copy } from "#app/lib/icons";
-import { useCopy } from "#app/lib/useCopy";
+import { useCopy, type CopyState } from "#app/lib/useCopy";
 
 interface CopyButtonProps {
   text: string;
-  /** The accessible name of a button without text of its own, as in "Copy hub.md.xpdustry.com". */
-  label: string;
   /**
-   * A text button instead of an icon; the text reads "Copied" for a moment after a copy. Or a
-   * function drawing the button's face, told whether a copy just landed; `label` names it.
+   * The button's text, which says "Copied" or "Could not copy" after a press. Or a function
+   * drawing the button's face for each state; `label` names it then.
    */
-  children?: ReactNode | ((copied: boolean) => ReactNode);
+  children: ReactNode | ((state: CopyState) => ReactNode);
+  /** The accessible name of a drawn face, as in "Copy hub.md.xpdustry.com". */
+  label?: string;
   tone?: PlinthStyle["tone"];
   className?: string;
 }
 
-/** Copies `text`, then shows a check (or "Copied") for a moment and says so to screen readers. */
+/** Copies `text`, turns teal when it landed or red when the browser refused, and says so. */
 export function CopyButton({ text, label, children, tone = "ink", className }: CopyButtonProps) {
   const gt = useGT();
-  const { copied, copy } = useCopy(text);
-
-  const named = typeof children !== "function" && Boolean(children);
-  const face =
-    typeof children === "function" ? (
-      children(copied)
-    ) : children ? (
-      copied ? (
-        gt("Copied")
-      ) : (
-        children
-      )
-    ) : copied ? (
-      <Check />
-    ) : (
-      <Copy />
-    );
+  const { state, copy } = useCopy(text);
+  const drawn = typeof children === "function";
+  const face = drawn
+    ? children(state)
+    : state === "copied"
+      ? gt("Copied")
+      : state === "failed"
+        ? gt("Could not copy")
+        : children;
   return (
     <>
       <PlinthButton
         tone={tone}
         size="sm"
-        icon={!children}
-        done={!named && copied}
+        done={state === "copied"}
+        failed={state === "failed"}
         className={className}
         onClick={copy}
-        {...(!named && { "aria-label": label, title: gt("Copy address") })}
+        {...(drawn && { "aria-label": label, title: gt("Copy address") })}
       >
         {face}
       </PlinthButton>
-      <output className="sr-only">{copied ? gt("Copied {text}", { text }) : ""}</output>
+      <CopyStatus state={state} text={text} />
     </>
   );
 }

@@ -56,6 +56,10 @@ globalStyle(`${plinth}[aria-current]:not([href*="#"]), ${done}`, {
   vars: palette({ ...teal, hover: teal.face }),
 });
 
+export const failed = style({
+  vars: palette({ face: vars.alarm, hover: vars.alarm, wall: vars.alarmWall, on: vars.onAlarm }),
+});
+
 export const sm = style({});
 
 export const icon = style({});
