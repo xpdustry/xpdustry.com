@@ -181,8 +181,9 @@ export const line = style({
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr)",
   overflow: "hidden",
-  margin: "-3px 0",
-  padding: "3px 0",
+  // Room for the letters' ascenders and tails, which grow with the text.
+  margin: "-0.25em 0",
+  padding: "0.25em 0",
 });
 
 globalStyle(`${line} > *`, {

@@ -1,14 +1,23 @@
 import framesUrl from "#app/assets/logo-frames.webp";
 
-let loading: Promise<HTMLImageElement> | undefined;
+let loading: Promise<HTMLImageElement | undefined> | undefined;
 
-/** The relief logo's frames (`LOGO_FRAME_SHEET` in `logo.ts`), decoded. */
-export function loadLogoFrames(): Promise<HTMLImageElement> {
+/**
+ * The relief logo's frames (`LOGO_FRAME_SHEET` in `logo.ts`), decoded, or nothing when the browser
+ * could not load them: leaving the page mid-download cancels the decode. A failure is not kept, so
+ * the next caller tries again.
+ */
+export function loadLogoFrames(): Promise<HTMLImageElement | undefined> {
   loading ??= (async () => {
     const sheet = new Image();
     sheet.src = framesUrl;
-    await sheet.decode();
-    return sheet;
+    try {
+      await sheet.decode();
+      return sheet;
+    } catch {
+      loading = undefined;
+      return undefined;
+    }
   })();
   return loading;
 }

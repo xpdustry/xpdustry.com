@@ -19,7 +19,8 @@ export function PressableLogo({ className }: { className?: string }) {
 
     void (async () => {
       const sheet = await loadLogoFrames();
-      if (abort.signal.aborted) return;
+      // Without its frames the logo stays the still image it started as.
+      if (!sheet || abort.signal.aborted) return;
 
       const view = document.createElement("canvas");
       view.width = view.height = size;
