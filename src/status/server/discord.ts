@@ -1,5 +1,5 @@
 import * as v from "valibot";
-import type { DiscordCounts } from "#app/data/live";
+import type { DiscordCounts } from "../live";
 
 const InviteSchema = v.object({
   approximate_member_count: v.pipe(v.number(), v.integer(), v.minValue(0)),

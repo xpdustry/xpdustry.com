@@ -1,5 +1,5 @@
-import type { ServerDefinition } from "#app/data/servers";
-import type { ServerInfo, ServerSnapshot } from "#app/data/snapshots";
+import type { ServerDefinition } from "../../servers";
+import type { ServerInfo, ServerSnapshot } from "../../snapshots";
 
 export interface MindustryStatusProbe {
   query: (hostname: string, signal: AbortSignal) => Promise<ServerInfo>;

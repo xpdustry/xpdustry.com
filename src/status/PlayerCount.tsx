@@ -1,7 +1,7 @@
 import { useGT, useLocale } from "gt-tanstack-start";
-import { Online } from "#app/components/ui/Online";
-import type { PlayerCount as Count } from "#app/data/live";
 import { formatNumber } from "#app/i18n/format";
+import type { PlayerCount as Count } from "./live";
+import { Online } from "./Online";
 
 /** "31 online" with a green light, or a grey one while the servers are being checked or are down. */
 export function PlayerCount({

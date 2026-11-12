@@ -1,11 +1,7 @@
 import { createSocket, type Socket } from "node:dgram";
 import { Resolver } from "node:dns/promises";
-import {
-  decodeServerInfo,
-  MalformedPacketError,
-  QUERY_PACKET
-} from "#app/server/mindustry/protocol";
-import type { MindustryStatusProbe } from "#app/server/mindustry/status";
+import { decodeServerInfo, MalformedPacketError, QUERY_PACKET } from "./protocol";
+import type { MindustryStatusProbe } from "./status";
 
 const DEFAULT_MINDUSTRY_PORT = 6567;
 const QUERY_TIMEOUT_MS = 5_000;

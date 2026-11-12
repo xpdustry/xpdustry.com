@@ -1,4 +1,4 @@
-import type { ServerDefinition } from "#app/data/servers";
+import type { ServerDefinition } from "./servers";
 
 /** What a server answers a status query with, its Mindustry markup stripped. */
 export interface ServerInfo {

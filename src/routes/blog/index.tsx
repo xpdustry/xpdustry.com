@@ -3,9 +3,9 @@ import { getLocale, getMessages, T, useGT, useMessages, useLocale } from "gt-tan
 import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/brand/site";
 import { LeadPost } from "#app/components/blog/LeadPost";
 import { PostTile } from "#app/components/blog/PostTile";
-import { DiscordCard } from "#app/components/site/DiscordCard";
 import { posts, translated } from "#app/content/registry";
 import { blogCard, seo } from "#app/lib/seo";
+import { DiscordCard } from "#app/status/DiscordCard";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import * as styles from "#app/components/blog/BlogIndex.css";

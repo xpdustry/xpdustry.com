@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { MalformedPacketError, decodeServerInfo } from "#app/server/mindustry/protocol";
+import { MalformedPacketError, decodeServerInfo } from "./protocol";
 
 function packet(
   overrides: Partial<{

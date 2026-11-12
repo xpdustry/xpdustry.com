@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { services } from "#app/server/services";
+import { services } from "#app/status/server/services";
 
 export const Route = createFileRoute("/api/servers")({
   server: {

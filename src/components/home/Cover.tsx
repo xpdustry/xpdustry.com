@@ -1,8 +1,8 @@
 import { T, useGT } from "gt-tanstack-start";
 import { Hero } from "#app/components/home/Hero";
 import { PlayCard } from "#app/components/home/PlayCard";
-import { DiscordCard } from "#app/components/site/DiscordCard";
-import { playerCount, type LiveData } from "#app/data/live";
+import { DiscordCard } from "#app/status/DiscordCard";
+import { playerCount, type LiveData } from "#app/status/live";
 import * as styles from "./Cover.css";
 
 export function Cover({ live }: { live: LiveData }) {

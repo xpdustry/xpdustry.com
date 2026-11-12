@@ -1,6 +1,6 @@
 import * as v from "valibot";
-import type { ServerInfo } from "#app/data/snapshots";
-import { stripMindustryMarkup } from "#app/server/mindustry/markup";
+import type { ServerInfo } from "../../snapshots";
+import { stripMindustryMarkup } from "./markup";
 
 /** Framework message, then the discover-host opcode. */
 export const QUERY_PACKET = Uint8Array.from([0xfe, 0x01]);

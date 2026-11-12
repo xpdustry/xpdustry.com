@@ -1,5 +1,5 @@
 import type { ProjectSlug } from "#app/brand/projects";
-import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
+import type { ServerSnapshot, ServerSnapshotItem } from "./snapshots";
 
 export interface DiscordCounts {
   members: number;

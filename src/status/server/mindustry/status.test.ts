@@ -1,7 +1,7 @@
 import { expect, test } from "vitest";
-import type { ServerDefinition } from "#app/data/servers";
-import type { ServerInfo } from "#app/data/snapshots";
-import { queryServers } from "#app/server/mindustry/status";
+import type { ServerDefinition } from "../../servers";
+import type { ServerInfo } from "../../snapshots";
+import { queryServers } from "./status";
 
 const hub: ServerDefinition = { slug: "hub", label: "Hub", hostname: "hub.md.xpdustry.com" };
 const pvp: ServerDefinition = { slug: "pvp", label: "PvP", hostname: "pvp.md.xpdustry.com" };

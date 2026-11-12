@@ -3,7 +3,7 @@ import { pathLocale, withoutLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { requestRedirect } from "#app/server/redirects";
 import { unknownServerFunction } from "#app/server/serverFunctions";
-import { startServices } from "#app/server/services";
+import { startServices } from "#app/status/server/services";
 
 startServices();
 

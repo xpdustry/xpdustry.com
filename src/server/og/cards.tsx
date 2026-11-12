@@ -7,7 +7,6 @@ import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
 import { projects } from "#app/brand/projects";
 import { posts, translated } from "#app/content/registry";
-import { servers } from "#app/data/servers";
 import { topic } from "#app/data/topics";
 import { CARD_SIZE, postTitle } from "#app/lib/seo";
 import {
@@ -17,7 +16,8 @@ import {
   type CardLanguage,
   type CardPost
 } from "#app/server/og/Card";
-import { services } from "#app/server/services";
+import { services } from "#app/status/server/services";
+import { servers } from "#app/status/servers";
 import { DISPLAY_WEIGHT, FACE } from "#app/ui/styles/fonts";
 
 const MAX_AGE_MS = 60 * 60 * 1000;

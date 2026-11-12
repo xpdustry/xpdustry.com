@@ -1,7 +1,7 @@
 import { T, useGT } from "gt-tanstack-start";
-import { PlayerCount } from "#app/components/ui/PlayerCount";
-import type { PlayerCount as Count } from "#app/data/live";
-import { HUB } from "#app/data/servers";
+import type { PlayerCount as Count } from "#app/status/live";
+import { PlayerCount } from "#app/status/PlayerCount";
+import { HUB } from "#app/status/servers";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import { CopyStatus } from "#app/ui/copy/CopyStatus";

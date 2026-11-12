@@ -1,11 +1,11 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
 import { useId, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
-import { PlayerCount } from "#app/components/ui/PlayerCount";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
-import { findServer, playerCount } from "#app/data/live";
-import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
 import { useSeen } from "#app/lib/useSeen";
+import { findServer, playerCount } from "#app/status/live";
+import { PlayerCount } from "#app/status/PlayerCount";
+import type { ServerSnapshot, ServerSnapshotItem } from "#app/status/snapshots";
 import { Patches } from "#app/textures/Patches";
 import { Spread, spreadFrom } from "#app/textures/Spread";
 import { CopyStatus } from "#app/ui/copy/CopyStatus";

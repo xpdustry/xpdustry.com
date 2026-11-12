@@ -1,11 +1,11 @@
 import { useGT, useLocale } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { SITE } from "#app/brand/site";
-import type { DiscordCounts } from "#app/data/live";
 import { formatNumber } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import { ArrowUpRight, Discord } from "#app/ui/icons";
+import type { DiscordCounts } from "./live";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./DiscordCard.css";
 

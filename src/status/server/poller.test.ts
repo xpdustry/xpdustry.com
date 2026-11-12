@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-import { Poller } from "#app/server/poller";
+import { Poller } from "./poller";
 
 beforeEach(() => {
   vi.useFakeTimers();

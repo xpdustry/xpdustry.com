@@ -1,5 +1,5 @@
 import { expect, test, vi } from "vitest";
-import { fetchDiscordCounts } from "#app/server/discord";
+import { fetchDiscordCounts } from "./discord";
 
 const signal = new AbortController().signal;
 

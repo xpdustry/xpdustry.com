@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { stripMindustryMarkup } from "#app/server/mindustry/markup";
+import { stripMindustryMarkup } from "./markup";
 
 test.each([
   ["Grasslands Core", "Grasslands Core"],

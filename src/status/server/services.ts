@@ -1,12 +1,12 @@
 import { SITE } from "#app/brand/site";
-import type { DiscordCounts, LiveData } from "#app/data/live";
-import { servers } from "#app/data/servers";
-import type { ServerSnapshot } from "#app/data/snapshots";
-import { fetchDiscordCounts } from "#app/server/discord";
-import { fetchGitHubStats, type GitHubStats } from "#app/server/github";
-import { pollingSnapshot, queryServers } from "#app/server/mindustry/status";
-import { createNodeMindustryProbe } from "#app/server/mindustry/transport";
-import { Poller, type PollerHealth } from "#app/server/poller";
+import type { DiscordCounts, LiveData } from "../live";
+import { servers } from "../servers";
+import type { ServerSnapshot } from "../snapshots";
+import { fetchDiscordCounts } from "./discord";
+import { fetchGitHubStats, type GitHubStats } from "./github";
+import { pollingSnapshot, queryServers } from "./mindustry/status";
+import { createNodeMindustryProbe } from "./mindustry/transport";
+import { Poller, type PollerHealth } from "./poller";
 
 interface ServicesHealth {
   status: "ok";

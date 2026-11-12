@@ -1,9 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import {
-  createNodeMindustryProbe,
-  type EndpointExchange,
-  type SrvRecord
-} from "#app/server/mindustry/transport";
+import { createNodeMindustryProbe, type EndpointExchange, type SrvRecord } from "./transport";
 
 const friendly = "hub.md.xpdustry.com";
 
