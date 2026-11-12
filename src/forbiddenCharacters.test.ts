@@ -7,7 +7,7 @@ import { expect, test } from "vitest";
 const FORBIDDEN = new RegExp(`[${String.fromCodePoint(0x2013, 0x2014, 0x2015)}]`);
 const TEXT = /\.(?:[cm]?[jt]sx?|json|md|ya?ml|css|html|txt|xml|svg|webmanifest)$/;
 
-const root = fileURLToPath(new URL("../../", import.meta.url));
+const root = fileURLToPath(new URL("../", import.meta.url));
 
 const ignored = ignore().add(".git");
 for (const rules of [".gitignore", ".git/info/exclude"]) {

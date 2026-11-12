@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getLocale, getMessages, T, useGT, useMessages, useLocale } from "gt-tanstack-start";
-import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/brand/site";
-import { LeadPost } from "#app/components/blog/LeadPost";
-import { PostTile } from "#app/components/blog/PostTile";
-import { posts, translated } from "#app/content/registry";
+import { posts, translated } from "#app/blog/content/registry";
+import { LeadPost } from "#app/blog/LeadPost";
+import { PostTile } from "#app/blog/PostTile";
+import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/blog/titles";
 import { blogCard, seo } from "#app/lib/seo";
 import { DiscordCard } from "#app/status/DiscordCard";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
-import * as styles from "#app/components/blog/BlogIndex.css";
+import * as styles from "#app/blog/BlogIndex.css";
 import * as card from "#app/ui/Card.css";
 import { grid } from "#app/ui/styles/layout.css";
 

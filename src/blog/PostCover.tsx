@@ -1,18 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { T, useLocale, Var } from "gt-tanstack-start";
-import { authors } from "#app/content/authors";
-import type { Post } from "#app/content/registry";
-import { topic } from "#app/data/topics";
 import { formatDate } from "#app/i18n/format";
 import { postTitle } from "#app/lib/seo";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";
-import { themed } from "./themed";
+import { authors } from "./content/authors";
+import type { Post } from "./content/registry";
 import { TopicChip } from "./TopicChip";
+import { topic } from "./topics";
+import { themed } from "./topicTheme";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./PostCover.css";
-import { avatar, pill } from "./themed.css";
+import { avatar, pill } from "./topicTheme.css";
 
 export function PostCover({ post, className }: { post: Post; className?: string }) {
   const locale = useLocale();

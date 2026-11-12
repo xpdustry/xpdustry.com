@@ -5,9 +5,9 @@ import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-
 import { Renderer } from "@takumi-rs/core";
 import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
+import { posts, translated } from "#app/blog/content/registry";
+import { topic } from "#app/blog/topics";
 import { projects } from "#app/brand/projects";
-import { posts, translated } from "#app/content/registry";
-import { topic } from "#app/data/topics";
 import { CARD_SIZE, postTitle } from "#app/lib/seo";
 import {
   BlogCard,

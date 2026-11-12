@@ -1,5 +1,5 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import { topic } from "#app/data/topics";
+import { topic } from "./topics";
 import * as styles from "./TopicChip.css";
 
 interface TopicChipProps {

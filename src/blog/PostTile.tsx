@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useLocale } from "gt-tanstack-start";
-import { PostArt } from "#app/components/blog/PostArt";
-import { TopicChip } from "#app/components/blog/TopicChip";
-import type { Post } from "#app/content/registry";
 import { formatDate } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
+import type { Post } from "./content/registry";
+import { PostArt } from "./PostArt";
+import { TopicChip } from "./TopicChip";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./PostTile.css";
 

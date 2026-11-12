@@ -1,17 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { T, useLocale } from "gt-tanstack-start";
 import logo from "#app/brand/logo.svg";
-import { authors } from "#app/content/authors";
-import type { Post } from "#app/content/registry";
-import { topic } from "#app/data/topics";
 import { formatDate } from "#app/i18n/format";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
-import { themed } from "./themed";
+import { authors } from "./content/authors";
+import type { Post } from "./content/registry";
 import { TopicChip } from "./TopicChip";
+import { topic } from "./topics";
+import { themed } from "./topicTheme";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./LeadPost.css";
-import * as themedStyles from "./themed.css";
+import * as themedStyles from "./topicTheme.css";
 
 export function LeadPost({ post, className }: { post: Post; className?: string }) {
   const locale = useLocale();

@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { parseBlogFrontmatter } from "#app/content/schema";
+import { parseBlogFrontmatter } from "./schema";
 
 const valid = {
   title: "Beta 8 blurs your alerts",

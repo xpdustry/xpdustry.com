@@ -1,18 +1,18 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { getLocale, getMessages, useGT, useMessages, useLocale } from "gt-tanstack-start";
-import { BLOG_TAGLINE } from "#app/brand/site";
-import { PostAside } from "#app/components/blog/PostAside";
-import { PostBody } from "#app/components/blog/PostBody";
-import { PostCover } from "#app/components/blog/PostCover";
-import { PostTile } from "#app/components/blog/PostTile";
-import { authors } from "#app/content/authors";
-import { nearbyPosts, postsBySlug, translated } from "#app/content/registry";
+import { authors } from "#app/blog/content/authors";
+import { nearbyPosts, postsBySlug, translated } from "#app/blog/content/registry";
+import { PostAside } from "#app/blog/PostAside";
+import { PostBody } from "#app/blog/PostBody";
+import { PostCover } from "#app/blog/PostCover";
+import { PostTile } from "#app/blog/PostTile";
+import { BLOG_TAGLINE } from "#app/blog/titles";
 import { postCard, postTitle, seo } from "#app/lib/seo";
 import { postStructuredData } from "#app/lib/structuredData";
 import { Newspaper } from "#app/ui/icons";
 import { fontPreloads } from "#app/ui/styles/fontPreloads";
 import { Tray } from "#app/ui/Tray";
-import * as styles from "#app/components/blog/PostPage.css";
+import * as styles from "#app/blog/PostPage.css";
 import * as card from "#app/ui/Card.css";
 
 export const Route = createFileRoute("/blog/$slug")({

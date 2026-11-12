@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
-import { PostBody } from "#app/components/blog/PostBody";
+import { PostBody } from "../PostBody";
 import { compileBlogMarkdown } from "./markdown";
 
 const frontmatter = `---
@@ -12,7 +12,7 @@ topic: NoHorny
 ---`;
 
 function compile(body: string) {
-  return compileBlogMarkdown("src/content/blog/a-post.md", `${frontmatter}\n\n${body}`);
+  return compileBlogMarkdown("src/blog/posts/en/a-post.md", `${frontmatter}\n\n${body}`);
 }
 
 function render(body: string): string {
@@ -49,8 +49,11 @@ describe("compileBlogMarkdown", () => {
 
   test("includes the source path in invalid frontmatter errors", () => {
     expect(() =>
-      compileBlogMarkdown("src/content/blog/broken.md", "---\ntitle: [unterminated\n---\n\nBroken.")
-    ).toThrow(/^src\/content\/blog\/broken\.md:/);
+      compileBlogMarkdown(
+        "src/blog/posts/en/broken.md",
+        "---\ntitle: [unterminated\n---\n\nBroken."
+      )
+    ).toThrow(/^src\/blog\/posts\/en\/broken\.md:/);
   });
 });
 

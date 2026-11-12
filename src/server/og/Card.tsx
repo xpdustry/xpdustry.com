@@ -1,7 +1,8 @@
 import { msg } from "gt-tanstack-start";
 import type { CSSProperties, ReactNode } from "react";
+import { BLOG_DESCRIPTION } from "#app/blog/titles";
 import logo from "#app/brand/logo.svg?raw";
-import { BLOG_DESCRIPTION, SITE } from "#app/brand/site";
+import { SITE } from "#app/brand/site";
 import { formatNumber, formatShortDate } from "#app/i18n/format";
 import { withLocale } from "#app/i18n/localePath";
 import { CARD_SIZE } from "#app/lib/seo";

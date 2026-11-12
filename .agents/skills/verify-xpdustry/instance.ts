@@ -41,7 +41,7 @@ export function fail(message: string): never {
 }
 
 /** Everything the build reads. Git is not involved, so this works in an export or a container too. */
-const BUILD_INPUTS = ["src", "public", "scripts", "vite", "package.json", "pnpm-lock.yaml"];
+const BUILD_INPUTS = ["src", "public", "scripts", "package.json", "pnpm-lock.yaml"];
 const BUILD_CONFIG = /^(?:vite|vitest)\.config\.ts$|^tsconfig\.json$|^gt\.config\.json$/;
 
 /** The files of one build input, relative to the repository. */

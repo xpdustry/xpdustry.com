@@ -2,7 +2,7 @@ import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
 import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
-import { ground, logo as themedLogo } from "./themed.css";
+import { ground, logo as themedLogo } from "./topicTheme.css";
 
 const pad = { block: 42, inline: 46 };
 const padPhone = { block: 28, inline: 24 };

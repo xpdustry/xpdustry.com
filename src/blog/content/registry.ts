@@ -1,7 +1,7 @@
 import type { MarkdownDocument } from "@tanstack/markdown";
-import { ContentError } from "#app/content/errors";
-import type { BlogFrontmatter } from "#app/content/schema";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
+import { ContentError } from "./errors";
+import type { BlogFrontmatter } from "./schema";
 
 export interface PostModule {
   frontmatter: BlogFrontmatter;
@@ -15,12 +15,12 @@ export interface Post {
   load: () => Promise<MarkdownDocument>;
 }
 
-const frontmatters = import.meta.glob<BlogFrontmatter>("./blog/*/*.md", {
+const frontmatters = import.meta.glob<BlogFrontmatter>("../posts/*/*.md", {
   query: "?frontmatter",
   import: "frontmatter",
   eager: true
 });
-const documents = import.meta.glob<MarkdownDocument>("./blog/*/*.md", { import: "document" });
+const documents = import.meta.glob<MarkdownDocument>("../posts/*/*.md", { import: "document" });
 
 const byLocale = buildPosts();
 

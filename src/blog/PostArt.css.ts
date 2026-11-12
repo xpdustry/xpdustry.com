@@ -1,5 +1,5 @@
 import { createVar, fallbackVar, style } from "@vanilla-extract/css";
-import { logoShadow } from "./themed.css";
+import { logoShadow } from "./topicTheme.css";
 
 export const artTop = createVar();
 export const artLogo = createVar();

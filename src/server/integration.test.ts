@@ -340,7 +340,7 @@ describe("post body chunks", () => {
   test("each post body remains a separate dynamic chunk", async () => {
     const files = await readdir(`${clientRoot}assets`);
     const bodies = files.filter((file) => /^nohorny-4-beta-\d+-[^.]+\.js$/.test(file));
-    const posts = await readdir(new URL("../content/blog/", import.meta.url), { recursive: true });
+    const posts = await readdir(new URL("../blog/posts/", import.meta.url), { recursive: true });
     expect(bodies).toHaveLength(posts.filter((file) => file.endsWith(".md")).length);
     for (const body of bodies) {
       expect(await readFile(`${clientRoot}assets/${body}`, "utf8")).toContain("children");

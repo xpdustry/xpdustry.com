@@ -1,5 +1,5 @@
 {
-  "include": ["src", "scripts", "vite", ".agents", "*.ts"],
+  "include": ["src", "scripts", ".agents", "*.ts"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "target": "ES2024",

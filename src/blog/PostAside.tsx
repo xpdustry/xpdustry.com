@@ -1,11 +1,11 @@
 import { T, useGT } from "gt-tanstack-start";
 import { projectForTopic } from "#app/brand/projects";
 import { SITE } from "#app/brand/site";
-import type { Post } from "#app/content/registry";
-import { parseReleaseId, releaseLabel, releaseUrl } from "#app/lib/releases";
 import { DiscordCard } from "#app/status/DiscordCard";
 import { CopyButton } from "#app/ui/copy/CopyButton";
 import { PlinthAnchor } from "#app/ui/Plinth";
+import type { Post } from "./content/registry";
+import { parseReleaseId, releaseLabel, releaseUrl } from "./releases";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./PostAside.css";
 

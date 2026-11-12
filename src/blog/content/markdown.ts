@@ -14,11 +14,11 @@ import { parseMarkdown } from "@tanstack/markdown/parser";
 import * as v from "valibot";
 import type { Plugin } from "vite";
 import { parse as parseYaml } from "yaml";
-import { POST_ELEMENTS } from "#app/content/elements.ts";
-import { ContentError } from "#app/content/errors.ts";
-import type { PostModule } from "#app/content/registry.ts";
-import { parseBlogFrontmatter } from "#app/content/schema.ts";
-import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "#app/lib/schema.ts";
+import { POST_ELEMENTS } from "./elements.ts";
+import { ContentError } from "./errors.ts";
+import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "./fields.ts";
+import type { PostModule } from "./registry.ts";
+import { parseBlogFrontmatter } from "./schema.ts";
 
 const DimensionSchema = v.pipe(
   v.string(),
@@ -70,7 +70,7 @@ export function blogMarkdownPlugin(): Plugin {
     enforce: "pre",
     transform(source, id) {
       const file = id.split("?", 1)[0]?.replaceAll("\\", "/");
-      if (!file?.endsWith(".md") || !file.includes("/src/content/blog/")) return;
+      if (!file?.endsWith(".md") || !file.includes("/src/blog/posts/")) return;
 
       try {
         const compiled = compileBlogMarkdown(file, source);

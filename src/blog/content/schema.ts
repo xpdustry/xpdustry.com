@@ -1,7 +1,7 @@
 import * as v from "valibot";
-import { authorNames } from "#app/content/authors";
-import { ContentError } from "#app/content/errors";
-import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "#app/lib/schema";
+import { authorNames } from "./authors.ts";
+import { ContentError } from "./errors.ts";
+import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "./fields.ts";
 
 const IsoCalendarDateSchema = v.pipe(
   v.string(),

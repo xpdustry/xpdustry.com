@@ -1,7 +1,7 @@
 import type { MarkdownDocument } from "@tanstack/markdown";
 import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
 import type { ComponentProps, ReactNode } from "react";
-import { POST_ELEMENTS } from "#app/content/elements";
+import { POST_ELEMENTS } from "./content/elements";
 import * as styles from "./PostBody.css";
 
 interface CalloutProps {

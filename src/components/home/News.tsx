@@ -1,7 +1,7 @@
 import { useGT, useMessages, useLocale } from "gt-tanstack-start";
-import { BLOG_TAGLINE } from "#app/brand/site";
-import { PostTile } from "#app/components/blog/PostTile";
-import { posts, translated } from "#app/content/registry";
+import { posts, translated } from "#app/blog/content/registry";
+import { PostTile } from "#app/blog/PostTile";
+import { BLOG_TAGLINE } from "#app/blog/titles";
 import { Newspaper } from "#app/ui/icons";
 import { Tray } from "#app/ui/Tray";
 import * as styles from "./News.css";

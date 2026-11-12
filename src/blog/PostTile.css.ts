@@ -51,9 +51,9 @@ export const foot = style({
   flexDirection: "column",
   margin: `0 calc(-1 * ${pad}) calc(-1 * ${padFoot})`,
   padding: `calc(${fade} + 14px) ${pad} ${padFoot}`,
-  background: 'url("../../textures/assets/fade.webp") 0 0 / 240px',
+  background: 'url("../textures/assets/fade.webp") 0 0 / 240px',
   mask: [
-    `url("../../textures/assets/fringe/f7fdfd-rise.webp") ${fallbackVar(fray, "0")} 0 / 486px 48px repeat-x`,
+    `url("../textures/assets/fringe/f7fdfd-rise.webp") ${fallbackVar(fray, "0")} 0 / 486px 48px repeat-x`,
     "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat"
   ].join(", "),
   selectors: {

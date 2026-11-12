@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { posts } from "#app/blog/content/registry";
 import { SITE } from "#app/brand/site";
-import { posts } from "#app/content/registry";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE, LOCALES } from "#app/i18n/locales";
 
