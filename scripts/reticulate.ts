@@ -99,31 +99,55 @@ function grow(field: Field, random: () => number): Field {
   return { a: stretch(a), b: stretch(b), width: width + 1, height: height + 1 };
 }
 
-function runPhase(field: Field, options: PhaseOptions, random: () => number): Field {
-  const diffusionA = options.ratio * options.scale;
-  const diffusionB = options.scale;
-  const dt = (0.01 * options.speed) / 100;
-  let current = field;
-  let lapA = new Float64Array(current.a.length);
-  let lapB = new Float64Array(current.b.length);
+interface Rates {
+  diffusionA: number;
+  diffusionB: number;
+  dt: number;
+  floorB: number;
+}
 
+interface Laplacians {
+  a: Float64Array;
+  b: Float64Array;
+}
+
+const laplaciansFor = ({ a, b }: Field): Laplacians => ({
+  a: new Float64Array(a.length),
+  b: new Float64Array(b.length)
+});
+
+const clamp = (value: number, low: number, high: number) =>
+  value < low ? low : value > high ? high : value;
+
+/** Advances both morphogens by one time step, in place. */
+function react(field: Field, laplacians: Laplacians, rates: Rates): void {
+  const { a, b, width, height } = field;
+  wrappedLaplacian(a, laplacians.a, width, height);
+  wrappedLaplacian(b, laplacians.b, width, height);
+  for (let i = 0; i < a.length; i += 1) {
+    const na = a[i] + (16 - a[i] * b[i] + rates.diffusionA * laplacians.a[i]) * rates.dt;
+    const nb = b[i] + (a[i] * b[i] - b[i] - 12 + rates.diffusionB * laplacians.b[i]) * rates.dt;
+    a[i] = clamp(na, 0, 1000);
+    b[i] = clamp(nb, rates.floorB, 1000);
+  }
+}
+
+function runPhase(field: Field, options: PhaseOptions, random: () => number): Field {
+  const rates: Rates = {
+    diffusionA: options.ratio * options.scale,
+    diffusionB: options.scale,
+    dt: (0.01 * options.speed) / 100,
+    floorB: options.floorB
+  };
+  let current = field;
+  let laplacians = laplaciansFor(current);
   for (let step = 1; step <= options.steps; step += 1) {
     if (options.growEvery && step % options.growEvery === 1) {
       current = grow(current, random);
-      lapA = new Float64Array(current.a.length);
-      lapB = new Float64Array(current.b.length);
+      laplacians = laplaciansFor(current);
     }
-    const { a, b, width, height } = current;
-    wrappedLaplacian(a, lapA, width, height);
-    wrappedLaplacian(b, lapB, width, height);
-    for (let i = 0; i < a.length; i += 1) {
-      const na = a[i] + (16 - a[i] * b[i] + diffusionA * lapA[i]) * dt;
-      const nb = b[i] + (a[i] * b[i] - b[i] - 12 + diffusionB * lapB[i]) * dt;
-      a[i] = na < 0 ? 0 : na > 1000 ? 1000 : na;
-      b[i] = nb < options.floorB ? options.floorB : nb > 1000 ? 1000 : nb;
-    }
+    react(current, laplacians, rates);
   }
-
   return current;
 }
 
@@ -146,14 +170,20 @@ function netCoverage(normalisedB: number): number {
   return coverage * coverage * (3 - 2 * coverage);
 }
 
-export function toMask(field: Field): Uint8Array {
-  const { b } = field;
+function range(values: Float64Array): { low: number; high: number } {
   let low = Infinity;
   let high = -Infinity;
-  for (const value of b) {
+  for (const value of values) {
     if (value < low) low = value;
     if (value > high) high = value;
   }
+  return { low, high };
+}
+
+/** The net's alpha, 0..255, from the B morphogen. */
+export function toMask(field: Field): Uint8Array {
+  const { b } = field;
+  const { low, high } = range(b);
   const span = high - low || 1;
   const out = new Uint8Array(b.length);
   for (let i = 0; i < b.length; i += 1) {
@@ -184,15 +214,14 @@ function boxPass(
   horizontal: boolean
 ): Uint8Array {
   const out = new Uint8Array(source.length);
-  const length = horizontal ? width : height;
-  const lines = horizontal ? height : width;
+  // A line is a row or a column: `along` is the stride between its pixels, `across` between lines.
+  const [length, lines, along, across] = horizontal
+    ? [width, height, 1, width]
+    : [height, width, width, 1];
   const window = radius * 2 + 1;
 
   for (let line = 0; line < lines; line += 1) {
-    const at = (index: number) => {
-      const wrapped = ((index % length) + length) % length;
-      return horizontal ? line * width + wrapped : wrapped * width + line;
-    };
+    const at = (index: number) => line * across + (((index % length) + length) % length) * along;
     let total = 0;
     for (let offset = -radius; offset <= radius; offset += 1) total += source[at(offset)];
     for (let index = 0; index < length; index += 1) {
