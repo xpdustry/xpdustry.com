@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { constants, createBrotliCompress, createGzip } from "node:zlib";
 import { serve, type ServerMiddleware } from "srvx";
 import { staticMiddleware } from "srvx/static";
-import { requestRedirect } from "../src/server/redirects.ts";
 
 const client = fileURLToPath(new URL("../dist/client", import.meta.url));
 const app: { default: { fetch: (request: Request) => Promise<Response> } } = await import(
@@ -51,6 +50,6 @@ function compressed(request: Request, response: Response): Response {
 
 serve({
   fetch: async (request) => compressed(request, await app.default.fetch(request)),
-  middleware: [(request, next) => requestRedirect(request) ?? next(), fromDisk],
+  middleware: [fromDisk],
   gracefulShutdown: true,
 });

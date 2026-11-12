@@ -274,6 +274,27 @@ test("the production file server preserves every public URL from the previous si
   }
 });
 
+test("the production server runs from what the container image ships", async () => {
+  const root = new URL("../../", import.meta.url);
+  const shipped = [
+    ...(await readFile(new URL("Containerfile", root), "utf8")).matchAll(
+      /^COPY --from=build \S+ \/app\/(\S+)/gm,
+    ),
+  ].map(([, path]) => path);
+  const imports = [
+    ...(await readFile(new URL("scripts/serve.ts", root), "utf8")).matchAll(
+      /(?:from|import\()\s*["'](\.[^"']+)["']/g,
+    ),
+  ].map(([, specifier]) => new URL(specifier, new URL("scripts/", root)).pathname);
+  for (const imported of imports) {
+    const path = imported.slice(root.pathname.length);
+    expect(
+      shipped.some((copied) => path === copied || path.startsWith(`${copied}/`)),
+      `${path} is imported by scripts/serve.ts but not copied into the image`,
+    ).toBe(true);
+  }
+});
+
 describe("post body chunks", () => {
   test.each(["/", "/blog", "/no-such-page"])(
     "%s does not preload any post bodies",
