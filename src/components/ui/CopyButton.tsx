@@ -1,3 +1,4 @@
+import { useGT } from "gt-tanstack-start";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { PlinthButton, type PlinthStyle } from "#app/components/ui/Plinth";
 import { Check, Copy } from "#app/lib/icons";
@@ -19,6 +20,7 @@ interface CopyButtonProps {
 
 /** Copies `text`, then shows a check (or "Copied") for a moment and says so to screen readers. */
 export function CopyButton({ text, label, children, tone = "ink", className }: CopyButtonProps) {
+  const gt = useGT();
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -36,7 +38,7 @@ export function CopyButton({ text, label, children, tone = "ink", className }: C
       children(copied)
     ) : children ? (
       copied ? (
-        "Copied"
+        gt("Copied")
       ) : (
         children
       )
@@ -54,11 +56,11 @@ export function CopyButton({ text, label, children, tone = "ink", className }: C
         done={!named && copied}
         className={className}
         onClick={copy}
-        {...(!named && { "aria-label": label, title: "Copy address" })}
+        {...(!named && { "aria-label": label, title: gt("Copy address") })}
       >
         {face}
       </PlinthButton>
-      <output className="sr-only">{copied ? `Copied ${text}` : ""}</output>
+      <output className="sr-only">{copied ? gt("Copied {text}", { text }) : ""}</output>
     </>
   );
 }

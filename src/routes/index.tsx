@@ -1,4 +1,5 @@
 import { createFileRoute, getRouteApi, rootRouteId, useRouter } from "@tanstack/react-router";
+import { getMessages } from "gt-tanstack-start";
 import { useEffect } from "react";
 import { Cover } from "#app/components/home/Cover";
 import { Gamemodes } from "#app/components/home/Gamemodes";
@@ -13,19 +14,21 @@ const REFRESH_MS = 30_000;
 const root = getRouteApi(rootRouteId);
 
 export const Route = createFileRoute("/")({
-  head: () =>
-    seo({
-      title: SITE.title,
+  head: async () => {
+    const m = await getMessages();
+    return seo({
+      title: m(SITE.title),
       fullTitle: true,
-      description: SITE.description,
+      description: m(SITE.description),
       path: "/",
       jsonLd: homeStructuredData(),
-    }),
+    });
+  },
   component: Home,
 });
 
 function Home() {
-  const live = root.useLoaderData();
+  const { live } = root.useLoaderData();
   const router = useRouter();
 
   useEffect(() => {

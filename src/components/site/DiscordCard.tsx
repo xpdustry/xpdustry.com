@@ -1,3 +1,4 @@
+import { useGT } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { Patches } from "#app/components/ui/Patches";
 import type { DiscordCounts } from "#app/data/live";
@@ -24,6 +25,7 @@ export function DiscordCard({
   compact?: boolean;
   className?: string;
 }) {
+  const gt = useGT();
   return (
     <a
       href={SITE.discord}
@@ -39,7 +41,10 @@ export function DiscordCard({
         <span className={styles.say}>{children}</span>
         {counts && (
           <small className={styles.counts}>
-            {number.format(counts.online)} online, {number.format(counts.members)} members
+            {gt("{online} online, {members} members", {
+              online: number.format(counts.online),
+              members: number.format(counts.members),
+            })}
           </small>
         )}
       </span>

@@ -1,3 +1,4 @@
+import { msg } from "gt-tanstack-start";
 import clajIcon from "#app/assets/brand/claj.png";
 import nohornyIcon from "#app/assets/brand/nohorny.svg";
 import { PATCHES } from "#app/data/patches";
@@ -55,8 +56,9 @@ export const projects: readonly Project[] = [
     name: "NoHorny",
     repository: "xpdustry/nohorny",
     website: "https://nohorny.xpdustry.com",
-    summary:
+    summary: msg(
       "NoHorny is a Mindustry server plugin that detects and removes NSFW art drawn on logic displays and canvases.",
+    ),
     icon: nohornyIcon,
     card: {
       kind: "featured",
@@ -71,8 +73,9 @@ export const projects: readonly Project[] = [
     slug: "claj",
     name: "CLaJ",
     repository: "xpdustry/claj",
-    summary:
+    summary: msg(
       "CLaJ (Copy Link and Join) is a Mindustry mod that lets you play with your friends through a shared link.",
+    ),
     icon: clajIcon,
     card: {
       kind: "item",
@@ -85,7 +88,7 @@ export const projects: readonly Project[] = [
     slug: "toxopid",
     name: "Toxopid",
     repository: "xpdustry/toxopid",
-    summary: "A Gradle plugin for building, testing and running Mindustry mods and plugins.",
+    summary: msg("A Gradle plugin for building, testing and running Mindustry mods and plugins."),
     card: {
       kind: "item",
       ground: "#8da1e3",
@@ -97,7 +100,7 @@ export const projects: readonly Project[] = [
     slug: "distributor",
     name: "Distributor",
     repository: "xpdustry/distributor",
-    summary: "A framework offering utilities for Mindustry plugins.",
+    summary: msg("A framework offering utilities for Mindustry plugins."),
     card: {
       kind: "item",
       ground: "#e8dc80",

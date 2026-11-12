@@ -1,4 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useGT, useMessages } from "gt-tanstack-start";
 import { PostAside } from "#app/components/blog/PostAside";
 import { PostBody } from "#app/components/blog/PostBody";
 import { PostCover } from "#app/components/blog/PostCover";
@@ -44,6 +45,8 @@ function PostPage() {
   const { document } = Route.useLoaderData();
   const post = postsBySlug.get(slug)!;
   const nearby = nearbyPosts(slug);
+  const gt = useGT();
+  const m = useMessages();
 
   return (
     <main id="main">
@@ -60,9 +63,9 @@ function PostPage() {
         <Tray
           id="more"
           icon={Newspaper}
-          title="More posts"
-          subtitle={BLOG_TAGLINE}
-          action={{ to: "/blog", label: "All posts" }}
+          title={gt("More posts")}
+          subtitle={m(BLOG_TAGLINE)}
+          action={{ to: "/blog", label: gt("All posts") }}
         >
           <div className={styles.more}>
             {nearby.map((other) => (

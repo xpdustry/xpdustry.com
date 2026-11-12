@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useGT } from "gt-tanstack-start";
 import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
@@ -17,6 +18,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
   const { title, description, author, publishedAt, updatedAt, topicVersion } = post.frontmatter;
   const theme = topic(post.frontmatter.topic);
   const profile = authors[author];
+  const gt = useGT();
   const chip = (
     <TopicChip
       name={theme.name}
@@ -33,7 +35,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
       <div className={styles.crumbs}>
         <Link to="/blog" activeOptions={{ exact: true }} className={`${pill} ${styles.back}`}>
           <CaretLeft />
-          Blog
+          {gt("Blog")}
         </Link>
         {postTitle(post.frontmatter) === title ? (
           <>

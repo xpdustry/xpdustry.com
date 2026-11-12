@@ -8,6 +8,7 @@ import {
   rootRouteId,
   useMatch,
 } from "@tanstack/react-router";
+import { GTProvider, getLocale, getTranslationsSnapshot, useGT } from "gt-tanstack-start";
 import { useEffect, type ReactNode } from "react";
 import { Background } from "#app/components/site/Background";
 import { Footer } from "#app/components/site/Footer";
@@ -17,6 +18,7 @@ import { getLiveData } from "#app/data/live.functions";
 import { CROWN } from "#app/data/textures";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/lib/reveal";
 import { useSpotlight } from "#app/lib/useSpotlight";
+import gtConfig from "../../gt.config.json";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
@@ -24,7 +26,14 @@ import "@fontsource/dm-mono/500.css";
 import "#app/styles/global.css";
 
 export const Route = createRootRoute({
-  loader: () => getLiveData(),
+  loader: async () => {
+    const locale = getLocale();
+    const [live, translations] = await Promise.all([
+      getLiveData(),
+      getTranslationsSnapshot(locale),
+    ]);
+    return { live, locale, translations };
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -61,27 +70,38 @@ function useSmoothScrollOnceHydrated() {
   }, []);
 }
 
+function SkipLink() {
+  const gt = useGT();
+  return (
+    <a className="skip-link" href="#main">
+      {gt("Skip to content")}
+    </a>
+  );
+}
+
 function Document({ children }: { children: ReactNode }) {
   useSpotlight();
   useSmoothScrollOnceHydrated();
-  const live = useMatch({ from: rootRouteId, select: (match) => match.loaderData });
+  const loaded = useMatch({ from: rootRouteId, select: (match) => match.loaderData });
+  const live = loaded?.live;
+  const locale = loaded?.locale ?? gtConfig.defaultLocale;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: REVEAL }} />
       </head>
       <body>
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
-        <Background />
-        <div className="wrap">
-          <Header players={live ? playerCount(live.servers.servers) : { state: "polling" }} />
-          {children}
-        </div>
-        <Footer />
+        <GTProvider locale={locale} translations={loaded?.translations ?? {}}>
+          <SkipLink />
+          <Background />
+          <div className="wrap">
+            <Header players={live ? playerCount(live.servers.servers) : { state: "polling" }} />
+            {children}
+          </div>
+          <Footer />
+        </GTProvider>
         <Scripts />
       </body>
     </html>

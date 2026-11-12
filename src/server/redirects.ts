@@ -1,3 +1,4 @@
+import { withoutLocale } from "../i18n/localePath.ts";
 const convertedBlogImages = [
   "nohorny-admin-overview-dark",
   "nohorny-admin-requests-dark",
@@ -23,7 +24,7 @@ export function requestRedirect(request: Request): Response | undefined {
   }
 
   // TanStack Router would answer these with its default 307; canonical URLs are permanent.
-  if (/^\/blog(?:\/[^/]+)?\/$/.test(url.pathname)) {
+  if (/^\/blog(?:\/[^/]+)?\/$/.test(withoutLocale(url.pathname))) {
     return new Response(null, {
       status: 308,
       headers: { location: url.pathname.slice(0, -1) + url.search },

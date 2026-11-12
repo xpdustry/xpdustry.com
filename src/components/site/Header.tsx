@@ -1,3 +1,4 @@
+import { useGT } from "gt-tanstack-start";
 import { useEffect, useId, useRef, useState } from "react";
 import { Brand } from "#app/components/site/Brand";
 import { PlayPill } from "#app/components/site/PlayPill";
@@ -17,6 +18,7 @@ export function Header({ players }: { players: PlayerCount }) {
   const header = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const menu = useId();
+  const gt = useGT();
 
   useEffect(() => {
     if (!open) return;
@@ -45,25 +47,25 @@ export function Header({ players }: { players: PlayerCount }) {
         tone="ink"
         icon
         className={styles.toggle}
-        aria-label="Menu"
+        aria-label={gt("Menu")}
         aria-expanded={open}
         aria-controls={menu}
         onClick={() => setOpen(!open)}
       >
         {open ? <X /> : <List />}
       </PlinthButton>
-      <nav id={menu} className={`${styles.nav} ${open ? styles.open : ""}`} aria-label="Main">
+      <nav id={menu} className={`${styles.nav} ${open ? styles.open : ""}`} aria-label={gt("Main")}>
         <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }} onClick={shut}>
-          Home
+          {gt("Home")}
         </PlinthLink>
         <PlinthSectionLink tone="ink" hash="projects" onClick={shut}>
-          Projects
+          {gt("Projects")}
         </PlinthSectionLink>
         <PlinthSectionLink tone="ink" hash="gamemodes" onClick={shut}>
-          Gamemodes
+          {gt("Gamemodes")}
         </PlinthSectionLink>
         <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }} onClick={shut}>
-          Blog
+          {gt("Blog")}
         </PlinthLink>
         <PlinthAnchor tone="ink" href={SITE.maven} onClick={shut}>
           Maven

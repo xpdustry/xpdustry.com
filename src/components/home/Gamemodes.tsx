@@ -1,4 +1,5 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
+import { useGT, useMessages } from "gt-tanstack-start";
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { Tray } from "#app/components/tray/Tray";
 import { Patches } from "#app/components/ui/Patches";
@@ -21,11 +22,12 @@ const COPIED_MS = 1800;
 const FAILED_MS = 6000;
 
 export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
+  const gt = useGT();
   return (
     <Tray
       id="gamemodes"
       icon={GameController}
-      title="Gamemodes"
+      title={gt("Gamemodes")}
       subtitle={<PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />}
     >
       <ul className={styles.modes}>
@@ -42,6 +44,8 @@ interface Copied extends ReturnType<typeof spreadFrom> {
 }
 
 function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem }) {
+  const gt = useGT();
+  const m = useMessages();
   const count = playerCount(server ? [server] : []);
   const hostname = server?.hostname ?? "";
   const [copied, setCopied] = useState<Copied>();
@@ -102,13 +106,13 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
         <button
           type="button"
           className={styles.band}
-          title={`Copy ${hostname}`}
+          title={gt("Copy {address}", { address: hostname })}
           disabled={!hostname}
           onClick={copy}
         >
           <Icon className={styles.icon} />
           <span className={styles.id}>
-            <span className={styles.name}>{mode.name}</span>
+            <span className={styles.name}>{m(mode.name)}</span>
             <span className={styles.line}>
               <PlayerCount
                 count={count}
@@ -118,11 +122,11 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
                 {copied?.ok === false
                   ? hostname
                   : brief
-                    ? "Copied"
-                    : "Copied, paste it in Join game"}
+                    ? gt("Copied")
+                    : gt("Copied, paste it in Join game")}
               </span>
             </span>
-            <span className="sr-only">. Copy the server address</span>
+            <span className="sr-only">{gt(". Copy the server address")}</span>
           </span>
           <span className={styles.mark} aria-hidden="true">
             <Copy className={styles.glyph} />
@@ -130,10 +134,11 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
           </span>
         </button>
       </h3>
-      <p className={styles.about}>{mode.description}</p>
+      <p className={styles.about}>{m(mode.description)}</p>
       <output className="sr-only">
-        {landed && `Copied ${hostname}. Paste it in Play, Join game, Add server.`}
-        {failed && `Could not copy. The address is ${hostname}.`}
+        {landed &&
+          gt("Copied {address}. Paste it in Play, Join game, Add server.", { address: hostname })}
+        {failed && gt("Could not copy. The address is {address}.", { address: hostname })}
       </output>
     </li>
   );

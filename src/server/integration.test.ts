@@ -149,6 +149,28 @@ describe("built pages", () => {
   });
 });
 
+describe("locales", () => {
+  test.each(["fr", "ru"])(
+    "/%s serves the site in that locale, under its own links",
+    async (locale) => {
+      const html = await (await get(`/${locale}/blog`)).text();
+      expect(html).toContain(`<html lang="${locale}"`);
+      expect(html).toContain(`href="/${locale}/blog/nohorny-4-beta-8"`);
+      expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/blog"');
+    },
+  );
+
+  test("a request that states no language gets the default one", async () => {
+    const response = await get("/blog");
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('<html lang="en"');
+  });
+
+  test("a locale the site does not have is not a page", async () => {
+    expect((await get("/de/blog")).status).toBe(404);
+  });
+});
+
 describe("permanent redirects", () => {
   test.each([...LEGACY_MEDIA_REDIRECTS])("%s redirects to %s", async (from, to) => {
     const response = await get(`${from}?source=old%20link`);
@@ -161,7 +183,7 @@ describe("permanent redirects", () => {
     }
   });
 
-  test.each(["/blog/", "/blog/nohorny-4-beta-8/"])(
+  test.each(["/blog/", "/blog/nohorny-4-beta-8/", "/fr/blog/"])(
     "%s permanently removes its trailing slash and preserves queries",
     async (path) => {
       const response = await get(`${path}?q=a%20b&tag=one&tag=two`);

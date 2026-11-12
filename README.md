@@ -36,6 +36,7 @@ Set `XPD_DISABLE_STATUS=1` to stop the server from polling the Mindustry servers
 ## Where things are
 
 - `src/routes`: the pages, plus the server routes (`/api/servers`, `/healthz`, `/og/*`, `/sitemap.xml`).
+- `src/_gt`, `src/i18n`, `gt.config.json`: translations, with [General Translation](https://generaltranslation.com/docs/react/tanstack-start-quickstart). English is the source; French and Russian live under `/fr` and `/ru`. Mark text with `useGT()` in components and `msg()` in data, then run `pnpm translations` to add it to the files in `src/_gt`, which hold the English until someone translates them.
 - `src/components`: the UI, each with its styles beside it as a vanilla-extract `.css.ts` file. `src/styles` holds what they share: the design tokens (`theme.css.ts`), the type and corner scales (`scale.ts`), the media queries (`media.ts`) and the page grid (`pageGrid.ts`, `layout.css.ts`).
 - `src/data`: the projects, gamemodes and servers the home page shows, the site's links, and the textures (`textures.ts` for the page's, `patches.ts` for the cards').
 - `src/lib`: what the pages share besides components: the icons, SEO and structured data, formatting, and what a texture is (`textures.ts`).

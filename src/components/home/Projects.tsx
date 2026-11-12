@@ -1,3 +1,4 @@
+import { useGT, useMessages } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { Tray } from "#app/components/tray/Tray";
 import { Patches } from "#app/components/ui/Patches";
@@ -14,12 +15,13 @@ import * as styles from "./Projects.css";
 type CardOf<Kind extends Project["card"]["kind"]> = Extract<Project["card"], { kind: Kind }>;
 
 export function Projects({ releases }: { releases: LiveData["releases"] }) {
+  const gt = useGT();
   return (
     <Tray
       id="projects"
       icon={PuzzlePiece}
-      title="Projects"
-      subtitle="Plugins, mods and tooling we maintain"
+      title={gt("Projects")}
+      subtitle={gt("Plugins, mods and tooling we maintain")}
       action={{ href: SITE.github, label: "GitHub" }}
     >
       <div className={styles.projects}>
@@ -43,8 +45,8 @@ export function Projects({ releases }: { releases: LiveData["releases"] }) {
         })}
         <Tile href={SITE.github} patches={PATCHES.moreCard} className={styles.more}>
           <GitHub className={styles.symbol} />
-          <h3>Much more</h3>
-          <p>Everything we make is public on GitHub.</p>
+          <h3>{gt("Much more")}</h3>
+          <p>{gt("Everything we make is public on GitHub.")}</p>
         </Tile>
       </div>
     </Tray>
@@ -83,6 +85,7 @@ function Version({ tag }: { tag?: string }) {
 }
 
 function Featured({ project, card, release }: CardProps<"featured">) {
+  const m = useMessages();
   return (
     <Tile
       href={project.website ?? repositoryUrl(project)}
@@ -95,7 +98,7 @@ function Featured({ project, card, release }: CardProps<"featured">) {
         <h3>{project.name}</h3>
         <Version tag={release} />
       </span>
-      <p style={{ color: card.muted }}>{project.summary}</p>
+      <p style={{ color: card.muted }}>{m(project.summary)}</p>
       <img
         className={styles.screenshot}
         src={card.screenshot}
@@ -108,6 +111,7 @@ function Featured({ project, card, release }: CardProps<"featured">) {
 }
 
 function Item({ project, card: { symbol: Glyph, ...card }, release }: CardProps<"item">) {
+  const m = useMessages();
   return (
     <Tile
       href={project.website ?? repositoryUrl(project)}
@@ -117,7 +121,7 @@ function Item({ project, card: { symbol: Glyph, ...card }, release }: CardProps<
     >
       <Glyph className={styles.symbol} />
       <h3>{project.name}</h3>
-      <p>{project.summary}</p>
+      <p>{m(project.summary)}</p>
       <Version tag={release} />
     </Tile>
   );
