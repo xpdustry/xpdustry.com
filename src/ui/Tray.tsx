@@ -1,7 +1,7 @@
 import type { LinkComponentProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
-import { ArrowRight, ArrowUpRight, type Icon } from "#app/lib/icons";
+import { ArrowRight, ArrowUpRight, type Icon } from "./icons";
+import { PlinthAnchor, PlinthLink } from "./Plinth";
 import * as styles from "./Tray.css";
 
 type TrayAction = { label: string } & (

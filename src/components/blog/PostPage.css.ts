@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css";
-import { media, upTo } from "#app/styles/media";
-import { vars } from "#app/styles/theme.css";
+import { media, upTo } from "#app/ui/styles/media";
+import { vars } from "#app/ui/styles/theme.css";
 
 const threeUp = upTo(900);
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
-import * as card from "#app/components/ui/Card.css";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./Message.css";
 
 export function Message({

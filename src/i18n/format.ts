@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, localeInfo } from "#app/i18n/locales";
+import { DEFAULT_LOCALE, localeInfo } from "./locales";
 
 const cached = <Format>(create: (tag: string) => Format) => {
   const formats = new Map<string, Format>();

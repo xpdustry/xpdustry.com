@@ -1,7 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { font, leading, rem, tracking } from "#app/styles/scale";
+import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./shared";
-import { vars } from "#app/styles/theme.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 export const play = style({
   containerType: "inline-size",

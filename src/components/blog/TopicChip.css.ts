@@ -1,5 +1,5 @@
 import { createVar, globalStyle, styleVariants } from "@vanilla-extract/css";
-import { font, radius, rem } from "#app/styles/scale";
+import { font, radius, rem } from "#app/ui/styles/scale";
 import { accented, pill } from "./themed.css";
 
 export const face = createVar();

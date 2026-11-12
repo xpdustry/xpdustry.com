@@ -1,7 +1,7 @@
 import { style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { font, leading, rem, tracking } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 import { ground, logo as themedLogo } from "./themed.css";
 
 export const cover = style([

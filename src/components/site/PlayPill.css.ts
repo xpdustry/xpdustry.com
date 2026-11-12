@@ -1,7 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { upTo } from "#app/styles/media";
-import { font, leading, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { upTo } from "#app/ui/styles/media";
+import { font, leading, rem } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = upTo(780);
 /**

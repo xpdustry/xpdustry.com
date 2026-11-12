@@ -1,5 +1,5 @@
 import { useGT } from "gt-tanstack-start";
-import type { CopyState } from "#app/lib/useCopy";
+import type { CopyState } from "./useCopy";
 
 /**
  * Tells screen readers how a copy of `text` went: `copied` once it landed (or "Copied {text}"),

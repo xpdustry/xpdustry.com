@@ -1,5 +1,5 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { font, rem, tracking } from "#app/styles/scale";
+import { font, rem, tracking } from "#app/ui/styles/scale";
 
 /** The logo's width. */
 export const mark = createVar();

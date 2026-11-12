@@ -13,16 +13,16 @@ import { Header } from "#app/components/site/Header";
 import { RouteAnnouncer } from "#app/components/site/RouteAnnouncer";
 import { playerCount } from "#app/data/live";
 import { getLiveData } from "#app/data/live.functions";
-import { fontPreloads } from "#app/lib/fontPreloads";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/lib/reveal";
 import { CROWN } from "#app/textures/page";
+import { fontPreloads } from "#app/ui/styles/fontPreloads";
 import gtConfig from "../../gt.config.json";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
 import "@fontsource/dm-mono/500.css";
-import "#app/styles/cyrillic.css";
-import "#app/styles/global.css";
+import "#app/ui/styles/cyrillic.css";
+import "#app/ui/styles/global.css";
 
 export const Route = createRootRoute({
   loader: async () => {

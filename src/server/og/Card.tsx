@@ -1,12 +1,12 @@
 import { msg } from "gt-tanstack-start";
 import type { CSSProperties, ReactNode } from "react";
-import logo from "#app/assets/logo.svg?raw";
-import { BLOG_DESCRIPTION, SITE } from "#app/data/site";
+import logo from "#app/brand/logo.svg?raw";
+import { BLOG_DESCRIPTION, SITE } from "#app/brand/site";
+import { formatNumber, formatShortDate } from "#app/i18n/format";
 import { withLocale } from "#app/i18n/localePath";
-import { formatNumber, formatShortDate } from "#app/lib/format";
 import { CARD_SIZE } from "#app/lib/seo";
-import { FACE } from "#app/styles/fonts";
 import texture from "#app/textures/assets/reticulate.png?inline";
+import { FACE } from "#app/ui/styles/fonts";
 
 export interface CardPost {
   slug: string;

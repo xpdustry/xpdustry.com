@@ -1,4 +1,4 @@
-import logo from "#app/assets/logo.svg";
+import logo from "#app/brand/logo.svg";
 import type { Post } from "#app/content/registry";
 import { topic } from "#app/data/topics";
 import { Patches } from "#app/textures/Patches";

@@ -1,6 +1,6 @@
 import { createGlobalVar, createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { vars } from "#app/ui/styles/theme.css";
 
 /** Each stage's tile, as a `url()`. */
 export const tile = { thin: createVar(), thick: createVar(), solid: createVar() };

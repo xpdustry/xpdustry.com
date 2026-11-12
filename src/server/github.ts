@@ -1,7 +1,7 @@
 // GitHub allows unauthenticated clients sixty calls an hour per address: one refresh costs one
 // call for the organisation plus one per project, so it runs hourly.
 
-import { projects, type ProjectSlug } from "#app/data/projects";
+import { projects, type ProjectSlug } from "#app/brand/projects";
 
 export interface GitHubStats {
   /** Stars over the featured repositories. */

@@ -1,7 +1,7 @@
 import { msg } from "gt-tanstack-start";
+import { SITE } from "#app/brand/site";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
-import { SITE } from "#app/data/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { postCard, postTitle, type Translate } from "#app/lib/seo";

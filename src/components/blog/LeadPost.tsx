@@ -1,15 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { T, useLocale } from "gt-tanstack-start";
-import logo from "#app/assets/logo.svg";
+import logo from "#app/brand/logo.svg";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
 import { topic } from "#app/data/topics";
-import { formatDate } from "#app/lib/format";
+import { formatDate } from "#app/i18n/format";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { themed } from "./themed";
 import { TopicChip } from "./TopicChip";
-import * as card from "#app/components/ui/Card.css";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./LeadPost.css";
 import * as themedStyles from "./themed.css";
 

@@ -1,7 +1,7 @@
 import { globalStyle, keyframes, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { radius } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media } from "./styles/media";
+import { radius } from "./styles/scale";
+import { vars } from "./styles/theme.css";
 
 export const card = style({});
 

@@ -1,4 +1,4 @@
-import { projectForTopic, type ProjectTheme } from "#app/data/projects";
+import { projectForTopic, type ProjectTheme } from "#app/brand/projects";
 import { PATCHES } from "#app/textures/cards";
 
 export interface Topic extends ProjectTheme {

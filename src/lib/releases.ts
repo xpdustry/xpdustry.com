@@ -1,5 +1,5 @@
-import { projects } from "#app/data/projects";
-import { SITE } from "#app/data/site";
+import { projects } from "#app/brand/projects";
+import { SITE } from "#app/brand/site";
 
 export interface ParsedReleaseId {
   repository: string;

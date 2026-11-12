@@ -1,9 +1,9 @@
 import { msg } from "gt-tanstack-start";
-import clajIcon from "#app/assets/brand/claj.png";
-import nohornyIcon from "#app/assets/brand/nohorny.svg";
-import { Package, PlugsConnected, Toolbox, type Icon } from "#app/lib/icons";
 import { PATCHES } from "#app/textures/cards";
 import type { Patches } from "#app/textures/texture";
+import { Package, PlugsConnected, Toolbox, type Icon } from "#app/ui/icons";
+import clajIcon from "./icons/claj.png";
+import nohornyIcon from "./icons/nohorny.svg";
 
 export type ProjectSlug = "nohorny" | "claj" | "toxopid" | "distributor";
 

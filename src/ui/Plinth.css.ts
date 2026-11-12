@@ -1,6 +1,6 @@
 import { createVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
-import { font, radius, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { font, radius, rem } from "./styles/scale";
+import { vars } from "./styles/theme.css";
 
 const depth = createVar();
 const faceColor = createVar();

@@ -1,5 +1,5 @@
+import { BLOG_TITLE, SITE } from "#app/brand/site";
 import type { BlogFrontmatter } from "#app/content/schema";
-import { BLOG_TITLE, SITE } from "#app/data/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE, LOCALES, localeInfo } from "#app/i18n/locales";
 import type { JsonLd } from "#app/lib/structuredData";

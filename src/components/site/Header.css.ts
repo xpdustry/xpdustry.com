@@ -7,10 +7,10 @@ import {
   popoverOpen,
   popoverShut
 } from "#app/components/site/popover";
-import { media } from "#app/styles/media";
-import { radius } from "#app/styles/scale";
-import { tone, wall } from "#app/components/ui/Plinth.css";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { radius } from "#app/ui/styles/scale";
+import { tone, wall } from "#app/ui/Plinth.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 /*
  * In em, which media queries take from the browser's text size rather than the page's: text

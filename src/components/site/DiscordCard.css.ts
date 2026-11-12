@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css";
-import { font, leading, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { font, leading, rem } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 
 const BLURPLE = "#5b6bd7";
 

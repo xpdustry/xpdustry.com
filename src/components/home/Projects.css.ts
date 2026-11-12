@@ -1,8 +1,8 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { font, leading, radius, rem, tracking } from "#app/styles/scale";
+import { media } from "#app/ui/styles/media";
+import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
 import { cards, figures } from "./shared";
-import { vars } from "#app/styles/theme.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 const glass = "rgb(255 255 255 / 0.12)";
 

@@ -1,5 +1,5 @@
 import type { StyleRule } from "@vanilla-extract/css";
-import { vars } from "#app/styles/theme.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 const DURATION = "0.18s";
 

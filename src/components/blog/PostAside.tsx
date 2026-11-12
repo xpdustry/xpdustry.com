@@ -1,12 +1,12 @@
 import { T, useGT } from "gt-tanstack-start";
+import { projectForTopic } from "#app/brand/projects";
+import { SITE } from "#app/brand/site";
 import { DiscordCard } from "#app/components/site/DiscordCard";
-import { CopyButton } from "#app/components/ui/CopyButton";
-import { PlinthAnchor } from "#app/components/ui/Plinth";
 import type { Post } from "#app/content/registry";
-import { projectForTopic } from "#app/data/projects";
-import { SITE } from "#app/data/site";
 import { parseReleaseId, releaseLabel, releaseUrl } from "#app/lib/releases";
-import * as card from "#app/components/ui/Card.css";
+import { CopyButton } from "#app/ui/copy/CopyButton";
+import { PlinthAnchor } from "#app/ui/Plinth";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./PostAside.css";
 
 export function PostAside({ post, className }: { post: Post; className?: string }) {

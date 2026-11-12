@@ -1,10 +1,10 @@
 import { useGT } from "gt-tanstack-start";
-import { CopyButton } from "#app/components/ui/CopyButton";
-import { Hostname } from "#app/components/ui/Hostname";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import type { PlayerCount as Count } from "#app/data/live";
 import { HUB } from "#app/data/servers";
-import { Check, Copy, X } from "#app/lib/icons";
+import { CopyButton } from "#app/ui/copy/CopyButton";
+import { Hostname } from "#app/ui/Hostname";
+import { Check, Copy, X } from "#app/ui/icons";
 import * as styles from "./PlayPill.css";
 
 export function PlayPill({ players, className }: { players: Count; className?: string }) {

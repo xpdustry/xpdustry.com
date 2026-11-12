@@ -1,14 +1,14 @@
 import { T, useGT } from "gt-tanstack-start";
-import { CopyStatus } from "#app/components/ui/CopyStatus";
-import { Hostname } from "#app/components/ui/Hostname";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import type { PlayerCount as Count } from "#app/data/live";
 import { HUB } from "#app/data/servers";
-import { Check, Copy, X } from "#app/lib/icons";
-import { useCopy } from "#app/lib/useCopy";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
-import * as card from "#app/components/ui/Card.css";
+import { CopyStatus } from "#app/ui/copy/CopyStatus";
+import { useCopy } from "#app/ui/copy/useCopy";
+import { Hostname } from "#app/ui/Hostname";
+import { Check, Copy, X } from "#app/ui/icons";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./PlayCard.css";
 
 /** The hub's address. A press anywhere on the card copies it. */

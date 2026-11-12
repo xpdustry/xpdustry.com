@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getLocale, getMessages, T, useGT, useMessages, useLocale } from "gt-tanstack-start";
+import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/brand/site";
 import { LeadPost } from "#app/components/blog/LeadPost";
 import { PostTile } from "#app/components/blog/PostTile";
 import { DiscordCard } from "#app/components/site/DiscordCard";
 import { posts, translated } from "#app/content/registry";
-import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/data/site";
 import { blogCard, seo } from "#app/lib/seo";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import * as styles from "#app/components/blog/BlogIndex.css";
-import * as card from "#app/components/ui/Card.css";
-import { grid } from "#app/styles/layout.css";
+import * as card from "#app/ui/Card.css";
+import { grid } from "#app/ui/styles/layout.css";
 
 export const Route = createFileRoute("/blog/")({
   head: async () => {

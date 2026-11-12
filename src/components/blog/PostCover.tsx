@@ -3,14 +3,14 @@ import { T, useLocale, Var } from "gt-tanstack-start";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
 import { topic } from "#app/data/topics";
-import { formatDate } from "#app/lib/format";
-import { CaretLeft } from "#app/lib/icons";
+import { formatDate } from "#app/i18n/format";
 import { postTitle } from "#app/lib/seo";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
+import { CaretLeft } from "#app/ui/icons";
 import { themed } from "./themed";
 import { TopicChip } from "./TopicChip";
-import * as card from "#app/components/ui/Card.css";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./PostCover.css";
 import { avatar, pill } from "./themed.css";
 

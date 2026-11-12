@@ -6,9 +6,9 @@ import {
   popoverOpen,
   popoverShut
 } from "#app/components/site/popover";
-import { media } from "#app/styles/media";
-import { font, leading, radius, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { font, leading, radius, rem } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 
 export const wrapper = style({
   position: "relative",

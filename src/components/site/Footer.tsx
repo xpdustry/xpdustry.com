@@ -1,8 +1,8 @@
 import { T, useGT } from "gt-tanstack-start";
-import { Brand } from "#app/components/site/Brand";
-import { PlinthAnchor } from "#app/components/ui/Plinth";
-import { SITE } from "#app/data/site";
-import { ArrowUp } from "#app/lib/icons";
+import { Brand } from "#app/brand/Brand";
+import { SITE } from "#app/brand/site";
+import { ArrowUp } from "#app/ui/icons";
+import { PlinthAnchor } from "#app/ui/Plinth";
 import * as styles from "./Footer.css";
 
 export function Footer() {

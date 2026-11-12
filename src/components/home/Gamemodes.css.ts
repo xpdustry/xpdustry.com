@@ -1,8 +1,8 @@
 import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
-import { media, narrowerThan } from "#app/styles/media";
-import { font, leading, rem, tracking } from "#app/styles/scale";
+import { media, narrowerThan } from "#app/ui/styles/media";
+import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./shared";
-import { vars } from "#app/styles/theme.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = narrowerThan(660);
 const phone = narrowerThan(440);

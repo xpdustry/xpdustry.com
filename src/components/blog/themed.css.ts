@@ -1,6 +1,6 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { font, radius, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { font, radius, rem } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 
 export const accent = createVar();
 export const accentInk = createVar();

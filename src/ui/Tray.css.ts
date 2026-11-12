@@ -1,7 +1,7 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { media, narrowerThan, upTo } from "#app/styles/media";
-import { font, leading, radius, rem, tracking } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media, narrowerThan, upTo } from "./styles/media";
+import { font, leading, radius, rem, tracking } from "./styles/scale";
+import { vars } from "./styles/theme.css";
 
 const tabWidth = createVar();
 const trayR = createVar();

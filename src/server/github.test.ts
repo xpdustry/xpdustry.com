@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { projects } from "#app/data/projects";
+import { projects } from "#app/brand/projects";
 import { fetchGitHubStats } from "#app/server/github";
 
 const repositories = projects.map((project, index) => ({

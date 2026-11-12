@@ -1,4 +1,4 @@
-import type { ProjectSlug } from "#app/data/projects";
+import type { ProjectSlug } from "#app/brand/projects";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
 
 export interface DiscordCounts {

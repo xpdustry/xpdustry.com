@@ -5,8 +5,8 @@ import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-
 import { Renderer } from "@takumi-rs/core";
 import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
+import { projects } from "#app/brand/projects";
 import { posts, translated } from "#app/content/registry";
-import { projects } from "#app/data/projects";
 import { servers } from "#app/data/servers";
 import { topic } from "#app/data/topics";
 import { CARD_SIZE, postTitle } from "#app/lib/seo";
@@ -18,7 +18,7 @@ import {
   type CardPost
 } from "#app/server/og/Card";
 import { services } from "#app/server/services";
-import { DISPLAY_WEIGHT, FACE } from "#app/styles/fonts";
+import { DISPLAY_WEIGHT, FACE } from "#app/ui/styles/fonts";
 
 const MAX_AGE_MS = 60 * 60 * 1000;
 
@@ -29,12 +29,12 @@ const FONTS = [
   { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 }
 ];
 
-const iconData = import.meta.glob<string>("/src/assets/brand/*", {
+const iconData = import.meta.glob<string>("/src/brand/icons/*", {
   query: "?inline",
   import: "default",
   eager: true
 });
-const iconUrls = import.meta.glob<string>("/src/assets/brand/*", {
+const iconUrls = import.meta.glob<string>("/src/brand/icons/*", {
   query: "?url",
   import: "default",
   eager: true

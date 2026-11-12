@@ -1,5 +1,5 @@
 import { inPage, inlineScript } from "#app/lib/inlineScript";
-import { media } from "#app/styles/media";
+import { media } from "#app/ui/styles/media";
 import * as styles from "./Background.css";
 
 function drift(element: HTMLElement, query: string, tile: number, far: number, near: number) {

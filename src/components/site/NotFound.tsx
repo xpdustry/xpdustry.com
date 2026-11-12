@@ -1,7 +1,7 @@
 import { T, useGT } from "gt-tanstack-start";
+import { SITE } from "#app/brand/site";
 import { Message } from "#app/components/site/Message";
-import { PlinthLink } from "#app/components/ui/Plinth";
-import { SITE } from "#app/data/site";
+import { PlinthLink } from "#app/ui/Plinth";
 
 export function NotFound() {
   const gt = useGT();

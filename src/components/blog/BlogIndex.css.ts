@@ -1,7 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { font, leading, rem, tracking } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 
 export const intro = style({
   gridColumn: "span 8",

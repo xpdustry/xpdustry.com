@@ -1,5 +1,5 @@
 import { createVar, style } from "@vanilla-extract/css";
-import { vars } from "#app/styles/theme.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 const light = createVar();
 

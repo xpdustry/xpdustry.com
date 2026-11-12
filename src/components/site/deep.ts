@@ -1,4 +1,4 @@
-import { vars } from "#app/styles/theme.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 export const onDeep = {
   vars: { [vars.focus]: vars.t9 },

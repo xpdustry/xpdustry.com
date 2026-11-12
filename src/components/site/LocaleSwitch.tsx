@@ -1,11 +1,11 @@
 import { useLocation } from "@tanstack/react-router";
 import { useGT, useLocale, useSetLocale } from "gt-tanstack-start";
 import { useId, type MouseEvent } from "react";
-import { PlinthButton } from "#app/components/ui/Plinth";
 import { withLocale } from "#app/i18n/localePath";
 import { LOCALES, localeInfo } from "#app/i18n/locales";
-import { Check } from "#app/lib/icons";
 import { moving } from "#app/lib/usePopovers";
+import { Check } from "#app/ui/icons";
+import { PlinthButton } from "#app/ui/Plinth";
 import * as styles from "./LocaleSwitch.css";
 
 /** The page's language as a button, opening the list of the languages the site is served in. */

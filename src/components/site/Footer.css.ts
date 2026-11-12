@@ -1,10 +1,10 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { onDeep } from "#app/components/site/deep";
-import { media, upTo } from "#app/styles/media";
-import { font, leading, rem, tracking } from "#app/styles/scale";
 import { RIDGE } from "#app/textures/page";
-import { mark, name } from "#app/components/site/Brand.css";
-import { vars } from "#app/styles/theme.css";
+import { media, upTo } from "#app/ui/styles/media";
+import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { mark, name } from "#app/brand/Brand.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = upTo(900);
 

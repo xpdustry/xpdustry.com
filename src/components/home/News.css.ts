@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
+import { media } from "#app/ui/styles/media";
 import { cards } from "./shared";
 
 export const posts = cards(92);

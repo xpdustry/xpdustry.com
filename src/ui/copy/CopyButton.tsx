@@ -1,8 +1,8 @@
 import { useGT } from "gt-tanstack-start";
 import type { ReactNode } from "react";
-import { CopyStatus } from "#app/components/ui/CopyStatus";
-import { PlinthButton, type PlinthStyle } from "#app/components/ui/Plinth";
-import { useCopy, type CopyState } from "#app/lib/useCopy";
+import { PlinthButton, type PlinthStyle } from "../Plinth";
+import { CopyStatus } from "./CopyStatus";
+import { useCopy, type CopyState } from "./useCopy";
 
 interface CopyButtonProps {
   text: string;

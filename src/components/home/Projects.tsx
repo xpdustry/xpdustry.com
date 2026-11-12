@@ -1,15 +1,15 @@
 import { T, useGT, useMessages } from "gt-tanstack-start";
 import type { ReactNode } from "react";
-import { Tray } from "#app/components/tray/Tray";
+import { projects, repositoryUrl, type Project } from "#app/brand/projects";
+import { SITE } from "#app/brand/site";
 import type { LiveData } from "#app/data/live";
-import { projects, repositoryUrl, type Project } from "#app/data/projects";
-import { SITE } from "#app/data/site";
-import { versionOf } from "#app/lib/format";
-import { GitHub, PuzzlePiece } from "#app/lib/icons";
+import { versionOf } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import type { Patches as PatchSet } from "#app/textures/texture";
-import * as card from "#app/components/ui/Card.css";
+import { GitHub, PuzzlePiece } from "#app/ui/icons";
+import { Tray } from "#app/ui/Tray";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./Projects.css";
 
 type CardOf<Kind extends Project["card"]["kind"]> = Extract<Project["card"], { kind: Kind }>;

@@ -3,11 +3,11 @@ import { useLocale } from "gt-tanstack-start";
 import { PostArt } from "#app/components/blog/PostArt";
 import { TopicChip } from "#app/components/blog/TopicChip";
 import type { Post } from "#app/content/registry";
-import { formatDate } from "#app/lib/format";
+import { formatDate } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
-import * as card from "#app/components/ui/Card.css";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./PostTile.css";
 
 interface PostTileProps {

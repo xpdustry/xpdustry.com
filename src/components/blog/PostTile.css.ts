@@ -1,7 +1,7 @@
 import { createVar, fallbackVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { font, leading, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { font, leading, rem } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 import { artLogo, artTop } from "./PostArt.css";
 
 const fade = createVar();

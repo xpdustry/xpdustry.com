@@ -1,6 +1,6 @@
+import { SITE } from "#app/brand/site";
 import type { DiscordCounts, LiveData } from "#app/data/live";
 import { servers } from "#app/data/servers";
-import { SITE } from "#app/data/site";
 import type { ServerSnapshot } from "#app/data/snapshots";
 import { fetchDiscordCounts } from "#app/server/discord";
 import { fetchGitHubStats, type GitHubStats } from "#app/server/github";

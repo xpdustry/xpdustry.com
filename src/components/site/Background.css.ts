@@ -1,6 +1,6 @@
 import { keyframes, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
 import { BACKDROP, CROWN } from "#app/textures/page";
+import { media } from "#app/ui/styles/media";
 
 export const TILE = BACKDROP.far.repeat;
 export const FAR = 6;

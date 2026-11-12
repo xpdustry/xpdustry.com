@@ -1,11 +1,11 @@
 import { T } from "gt-tanstack-start";
+import { SITE } from "#app/brand/site";
 import { PressableLogo } from "#app/components/home/PressableLogo";
-import { PlinthAnchor, PlinthSectionLink } from "#app/components/ui/Plinth";
-import { SITE } from "#app/data/site";
-import { GitHub } from "#app/lib/icons";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
-import * as card from "#app/components/ui/Card.css";
+import { GitHub } from "#app/ui/icons";
+import { PlinthAnchor, PlinthSectionLink } from "#app/ui/Plinth";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./Hero.css";
 
 export function Hero({ className }: { className?: string }) {

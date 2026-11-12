@@ -1,7 +1,7 @@
 import { msg } from "gt-tanstack-start";
-import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/lib/icons";
 import { EDGES, SPREADS } from "#app/textures/cards";
 import type { Fringe, Patches, SpreadTiles } from "#app/textures/texture";
+import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/ui/icons";
 
 export interface Gamemode {
   /** The `servers` entry that runs it. */

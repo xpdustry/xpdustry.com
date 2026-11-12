@@ -1,12 +1,12 @@
 import { useGT, useLocale } from "gt-tanstack-start";
 import type { ReactNode } from "react";
+import { SITE } from "#app/brand/site";
 import type { DiscordCounts } from "#app/data/live";
-import { SITE } from "#app/data/site";
-import { formatNumber } from "#app/lib/format";
-import { ArrowUpRight, Discord } from "#app/lib/icons";
+import { formatNumber } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
-import * as card from "#app/components/ui/Card.css";
+import { ArrowUpRight, Discord } from "#app/ui/icons";
+import * as card from "#app/ui/Card.css";
 import * as styles from "./DiscordCard.css";
 
 export function DiscordCard({

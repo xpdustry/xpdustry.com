@@ -1,6 +1,6 @@
 import { createGlobalVar, globalStyle, style } from "@vanilla-extract/css";
-import { cover } from "#app/components/ui/Card.css";
-import { vars } from "#app/styles/theme.css";
+import { cover } from "#app/ui/Card.css";
+import { vars } from "#app/ui/styles/theme.css";
 
 const GROW = "--grow";
 const grow = createGlobalVar(GROW, {

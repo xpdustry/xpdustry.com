@@ -1,8 +1,8 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { pageGridWith } from "#app/styles/pageGrid";
-import { font, leading, rem } from "#app/styles/scale";
-import { vars } from "#app/styles/theme.css";
+import { media } from "#app/ui/styles/media";
+import { pageGridWith } from "#app/ui/styles/pageGrid";
+import { font, leading, rem } from "#app/ui/styles/scale";
+import { vars } from "#app/ui/styles/theme.css";
 
 export function cards(rowHeight: number) {
   const cards = pageGridWith({

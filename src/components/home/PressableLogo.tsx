@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import relief from "#app/assets/logo-relief.webp";
 import { DEPTH, LIFT, drawFrame, frameIndex } from "#app/lib/logo";
 import { loadLogoFrames } from "#app/lib/relief";
-import { media } from "#app/styles/media";
+import { media } from "#app/ui/styles/media";
 import * as styles from "./PressableLogo.css";
 
 const ease = (t: number) => 1 - (1 - t) ** 4;
