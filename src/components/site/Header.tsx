@@ -1,6 +1,6 @@
 import { useLocation } from "@tanstack/react-router";
 import { T, useGT } from "gt-tanstack-start";
-import { useCallback, useId, useRef, useState } from "react";
+import { useId, useRef } from "react";
 import { Brand } from "#app/components/site/Brand";
 import { LocaleList, LocaleSwitch } from "#app/components/site/LocaleSwitch";
 import { PlayPill } from "#app/components/site/PlayPill";
@@ -13,77 +13,57 @@ import {
 import type { PlayerCount } from "#app/data/live";
 import { SITE } from "#app/data/site";
 import { GitHub, List, X } from "#app/lib/icons";
-import { useDismiss } from "#app/lib/useDismiss";
+import { moving, useShutPopovers } from "#app/lib/usePopovers";
 import * as styles from "./Header.css";
 
-/** `players` feeds the address pill, shown where the page has no play card of its own. */
+const FOLDS = [styles.folded, styles.narrow];
+
+/**
+ * `players` feeds the address pill, shown where the page has no play card of its own.
+ *
+ * Where the navigation folds into a menu, the menu and the language list are popovers the browser
+ * opens and shuts by itself, so they work before the page hydrates and without JavaScript.
+ */
 export function Header({ players }: { players: PlayerCount }) {
-  const [open, setOpen] = useState<"menu" | "languages">();
   const header = useRef<HTMLElement>(null);
-  const menuToggle = useRef<HTMLButtonElement>(null);
-  const languageToggle = useRef<HTMLButtonElement>(null);
   const menu = useId();
   const gt = useGT();
   const onLanding = useLocation({ select: (location) => location.pathname === "/" });
+  useShutPopovers(header, FOLDS);
 
-  const [moving, setMoving] = useState(false);
-  const show = useCallback((popover?: "menu" | "languages") => {
-    setMoving(true);
-    setOpen(popover);
-  }, []);
-  const shut = useCallback(() => show(), [show]);
-  const toggle = (popover: "menu" | "languages") => show(open === popover ? undefined : popover);
-  useDismiss({
-    open: open !== undefined,
-    within: header,
-    returnTo: open === "languages" ? languageToggle : menuToggle,
-    close: shut,
-  });
   return (
     <header ref={header} className={`${styles.header} reveal`}>
       <Brand className={styles.brand} />
       <PlinthButton
-        ref={menuToggle}
         tone="ink"
         icon
         className={styles.toggle}
         aria-label={gt("Menu")}
-        aria-expanded={open === "menu"}
-        aria-controls={menu}
-        onClick={() => toggle("menu")}
+        popoverTarget={menu}
       >
-        {open === "menu" ? <X /> : <List />}
+        <List className={styles.whenShut} />
+        <X className={styles.whenOpen} />
       </PlinthButton>
-      <nav
-        id={menu}
-        className={`${styles.nav} ${open === "menu" ? styles.open : ""} ${moving ? styles.moving : ""}`}
-        aria-label={gt("Main")}
-        onTransitionEnd={(event) => event.target === event.currentTarget && setMoving(false)}
-      >
-        <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }} onClick={shut}>
+      <nav id={menu} popover="auto" className={styles.nav} aria-label={gt("Main")} {...moving}>
+        <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }}>
           <T>Home</T>
         </PlinthLink>
-        <PlinthSectionLink tone="ink" hash="projects" onClick={shut}>
+        <PlinthSectionLink tone="ink" hash="projects">
           <T>Projects</T>
         </PlinthSectionLink>
-        <PlinthSectionLink tone="ink" hash="gamemodes" onClick={shut}>
+        <PlinthSectionLink tone="ink" hash="gamemodes">
           <T>Gamemodes</T>
         </PlinthSectionLink>
-        <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }} onClick={shut}>
+        <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }}>
           <T>Blog</T>
         </PlinthLink>
-        <PlinthAnchor tone="ink" href={SITE.maven} onClick={shut}>
+        <PlinthAnchor tone="ink" href={SITE.maven}>
           Maven
         </PlinthAnchor>
         <LocaleList className={styles.languages} />
       </nav>
       {!onLanding && <PlayPill players={players} className={styles.play} />}
-      <LocaleSwitch
-        className={styles.language}
-        button={languageToggle}
-        open={open === "languages"}
-        onToggle={() => toggle("languages")}
-      />
+      <LocaleSwitch className={styles.language} />
       <PlinthAnchor
         tone="ink"
         icon

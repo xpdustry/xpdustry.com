@@ -4,6 +4,11 @@ import { font, leading } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const narrow = upTo(780);
+/**
+ * Beside the header's unfolded navigation, where "Checking" in French leaves no room for the links:
+ * the light alone says the count is not there yet.
+ */
+const besideNavigation = "not all and (max-width: 77.5em)";
 
 export const pill = style({
   whiteSpace: "nowrap",
@@ -22,6 +27,7 @@ export const count = style({
 export const waiting = style({
   "@media": {
     [narrow]: { gap: 0, fontSize: 0 },
+    [besideNavigation]: { gap: 0, fontSize: 0 },
   },
 });
 

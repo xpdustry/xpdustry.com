@@ -1,5 +1,11 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { popoverOpen, popoverShut, popoverTransition } from "#app/components/site/popover";
+import {
+  popoverBox,
+  popoverFallbackPlace,
+  popoverMoving,
+  popoverOpen,
+  popoverShut,
+} from "#app/components/site/popover";
 import { media } from "#app/styles/media";
 import { font, leading, radius } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
@@ -14,7 +20,11 @@ const code = {
   textTransform: "uppercase",
 } as const;
 
-export const button = style({});
+const ANCHOR = "--locale-switch";
+
+export const button = style({
+  anchorName: ANCHOR,
+});
 
 globalStyle(`${button} > span`, {
   ...code,
@@ -31,10 +41,14 @@ export const list = style({
   gap: 2,
 });
 
+const top = `calc(anchor(${ANCHOR} bottom) + 10px)`;
+const right = `anchor(${ANCHOR} right)`;
+
 export const panel = style({
+  ...popoverBox,
   position: "absolute",
-  top: "calc(100% + 10px)",
-  right: 0,
+  top: ["calc(100% + 10px)", top],
+  right: [0, right],
   zIndex: 6,
   ...popoverShut,
   minWidth: 170,
@@ -43,14 +57,17 @@ export const panel = style({
   borderRadius: radius.lg,
   background: vars.deep,
   boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)",
-  "@media": {
-    [media.motion]: { transition: popoverTransition },
-  },
-});
-
-export const open = style({
   selectors: {
-    [`${panel}&`]: popoverOpen,
+    "&:popover-open": {
+      ...popoverOpen,
+      top: [popoverFallbackPlace.top, top],
+      right: [popoverFallbackPlace.right, right],
+    },
+  },
+  "@media": {
+    [media.motion]: {
+      selectors: popoverMoving,
+    },
   },
 });
 
@@ -60,6 +77,8 @@ export const option = style({
   gap: 10,
   width: "100%",
   padding: "9px 10px",
+  color: "inherit",
+  textDecoration: "none",
   border: 0,
   borderRadius: radius.sm,
   background: "none",
@@ -69,6 +88,9 @@ export const option = style({
   selectors: {
     "&:hover": { background: "rgb(255 255 255 / 0.08)" },
     '&[aria-current="true"]': { color: vars.t9, cursor: "default" },
+  },
+  "@media": {
+    [media.coarse]: { paddingBlock: 11 },
   },
 });
 

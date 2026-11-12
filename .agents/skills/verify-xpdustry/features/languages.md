@@ -31,7 +31,7 @@ const page = await newPage({ width: 1280 });
 await go(page, "/");
 await page.getByRole("button", { name: "Language: English" }).click();
 await snap(page, "1-list-open");
-await page.getByRole("list", { name: "Language" }).getByRole("button", { name: "Français" }).click();
+await page.getByRole("list", { name: "Language" }).getByRole("link", { name: "Français" }).click();
 await page.waitForURL("**/fr");
 await page.getByRole("link", { name: "Accueil" }).first().waitFor();
 print("lang-switch:", page.url(), await page.locator("html").getAttribute("lang")); // …/fr fr
@@ -61,12 +61,12 @@ await page.getByRole("button", { name: "Меню" }).click();
 const languages = page.getByRole("list", { name: "Язык" });
 await languages.waitFor();
 await snap(page, "1-menu-open");
-await languages.getByRole("button", { name: "Français" }).click();
+await languages.getByRole("link", { name: "Français" }).click();
 await page.waitForURL("**/fr");
 await page.waitForFunction(() => document.documentElement.lang === "fr");
 await page.getByRole("button", { name: "Menu" }).click();
 const nav = page.getByRole("navigation", { name: "Navigation principale" });
-print("lang-switch:", page.url(), await nav.getByRole("link").allInnerTexts()); // …/fr [Accueil, Projets, Modes, Blog, Maven]
+print("lang-switch:", page.url(), await nav.getByRole("link").allInnerTexts()); // …/fr [Accueil, Projets, Modes, Blog, Maven, en English, fr Français, ru Русский]
 await snap(page, "2-french-menu");
 EOF
 ```
@@ -78,6 +78,7 @@ EOF
 
 - `get("/")` with no `accept-language` header is treated as English by the server.
 - The first-visit redirect already sets the `generaltranslation.locale` cookie, before the visitor chooses anything.
+- The languages are links to the same page under each prefix, and the menu and the list are `popover`s the browser opens itself, so both work with scripts off (`browser.newContext({ javaScriptEnabled: false })`). Without scripts, choosing English from `/fr/...` lands back on `/fr/...`: the server sends an unprefixed path to the language in the cookie, which the French page set.
 - The switcher is labelled in the current language: `Langue : Français` on French pages, `Язык: Русский` on Russian ones.
 - `/og/...` images ignore the visitor's language on purpose; only the URL prefix selects theirs. See [search metadata](search-metadata.md).
 - A string missing from `src/_gt/<locale>.json` silently shows in English. Compare the keys with `src/_gt/en.json` when a page mixes languages.

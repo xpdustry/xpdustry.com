@@ -359,7 +359,7 @@ function layoutIssues(): string[] {
   const found = new Set<string>();
   const width = document.documentElement.clientWidth;
   if (document.documentElement.scrollWidth > width + 1) found.add("page scrolls sideways");
-  for (const link of document.querySelectorAll("header nav a")) {
+  for (const link of document.querySelectorAll("header nav > a")) {
     const lines = new Set<number>();
     const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
