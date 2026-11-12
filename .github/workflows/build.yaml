@@ -1,0 +1,153 @@
+name: "Build"
+
+on:
+  push:
+    branches: ["**"]
+    tags-ignore: ["**"]
+    # Blog posts are Markdown too, so only the prose outside `src` is skipped
+    paths-ignore: ["*.md", ".agents/**/*.md"]
+  pull_request:
+    paths-ignore: ["*.md", ".agents/**/*.md"]
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
+  cancel-in-progress: true
+
+# Static checks first, then the tests and the image, which is built and smoke tested but never
+# published
+jobs:
+  static:
+    name: "Static"
+    # Same-repo PRs are already built by their push
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      # All of history, as fallow ranks its refactoring targets by each file's changes
+      - name: "Checkout Repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: "Setup Node.js And Dependencies"
+        uses: ./.github/actions/setup
+
+      - name: "Check Formatting"
+        run: pnpm format:check
+
+      - name: "Lint"
+        run: pnpm lint
+
+      - name: "Check Types"
+        run: pnpm typecheck
+
+      - name: "Find Unused Code"
+        run: pnpm deadcode
+
+      - name: "Check Code Health"
+        run: pnpm health
+
+      - name: "Check Feature Boundaries"
+        run: pnpm architecture
+
+  unit:
+    name: "Unit Tests"
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: "Setup Node.js And Dependencies"
+        uses: ./.github/actions/setup
+
+      - name: "Run Unit Tests"
+        run: pnpm exec vitest run --project unit --reporter=default --reporter=junit --outputFile.junit=reports/unit.xml
+
+      - name: "Upload Test Results"
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results-unit
+          path: reports/
+
+  # The tests that read the production build, which also proves it builds
+  artifact:
+    name: "Artifact Tests"
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: "Setup Node.js And Dependencies"
+        uses: ./.github/actions/setup
+
+      - name: "Build Site"
+        run: pnpm build
+
+      - name: "Run Artifact Tests"
+        run: pnpm exec vitest run --project artifact --reporter=default --reporter=junit --outputFile.junit=reports/artifact.xml
+
+      - name: "Upload Test Results"
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results-artifact
+          path: reports/
+
+  # A broken image only shows once it starts. Podman, as BuildKit ignores `.containerignore`
+  image:
+    name: "Image"
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      IMAGE: "localhost/xpdustry-website"
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: "Build Image"
+        run: podman build --tag "$IMAGE:$GITHUB_SHA" .
+
+      # The image boots and serves a page, a translation and the sitemap, without polling the servers
+      - name: "Smoke Test Image"
+        run: |
+          podman run --detach --name smoke --publish 3000:3000 --env XPD_DISABLE_STATUS=1 "$IMAGE:$GITHUB_SHA"
+          for _ in $(seq 30); do
+            if curl --silent --fail --output /dev/null http://127.0.0.1:3000/; then
+              for path in / /fr /sitemap.xml; do
+                curl --silent --show-error --fail --output /dev/null "http://127.0.0.1:3000$path" || { podman logs smoke; exit 1; }
+              done
+              exit 0
+            fi
+            [ "$(podman inspect --format '{{.State.Running}}' smoke)" = true ] || break
+            sleep 1
+          done
+          podman logs smoke
+          exit 1
+
+  event-file:
+    name: "Event File"
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: "Upload Event File"
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: event-file
+          path: ${{ github.event_path }}

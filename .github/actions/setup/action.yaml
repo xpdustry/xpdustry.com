@@ -1,0 +1,32 @@
+name: "Setup"
+description: "Install Node.js, pnpm and the dependencies."
+
+runs:
+  using: composite
+  steps:
+    # The version `packageManager` names in package.json
+    - name: "Setup pnpm"
+      uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+
+    # The Node.js major the Containerfile's image runs
+    - name: "Setup Node.js 24"
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: "24"
+
+    - name: "Find pnpm Store"
+      id: pnpm-store
+      shell: bash
+      run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+    # A changed lockfile starts from the last store, which setup-node's own cache can't
+    - name: "Restore pnpm Store"
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: pnpm-store-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: pnpm-store-${{ runner.os }}-
+
+    - name: "Install Dependencies"
+      shell: bash
+      run: pnpm install --frozen-lockfile

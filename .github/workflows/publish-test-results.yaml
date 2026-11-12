@@ -1,0 +1,34 @@
+name: "Publish Test Results"
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
+
+jobs:
+  action:
+    name: "Action"
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      checks: write
+      pull-requests: write # needed unless run with comment_mode: off
+      actions: read # required by download step to access artifacts API
+    steps:
+      - name: "Download and Extract Test Results"
+        uses: dawidd6/action-download-artifact@a92c7ae74cf1df8810783758581e485ac3aaa309 # v28
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          path: artifacts
+          name: test-results-.*|event-file
+          name_is_regexp: true
+
+      - name: "Publish Test Results"
+        uses: EnricoMi/publish-unit-test-result-action@da5b7be67623cd59bbbd1a0ce4f022050a55605f # v2.26.0
+        with:
+          commit: ${{ github.event.workflow_run.head_sha }}
+          event_file: artifacts/event-file/event.json
+          event_name: ${{ github.event.workflow_run.event }}
+          files: "artifacts/**/*.xml"
