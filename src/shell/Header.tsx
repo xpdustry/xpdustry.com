@@ -39,24 +39,7 @@ export function Header({ players }: { players: PlayerCount }) {
         <List className={styles.whenShut} />
         <X className={styles.whenOpen} />
       </PlinthButton>
-      <nav id={menu} popover="auto" className={styles.nav} aria-label={gt("Main")} {...moving}>
-        <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }}>
-          <T>Home</T>
-        </PlinthLink>
-        <PlinthSectionLink tone="ink" hash="projects">
-          <T>Projects</T>
-        </PlinthSectionLink>
-        <PlinthSectionLink tone="ink" hash="gamemodes">
-          <T>Gamemodes</T>
-        </PlinthSectionLink>
-        <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }}>
-          <T>Blog</T>
-        </PlinthLink>
-        <PlinthAnchor tone="ink" href={SITE.maven}>
-          Maven
-        </PlinthAnchor>
-        <LocaleList className={styles.languages} />
-      </nav>
+      <MainNav id={menu} />
       {!onLanding && <PlayPill players={players} className={styles.play} />}
       <LocaleSwitch className={styles.language} />
       <PlinthAnchor
@@ -69,5 +52,30 @@ export function Header({ players }: { players: PlayerCount }) {
         <GitHub />
       </PlinthAnchor>
     </header>
+  );
+}
+
+/** The site's pages, folded into a menu, with the languages at its foot, where the header is short. */
+function MainNav({ id }: { id: string }) {
+  const gt = useGT();
+  return (
+    <nav id={id} popover="auto" className={styles.nav} aria-label={gt("Main")} {...moving}>
+      <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }}>
+        <T>Home</T>
+      </PlinthLink>
+      <PlinthSectionLink tone="ink" hash="projects">
+        <T>Projects</T>
+      </PlinthSectionLink>
+      <PlinthSectionLink tone="ink" hash="gamemodes">
+        <T>Gamemodes</T>
+      </PlinthSectionLink>
+      <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }}>
+        <T>Blog</T>
+      </PlinthLink>
+      <PlinthAnchor tone="ink" href={SITE.maven}>
+        Maven
+      </PlinthAnchor>
+      <LocaleList className={styles.languages} />
+    </nav>
   );
 }
