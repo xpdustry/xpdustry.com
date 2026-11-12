@@ -31,19 +31,16 @@ const short = cached(
 );
 const number = cached((tag) => new Intl.NumberFormat(tag));
 
-/** "7 October 2026" */
 export function formatDate(iso: string, locale: string = DEFAULT_LOCALE): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? "" : long(locale).format(date);
 }
 
-/** "07 Oct 2026" */
 export function formatShortDate(iso: string, locale: string = DEFAULT_LOCALE): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? "" : short(locale).format(date);
 }
 
-/** "2,762" */
 export function formatNumber(value: number, locale: string = DEFAULT_LOCALE): string {
   return number(locale).format(value);
 }

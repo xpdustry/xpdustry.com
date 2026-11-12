@@ -20,7 +20,6 @@ export function DiscordCard({
   children: ReactNode;
   /** Who is there right now, where the page knows. */
   counts?: DiscordCounts;
-  /** The sidebar size. */
   compact?: boolean;
   className?: string;
 }) {

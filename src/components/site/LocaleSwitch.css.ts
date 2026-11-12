@@ -17,7 +17,6 @@ export const button = style({});
 globalStyle(`${button} > span`, {
   ...code,
   minWidth: "2ch",
-  // as tall as the icon buttons beside it
   padding: "9.5px 11px",
 });
 

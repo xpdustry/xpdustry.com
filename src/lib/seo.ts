@@ -61,7 +61,7 @@ export function seo(page: PageSeo) {
   const urlIn = (other: string) => `${SITE.origin}${withLocale(page.path, other)}`;
   const url = urlIn(locale);
   const image = page.image ?? SITE_CARD;
-  const imageUrl = `${SITE.origin}${image.url}`;
+  const imageUrl = `${SITE.origin}${withLocale(image.url, locale)}`;
 
   return {
     meta: [

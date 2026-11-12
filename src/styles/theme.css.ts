@@ -1,4 +1,5 @@
 import { createGlobalTheme, createGlobalThemeContract, globalStyle } from "@vanilla-extract/css";
+import { FACE } from "./fonts";
 import { media } from "./media";
 
 export const vars = createGlobalThemeContract(
@@ -91,9 +92,9 @@ createGlobalTheme(":root", vars, {
   gap: "14px",
   group: "56px",
 
-  fontDisplay: '"Momo Trust Display", system-ui, sans-serif',
-  fontText: '"Momo Trust Sans Variable", system-ui, sans-serif',
-  fontMono: '"DM Mono", ui-monospace, monospace',
+  fontDisplay: `"${FACE.display}", "${FACE.cyrillicDisplay}", system-ui, sans-serif`,
+  fontText: `"${FACE.text}", "${FACE.cyrillicText}", system-ui, sans-serif`,
+  fontMono: `"${FACE.mono}", "${FACE.cyrillicMono}", ui-monospace, monospace`,
   easeOut: "cubic-bezier(0.22, 1, 0.36, 1)",
   easeSpring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
   easeGrow: "cubic-bezier(0.3, 0.5, 0.4, 1)",

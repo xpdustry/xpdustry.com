@@ -23,6 +23,7 @@ import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
 import "@fontsource/dm-mono/500.css";
+import "#app/styles/cyrillic.css";
 import "#app/styles/global.css";
 
 export const Route = createRootRoute({

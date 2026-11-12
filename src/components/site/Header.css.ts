@@ -107,7 +107,6 @@ globalStyle(`${header} ${end} > span`, {
   padding: 9,
 });
 
-/** The language button, where the header has room for it; narrower, the menu lists the languages. */
 export const language = style({
   selectors: {
     [`${header} &`]: { marginLeft: -12 },

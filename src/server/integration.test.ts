@@ -287,7 +287,7 @@ describe("post body chunks", () => {
   test("each post body remains a separate dynamic chunk", async () => {
     const files = await readdir(`${clientRoot}assets`);
     const bodies = files.filter((file) => /^nohorny-4-beta-\d+-[^.]+\.js$/.test(file));
-    const posts = await readdir(new URL("../content/blog/en/", import.meta.url));
+    const posts = await readdir(new URL("../content/blog/", import.meta.url), { recursive: true });
     expect(bodies).toHaveLength(posts.filter((file) => file.endsWith(".md")).length);
     for (const body of bodies) {
       expect(await readFile(`${clientRoot}assets/${body}`, "utf8")).toContain("children");
@@ -343,6 +343,26 @@ describe("built social cards", () => {
         new TextEncoder().encode("PNG"),
       );
     }
+  });
+
+  test("a locale's pages point at cards in that locale, whatever the visitor prefers", async () => {
+    const html = await (await get("/ru/blog")).text();
+    expect(html).toContain(
+      '<meta property="og:image" content="https://xpdustry.com/ru/og/blog.png"',
+    );
+
+    const localized = await get("/ru/og/blog.png");
+    expect(localized.status).toBe(200);
+    expect(localized.headers.get("content-type")).toBe("image/png");
+
+    const plain = new Uint8Array(await (await get("/og/home.png")).arrayBuffer());
+    const preferring = await fetchApp(
+      new Request("http://localhost/og/home.png", {
+        headers: { "accept-language": "ru", cookie: "generaltranslation.locale=ru" },
+      }),
+    );
+    expect(preferring.status).toBe(200);
+    expect(new Uint8Array(await preferring.arrayBuffer())).toEqual(plain);
   });
 
   test("unknown cards are not rendered", async () => {

@@ -15,8 +15,6 @@ export interface Post {
   load: () => Promise<MarkdownDocument>;
 }
 
-// One directory per locale, `blog/<locale>/<slug>.md`. The default locale's posts are the posts;
-// the others hold their translations, and a post without one reads in the default language.
 const frontmatters = import.meta.glob<BlogFrontmatter>("./blog/*/*.md", {
   query: "?frontmatter",
   import: "frontmatter",

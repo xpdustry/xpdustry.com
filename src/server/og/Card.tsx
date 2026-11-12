@@ -1,9 +1,12 @@
+import { msg } from "gt-tanstack-start";
 import type { CSSProperties, ReactNode } from "react";
 import logo from "#app/assets/logo.svg?raw";
 import texture from "#app/assets/reticulate.png?inline";
 import { BLOG_DESCRIPTION, SITE } from "#app/data/site";
-import { formatShortDate } from "#app/lib/format";
+import { withLocale } from "#app/i18n/localePath";
+import { formatNumber, formatShortDate } from "#app/lib/format";
 import { CARD_SIZE } from "#app/lib/seo";
+import { FACE } from "#app/styles/fonts";
 
 export interface CardPost {
   slug: string;
@@ -31,6 +34,25 @@ const color = {
   hair: "rgba(255,255,255,.14)",
 } as const;
 
+export interface CardLanguage {
+  locale: string;
+  m: (message: string) => string;
+}
+
+const LABEL = {
+  projects: msg("Projects"),
+  stars: msg("Stars"),
+  servers: msg("Servers"),
+  posts: msg("Posts"),
+  latest: msg("Latest"),
+  author: msg("Author"),
+  published: msg("Published"),
+  topic: msg("Topic"),
+};
+
+const DISPLAY = `${FACE.display}, ${FACE.cyrillicDisplay}`;
+const MONO = `${FACE.mono}, ${FACE.cyrillicMono}`;
+
 const host = SITE.origin.replace("https://", "");
 const LOGO = `data:image/svg+xml;base64,${Buffer.from(logo.replace(/<\?xml[^>]*\?>/, "")).toString("base64")}`;
 
@@ -47,7 +69,7 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
         padding: "72px 80px 66px",
         background: color.ground,
         color: color.ink,
-        fontFamily: "Momo Trust Display",
+        fontFamily: DISPLAY,
       }}
     >
       <div
@@ -128,57 +150,62 @@ function titleSize(title: string): number {
   return 40;
 }
 
-export function HomeCard({ stats }: { stats: HomeStats }) {
+export function HomeCard({ stats, locale, m }: { stats: HomeStats } & CardLanguage) {
   return (
     <Frame
       mark={LOGO}
       stats={
         <>
-          <Stat value={String(stats.projects)} label="Projects" />
-          {stats.stars !== undefined && <Stat value={String(stats.stars)} label="Stars" />}
-          <Stat value={String(stats.servers)} label="Servers" />
+          <Stat value={formatNumber(stats.projects, locale)} label={m(LABEL.projects)} />
+          {stats.stars !== undefined && (
+            <Stat value={formatNumber(stats.stars, locale)} label={m(LABEL.stars)} />
+          )}
+          <Stat value={formatNumber(stats.servers, locale)} label={m(LABEL.servers)} />
         </>
       }
     >
       <Identifier path="home" />
-      <Description>{SITE.description}</Description>
+      <Description>{m(SITE.description)}</Description>
     </Frame>
   );
 }
 
 /** `posts` are newest first, as the registry sorts them. */
-export function BlogCard({ posts }: { posts: readonly CardPost[] }) {
+export function BlogCard({ posts, locale, m }: { posts: readonly CardPost[] } & CardLanguage) {
   const latest = posts[0];
   return (
     <Frame
       mark={LOGO}
       stats={
         <>
-          <Stat value={String(posts.length)} label="Posts" />
-          {latest && <Stat value={formatShortDate(latest.publishedAt)} label="Latest" />}
+          <Stat value={String(posts.length)} label={m(LABEL.posts)} />
+          {latest && (
+            <Stat value={formatShortDate(latest.publishedAt, locale)} label={m(LABEL.latest)} />
+          )}
         </>
       }
     >
       <Identifier path="blog" />
-      <Description>{BLOG_DESCRIPTION}</Description>
+      <Description>{m(BLOG_DESCRIPTION)}</Description>
     </Frame>
   );
 }
 
-export function PostCard({ post }: { post: CardPost }) {
+export function PostCard({ post, locale, m }: { post: CardPost } & CardLanguage) {
   return (
     <Frame
       mark={post.icon ?? LOGO}
       stats={
         <>
-          <Stat value={post.author} label="Author" />
-          <Stat value={formatShortDate(post.publishedAt)} label="Published" />
-          <Stat value={post.topic} label="Topic" />
+          <Stat value={post.author} label={m(LABEL.author)} />
+          <Stat value={formatShortDate(post.publishedAt, locale)} label={m(LABEL.published)} />
+          <Stat value={post.topic} label={m(LABEL.topic)} />
         </>
       }
     >
-      <div style={{ marginBottom: 22, fontFamily: "DM Mono", fontSize: 26, color: color.faint }}>
-        {host}/blog/<span style={{ color: color.ink }}>{post.slug}</span>
+      <div style={{ marginBottom: 22, fontFamily: MONO, fontSize: 26, color: color.faint }}>
+        {host}
+        {withLocale("/blog", locale)}/<span style={{ color: color.ink }}>{post.slug}</span>
       </div>
       <div style={{ fontSize: titleSize(post.title), lineHeight: 1.08, letterSpacing: "-.02em" }}>
         {post.title}

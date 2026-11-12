@@ -1,21 +1,32 @@
 import dmMono from "@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2?inline";
+import golosBold from "@fontsource/golos-text/files/golos-text-cyrillic-700-normal.woff2?inline";
+import plexMono from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-cyrillic-400-normal.woff2?inline";
 import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-400-normal.woff2?inline";
 import { Renderer } from "@takumi-rs/core";
 import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
-import { posts } from "#app/content/registry";
+import { posts, translated } from "#app/content/registry";
 import { projects } from "#app/data/projects";
 import { servers } from "#app/data/servers";
 import { topic } from "#app/data/topics";
 import { CARD_SIZE, postTitle } from "#app/lib/seo";
-import { BlogCard, HomeCard, PostCard, type CardPost } from "#app/server/og/Card";
+import {
+  BlogCard,
+  HomeCard,
+  PostCard,
+  type CardLanguage,
+  type CardPost,
+} from "#app/server/og/Card";
 import { services } from "#app/server/services";
+import { DISPLAY_WEIGHT, FACE } from "#app/styles/fonts";
 
 const MAX_AGE_MS = 60 * 60 * 1000;
 
 const FONTS = [
-  { name: "Momo Trust Display", data: bytes(momo), weight: 400 },
-  { name: "DM Mono", data: bytes(dmMono), weight: 400 },
+  { name: FACE.display, data: bytes(momo), weight: DISPLAY_WEIGHT },
+  { name: FACE.mono, data: bytes(dmMono), weight: 400 },
+  { name: FACE.cyrillicDisplay, data: bytes(golosBold), weight: DISPLAY_WEIGHT },
+  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 },
 ];
 
 const iconData = import.meta.glob<string>("/src/assets/brand/*", {
@@ -35,14 +46,19 @@ function inlineIcon(url: string | undefined): string | undefined {
   return url.startsWith("data:") ? url : inlineIcons.get(url);
 }
 
-const cardPosts: readonly CardPost[] = posts.map((post) => ({
-  slug: post.slug,
-  title: postTitle(post.frontmatter),
-  author: post.frontmatter.author,
-  topic: post.frontmatter.topic,
-  publishedAt: post.frontmatter.publishedAt,
-  icon: inlineIcon(topic(post.frontmatter.topic).icon),
-}));
+function cardPosts(locale: string): CardPost[] {
+  return posts.map((original) => {
+    const post = translated(original, locale);
+    return {
+      slug: post.slug,
+      title: postTitle(post.frontmatter),
+      author: post.frontmatter.author,
+      topic: post.frontmatter.topic,
+      publishedAt: post.frontmatter.publishedAt,
+      icon: inlineIcon(topic(post.frontmatter.topic).icon),
+    };
+  });
+}
 
 type Png = Uint8Array<ArrayBuffer>;
 
@@ -63,16 +79,21 @@ function getRenderer(): Promise<Renderer> {
   return renderer;
 }
 
-function cardFor(path: string): ReactElement | undefined {
+function cardFor(path: string, language: CardLanguage): ReactElement | undefined {
   if (path === "home.png") {
     const stars = services().github.value?.stars;
-    return <HomeCard stats={{ projects: projects.length, servers: servers.length, stars }} />;
+    return (
+      <HomeCard
+        stats={{ projects: projects.length, servers: servers.length, stars }}
+        {...language}
+      />
+    );
   }
-  if (path === "blog.png") return <BlogCard posts={cardPosts} />;
+  if (path === "blog.png") return <BlogCard posts={cardPosts(language.locale)} {...language} />;
 
   const slug = /^blog\/([^/]+)\.png$/.exec(path)?.[1];
-  const post = cardPosts.find((entry) => entry.slug === slug);
-  return post && <PostCard post={post} />;
+  const post = cardPosts(language.locale).find((entry) => entry.slug === slug);
+  return post && <PostCard post={post} {...language} />;
 }
 
 async function renderCard(card: ReactElement): Promise<Png> {
@@ -81,21 +102,22 @@ async function renderCard(card: ReactElement): Promise<Png> {
   return new Uint8Array(png);
 }
 
-/** The PNG for a card path, or `undefined` when no page owns it. */
-export async function readCard(path: string): Promise<Png | undefined> {
-  const cached = cache.get(path);
+/** The PNG for a card path in `language`, or `undefined` when no page owns it. */
+export async function readCard(path: string, language: CardLanguage): Promise<Png | undefined> {
+  const key = `${language.locale}/${path}`;
+  const cached = cache.get(key);
   if (cached && Date.now() - cached.renderedAt < MAX_AGE_MS) return cached.png;
 
-  const pending = inflight.get(path);
+  const pending = inflight.get(key);
   if (pending) return pending;
 
   const task = (async () => {
-    const card = cardFor(path);
+    const card = cardFor(path, language);
     if (!card) return undefined;
     const png = await renderCard(card);
-    cache.set(path, { png, renderedAt: Date.now() });
+    cache.set(key, { png, renderedAt: Date.now() });
     return png;
-  })().finally(() => inflight.delete(path));
-  inflight.set(path, task);
+  })().finally(() => inflight.delete(key));
+  inflight.set(key, task);
   return task;
 }
