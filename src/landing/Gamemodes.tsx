@@ -1,6 +1,6 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
-import { useId, useLayoutEffect, useRef, useState, type MouseEvent, type Ref } from "react";
+import { useId, useRef, useState, type MouseEvent, type Ref } from "react";
 import { findServer, playerCount } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/status/snapshots";
@@ -66,7 +66,7 @@ function Mode({
   const gt = useGT();
   const m = useMessages();
   const hostname = server?.hostname ?? "";
-  const { state, spread, short, chip, said, press } = useModePress(hostname);
+  const { state, spread, chip, press } = useModePress(hostname);
   const ids = useId();
   const Icon = mode.icon;
   return (
@@ -96,7 +96,7 @@ function Mode({
           </h3>
           <span id={`${ids}line`} className={styles.line}>
             <Players server={server} />
-            <Said ref={said} failed={state === "failed"} short={short} hostname={hostname} />
+            <Said failed={state === "failed"} hostname={hostname} />
           </span>
           <span id={`${ids}action`} hidden>
             <T>. Copy the server address</T>
@@ -111,28 +111,19 @@ function Mode({
 
 /**
  * A press on a mode's card: it copies the address and starts a spread where it landed, or from
- * the chip for a key press. The confirmation that replaces the player count then is the short
- * one if the long one is cut off, measured again on each press as the card may have been resized.
+ * the chip for a key press.
  */
 function useModePress(hostname: string) {
   const { state, copy } = useCopy(hostname);
   const [spread, setSpread] = useState<SpreadStart>();
-  const [short, setShort] = useState(false);
   const chip = useRef<HTMLSpanElement>(null);
-  const said = useRef<HTMLSpanElement>(null);
-
-  useLayoutEffect(() => {
-    const line = said.current;
-    if (state === "copied" && line && line.scrollWidth > line.clientWidth) setShort(true);
-  }, [state, spread]);
 
   const press = (event: MouseEvent<HTMLButtonElement>) => {
     const box = event.currentTarget.parentElement!.getBoundingClientRect();
     setSpread(spreadFromPress(event, box, chip.current!.getBoundingClientRect()));
-    setShort(false);
     void copy();
   };
-  return { state, spread, short, chip, said, press };
+  return { state, spread, chip, press };
 }
 
 /** The mode's colour down the band, its patches past the band's side or its fringe below it. */
@@ -157,28 +148,17 @@ function Players({ server }: { server?: ServerSnapshotItem }) {
   return <PlayerCount count={count} className={`${styles.count} ${empty ? styles.empty : ""}`} />;
 }
 
-/** What takes the player count's place after a press: that it copied, or the address to select. */
-function Said({
-  ref,
-  failed,
-  short,
-  hostname
-}: {
-  ref: Ref<HTMLSpanElement>;
-  failed: boolean;
-  short: boolean;
-  hostname: string;
-}) {
+/**
+ * What takes the player count's place after a press: a one-word "Copied", which fits where the
+ * count was in every language, or the address to select when the copy failed.
+ */
+function Said({ failed, hostname }: { failed: boolean; hostname: string }) {
+  const gt = useGT();
   return (
-    <span ref={ref} className={styles.said} aria-hidden="true">
-      {failed ? <Hostname name={hostname} /> : <Copied short={short} />}
+    <span className={styles.said} aria-hidden="true">
+      {failed ? <Hostname name={hostname} /> : gt("Copied")}
     </span>
   );
-}
-
-function Copied({ short }: { short: boolean }) {
-  const gt = useGT();
-  return short ? gt("Copied") : gt("Copied, paste it in Join game");
 }
 
 /** The copy chip, which turns into a tick once the copy landed, or a cross when it failed. */

@@ -219,10 +219,6 @@ export const said = style({
   translate: "0 110%",
   opacity: 0,
   selectors: {
-    [`${copied} &`]: {
-      lineHeight: leading.snug,
-      whiteSpace: "normal"
-    },
     // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
       position: "relative",
