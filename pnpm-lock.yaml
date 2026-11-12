@@ -188,6 +188,9 @@ importers:
       gt:
         specifier: ^2.27.3
         version: 2.27.3(@babel/core@7.29.7)
+      ignore:
+        specifier: ^7.0.14
+        version: 7.0.14
       oxfmt:
         specifier: ^0.67.0
         version: 0.67.0
@@ -2050,6 +2053,10 @@ packages:
 
   html-entities@2.6.0:
     resolution: {integrity: sha512-kig+rMn/QOVRvr7c86gQ8lWXq+Hkv6CbAH1hLu+RG338StTpE8Z0b44SDVaqVu7HGKf27frdmUYEs9hTUX/cLQ==}
+
+  ignore@7.0.14:
+    resolution: {integrity: sha512-wCBiZ77u1tuWde6G/nfOtLaCTYcFDU5yCzARzK10y+rLhzYoL7a7yEemcopcc2Mzow7gZOIjnV2ym1NYmdiJOQ==}
+    engines: {node: '>= 4'}
 
   iobuffer@6.0.1:
     resolution: {integrity: sha512-SZWYkWNfjIXIBYSDpXDYIgshqtbOPsi4lviawAEceR1Kqk+sHDlcQjWrzNQsii80AyBY0q5c8HCTNjqo74ul+Q==}
@@ -4727,6 +4734,8 @@ snapshots:
     optional: true
 
   html-entities@2.6.0: {}
+
+  ignore@7.0.14: {}
 
   iobuffer@6.0.1: {}
 

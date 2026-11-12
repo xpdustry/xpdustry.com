@@ -26,7 +26,7 @@
     "canonical": "https://xpdustry.com/ru",
     "card": "/ru/og/home.png",
     "structuredData": "Organization, WebSite",
-    "words": 215,
+    "words": 210,
     "links": 5
   },
   "/blog": {
@@ -86,7 +86,7 @@
     "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-11",
     "card": "/ru/og/blog/nohorny-4-beta-11.png",
     "structuredData": "BlogPosting, BreadcrumbList",
-    "words": 272,
+    "words": 271,
     "links": 5
   },
   "/blog/nohorny-4-beta-8": {
@@ -116,7 +116,7 @@
     "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-8",
     "card": "/ru/og/blog/nohorny-4-beta-8.png",
     "structuredData": "BlogPosting, BreadcrumbList",
-    "words": 178,
+    "words": 176,
     "links": 5
   },
   "/blog/nohorny-4-beta-7": {
@@ -146,7 +146,7 @@
     "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-7",
     "card": "/ru/og/blog/nohorny-4-beta-7.png",
     "structuredData": "BlogPosting, BreadcrumbList",
-    "words": 188,
+    "words": 185,
     "links": 5
   },
   "/blog/nohorny-4-beta-3": {
@@ -176,7 +176,7 @@
     "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-3",
     "card": "/ru/og/blog/nohorny-4-beta-3.png",
     "structuredData": "BlogPosting, BreadcrumbList",
-    "words": 220,
+    "words": 217,
     "links": 5
   },
   "/blog/nohorny-4-beta-1": {
@@ -206,7 +206,7 @@
     "canonical": "https://xpdustry.com/ru/blog/nohorny-4-beta-1",
     "card": "/ru/og/blog/nohorny-4-beta-1.png",
     "structuredData": "BlogPosting, BreadcrumbList",
-    "words": 212,
+    "words": 210,
     "links": 6
   }
 }

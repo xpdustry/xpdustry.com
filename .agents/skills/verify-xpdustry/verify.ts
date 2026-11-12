@@ -16,6 +16,7 @@ import {
   mkdirSync,
   openSync,
   readFileSync,
+  readdirSync,
   readlinkSync,
   rmSync,
   statSync,
@@ -30,7 +31,6 @@ import type { Browser, BrowserContext, Page } from "playwright";
 
 const SKILL_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO = join(SKILL_DIR, "../../..");
-const SKILL = relative(REPO, SKILL_DIR);
 const HOME = join(REPO, ".verify");
 const STATE = join(HOME, "instance.json");
 const LOG = join(HOME, "server.log");
@@ -57,20 +57,25 @@ function fail(message: string): never {
   throw new Failure(message);
 }
 
-const git = (...args: string[]) =>
-  execFileSync("git", args, { cwd: REPO, encoding: "utf8", maxBuffer: 1 << 28 });
+/** Everything the build reads. Git is not involved, so this works in an export or a container too. */
+const BUILD_INPUTS = ["src", "public", "scripts", "vite", "package.json", "pnpm-lock.yaml"];
+const BUILD_CONFIG = /^(?:vite|vitest)\.config\.ts$|^tsconfig\.json$|^gt\.config\.json$/;
 
-/** Changes whenever a tracked or untracked source file does; the skill's own files do not count. */
+/** Changes whenever a file the build reads is added, removed or rewritten. */
 function sourceFingerprint(): string {
   const digest = createHash("sha256");
-  digest.update(git("rev-parse", "HEAD"));
-  digest.update(git("diff", "HEAD", "--", ".", `:(exclude)${SKILL}`));
-  for (const name of git("ls-files", "--others", "--exclude-standard").split("\n")) {
-    const file = join(REPO, name);
-    if (!name || name.startsWith(SKILL) || !statSync(file, { throwIfNoEntry: false })?.isFile()) {
-      continue;
+  const inputs = [...BUILD_INPUTS, ...readdirSync(REPO).filter((name) => BUILD_CONFIG.test(name))];
+  for (const input of inputs.sort()) {
+    const root = join(REPO, input);
+    const stats = statSync(root, { throwIfNoEntry: false });
+    if (!stats) continue;
+    const files = stats.isDirectory()
+      ? readdirSync(root, { recursive: true, encoding: "utf8" }).map((name) => join(input, name))
+      : [input];
+    for (const file of files.sort()) {
+      const { size, mtimeMs } = statSync(join(REPO, file));
+      digest.update(`${file}\0${size}\0${mtimeMs}\n`);
     }
-    digest.update(name).update(readFileSync(file));
   }
   return digest.digest("hex").slice(0, 16);
 }

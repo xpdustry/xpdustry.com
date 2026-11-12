@@ -54,6 +54,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "fast-png": "^8.0.0",
     "gt": "^2.27.3",
+    "ignore": "^7.0.14",
     "oxfmt": "^0.67.0",
     "oxlint": "^1.78.0",
     "playwright": "^1.65.0",

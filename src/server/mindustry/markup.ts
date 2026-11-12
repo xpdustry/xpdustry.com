@@ -46,7 +46,7 @@ function isColor(tag: string): boolean {
   return NAMED_COLORS.has(tag.toLowerCase().replaceAll("_", ""));
 }
 
-// Mindustry accepts 1–6 or 8 hex digits and right-pads short forms; alpha is discarded.
+// Mindustry accepts 1 to 6 or 8 hex digits and right-pads short forms; alpha is discarded.
 function isHexColor(value: string): boolean {
   return value.length > 0 && value.length !== 7 && value.length <= 8 && /^[0-9a-f]+$/i.test(value);
 }
