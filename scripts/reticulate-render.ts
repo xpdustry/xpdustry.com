@@ -115,6 +115,99 @@ function labyrinthTable(labyrinth: Labyrinth, tile: number): Float32Array {
   return table;
 }
 
+type Settings = ReturnType<typeof resolve>;
+
+/** Shifts a point by smooth noise, so outlines come out lumpy instead of perfectly round. */
+function makeWarp(s: Settings, w: number, h: number) {
+  const lumpsAcross = s.lumps ? w / s.lumps : w / h;
+  const lumpsDown = s.lumps ? h / s.lumps : 1;
+  const across = s.seamless ? Math.max(1, Math.round(2.1 * lumpsAcross)) : 2.1 * lumpsAcross;
+  const reachAcross = s.lumps ? lumpsAcross : 1;
+  const warpX = makeNoise(s.seed, s.seamless ? across : 0);
+  const warpY = makeNoise(s.seed + 1, s.seamless ? across : 0);
+  return (u: number, v: number): [number, number] => [
+    u + (s.warp * 0.5 * (warpX(u * across, v * 2.1 * lumpsDown, 3) - 0.5)) / reachAcross,
+    v + (s.warp * 0.5 * (warpY(u * across, v * 2.1 * lumpsDown, 3) - 0.5)) / lumpsDown
+  ];
+}
+
+/** Scattered cells: the noise where it rises above `bias`, scaled by `amp`. */
+function makeScatter(noise: NonNullable<Settings["noise"]>, aspect: number, tiled: boolean) {
+  const sample = makeNoise(noise.seed ?? 7, tiled ? noise.scale : 0);
+  return (u: number, v: number) =>
+    Math.max(0, (sample(u * noise.scale * aspect, v * noise.scale) - noise.bias) * noise.amp);
+}
+
+/** The field's strength at a point in card units: the blobs, the level, the ramp and the noise. */
+function makeField(s: Settings, w: number, h: number) {
+  const aspect = w / h;
+  const blobs = s.span ? spread(s.blobs, s.span / aspect) : s.blobs;
+  const warp =
+    blobs.length > 0 || (s.ramp && s.warp > 0)
+      ? makeWarp(s, w, h)
+      : (u: number, v: number): [number, number] => [u, v];
+  const scatter = s.noise && makeScatter(s.noise, aspect, Boolean(s.repeat));
+  return (u: number, v: number) => {
+    const [wu, wv] = warp(u, v);
+    let b = 0;
+    for (const [bx, by, br, bw] of blobs) {
+      const d = Math.hypot((wu - bx) * aspect, wv - by) / br;
+      b += bw * Math.exp(-(d ** s.hard));
+    }
+    if (s.level) b += s.level;
+    if (s.ramp) b += Math.min(1, Math.max(0, (wv - s.ramp[0]) / (s.ramp[1] - s.ramp[0])));
+    if (scatter) b += scatter(u, v);
+    return b;
+  };
+}
+
+const GRID_STEP = 4;
+
+/**
+ * The field at a pixel, interpolated from samples `GRID_STEP` px apart: it varies slowly, and
+ * evaluating it for every pixel is what would make a render slow.
+ */
+function sampleOnGrid(field: (u: number, v: number) => number, w: number, h: number) {
+  const gw = Math.ceil(w / GRID_STEP) + 1;
+  const gh = Math.ceil(h / GRID_STEP) + 1;
+  const grid = new Float32Array(gw * gh);
+  for (let j = 0; j < gh; j++) {
+    for (let i = 0; i < gw; i++) grid[j * gw + i] = field((i * GRID_STEP) / w, (j * GRID_STEP) / h);
+  }
+  return (x: number, y: number) => {
+    const gx = x / GRID_STEP;
+    const gy = y / GRID_STEP;
+    const i0 = gx | 0;
+    const j0 = gy | 0;
+    const fx = gx - i0;
+    const fy = gy - j0;
+    const g0 = j0 * gw + i0;
+    return (
+      (grid[g0]! * (1 - fx) + grid[g0 + 1]! * fx) * (1 - fy) +
+      (grid[g0 + gw]! * (1 - fx) + grid[g0 + gw + 1]! * fx) * fy
+    );
+  };
+}
+
+/** How far a labyrinth line turns from the main tone to the inner one, deep inside a strong field. */
+function innerMix(line: number, strength: number): number {
+  return smoothstep(0.42, 0.58, line) * Math.min(1, Math.max(0, (strength - 0.62) / 0.25));
+}
+
+function paint(
+  pixels: Uint8ClampedArray,
+  at: number,
+  from: Rgba,
+  to: Rgba,
+  mix: number,
+  alpha: number
+) {
+  pixels[at] = from[0] + (to[0] - from[0]) * mix;
+  pixels[at + 1] = from[1] + (to[1] - from[1]) * mix;
+  pixels[at + 2] = from[2] + (to[2] - from[2]) * mix;
+  pixels[at + 3] = (from[3] + (to[3] - from[3]) * mix) * alpha;
+}
+
 /**
  * Renders the texture as RGBA pixels, `width` by `height` (or one `repeat` px tile).
  *
@@ -130,79 +223,20 @@ export function renderTexture(
   const s = resolve(settings);
   const w = Math.ceil(s.repeat ?? width);
   const h = Math.ceil(s.repeat ?? height);
-  const pixels = new Uint8ClampedArray(w * h * 4);
-  const color = parseHex(s.color);
-  const inner = s.inner ? parseHex(s.inner) : undefined;
-  const aspect = w / h;
-  const blobs = s.span ? spread(s.blobs, s.span / aspect) : s.blobs;
-  const noise = s.noise ? makeNoise(s.noise.seed ?? 7, s.repeat ? s.noise.scale : 0) : undefined;
-  const warped = blobs.length > 0 || (s.ramp && s.warp > 0);
-
-  const lumpsAcross = s.lumps ? w / s.lumps : aspect;
-  const lumpsDown = s.lumps ? h / s.lumps : 1;
-  const across = s.seamless ? Math.max(1, Math.round(2.1 * lumpsAcross)) : 2.1 * lumpsAcross;
-  const warpX = makeNoise(s.seed, s.seamless ? across : 0);
-  const warpY = makeNoise(s.seed + 1, s.seamless ? across : 0);
-  const field = (u: number, v: number) => {
-    let b = 0;
-    const wu = warped
-      ? u +
-        (s.warp * 0.5 * (warpX(u * across, v * 2.1 * lumpsDown, 3) - 0.5)) /
-          (s.lumps ? lumpsAcross : 1)
-      : u;
-    const wv = warped
-      ? v + (s.warp * 0.5 * (warpY(u * across, v * 2.1 * lumpsDown, 3) - 0.5)) / lumpsDown
-      : v;
-    for (const [bx, by, br, bw] of blobs) {
-      const d = Math.hypot((wu - bx) * aspect, wv - by) / br;
-      b += bw * Math.exp(-(d ** s.hard));
-    }
-    if (s.level) b += s.level;
-    if (s.ramp) b += Math.min(1, Math.max(0, (wv - s.ramp[0]) / (s.ramp[1] - s.ramp[0])));
-    if (noise && s.noise) {
-      const n = noise(u * s.noise.scale * aspect, v * s.noise.scale);
-      b += Math.max(0, (n - s.noise.bias) * s.noise.amp);
-    }
-    return b;
-  };
-
-  const GRID_STEP = 4;
-  const gw = Math.ceil(w / GRID_STEP) + 1;
-  const gh = Math.ceil(h / GRID_STEP) + 1;
-  const grid = new Float32Array(gw * gh);
-  for (let j = 0; j < gh; j++) {
-    for (let i = 0; i < gw; i++) grid[j * gw + i] = field((i * GRID_STEP) / w, (j * GRID_STEP) / h);
-  }
-
+  const strength = sampleOnGrid(makeField(s, w, h), w, h);
   const tile = Math.round(s.tile);
   const table = labyrinthTable(labyrinth, tile);
+  const color = parseHex(s.color);
+  const inner = s.inner ? parseHex(s.inner) : undefined;
+  const pixels = new Uint8ClampedArray(w * h * 4);
   for (let y = 0; y < h; y++) {
-    const gy = y / GRID_STEP;
-    const j0 = gy | 0;
-    const fy = gy - j0;
-    const row = (y % tile) * tile;
     for (let x = 0; x < w; x++) {
-      const gx = x / GRID_STEP;
-      const i0 = gx | 0;
-      const fx = gx - i0;
-      const g0 = j0 * gw + i0;
-      const b =
-        (grid[g0]! * (1 - fx) + grid[g0 + 1]! * fx) * (1 - fy) +
-        (grid[g0 + gw]! * (1 - fx) + grid[g0 + gw + 1]! * fx) * fy;
-      const r = table[row + (x % tile)]!;
+      const b = strength(x, y);
+      const r = table[(y % tile) * tile + (x % tile)]!;
       const f = r * Math.min(1, s.base + b * s.reach) + b * 0.9;
       const a = smoothstep(s.bias - s.soft, s.bias + s.soft, f);
       if (a <= 0) continue;
-
-      const k = (y * w + x) * 4;
-      const innerMix = inner
-        ? smoothstep(0.42, 0.58, r) * Math.min(1, Math.max(0, (b - 0.62) / 0.25))
-        : 0;
-      const to = inner ?? color;
-      pixels[k] = color[0] + (to[0] - color[0]) * innerMix;
-      pixels[k + 1] = color[1] + (to[1] - color[1]) * innerMix;
-      pixels[k + 2] = color[2] + (to[2] - color[2]) * innerMix;
-      pixels[k + 3] = (color[3] + (to[3] - color[3]) * innerMix) * a;
+      paint(pixels, (y * w + x) * 4, color, inner ?? color, inner ? innerMix(r, b) : 0, a);
     }
   }
   return { pixels, width: w, height: h };
