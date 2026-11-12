@@ -24,7 +24,8 @@
     "test:artifact": "pnpm build && vitest run --project artifact",
     "typecheck": "tsc --noEmit",
     "deadcode": "fallow dead-code",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm deadcode && pnpm test"
+    "architecture": "fallow architecture",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm deadcode && pnpm architecture && pnpm test"
   },
   "dependencies": {
     "@takumi-rs/core": "2.17.1",

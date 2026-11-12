@@ -8,5 +8,97 @@
     "duplicate-exports": "off",
     // The site is bundled, so what the browser needs is a build dependency.
     "dev-dependencies-in-production": "off"
+  },
+  // Each folder under `src` is a feature. A file belongs to the first zone that matches it, so the
+  // narrow zones come first.
+  "boundaries": {
+    "zones": [
+      // What only the server runs: a feature's `server/` folder. The client build refuses it too.
+      { "name": "status-server", "patterns": ["src/status/server/**"] },
+      { "name": "seo-server", "patterns": ["src/seo/server/**"] },
+      { "name": "shell-server", "patterns": ["src/shell/server/**"] },
+      // Server functions run on the server and are called from the browser through a stub.
+      { "name": "server-functions", "patterns": ["src/**/*.functions.ts"] },
+      // The pages and the framework's entries put the features together.
+      { "name": "routes", "patterns": ["src/routes/**"] },
+      {
+        "name": "entry",
+        "patterns": [
+          "src/{router.tsx,server.ts,start.ts,integration.test.ts,forbiddenCharacters.test.ts}"
+        ]
+      },
+      // What the blog and the live status offer the other features; the rest is their own.
+      {
+        "name": "blog-api",
+        "patterns": [
+          "src/blog/PostTile.tsx",
+          "src/blog/titles.ts",
+          "src/blog/topics.ts",
+          "src/blog/content/authors.ts",
+          "src/blog/content/registry.ts",
+          "src/blog/content/schema.ts"
+        ]
+      },
+      { "name": "blog", "patterns": ["src/blog/**"] },
+      {
+        "name": "status-api",
+        "patterns": [
+          "src/status/DiscordCard.tsx",
+          "src/status/PlayerCount.tsx",
+          "src/status/live.ts",
+          "src/status/servers.ts",
+          "src/status/snapshots.ts"
+        ]
+      },
+      { "name": "status", "patterns": ["src/status/**"] },
+      { "name": "landing", "patterns": ["src/landing/**"] },
+      { "name": "seo", "patterns": ["src/seo/**"] },
+      { "name": "shell", "patterns": ["src/shell/**"] },
+      // The shared kernel, open to every feature.
+      { "name": "textures", "patterns": ["src/textures/**"] },
+      { "name": "brand", "patterns": ["src/brand/**"] },
+      { "name": "i18n", "patterns": ["src/i18n/**"] },
+      { "name": "ui", "patterns": ["src/ui/**"] }
+    ],
+    // Zones without a rule, the routes and the entries, may import anything.
+    "rules": [
+      { "from": "ui", "allow": [] },
+      { "from": "i18n", "allow": [] },
+      { "from": "textures", "allow": ["ui"] },
+      { "from": "brand", "allow": ["ui", "textures"] },
+      { "from": "status", "allow": ["status-api", "ui", "i18n", "brand", "textures"] },
+      { "from": "status-api", "allow": ["status", "ui", "i18n", "brand", "textures"] },
+      { "from": "status-server", "allow": ["status-api", "brand"] },
+      { "from": "blog", "allow": ["blog-api", "status-api", "ui", "i18n", "brand", "textures"] },
+      { "from": "blog-api", "allow": ["blog", "status-api", "ui", "i18n", "brand", "textures"] },
+      { "from": "landing", "allow": ["blog-api", "status-api", "ui", "i18n", "brand", "textures"] },
+      { "from": "seo", "allow": ["blog-api", "brand", "i18n"] },
+      {
+        "from": "seo-server",
+        "allow": [
+          "seo",
+          "status-server",
+          "blog-api",
+          "status-api",
+          "ui",
+          "i18n",
+          "brand",
+          "textures"
+        ]
+      },
+      { "from": "shell", "allow": ["status-api", "ui", "i18n", "brand", "textures"] },
+      { "from": "shell-server", "allow": [] },
+      { "from": "server-functions", "allow": ["status-server"] }
+    ],
+    // A new file under `src` has to land in a zone.
+    "coverage": {
+      "requireAllFiles": true,
+      "allowUnmatched": [
+        "scripts/**",
+        ".agents/**",
+        "{vite,vitest}.config.ts",
+        "src/routeTree.gen.ts"
+      ]
+    }
   }
 }
