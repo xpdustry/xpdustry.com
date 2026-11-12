@@ -1,6 +1,7 @@
 import { style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { font, rem } from "#app/ui/styles/scale";
+import { displayTitle } from "#app/ui/styles/titles";
 import { vars } from "#app/ui/styles/theme.css";
 import { ground, logo as themedLogo } from "./topicTheme.css";
 
@@ -67,13 +68,7 @@ export const title = style({
   minWidth: 0,
   maxWidth: "17ch",
   marginTop: 2,
-  fontSize: rem(font.display),
-  lineHeight: leading.tight,
-  letterSpacing: tracking.display,
-  textWrap: "balance",
-  "@media": {
-    [media.phone]: { fontSize: rem(font.h2) }
-  }
+  ...displayTitle()
 });
 
 export const description = style({

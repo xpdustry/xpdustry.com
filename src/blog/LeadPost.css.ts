@@ -1,6 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
+import { font, radius, rem } from "#app/ui/styles/scale";
+import { displayTitle } from "#app/ui/styles/titles";
 import { vars } from "#app/ui/styles/theme.css";
 import { ground, logo as themedLogo } from "./topicTheme.css";
 
@@ -39,13 +40,7 @@ export const tags = style({
 
 globalStyle(`${lead} h2`, {
   marginTop: 28,
-  fontSize: rem(font.display),
-  lineHeight: leading.tight,
-  letterSpacing: tracking.display,
-  textWrap: "balance",
-  "@media": {
-    [media.phone]: { fontSize: rem(font.h2) }
-  }
+  ...displayTitle()
 });
 
 globalStyle(`${lead} p`, {
