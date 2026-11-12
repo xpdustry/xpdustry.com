@@ -1,5 +1,5 @@
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
-import { withoutLocale } from "#app/i18n/localePath";
+import { pathLocale, withoutLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { requestRedirect } from "#app/server/redirects";
 import { startServices } from "#app/server/services";
@@ -62,6 +62,13 @@ export default createServerEntry({
 
     keepOnlyLocaleCookie(request);
     askForDefaultLanguageWhenNoneStated(request);
-    return handler.fetch(request, opts);
+    const response = await handler.fetch(request, opts);
+    if (pathLocale(pathname) || response.headers.has("cache-control")) return response;
+
+    // An unprefixed page is English or a redirect to the visitor's language, chosen per visitor.
+    return withHeaders(response, (headers) => {
+      headers.set("cache-control", "private, no-cache");
+      headers.append("vary", "accept-language, cookie");
+    });
   },
 });

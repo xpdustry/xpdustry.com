@@ -464,4 +464,22 @@ describe("what a visitor sends", () => {
       expect(html).toContain(`<html lang="${path.slice(1, 3)}"`);
     },
   );
+
+  test("the first-visit redirect stays with the visitor it was chosen for", async () => {
+    const visitors: Record<string, string>[] = [
+      { "accept-language": "fr-FR,fr;q=0.9" },
+      { cookie: "generaltranslation.locale=ru" },
+    ];
+    for (const headers of visitors) {
+      const response = await fetchApp(new Request("https://xpdustry.com/blog", { headers }));
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toMatch(/^\/(fr|ru)\/blog$/);
+      expect(response.headers.get("cache-control")).toBe("private, no-cache");
+      expect(response.headers.get("vary")).toMatch(/accept-language.*cookie/i);
+    }
+    const english = await get("/");
+    expect(english.status).toBe(200);
+    expect(english.headers.get("cache-control")).toBe("private, no-cache");
+    expect(english.headers.get("vary")).toMatch(/accept-language.*cookie/i);
+  });
 });
