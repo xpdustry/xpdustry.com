@@ -5,7 +5,7 @@ import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-
 import { Renderer } from "@takumi-rs/core";
 import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
-import { posts, translated } from "#app/blog/content/registry";
+import { posts, translated, type Post } from "#app/blog/content/registry";
 import { postTitle } from "#app/blog/titles";
 import { topic } from "#app/blog/topics";
 import { projects } from "#app/brand/projects";
@@ -41,18 +41,16 @@ function inlineIcon(url: string | undefined): string | undefined {
   return url.startsWith("data:") ? url : inlineIcons.get(url);
 }
 
-function cardPosts(locale: string): CardPost[] {
-  return posts.map((original) => {
-    const post = translated(original, locale);
-    return {
-      slug: post.slug,
-      title: postTitle(post.frontmatter),
-      author: post.frontmatter.author,
-      topic: post.frontmatter.topic,
-      publishedAt: post.frontmatter.publishedAt,
-      icon: inlineIcon(topic(post.frontmatter.topic).icon)
-    };
-  });
+function cardPost(original: Post, locale: string): CardPost {
+  const post = translated(original, locale);
+  return {
+    slug: post.slug,
+    title: postTitle(post.frontmatter),
+    author: post.frontmatter.author,
+    topic: post.frontmatter.topic,
+    publishedAt: post.frontmatter.publishedAt,
+    icon: inlineIcon(topic(post.frontmatter.topic).icon)
+  };
 }
 
 type Png = Uint8Array<ArrayBuffer>;
@@ -74,22 +72,34 @@ function getRenderer(): Promise<Renderer> {
   return renderer;
 }
 
-function cardFor(path: string, language: CardLanguage): ReactElement | undefined {
-  if (path === "home.png") {
-    const stars = services().github.value?.stars;
-    return (
+type DrawCard = (language: CardLanguage) => ReactElement;
+
+/** Every card the site serves, by its path under `/og/`. */
+const CARDS = new Map<string, DrawCard>([
+  [
+    "home.png",
+    (language) => (
       <HomeCard
-        stats={{ projects: projects.length, servers: servers.length, stars }}
+        stats={{
+          projects: projects.length,
+          servers: servers.length,
+          stars: services().github.value?.stars
+        }}
         {...language}
       />
-    );
-  }
-  if (path === "blog.png") return <BlogCard posts={cardPosts(language.locale)} {...language} />;
-
-  const slug = /^blog\/([^/]+)\.png$/.exec(path)?.[1];
-  const post = cardPosts(language.locale).find((entry) => entry.slug === slug);
-  return post && <PostCard post={post} {...language} />;
-}
+    )
+  ],
+  [
+    "blog.png",
+    (language) => (
+      <BlogCard posts={posts.map((post) => cardPost(post, language.locale))} {...language} />
+    )
+  ],
+  ...posts.map((post): [string, DrawCard] => [
+    `blog/${post.slug}.png`,
+    (language) => <PostCard post={cardPost(post, language.locale)} {...language} />
+  ])
+]);
 
 async function renderCard(card: ReactElement): Promise<Png> {
   const { node, css } = await fromJsx(card);
@@ -107,7 +117,7 @@ export async function readCard(path: string, language: CardLanguage): Promise<Pn
   if (pending) return pending;
 
   const task = (async () => {
-    const card = cardFor(path, language);
+    const card = CARDS.get(path)?.(language);
     if (!card) return undefined;
     const png = await renderCard(card);
     cache.set(key, { png, renderedAt: Date.now() });
