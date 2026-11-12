@@ -1,9 +1,9 @@
-import framesUrl from "#app/assets/logo-frames.webp";
+import framesUrl from "./logo-frames.webp";
 
 let loading: Promise<HTMLImageElement | undefined> | undefined;
 
 /**
- * The relief logo's frames (`LOGO_FRAME_SHEET` in `logo.ts`), decoded, or nothing when the browser
+ * The relief logo's frames (`LOGO_FRAME_SHEET` in `frames.ts`), decoded, or nothing when the browser
  * could not load them: leaving the page mid-download cancels the decode. A failure is not kept, so
  * the next caller tries again.
  */

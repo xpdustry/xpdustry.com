@@ -6,11 +6,11 @@ import {
   frameIndex,
   frameOffset,
   frameRect
-} from "../src/lib/logo.ts";
+} from "../src/landing/logo/frames.ts";
 
 /** The logo the frames are drawn from, and the folder the frames are written to. */
 export const LOGO = new URL("../src/brand/logo.svg", import.meta.url);
-export const FRAMES = new URL("../src/assets/", import.meta.url);
+export const FRAMES = new URL("../src/landing/logo/", import.meta.url);
 
 const LAYER = 0.96;
 

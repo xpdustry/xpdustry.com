@@ -1,7 +1,7 @@
 import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { media, narrowerThan } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
-import { figures } from "./shared";
+import { figures } from "./sections";
 import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = narrowerThan(660);
@@ -32,7 +32,7 @@ export const mode = style({
       position: "absolute",
       inset: 0,
       zIndex: -2,
-      background: 'url("../../textures/assets/fade.webp") 0 -60px / 240px'
+      background: 'url("../textures/assets/fade.webp") 0 -60px / 240px'
     }
   },
   "@container": {

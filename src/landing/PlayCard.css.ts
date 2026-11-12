@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
-import { figures } from "./shared";
+import { figures } from "./sections";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const play = style({

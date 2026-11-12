@@ -1,8 +1,6 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
 import { useId, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
-import { gamemodes, type Gamemode } from "#app/data/gamemodes";
-import { useSeen } from "#app/lib/useSeen";
 import { findServer, playerCount } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/status/snapshots";
@@ -13,6 +11,8 @@ import { useCopy } from "#app/ui/copy/useCopy";
 import { Hostname } from "#app/ui/Hostname";
 import { Check, Copy, GameController, X } from "#app/ui/icons";
 import { Tray } from "#app/ui/Tray";
+import { gamemodes, type Gamemode } from "./modes";
+import { useSeen } from "./useSeen";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./Gamemodes.css";
 

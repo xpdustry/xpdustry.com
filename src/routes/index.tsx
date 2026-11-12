@@ -2,10 +2,10 @@ import { createFileRoute, getRouteApi, rootRouteId, useRouter } from "@tanstack/
 import { getLocale, getMessages } from "gt-tanstack-start";
 import { useEffect } from "react";
 import { SITE } from "#app/brand/site";
-import { Cover } from "#app/components/home/Cover";
-import { Gamemodes } from "#app/components/home/Gamemodes";
-import { News } from "#app/components/home/News";
-import { Projects } from "#app/components/home/Projects";
+import { Cover } from "#app/landing/Cover";
+import { Gamemodes } from "#app/landing/Gamemodes";
+import { News } from "#app/landing/News";
+import { Projects } from "#app/landing/Projects";
 import { seo, siteCard } from "#app/lib/seo";
 import { homeStructuredData } from "#app/lib/structuredData";
 
