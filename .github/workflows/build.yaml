@@ -104,7 +104,7 @@ jobs:
           name: test-results-artifact
           path: reports/
 
-  # A broken image only shows once it starts. Podman, as BuildKit ignores `.containerignore`
+  # A broken image only shows once it starts
   image:
     name: "Image"
     needs: static

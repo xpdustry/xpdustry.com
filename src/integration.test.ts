@@ -309,7 +309,7 @@ test("the production file server preserves every public URL from the previous si
 test("the production server runs from what the container image ships", async () => {
   const root = new URL("../", import.meta.url);
   const shipped = [
-    ...(await readFile(new URL("Containerfile", root), "utf8")).matchAll(
+    ...(await readFile(new URL("Dockerfile", root), "utf8")).matchAll(
       /^COPY --from=build \S+ \/app\/(\S+)/gm
     )
   ].map(([, path]) => path);
@@ -324,6 +324,44 @@ test("the production server runs from what the container image ships", async () 
       shipped.some((copied) => path === copied || path.startsWith(`${copied}/`)),
       `${path} is imported by scripts/serve.ts but not copied into the image`
     ).toBe(true);
+  }
+});
+
+// The image installs `--prod` only, so a dev dependency the server imports breaks rendering there alone
+test("the production server only imports runtime dependencies", async () => {
+  const root = new URL("../", import.meta.url);
+  const { dependencies } = JSON.parse(await readFile(new URL("package.json", root), "utf8")) as {
+    dependencies: Record<string, string>;
+  };
+  const sources = [
+    ...(await readdir(new URL("dist/server/", root), { recursive: true }))
+      .filter((file) => file.endsWith(".js"))
+      .map((file) => new URL(`dist/server/${file}`, root)),
+    new URL("scripts/serve.ts", root),
+    new URL("scripts/compression.ts", root)
+  ];
+  const packages = new Set<string>();
+  for (const source of sources) {
+    // Statements open a line, so code samples in bundled doc comments (` * import …`) stay out
+    for (const [, statement, dynamic] of (await readFile(source, "utf8")).matchAll(
+      /^(?:import|export)\b(?:[^;"']*?\bfrom)?\s*["']([^"'./][^"']*)["']|\bimport\(\s*["']([^"'./][^"']*)["']\s*\)/gm
+    )) {
+      const specifier = (statement ?? dynamic)!;
+      if (!specifier.startsWith("node:")) {
+        packages.add(
+          specifier
+            .split("/")
+            .slice(0, specifier.startsWith("@") ? 2 : 1)
+            .join("/")
+        );
+      }
+    }
+  }
+  expect(packages.size).toBeGreaterThan(0);
+  for (const name of packages) {
+    expect(dependencies, `${name} is imported at runtime but only a dev dependency`).toHaveProperty(
+      [name]
+    );
   }
 });
 

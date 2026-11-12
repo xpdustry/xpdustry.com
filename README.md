@@ -4,7 +4,7 @@ Source for [xpdustry.com](https://xpdustry.com), built with React and [TanStack 
 
 ## Develop
 
-You need Node 24 or newer and pnpm.
+You need Node 26 or newer and pnpm.
 
 ```bash
 corepack enable
@@ -20,7 +20,7 @@ pnpm build
 pnpm start
 ```
 
-Or build the `Containerfile`. Two environment variables matter:
+Or build the `Dockerfile`. Two environment variables matter:
 
 - `PORT`: the port to listen on, `3000` by default.
 - `XPD_DISABLE_STATUS=1`: stop polling the Mindustry servers, Discord and GitHub.
