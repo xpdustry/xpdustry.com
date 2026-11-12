@@ -19,24 +19,25 @@ function isShared(pathname: string): boolean {
 /** The only cookie the server reads: the language a visitor chose, for unprefixed pages. */
 const LOCALE_COOKIE = "generaltranslation.locale";
 
-function keepOnlyLocaleCookie(request: Request): void {
+/**
+ * Strips a page request down to what can choose its language: the language cookie and the
+ * browser's languages, which default to English when the browser states none.
+ */
+function keepOnlyLanguageHints(request: Request): void {
   const cookies = (request.headers.get("cookie") ?? "")
     .split(";")
     .map((cookie) => cookie.trim())
     .filter((cookie) => cookie.startsWith(`${LOCALE_COOKIE}=`));
   if (cookies.length > 0) request.headers.set("cookie", cookies.join("; "));
   else request.headers.delete("cookie");
+  if (!request.headers.has("accept-language")) {
+    request.headers.set("accept-language", DEFAULT_LOCALE);
+  }
 }
 
 function forgetVisitor(request: Request): void {
   request.headers.delete("cookie");
   request.headers.set("accept-language", DEFAULT_LOCALE);
-}
-
-function askForDefaultLanguageWhenNoneStated(request: Request): void {
-  if (!request.headers.has("accept-language")) {
-    request.headers.set("accept-language", DEFAULT_LOCALE);
-  }
 }
 
 /**
@@ -67,28 +68,41 @@ function withHeaders(response: Response, edit: (headers: Headers) => void): Resp
   });
 }
 
+type FetchOptions = Parameters<typeof handler.fetch>[1];
+
+async function serveShared(request: Request, opts: FetchOptions): Promise<Response> {
+  forgetVisitor(request);
+  const response = await handler.fetch(request, opts);
+  return withHeaders(response, (headers) => headers.delete("set-cookie"));
+}
+
+async function servePrefixed(request: Request, opts: FetchOptions): Promise<Response> {
+  keepOnlyLanguageHints(request);
+  return await handler.fetch(request, opts);
+}
+
+/** An unprefixed page is English or a redirect to the visitor's language, chosen per visitor. */
+async function serveUnprefixed(request: Request, opts: FetchOptions): Promise<Response> {
+  keepOnlyLanguageHints(request);
+  if (choseEnglish(request)) askForEnglish(request);
+  const response = await handler.fetch(request, opts);
+  if (response.headers.has("cache-control")) return response;
+  return withHeaders(response, (headers) => {
+    headers.set("cache-control", "private, no-cache");
+    headers.append("vary", "accept-language, cookie, sec-fetch-site");
+  });
+}
+
+function serverFor(pathname: string) {
+  if (isShared(pathname)) return serveShared;
+  if (pathLocale(pathname)) return servePrefixed;
+  return serveUnprefixed;
+}
+
 export default createServerEntry({
   async fetch(request, opts) {
     const early = requestRedirect(request) ?? unknownServerFunction(request);
     if (early) return early;
-
-    const { pathname } = new URL(request.url);
-    if (isShared(pathname)) {
-      forgetVisitor(request);
-      const response = await handler.fetch(request, opts);
-      return withHeaders(response, (headers) => headers.delete("set-cookie"));
-    }
-
-    keepOnlyLocaleCookie(request);
-    askForDefaultLanguageWhenNoneStated(request);
-    if (!pathLocale(pathname) && choseEnglish(request)) askForEnglish(request);
-    const response = await handler.fetch(request, opts);
-    if (pathLocale(pathname) || response.headers.has("cache-control")) return response;
-
-    // An unprefixed page is English or a redirect to the visitor's language, chosen per visitor.
-    return withHeaders(response, (headers) => {
-      headers.set("cache-control", "private, no-cache");
-      headers.append("vary", "accept-language, cookie, sec-fetch-site");
-    });
+    return serverFor(new URL(request.url).pathname)(request, opts);
   }
 });
