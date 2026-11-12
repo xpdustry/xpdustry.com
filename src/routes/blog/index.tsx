@@ -7,7 +7,7 @@ import { Patches } from "#app/components/ui/Patches";
 import { posts, translated } from "#app/content/registry";
 import { PATCHES } from "#app/data/patches";
 import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/data/site";
-import { BLOG_CARD, seo } from "#app/lib/seo";
+import { blogCard, seo } from "#app/lib/seo";
 import * as styles from "#app/components/blog/BlogIndex.css";
 import * as card from "#app/components/ui/Card.css";
 import { grid } from "#app/styles/layout.css";
@@ -21,7 +21,7 @@ export const Route = createFileRoute("/blog/")({
       fullTitle: true,
       description: m(BLOG_DESCRIPTION),
       path: "/blog",
-      image: BLOG_CARD,
+      image: blogCard(m),
     });
   },
   component: BlogIndex,

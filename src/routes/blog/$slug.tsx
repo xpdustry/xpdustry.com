@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { getLocale, useGT, useMessages, useLocale } from "gt-tanstack-start";
+import { getLocale, getMessages, useGT, useMessages, useLocale } from "gt-tanstack-start";
 import { PostAside } from "#app/components/blog/PostAside";
 import { PostBody } from "#app/components/blog/PostBody";
 import { PostCover } from "#app/components/blog/PostCover";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/blog/$slug")({
     if (!post) throw notFound();
     return { document: await translated(post, getLocale()).load() };
   },
-  head: ({ params }) => {
+  head: async ({ params }) => {
     const original = postsBySlug.get(params.slug);
     if (!original) return {};
     const locale = getLocale();
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/blog/$slug")({
       publishedAt,
       updatedAt,
       authorUrl: authors[author].url,
-      jsonLd: postStructuredData(post, locale),
+      jsonLd: postStructuredData(post, locale, await getMessages()),
     });
   },
   component: PostPage,

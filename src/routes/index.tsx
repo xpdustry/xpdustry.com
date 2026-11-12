@@ -6,7 +6,7 @@ import { Gamemodes } from "#app/components/home/Gamemodes";
 import { News } from "#app/components/home/News";
 import { Projects } from "#app/components/home/Projects";
 import { SITE } from "#app/data/site";
-import { seo } from "#app/lib/seo";
+import { seo, siteCard } from "#app/lib/seo";
 import { homeStructuredData } from "#app/lib/structuredData";
 
 const REFRESH_MS = 30_000;
@@ -23,6 +23,7 @@ export const Route = createFileRoute("/")({
       fullTitle: true,
       description: m(SITE.description),
       path: "/",
+      image: siteCard(m),
       jsonLd: homeStructuredData(locale),
     });
   },

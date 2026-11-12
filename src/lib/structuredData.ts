@@ -1,9 +1,10 @@
+import { msg } from "gt-tanstack-start";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
 import { SITE } from "#app/data/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
-import { postCard, postTitle } from "#app/lib/seo";
+import { postCard, postTitle, type Translate } from "#app/lib/seo";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonLd;
 export interface JsonLd {
@@ -12,6 +13,7 @@ export interface JsonLd {
 
 const CONTEXT = "https://schema.org";
 const ORGANIZATION_ID = `${SITE.origin}/#organization`;
+const CRUMB = { home: msg("Home"), blog: msg("Blog") };
 
 export function homeStructuredData(locale: string = DEFAULT_LOCALE): JsonLd {
   const home = `${SITE.origin}${withLocale("/", locale)}`;
@@ -41,7 +43,8 @@ export function homeStructuredData(locale: string = DEFAULT_LOCALE): JsonLd {
 
 export function postStructuredData(
   post: Pick<Post, "slug" | "frontmatter">,
-  locale: string = DEFAULT_LOCALE,
+  locale: string,
+  m: Translate,
 ): JsonLd {
   const at = (path: string) => `${SITE.origin}${withLocale(path, locale)}`;
   const { description, author, publishedAt, updatedAt } = post.frontmatter;
@@ -66,8 +69,8 @@ export function postStructuredData(
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: at("/") },
-          { "@type": "ListItem", position: 2, name: "Blog", item: at("/blog") },
+          { "@type": "ListItem", position: 1, name: m(CRUMB.home), item: at("/") },
+          { "@type": "ListItem", position: 2, name: m(CRUMB.blog), item: at("/blog") },
           { "@type": "ListItem", position: 3, name: title, item: url },
         ],
       },

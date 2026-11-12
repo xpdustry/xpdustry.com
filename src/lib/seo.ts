@@ -1,5 +1,5 @@
 import type { BlogFrontmatter } from "#app/content/schema";
-import { BLOG_DESCRIPTION, SITE } from "#app/data/site";
+import { BLOG_TITLE, SITE } from "#app/data/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE, LOCALES, localeInfo } from "#app/i18n/locales";
 import type { JsonLd } from "#app/lib/structuredData";
@@ -12,15 +12,16 @@ export interface PageImage {
 
 export const CARD_SIZE = { width: 1200, height: 630 } as const;
 
-const SITE_CARD: PageImage = {
-  url: "/og/home.png",
-  alt: `${SITE.name} - ${SITE.positioning}`,
-};
+/** Looks up a `msg()` string in the language of the request. */
+export type Translate = (message: string) => string;
 
-export const BLOG_CARD: PageImage = {
-  url: "/og/blog.png",
-  alt: `${SITE.name} blog - ${BLOG_DESCRIPTION}`,
-};
+export function siteCard(m: Translate): PageImage {
+  return { url: "/og/home.png", alt: `${SITE.name} - ${m(SITE.positioning)}` };
+}
+
+export function blogCard(m: Translate): PageImage {
+  return { url: "/og/blog.png", alt: m(BLOG_TITLE) };
+}
 
 export function postCard(slug: string, title: string): PageImage {
   return { url: `/og/blog/${slug}.png`, alt: `${title} - ${SITE.name}` };
@@ -45,7 +46,7 @@ export interface PageSeo {
   /** The locale the page is rendered in; the default one when absent. */
   locale?: string;
   type?: "website" | "article";
-  image?: PageImage;
+  image: PageImage;
   publishedAt?: string;
   updatedAt?: string;
   /** Profile URL of the author, for `article:author`. */
@@ -60,8 +61,7 @@ export function seo(page: PageSeo) {
   const locale = page.locale ?? DEFAULT_LOCALE;
   const urlIn = (other: string) => `${SITE.origin}${withLocale(page.path, other)}`;
   const url = urlIn(locale);
-  const image = page.image ?? SITE_CARD;
-  const imageUrl = `${SITE.origin}${withLocale(image.url, locale)}`;
+  const imageUrl = `${SITE.origin}${withLocale(page.image.url, locale)}`;
 
   return {
     meta: [
@@ -81,12 +81,12 @@ export function seo(page: PageSeo) {
       { property: "og:image:type", content: "image/png" },
       { property: "og:image:width", content: String(CARD_SIZE.width) },
       { property: "og:image:height", content: String(CARD_SIZE.height) },
-      { property: "og:image:alt", content: image.alt },
+      { property: "og:image:alt", content: page.image.alt },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: page.description },
       { name: "twitter:image", content: imageUrl },
-      { name: "twitter:image:alt", content: image.alt },
+      { name: "twitter:image:alt", content: page.image.alt },
       ...(page.publishedAt
         ? [{ property: "article:published_time", content: page.publishedAt }]
         : []),
