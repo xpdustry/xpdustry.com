@@ -60,7 +60,7 @@ A recording. [Download it.](/blog/demo.mp4)
     expect(html).toContain('alt="A &lt;screen&gt;"');
     expect(html).toContain("The alert &amp; details.");
     expect(html).toContain(
-      '<video controls="" muted="" preload="metadata" poster="/blog/poster.jpg"',
+      '<video controls="" muted="" playsInline="" preload="metadata" poster="/blog/poster.jpg"',
     );
     expect(html).toContain('<a href="/blog/demo.mp4">Download it.</a>');
   });

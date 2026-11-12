@@ -47,7 +47,15 @@ function PostVideo({
 }: MediaProps & { poster: string; webm?: string }) {
   return (
     <figure>
-      <video controls muted preload="metadata" poster={poster} width={width} height={height}>
+      <video
+        controls
+        muted
+        playsInline
+        preload="metadata"
+        poster={poster}
+        width={width}
+        height={height}
+      >
         {webm && <source src={webm} type='video/webm; codecs="av01.0.08M.10"' />}
         <source src={src} type="video/mp4" />
         {children}
