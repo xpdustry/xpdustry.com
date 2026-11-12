@@ -1,6 +1,3 @@
-import text from "@fontsource-variable/momo-trust-sans/files/momo-trust-sans-latin-wght-normal.woff2?url";
-import mono from "@fontsource/dm-mono/files/dm-mono-latin-500-normal.woff2?url";
-import display from "@fontsource/momo-trust-display/files/momo-trust-display-latin-400-normal.woff2?url";
 import {
   HeadContent,
   Scripts,
@@ -17,6 +14,7 @@ import { RouteAnnouncer } from "#app/components/site/RouteAnnouncer";
 import { playerCount } from "#app/data/live";
 import { getLiveData } from "#app/data/live.functions";
 import { CROWN } from "#app/data/textures";
+import { fontPreloads } from "#app/lib/fontPreloads";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/lib/reveal";
 import { useSpotlight } from "#app/lib/useSpotlight";
 import gtConfig from "../../gt.config.json";
@@ -36,7 +34,7 @@ export const Route = createRootRoute({
     ]);
     return { live, locale, translations };
   },
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -47,13 +45,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
-      ...[display, text, mono].map((href) => ({
-        rel: "preload",
-        href,
-        as: "font",
-        type: "font/woff2",
-        crossOrigin: "anonymous" as const,
-      })),
+      ...fontPreloads(["display", "mono"], loaderData?.locale ?? gtConfig.defaultLocale),
       // The backdrop's layers are many times the crown's weight, so they yield to the first screen.
       ...REVEAL_IMAGES.map((href) => ({
         rel: "preload",

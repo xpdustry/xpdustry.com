@@ -8,6 +8,7 @@ import { Tray } from "#app/components/tray/Tray";
 import { authors } from "#app/content/authors";
 import { nearbyPosts, postsBySlug, translated } from "#app/content/registry";
 import { BLOG_TAGLINE } from "#app/data/site";
+import { fontPreloads } from "#app/lib/fontPreloads";
 import { Newspaper } from "#app/lib/icons";
 import { postCard, postTitle, seo } from "#app/lib/seo";
 import { postStructuredData } from "#app/lib/structuredData";
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/blog/$slug")({
     const post = translated(original, locale);
     const { description, publishedAt, updatedAt, author } = post.frontmatter;
     const title = postTitle(post.frontmatter);
-    return seo({
+    const head = seo({
       locale,
       title,
       description,
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/blog/$slug")({
       authorUrl: authors[author].url,
       jsonLd: postStructuredData(post, locale, await getMessages()),
     });
+    return { ...head, links: [...head.links, ...fontPreloads(["text"], locale)] };
   },
   component: PostPage,
 });
