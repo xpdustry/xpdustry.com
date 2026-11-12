@@ -1,24 +1,25 @@
 import { useGT, useLocale, useSetLocale } from "gt-tanstack-start";
-import { useCallback, useId, useRef, useState } from "react";
+import { useId, type RefObject } from "react";
 import { PlinthButton } from "#app/components/ui/Plinth";
 import { LOCALES, localeInfo } from "#app/i18n/locales";
 import { Check } from "#app/lib/icons";
-import { useDismiss } from "#app/lib/useDismiss";
 import * as styles from "./LocaleSwitch.css";
 
+interface LocaleSwitchProps {
+  className?: string;
+  button: RefObject<HTMLButtonElement | null>;
+  open: boolean;
+  onToggle: () => void;
+}
+
 /** The page's language as a button, opening the list of the languages the site is served in. */
-export function LocaleSwitch({ className }: { className?: string }) {
+export function LocaleSwitch({ className, button, open, onToggle }: LocaleSwitchProps) {
   const gt = useGT();
   const locale = useLocale();
-  const [open, setOpen] = useState(false);
-  const wrapper = useRef<HTMLDivElement>(null);
-  const button = useRef<HTMLButtonElement>(null);
   const list = useId();
-  const close = useCallback(() => setOpen(false), []);
-  useDismiss({ open, within: wrapper, returnTo: button, close });
 
   return (
-    <div ref={wrapper} className={`${styles.wrapper} ${className ?? ""}`}>
+    <div className={`${styles.wrapper} ${className ?? ""}`}>
       <PlinthButton
         ref={button}
         tone="ink"
@@ -26,7 +27,7 @@ export function LocaleSwitch({ className }: { className?: string }) {
         aria-label={gt("Language: {language}", { language: localeInfo(locale).name })}
         aria-expanded={open}
         aria-controls={list}
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
       >
         {locale}
       </PlinthButton>

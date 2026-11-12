@@ -1,5 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { onDeep } from "#app/components/site/deep";
+import { popoverOpen, popoverShut, popoverTransition } from "#app/components/site/popover";
 import { media, upTo } from "#app/styles/media";
 import { radius } from "#app/styles/scale";
 import { tone, wall } from "#app/components/ui/Plinth.css";
@@ -55,7 +56,7 @@ export const nav = style({
       position: "absolute",
       top: `calc(100% - ${below} + 10px)`,
       right: 6,
-      display: "none",
+      ...popoverShut,
       flexDirection: "column",
       gap: 10,
       minWidth: 210,
@@ -66,6 +67,7 @@ export const nav = style({
       background: vars.deep,
       boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)",
     },
+    [`${folded} and ${media.motion}`]: { transition: popoverTransition },
   },
 });
 
@@ -73,7 +75,7 @@ export const open = style({
   "@media": {
     [folded]: {
       selectors: {
-        [`${nav}&`]: { display: "flex" },
+        [`${nav}&`]: popoverOpen,
       },
     },
   },

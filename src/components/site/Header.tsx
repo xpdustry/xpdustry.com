@@ -16,30 +16,41 @@ import { useDismiss } from "#app/lib/useDismiss";
 import * as styles from "./Header.css";
 
 export function Header({ players }: { players: PlayerCount }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<"menu" | "languages">();
   const header = useRef<HTMLElement>(null);
-  const toggle = useRef<HTMLButtonElement>(null);
+  const menuToggle = useRef<HTMLButtonElement>(null);
+  const languageToggle = useRef<HTMLButtonElement>(null);
   const menu = useId();
   const gt = useGT();
 
-  const shut = useCallback(() => setOpen(false), []);
-  useDismiss({ open, within: header, returnTo: toggle, close: shut });
+  const shut = useCallback(() => setOpen(undefined), []);
+  const toggle = (popover: "menu" | "languages") => setOpen(open === popover ? undefined : popover);
+  useDismiss({
+    open: open !== undefined,
+    within: header,
+    returnTo: open === "languages" ? languageToggle : menuToggle,
+    close: shut,
+  });
   return (
     <header ref={header} className={`${styles.header} reveal`}>
       <Brand className={styles.brand} />
       <PlinthButton
-        ref={toggle}
+        ref={menuToggle}
         tone="ink"
         icon
         className={styles.toggle}
         aria-label={gt("Menu")}
-        aria-expanded={open}
+        aria-expanded={open === "menu"}
         aria-controls={menu}
-        onClick={() => setOpen(!open)}
+        onClick={() => toggle("menu")}
       >
-        {open ? <X /> : <List />}
+        {open === "menu" ? <X /> : <List />}
       </PlinthButton>
-      <nav id={menu} className={`${styles.nav} ${open ? styles.open : ""}`} aria-label={gt("Main")}>
+      <nav
+        id={menu}
+        className={`${styles.nav} ${open === "menu" ? styles.open : ""}`}
+        aria-label={gt("Main")}
+      >
         <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }} onClick={shut}>
           <T>Home</T>
         </PlinthLink>
@@ -58,7 +69,12 @@ export function Header({ players }: { players: PlayerCount }) {
         <LocaleList className={styles.languages} />
       </nav>
       <PlayPill players={players} className={styles.play} />
-      <LocaleSwitch className={styles.language} />
+      <LocaleSwitch
+        className={styles.language}
+        button={languageToggle}
+        open={open === "languages"}
+        onToggle={() => toggle("languages")}
+      />
       <PlinthAnchor
         tone="ink"
         icon

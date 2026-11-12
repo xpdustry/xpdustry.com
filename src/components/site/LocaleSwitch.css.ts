@@ -1,4 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
+import { popoverOpen, popoverShut, popoverTransition } from "#app/components/site/popover";
+import { media } from "#app/styles/media";
 import { font, leading, radius } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
@@ -16,8 +18,11 @@ export const button = style({});
 
 globalStyle(`${button} > span`, {
   ...code,
-  minWidth: "2ch",
-  padding: "9.5px 11px",
+  display: "grid",
+  placeItems: "center",
+  width: 40,
+  height: 40,
+  padding: 0,
 });
 
 export const list = style({
@@ -31,18 +36,21 @@ export const panel = style({
   top: "calc(100% + 10px)",
   right: 0,
   zIndex: 6,
-  display: "none",
+  ...popoverShut,
   minWidth: 170,
   padding: 8,
   border: `2px solid ${vars.deepWall}`,
   borderRadius: radius.lg,
   background: vars.deep,
   boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)",
+  "@media": {
+    [media.motion]: { transition: popoverTransition },
+  },
 });
 
 export const open = style({
   selectors: {
-    [`${panel}&`]: { display: "flex" },
+    [`${panel}&`]: popoverOpen,
   },
 });
 
