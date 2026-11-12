@@ -47,6 +47,14 @@ describe("compileBlogMarkdown", () => {
     expect(html).toContain('<a href="/blog">internal</a>');
   });
 
+  test("includes the source path in invalid frontmatter errors", () => {
+    expect(() =>
+      compileBlogMarkdown("src/content/blog/broken.md", "---\ntitle: [unterminated\n---\n\nBroken.")
+    ).toThrow(/^src\/content\/blog\/broken\.md:/);
+  });
+});
+
+describe("post media", () => {
   test("renders repository-owned images and video", () => {
     const html =
       render(`<!-- ::post-image src="/blog/screenshot.png" alt="A <screen>" width="799" height="741" caption="The alert & details." -->
@@ -75,9 +83,26 @@ A recording. [Download it.](/blog/demo.mp4)
     expect(() => compile(media)).toThrow();
   });
 
-  test("includes the source path in invalid frontmatter errors", () => {
-    expect(() =>
-      compileBlogMarkdown("src/content/blog/broken.md", "---\ntitle: [unterminated\n---\n\nBroken.")
-    ).toThrow(/^src\/content\/blog\/broken\.md:/);
+  test.each([
+    [
+      '<!-- ::start:post-image src="/blog/a.png" alt="A" width="1" height="1" -->\nA body.\n<!-- ::end:post-image -->',
+      "post-image cannot have body content"
+    ],
+    [
+      '<!-- ::start:post-video src="/blog/a.mp4" poster="/blog/a.png" width="1" height="1" -->\n<!-- ::end:post-video -->',
+      "post-video requires fallback content"
+    ],
+    ['<!-- ::post-image src="/blog/a.png" width="1" height="1" -->', /^post-image: .*alt/]
+  ])("explains what is wrong with %j", (media, message) => {
+    expect(() => compile(media)).toThrow(message);
+  });
+
+  test("leaves comments naming other components as text", () => {
+    expect(compile('<!-- ::post-other src="/blog/a.png" -->').document.children).toEqual([
+      {
+        type: "paragraph",
+        children: [{ type: "text", value: '<!-- ::post-other src="/blog/a.png" -->' }]
+      }
+    ]);
   });
 });

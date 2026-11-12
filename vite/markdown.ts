@@ -98,31 +98,40 @@ function parseFrontmatter(file: string, source: string | undefined): unknown {
   }
 }
 
+type MediaName = keyof typeof MEDIA;
+type Media = (typeof MEDIA)[MediaName];
+
+const isMediaName = (name: string): name is MediaName => Object.hasOwn(MEDIA, name);
+
+function assertBody(node: ComponentNode, media: Media) {
+  const hasBody = node.children.length > 0;
+  if (media.body && !hasBody) throw new Error(`${node.name} requires fallback content`);
+  if (!media.body && hasBody) throw new Error(`${node.name} cannot have body content`);
+}
+
+/** The validated attributes as element properties, without the optional ones left out. */
+function mediaProperties(node: ComponentNode, media: Media): Record<string, string> {
+  const result = v.safeParse(media.schema, node.attributes);
+  if (!result.success) throw new Error(`${node.name}: ${v.summarize(result.issues)}`);
+  return Object.fromEntries(
+    Object.entries(result.output).flatMap(([key, value]) =>
+      value === undefined ? [] : [[key, String(value)]]
+    )
+  );
+}
+
 function mediaExtension(): MarkdownExtension {
   return {
     name: "xpdustry:post-media",
     parseBlock(context) {
       const comment = parseComponentComment(context.lines[context.index] ?? "");
-      if (!comment || !Object.hasOwn(MEDIA, comment.name)) return;
+      if (!comment || !isMediaName(comment.name)) return;
 
       const node = parseCommentComponentBlock(context);
       if (!node) return;
-      const media = MEDIA[node.name as keyof typeof MEDIA];
-      if (media.body && node.children.length === 0) {
-        throw new Error(`${node.name} requires fallback content`);
-      }
-      if (!media.body && node.children.length > 0) {
-        throw new Error(`${node.name} cannot have body content`);
-      }
-
-      const result = v.safeParse(media.schema, node.attributes);
-      if (!result.success) throw new Error(`${node.name}: ${v.summarize(result.issues)}`);
-      const properties = Object.fromEntries(
-        Object.entries(result.output).flatMap(([key, value]) =>
-          value === undefined ? [] : [[key, String(value)]]
-        )
-      );
-      return { ...node, tagName: media.tagName, properties };
+      const media = MEDIA[node.name as MediaName];
+      assertBody(node, media);
+      return { ...node, tagName: media.tagName, properties: mediaProperties(node, media) };
     }
   };
 }
