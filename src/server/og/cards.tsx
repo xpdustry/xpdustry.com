@@ -13,7 +13,7 @@ import { posts } from "#app/content/registry";
 import { projects } from "#app/data/projects";
 import { servers } from "#app/data/servers";
 import { topic } from "#app/data/topics";
-import { CARD_SIZE } from "#app/lib/seo";
+import { CARD_SIZE, postTitle } from "#app/lib/seo";
 import { BlogCard, HomeCard, PostCard, type CardPost } from "#app/server/og/Card";
 import { services } from "#app/server/services";
 
@@ -44,7 +44,7 @@ function inlineIcon(url: string | undefined): string | undefined {
 
 const cardPosts: readonly CardPost[] = posts.map((post) => ({
   slug: post.slug,
-  title: post.frontmatter.title,
+  title: postTitle(post.frontmatter),
   author: post.frontmatter.author,
   topic: post.frontmatter.topic,
   publishedAt: post.frontmatter.publishedAt,

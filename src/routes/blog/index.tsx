@@ -1,18 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AskCard } from "#app/components/blog/AskCard";
 import { LeadPost } from "#app/components/blog/LeadPost";
 import { PostTile } from "#app/components/blog/PostTile";
+import { DiscordCard } from "#app/components/site/DiscordCard";
 import { Patches } from "#app/components/ui/Patches";
 import { posts } from "#app/content/registry";
 import { PATCHES } from "#app/data/patches";
-import { BLOG_DESCRIPTION } from "#app/data/site";
+import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/data/site";
 import { BLOG_CARD, seo } from "#app/lib/seo";
 import styles from "#app/components/blog/BlogIndex.module.css";
 import card from "#app/components/ui/Card.module.css";
 
 export const Route = createFileRoute("/blog/")({
   head: () =>
-    seo({ title: "Blog", description: BLOG_DESCRIPTION, path: "/blog", image: BLOG_CARD }),
+    seo({
+      title: BLOG_TITLE,
+      fullTitle: true,
+      description: BLOG_DESCRIPTION,
+      path: "/blog",
+      image: BLOG_CARD,
+    }),
   component: BlogIndex,
 });
 
@@ -25,9 +31,9 @@ function BlogIndex() {
         <h1>Blog</h1>
         <p>{BLOG_DESCRIPTION}</p>
       </section>
-      <AskCard title="Questions about a release?" className={`${styles.ask} reveal`}>
+      <DiscordCard title="Questions about a release?" className={`${styles.ask} reveal`}>
         Ask in our Discord.
-      </AskCard>
+      </DiscordCard>
       {latest ? (
         <LeadPost post={latest} className={`${styles.lead} reveal`} />
       ) : (

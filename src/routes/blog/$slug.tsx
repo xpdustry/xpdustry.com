@@ -7,7 +7,8 @@ import { Tray } from "#app/components/tray/Tray";
 import { Newspaper } from "#app/components/ui/Icons";
 import { authors } from "#app/content/authors";
 import { nearbyPosts, postsBySlug } from "#app/content/registry";
-import { postCard, seo } from "#app/lib/seo";
+import { postCard, postTitle, seo } from "#app/lib/seo";
+import { postStructuredData } from "#app/lib/structuredData";
 import styles from "#app/components/blog/PostPage.module.css";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ params }) => {
     const post = postsBySlug.get(params.slug);
     if (!post) return {};
-    const { title, description, publishedAt, updatedAt, author } = post.frontmatter;
+    const { description, publishedAt, updatedAt, author } = post.frontmatter;
+    const title = postTitle(post.frontmatter);
     return seo({
       title,
       description,
@@ -29,6 +31,7 @@ export const Route = createFileRoute("/blog/$slug")({
       publishedAt,
       updatedAt,
       authorUrl: authors[author].url,
+      jsonLd: postStructuredData(post),
     });
   },
   component: PostPage,
@@ -41,14 +44,16 @@ function PostPage() {
   const nearby = nearbyPosts(slug);
 
   return (
-    <>
-      <main id="main" className={styles.post}>
-        <PostCover post={post} className={`${styles.cover} reveal`} />
-        <article className={`${styles.article} reveal`}>
-          <PostBody document={document} />
+    <main id="main">
+      <div className={styles.post}>
+        <article className={styles.article}>
+          <PostCover post={post} className={`${styles.cover} reveal`} />
+          <div className={`${styles.body} reveal`}>
+            <PostBody document={document} />
+          </div>
         </article>
-        <PostAside post={post} className="reveal" />
-      </main>
+        <PostAside post={post} className={`${styles.aside} reveal`} />
+      </div>
       {nearby.length > 0 && (
         <Tray
           id="more"
@@ -64,6 +69,6 @@ function PostPage() {
           </div>
         </Tray>
       )}
-    </>
+    </main>
   );
 }

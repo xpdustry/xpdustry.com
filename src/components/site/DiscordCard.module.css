@@ -56,3 +56,21 @@
   font-size: 13px;
   opacity: 0.9;
 }
+
+.compact {
+  gap: 18px;
+  padding: 20px 22px;
+}
+
+.compact .glyph {
+  width: 34px;
+  height: 34px;
+}
+
+.compact .title {
+  font-size: 21px;
+}
+
+.compact .say {
+  font-size: 14.5px;
+}

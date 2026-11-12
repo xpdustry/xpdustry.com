@@ -43,6 +43,7 @@ export interface Project {
   name: string;
   repository: `${string}/${string}`;
   summary: string;
+  website?: string;
   icon?: string;
   card: FeaturedCard | ItemCard;
   theme?: ProjectTheme;
@@ -62,8 +63,9 @@ export const projects: readonly Project[] = [
     slug: "nohorny",
     name: "NoHorny",
     repository: "xpdustry/nohorny",
+    website: "https://nohorny.xpdustry.com",
     summary:
-      "Detects and removes NSFW imagery from logic displays and canvases, with an admin panel to review every catch.",
+      "NoHorny is a Mindustry server plugin that detects and removes NSFW art drawn on logic displays and canvases.",
     icon: nohornyIcon,
     card: {
       kind: "featured",
@@ -78,7 +80,8 @@ export const projects: readonly Project[] = [
     slug: "claj",
     name: "CLaJ",
     repository: "xpdustry/claj",
-    summary: "A proxy that lets players join each other's games directly.",
+    summary:
+      "CLaJ (Copy Link and Join) is a Mindustry mod that lets you play with your friends through a shared link.",
     icon: clajIcon,
     card: {
       kind: "item",
@@ -91,7 +94,7 @@ export const projects: readonly Project[] = [
     slug: "toxopid",
     name: "Toxopid",
     repository: "xpdustry/toxopid",
-    summary: "Gradle plugin for Mindustry mods and plugins.",
+    summary: "A Gradle plugin for building, testing and running Mindustry mods and plugins.",
     card: {
       kind: "item",
       ground: "#8da1e3",
@@ -103,7 +106,7 @@ export const projects: readonly Project[] = [
     slug: "distributor",
     name: "Distributor",
     repository: "xpdustry/distributor",
-    summary: "Utilities for Mindustry plugins.",
+    summary: "A framework offering utilities for Mindustry plugins.",
     card: {
       kind: "item",
       ground: "#e8dc80",

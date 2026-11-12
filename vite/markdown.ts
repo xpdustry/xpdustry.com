@@ -82,7 +82,9 @@ export function blogMarkdownPlugin(): Plugin {
         return {
           code: [
             `export const frontmatter = ${serialize(compiled.frontmatter)};`,
-            `export const document = ${serialize(compiled.document)};`,
+            ...(new URLSearchParams(id.split("?")[1]).has("frontmatter")
+              ? []
+              : [`export const document = ${serialize(compiled.document)};`]),
           ].join("\n"),
           map: null,
         };

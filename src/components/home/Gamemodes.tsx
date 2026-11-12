@@ -34,7 +34,12 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
       id="gamemodes"
       icon={GameController}
       title="Gamemodes"
-      subtitle={<PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />}
+      subtitle={
+        <>
+          Chaotic Neutral Mindustry servers ·{" "}
+          <PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />
+        </>
+      }
     >
       <ul className={styles.modes}>
         {gamemodes.map((mode) => (

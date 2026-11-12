@@ -6,11 +6,12 @@ description: >-
 publishedAt: 2026-04-23
 author: phinner
 topic: NoHorny
+topicVersion: "4"
 releases:
   - xpdustry/nohorny@v4.0.0-beta.3
 ---
 
-Another day, another NoHorny release. This time: **beta 3**.
+Another day, another release of the NoHorny Mindustry plugin. This time: **beta 3**.
 In this release, the main improvement is the grouping algorithm.
 
 - **In v3**, I was scanning the entire map every time there was a change, in a background thread.

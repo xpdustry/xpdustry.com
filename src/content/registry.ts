@@ -19,6 +19,7 @@ export interface Post {
 }
 
 const frontmatters = import.meta.glob<BlogFrontmatter>("./blog/*.md", {
+  query: "?frontmatter",
   import: "frontmatter",
   eager: true,
 });

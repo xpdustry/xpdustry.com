@@ -1,5 +1,6 @@
 export const SITE = {
   name: "Xpdustry",
+  title: "Xpdustry: Mindustry plugins and Chaotic Neutral servers",
   positioning: "Pretty cool Mindustry tools.",
   description:
     "We build open-source software for Mindustry, and also run the Chaotic Neutral Mindustry servers.",
@@ -12,4 +13,6 @@ export const SITE = {
   origin: "https://xpdustry.com",
 } as const;
 
-export const BLOG_DESCRIPTION = "Release notes and updates from the team.";
+export const BLOG_TITLE = "Xpdustry blog: Mindustry plugin news, guides and release notes";
+export const BLOG_DESCRIPTION =
+  "Release notes, guides and articles about Xpdustry Mindustry mods and plugins.";

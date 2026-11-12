@@ -1,4 +1,4 @@
-import { AskCard } from "#app/components/blog/AskCard";
+import { DiscordCard } from "#app/components/site/DiscordCard";
 import { CopyButton } from "#app/components/ui/CopyButton";
 import { PlinthAnchor } from "#app/components/ui/Plinth";
 import type { Post } from "#app/content/registry";
@@ -14,8 +14,8 @@ export function PostAside({ post, className }: { post: Post; className?: string 
   return (
     <aside className={`${styles.aside} ${className ?? ""}`}>
       {releases.length > 0 && (
-        <section className={styles.panel}>
-          <h2>This post covers</h2>
+        <section className={styles.panel} aria-label="This post covers">
+          <p className={styles.label}>This post covers</p>
           {releases.map((id) => {
             const release = parseReleaseId(id);
             // the tag alone when the release belongs to the post's own project
@@ -40,15 +40,15 @@ export function PostAside({ post, className }: { post: Post; className?: string 
           })}
         </section>
       )}
-      <section className={`${styles.panel} ${styles.share}`}>
-        <h2>Share this post</h2>
+      <section className={`${styles.panel} ${styles.share}`} aria-label="Share this post">
+        <p className={styles.label}>Share this post</p>
         <CopyButton text={`${SITE.origin}/blog/${post.slug}`} label="Copy the link to this post">
           Copy link
         </CopyButton>
       </section>
-      <AskCard title="Questions or feedback?" compact>
+      <DiscordCard title="Questions or feedback?" compact>
         Ask in our Discord, or ping {author} there.
-      </AskCard>
+      </DiscordCard>
     </aside>
   );
 }

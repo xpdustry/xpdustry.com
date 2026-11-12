@@ -69,7 +69,15 @@ type SectionLinkProps = Omit<ComponentProps<typeof PlinthLink>, "to" | "hash" | 
  * for a reload, and would put the scroll back where it was.
  */
 export function PlinthSectionLink({ hash, ...props }: SectionLinkProps) {
-  return <PlinthLink {...props} to="/" hash={hash} resetScroll={false} />;
+  return (
+    <PlinthLink
+      {...props}
+      to="/"
+      hash={hash}
+      resetScroll={false}
+      activeOptions={{ exact: true, includeHash: true }}
+    />
+  );
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &

@@ -1,4 +1,6 @@
+import type { BlogFrontmatter } from "#app/content/schema";
 import { BLOG_DESCRIPTION, SITE } from "#app/data/site";
+import type { JsonLd } from "#app/lib/structuredData";
 
 export interface PageImage {
   /** Site-relative, e.g. `/og/home.png`. */
@@ -24,8 +26,19 @@ export function postCard(slug: string, title: string): PageImage {
   return { url: `/og/blog/${slug}.png`, alt: `${title} - ${SITE.name}` };
 }
 
+export function postTitle({
+  title,
+  topic,
+  topicVersion,
+}: Pick<BlogFrontmatter, "title" | "topic" | "topicVersion">): string {
+  if (title.toLowerCase().includes(topic.toLowerCase())) return title;
+  return `${topic}${topicVersion ? ` ${topicVersion}` : ""} ${title}`;
+}
+
 export interface PageSeo {
   title: string;
+  /** Use the title as written, without appending the site name. */
+  fullTitle?: boolean;
   description: string;
   /** Site-relative, e.g. `/blog`. */
   path: string;
@@ -35,11 +48,13 @@ export interface PageSeo {
   updatedAt?: string;
   /** Profile URL of the author, for `article:author`. */
   authorUrl?: string;
+  jsonLd?: JsonLd;
 }
 
 /** A route's `head()`: title, description, canonical URL, Open Graph and Twitter tags. */
 export function seo(page: PageSeo) {
-  const title = page.title === SITE.name ? SITE.name : `${page.title} - ${SITE.name}`;
+  const title =
+    page.fullTitle || page.title === SITE.name ? page.title : `${page.title} - ${SITE.name}`;
   const url = `${SITE.origin}${page.path}`;
   const image = page.image ?? SITE_CARD;
   const imageUrl = `${SITE.origin}${image.url}`;
@@ -71,5 +86,13 @@ export function seo(page: PageSeo) {
       ...(page.authorUrl ? [{ property: "article:author", content: page.authorUrl }] : []),
     ],
     links: [{ rel: "canonical", href: url }],
+    scripts: page.jsonLd
+      ? [
+          {
+            type: "application/ld+json",
+            children: JSON.stringify(page.jsonLd).replace(/</g, "\\u003c"),
+          },
+        ]
+      : [],
   };
 }

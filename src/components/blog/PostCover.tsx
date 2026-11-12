@@ -7,6 +7,7 @@ import type { Post } from "#app/content/registry";
 import { seeded } from "#app/data/textures";
 import { topic } from "#app/data/topics";
 import { formatDate } from "#app/lib/format";
+import { postTitle } from "#app/lib/seo";
 import styles from "./PostCover.module.css";
 
 /** The top of a post page, in its topic's colours: where it is filed, what it is, who wrote it. */
@@ -14,6 +15,13 @@ export function PostCover({ post, className }: { post: Post; className?: string 
   const { title, description, author, publishedAt, updatedAt } = post.frontmatter;
   const theme = topic(post.frontmatter.topic);
   const profile = authors[author];
+  const TopicTag = theme.website ? "a" : "span";
+  const topicChip = (
+    <TopicTag className={styles.topic} href={theme.website}>
+      {theme.icon && <img src={theme.icon} alt="" />}
+      {[theme.name, post.frontmatter.topicVersion].filter(Boolean).join(" ")}
+    </TopicTag>
+  );
   return (
     <header
       className={`${styles.cover} ${className ?? ""}`}
@@ -28,16 +36,21 @@ export function PostCover({ post, className }: { post: Post; className?: string 
       <Patches patches={seeded(theme.patches, post.slug)} />
       {theme.icon && <img className={styles.logo} src={theme.icon} alt="" />}
       <div className={styles.crumbs}>
-        <Link to="/blog" className={styles.back}>
+        <Link to="/blog" activeOptions={{ exact: true }} className={styles.back}>
           <CaretLeft />
           Blog
         </Link>
-        <span className={styles.topic}>
-          {theme.icon && <img src={theme.icon} alt="" />}
-          {theme.name}
-        </span>
+        {postTitle(post.frontmatter) === title ? (
+          <>
+            {topicChip}
+            <h1 className={styles.title}>{title}</h1>
+          </>
+        ) : (
+          <h1 className={styles.heading}>
+            {topicChip} <span className={styles.title}>{title}</span>
+          </h1>
+        )}
       </div>
-      <h1>{title}</h1>
       <p className={styles.description}>{description}</p>
       <div className={styles.byline}>
         <a href={profile.url} target="_blank" rel="noreferrer">

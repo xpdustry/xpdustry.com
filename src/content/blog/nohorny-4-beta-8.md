@@ -6,12 +6,13 @@ description: >-
 publishedAt: 2026-07-20
 author: phinner
 topic: NoHorny
+topicVersion: "4"
 hero: /blog/nohorny-admin-overview-dark.webp
 releases:
   - xpdustry/nohorny@v4.0.0-beta.8
 ---
 
-This Monday morning, I give you NoHorny **beta 8**.
+This Monday morning, I give you **beta 8** of the NoHorny Mindustry plugin.
 
 > [!WARNING] Breaking change
 > Like I told you last week, this release makes the public NoHorny server instance no longer

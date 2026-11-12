@@ -6,13 +6,14 @@ description: >-
 publishedAt: 2026-05-22
 author: phinner
 topic: NoHorny
+topicVersion: "4"
 releases:
   - xpdustry/nohorny@v4.0.0-beta.7
 ---
 
-The week is ending, so it is time for a new NoHorny release. Say hello to **beta 7**.
+The week is ending, so it is time for a new release of the NoHorny Mindustry plugin. Say hello to **beta 7**.
 
-### Accuracy improvements
+## Accuracy improvements
 
 - **The trackers wait for the build to finish.** They estimate the time it takes to build a canvas
   or a logic schematic and wait for its completion. This little trick greatly decreases the number
@@ -25,7 +26,7 @@ The week is ending, so it is time for a new NoHorny release. Say hello to **beta
 > [!NOTE] The short version
 > All these changes now make automatically banning on an `NSFW` rating actually reliable.
 
-### Everything else
+## Everything else
 
 - The NoHorny server is now published to the GitHub package registry, so you no longer need to
   build it locally.

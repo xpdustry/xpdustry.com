@@ -33,6 +33,7 @@ export const BlogFrontmatterSchema = v.strictObject(
     updatedAt: v.optional(BlogFrontmatterDateSchema),
     author: v.picklist(authorNames, "must be a known author"),
     topic: NonBlankStringSchema,
+    topicVersion: v.optional(NonBlankStringSchema),
     /** The image behind the post on cards. Posts without one get a game screenshot. */
     hero: v.optional(blogMediaPathSchema(IMAGE_EXTENSIONS)),
     releases: v.optional(

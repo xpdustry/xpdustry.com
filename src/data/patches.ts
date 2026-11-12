@@ -104,8 +104,7 @@ export const PATCHES = {
     [0.92, 0.5, 77],
     [0.5, 1.08, 27],
   ]),
-  ask: growing(patches(...BLURPLE, [[1, 0, 140]]), 1.25),
-  askCompact: growing(patches(...BLURPLE, [[1, 0, 79]])),
+  discordCompact: growing(patches(...BLURPLE, [[1, 0, 79]])),
   nohornyCover: cover(...PLUM),
   siteCover: cover(...DEEP_TEAL),
   message: patches(...LIGHT_TEAL, [

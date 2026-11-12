@@ -6,6 +6,7 @@ description: >-
 publishedAt: 2026-10-07
 author: phinner
 topic: NoHorny
+topicVersion: "4"
 hero: /blog/nohorny-site-hero-dark.webp
 releases:
   - xpdustry/nohorny@v4.0.0-beta.9
@@ -13,7 +14,7 @@ releases:
   - xpdustry/nohorny@v4.0.0-beta.11
 ---
 
-Oh boy, what an excellent day to post about major improvements in NoHorny.
+Oh boy, what an excellent day to post about major improvements in the NoHorny Mindustry plugin.
 
 It has been a while since the last post in July? And I implemented a bunch of features you will really like:
 

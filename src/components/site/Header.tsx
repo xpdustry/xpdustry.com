@@ -68,7 +68,7 @@ export function Header({ players }: { players: PlayerCount }) {
         <PlinthSectionLink tone="ink" hash="gamemodes" onClick={shut}>
           Gamemodes
         </PlinthSectionLink>
-        <PlinthLink tone="ink" to="/blog" onClick={shut}>
+        <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }} onClick={shut}>
           Blog
         </PlinthLink>
         <PlinthAnchor tone="ink" href={SITE.maven} onClick={shut}>

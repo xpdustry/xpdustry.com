@@ -6,11 +6,12 @@ description: >-
 publishedAt: 2026-04-13
 author: phinner
 topic: NoHorny
+topicVersion: "4"
 releases:
   - xpdustry/nohorny@v4.0.0-beta.1
 ---
 
-Excellent news, everyone: **NoHorny v4 beta** is now available. Just in time for Mindustry v8.
+Excellent news, everyone: **NoHorny v4 beta**, the Mindustry plugin, is now available. Just in time for Mindustry v8.
 
 This beta includes some major improvements:
 

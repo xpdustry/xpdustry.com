@@ -16,8 +16,8 @@ export function Hero({ className }: { className?: string }) {
         <h1>{SITE.name}</h1>
       </div>
       <p>
-        We’re a small group of developers. Since 2019 we’ve made open source mods and plugins for
-        Mindustry, and run servers for people to play on.
+        We’re a group of developers, making open source mods and plugins for Mindustry since 2019.
+        We also run the Chaotic Neutral Mindustry servers.
       </p>
       <div className={styles.actions}>
         <PlinthSectionLink hash="projects">Browse projects</PlinthSectionLink>

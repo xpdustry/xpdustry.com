@@ -30,3 +30,10 @@ test("rejects duplicate release references within a post", () => {
     }),
   ).toThrow(/duplicate/);
 });
+
+test("accepts a version line and rejects blank or non-string versions", () => {
+  expect(parseBlogFrontmatter("a.md", { ...valid, topicVersion: "4" }).topicVersion).toBe("4");
+  for (const topicVersion of ["", "  ", 4]) {
+    expect(() => parseBlogFrontmatter("a.md", { ...valid, topicVersion })).toThrow(/topicVersion/);
+  }
+});

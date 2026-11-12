@@ -4,6 +4,7 @@ import { projectForTopic, type ProjectTheme } from "#app/data/projects";
 export interface Topic extends ProjectTheme {
   name: string;
   icon?: string;
+  website?: string;
 }
 
 /** Topics that are not a project wear the site's own deep teal. */
@@ -17,5 +18,10 @@ const DEFAULT_THEME: ProjectTheme = {
 
 export function topic(name: string): Topic {
   const project = projectForTopic(name);
-  return { name, icon: project?.icon, ...(project?.theme ?? DEFAULT_THEME) };
+  return {
+    name,
+    icon: project?.icon,
+    website: project?.website,
+    ...(project?.theme ?? DEFAULT_THEME),
+  };
 }

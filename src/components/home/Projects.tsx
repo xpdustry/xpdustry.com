@@ -37,7 +37,7 @@ export function Projects({ releases }: { releases: LiveData["releases"] }) {
           <Patches patches={PATCHES.moreCard} />
           <GitHub className={styles.symbol} />
           <h3>Much more</h3>
-          <p>Everything we make is public, on GitHub.</p>
+          <p>Everything we make is public on GitHub.</p>
         </a>
       </div>
     </Tray>
@@ -53,7 +53,7 @@ function Featured({ project, release }: { project: Project; release?: string }) 
   const { ground, patches, muted, screenshot } = project.card;
   return (
     <a
-      href={repositoryUrl(project)}
+      href={project.website ?? repositoryUrl(project)}
       className={`${card.card} spot ${styles.featured}`}
       style={{ background: ground }}
     >
@@ -82,7 +82,7 @@ function Item({
   const { ground, patches, symbol: Glyph } = project.card;
   return (
     <a
-      href={repositoryUrl(project)}
+      href={project.website ?? repositoryUrl(project)}
       className={`${card.card} spot ${styles.item} ${className ?? ""}`}
       style={{ background: ground }}
     >

@@ -168,13 +168,6 @@ canvas {
   translate: none;
 }
 
-/* a block of the page, hidden until the crown and the footer's ridge are in, then raised in with
-   the others on screen; the backdrop fades in once its own tiles are (see `lib/reveal.ts`) */
-:root[data-wait-frame] :is(.reveal, [data-crown]),
-:root[data-wait-backdrop] [data-backdrop] {
-  opacity: 0;
-}
-
 /* A card that glows along its edge as the pointer comes near (see useSpotlight). */
 :where(.spot)::after {
   content: "";

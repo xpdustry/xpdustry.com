@@ -1,8 +1,11 @@
 // Runs against the production build: `pnpm test:artifact` builds first.
 
-import { readFile } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, test } from "vitest";
+import { LEGACY_MEDIA_REDIRECTS } from "./redirects";
 
 const entryPath = fileURLToPath(new URL("../../dist/server/server.js", import.meta.url));
 const clientRoot = fileURLToPath(new URL("../../dist/client/", import.meta.url));
@@ -34,8 +37,8 @@ describe("built pages", () => {
   });
 
   test.each([
-    ["/", "Since 2019 we’ve made open source mods and plugins for"],
-    ["/blog", "Release notes and updates from the team."],
+    ["/", "making open source mods and plugins for Mindustry since 2019"],
+    ["/blog", "Release notes, guides and articles about Xpdustry"],
     ["/blog/nohorny-4-beta-8", "Discord alerts now arrive blurred"],
   ])("%s renders its primary content", async (path, content) => {
     const response = await get(path);
@@ -46,6 +49,47 @@ describe("built pages", () => {
     expect((html.match(/<h1[\s>]/g) ?? []).length).toBe(1);
   });
 
+  test.each([
+    ["/", "Xpdustry: Mindustry plugins and Chaotic Neutral servers"],
+    ["/blog", "Xpdustry blog: Mindustry plugin news, guides and release notes"],
+  ])("%s publishes its full title and keeps the bare site name", async (path, title) => {
+    const html = await (await get(path)).text();
+    expect(html).toContain(`<title>${title}</title>`);
+    expect(html).toContain(`<meta property="og:title" content="${title}"`);
+    expect(html).toContain(`<meta name="twitter:title" content="${title}"`);
+    expect(html).toContain('<meta property="og:site_name" content="Xpdustry"');
+  });
+
+  test("home names its servers and links the NoHorny card to its site", async () => {
+    const html = await (await get("/")).text();
+    expect(html).toContain("We also run the Chaotic Neutral Mindustry servers.");
+    expect(html).toContain("Chaotic Neutral Mindustry servers ·");
+    expect(html).toMatch(
+      /<a href="https:\/\/nohorny\.xpdustry\.com"[^>]*>[\s\S]*?<h3>NoHorny<\/h3>/,
+    );
+    expect(html).toContain("CLaJ (Copy Link and Join)");
+  });
+
+  test.each(["1", "3", "7", "8", "11"])(
+    "NoHorny beta %s identifies the Mindustry plugin and links its topic",
+    async (beta) => {
+      const html = await (await get(`/blog/nohorny-4-beta-${beta}`)).text();
+      expect(html).toContain("Mindustry plugin");
+      expect(html).toMatch(
+        /<a[^>]*href="https:\/\/nohorny\.xpdustry\.com"[^>]*>[\s\S]*?NoHorny(?: 4)?<\/a>/,
+      );
+      expect(html).toContain('aria-label="This post covers"');
+      expect(html).toContain('aria-label="Share this post"');
+      expect(html).not.toMatch(/<h2[^>]*>(?:This post covers|Share this post)<\/h2>/);
+    },
+  );
+
+  test("beta 7 starts its body outline at level two", async () => {
+    const html = await (await get("/blog/nohorny-4-beta-7")).text();
+    expect(html).toMatch(/<h2[^>]*>Accuracy improvements<\/h2>/);
+    expect(html).toMatch(/<h2[^>]*>Everything else<\/h2>/);
+  });
+
   test("a post renders its body on the server", async () => {
     const html = await (await get("/blog/nohorny-4-beta-8")).text();
     expect(html).toContain("Breaking change");
@@ -53,14 +97,98 @@ describe("built pages", () => {
   });
 
   test.each(["/no-such-page", "/blog/no-such-post"])(
-    "%s is a 404 that keeps its requested canonical URL",
+    "%s is a 404 excluded from indexing",
     async (path) => {
       const response = await get(path);
       expect(response.status).toBe(404);
 
       const html = await response.text();
       expect(html).toContain("this page does not exist");
-      expect(html).toContain(`<link rel="canonical" href="https://xpdustry.com${path}"`);
+      expect(html).not.toContain('<link rel="canonical"');
+      expect(html).toContain('<meta name="robots" content="noindex"');
+    },
+  );
+
+  test("home publishes a parseable website and organization graph", async () => {
+    const html = await (await get("/")).text();
+    const scripts = [
+      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g),
+    ];
+    expect(scripts).toHaveLength(1);
+    expect(JSON.parse(scripts[0]![1]!)).toMatchObject({
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "WebSite", "@id": "https://xpdustry.com/#website" },
+        {
+          "@type": "Organization",
+          "@id": "https://xpdustry.com/#organization",
+          logo: "https://xpdustry.com/icon-512.png",
+        },
+      ],
+    });
+  });
+
+  test.each([
+    ["nohorny-4-beta-1", "Say hello to NoHorny v4 beta 1"],
+    ["nohorny-4-beta-3", "NoHorny 4 Beta 3: Incremental grouping"],
+    ["nohorny-4-beta-7", "NoHorny 4 Beta 7: Automatic bans are reliable now"],
+    ["nohorny-4-beta-8", "NoHorny 4 Beta 8: Breaking changes and blurred alerts"],
+    ["nohorny-4-beta-11", "NoHorny 4 Beta 11: Admin panel and expanded tracking"],
+  ])("%s identifies the product and publishes post structured data", async (slug, title) => {
+    const html = await (await get(`/blog/${slug}`)).text();
+    expect(html).toContain(`<title>${title} - Xpdustry</title>`);
+    expect(html).toContain(`<meta property="og:title" content="${title} - Xpdustry"`);
+    expect(html).toContain(`<meta name="twitter:title" content="${title} - Xpdustry"`);
+    const scripts = [
+      ...html.matchAll(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g),
+    ];
+    expect(scripts).toHaveLength(1);
+    expect(JSON.parse(scripts[0]![1]!)).toMatchObject({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BlogPosting",
+          headline: title,
+          author: { "@type": "Person", name: "phinner", url: "https://github.com/phinner" },
+          publisher: { "@id": "https://xpdustry.com/#organization" },
+          image: `https://xpdustry.com/og/blog/${slug}.png`,
+          mainEntityOfPage: `https://xpdustry.com/blog/${slug}`,
+        },
+        {
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { position: 1, name: "Home" },
+            { position: 2, name: "Blog" },
+            { position: 3, name: title, item: `https://xpdustry.com/blog/${slug}` },
+          ],
+        },
+      ],
+    });
+    const main = /<main\b[^>]*>([\s\S]*?)<\/main>/.exec(html)?.[1];
+    const article = /<article\b[^>]*>([\s\S]*?)<\/article>/.exec(main ?? "")?.[1];
+    expect(article).toMatch(
+      /<header\b[\s\S]*<h1[^>]*>[\s\S]*NoHorny[\s\S]*<\/h1>[\s\S]*<time[\s\S]*<\/header>/,
+    );
+    const heading = /<h1[^>]*>([\s\S]*?)<\/h1>/.exec(article ?? "")?.[1];
+    expect(
+      heading
+        ?.replace(/<[^>]*>/g, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    ).toBe(title);
+    expect(article).toContain("<p>");
+    expect(main).toContain('id="more"');
+  });
+
+  test.each(["/", "/blog", "/blog/nohorny-4-beta-8"])(
+    "%s only marks links to the current page as current",
+    async (path) => {
+      const html = await (await get(path)).text();
+      const currentLinks = [...html.matchAll(/<a\b[^>]*aria-current="page"[^>]*>/g)];
+      for (const [link] of currentLinks) {
+        expect(/href="([^"]+)"/.exec(link)?.[1]).toBe(path);
+      }
+      if (path === "/" || path === "/blog") expect(currentLinks.length).toBeGreaterThan(0);
     },
   );
 
@@ -68,9 +196,117 @@ describe("built pages", () => {
     const html = await (await get("/blog")).text();
     const titles = [...html.matchAll(/<title[^>]*>([^<]*)<\/title>/g)].map((match) => match[1]);
 
-    expect(titles).toEqual(["Blog - Xpdustry"]);
+    expect(titles).toEqual(["Xpdustry blog: Mindustry plugin news, guides and release notes"]);
     expect(html.match(/<meta name="description"/g)).toHaveLength(1);
     expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/blog"');
+  });
+});
+
+describe("permanent redirects", () => {
+  test.each([...LEGACY_MEDIA_REDIRECTS])("%s redirects to %s", async (from, to) => {
+    const response = await get(`${from}?source=old%20link`);
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe(`${to}?source=old%20link`);
+    if (to.startsWith("/blog/")) {
+      expect((await stat(`${clientRoot}${to.slice(1)}`)).isFile()).toBe(true);
+    } else {
+      expect((await get(to)).status).toBe(200);
+    }
+  });
+
+  test.each(["/blog/", "/blog/nohorny-4-beta-8/"])(
+    "%s permanently removes its trailing slash and preserves queries",
+    async (path) => {
+      const response = await get(`${path}?q=a%20b&tag=one&tag=two`);
+      expect(response.status).toBe(308);
+      expect(response.headers.get("location")).toBe(`${path.slice(0, -1)}?q=a%20b&tag=one&tag=two`);
+    },
+  );
+
+  test("does not invent replacements for unknown images", async () => {
+    expect((await get("/blog/missing.png")).status).toBe(404);
+  });
+});
+
+test("the production file server preserves every public URL from the previous site", async () => {
+  // The complete public/ inventory from master before the rewrite.
+  const legacyFiles = [
+    "/apple-touch-icon.png",
+    "/blog/nohorny-admin-overview-dark.png",
+    "/blog/nohorny-admin-requests-dark.png",
+    "/blog/nohorny-discord-alert.png",
+    "/blog/nohorny-request-dark.png",
+    "/blog/nohorny-showcase-poster.jpg",
+    "/blog/nohorny-showcase.mp4",
+    "/blog/nohorny-site-hero-dark.png",
+    "/favicon.ico",
+    "/favicon.svg",
+    "/icon-192.png",
+    "/icon-512.png",
+    "/og.png",
+    "/phinner.svg",
+    "/robots.txt",
+    "/site.webmanifest",
+  ];
+  const server = spawn(process.execPath, ["scripts/serve.ts"], {
+    cwd: fileURLToPath(new URL("../../", import.meta.url)),
+    env: { ...process.env, PORT: "0", HOST: "127.0.0.1", TEST: "" },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const exited = once(server, "exit");
+  try {
+    const origin = await new Promise<string>((resolve, reject) => {
+      let output = "";
+      server.stdout.on("data", (chunk) => {
+        output += String(chunk);
+        const address = /http:\/\/127\.0\.0\.1:\d+/.exec(output)?.[0];
+        if (address) resolve(address);
+      });
+      server.stderr.on("data", (chunk) => {
+        output += String(chunk);
+      });
+      server.once("error", reject);
+      server.once("exit", () => reject(new Error(`File server exited: ${output}`)));
+    });
+    for (const path of legacyFiles) {
+      const response = await fetch(`${origin}${path}`, { method: "HEAD", redirect: "manual" });
+      const target = LEGACY_MEDIA_REDIRECTS.get(path);
+      expect(response.status, path).toBe(target ? 301 : 200);
+      if (target) {
+        expect(response.headers.get("location")).toBe(target);
+        expect((await fetch(`${origin}${target}`, { method: "HEAD" })).status).toBe(200);
+      }
+    }
+    const slash = await fetch(`${origin}/blog/?q=a%20b`, { redirect: "manual" });
+    expect(slash.status).toBe(308);
+    expect(slash.headers.get("location")).toBe("/blog?q=a%20b");
+  } finally {
+    server.kill();
+    await exited;
+  }
+});
+
+describe("post body chunks", () => {
+  test.each(["/", "/blog", "/no-such-page"])(
+    "%s does not preload any post bodies",
+    async (path) => {
+      const html = await (await get(path)).text();
+      const preloads = [...html.matchAll(/<link[^>]*rel="modulepreload"[^>]*>/g)].join("\n");
+      expect(preloads).not.toMatch(/nohorny-4-beta-\d+-/);
+    },
+  );
+
+  test("each post body remains a separate dynamic chunk", async () => {
+    const files = await readdir(`${clientRoot}assets`);
+    const bodies = files.filter((file) => /^nohorny-4-beta-\d+-[^.]+\.js$/.test(file));
+    const posts = await readdir(new URL("../content/blog/", import.meta.url));
+    expect(bodies).toHaveLength(posts.filter((file) => file.endsWith(".md")).length);
+    for (const body of bodies) {
+      expect(await readFile(`${clientRoot}assets/${body}`, "utf8")).toContain("children");
+    }
+    const html = await (await get("/blog/nohorny-4-beta-8")).text();
+    expect(html).toContain("Breaking change");
+    expect(html).not.toMatch(/rel="modulepreload"[^>]*nohorny-4-beta-(?:1|3|7|11)-/);
   });
 });
 

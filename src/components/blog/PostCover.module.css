@@ -22,10 +22,11 @@
 }
 
 .crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-self: flex-start;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0 8px;
+  align-self: stretch;
+  align-items: start;
 }
 
 .back {
@@ -59,13 +60,29 @@
   background: rgb(255 255 255 / 0.12);
   color: var(--accent);
   font-size: 14px;
+  font-weight: normal;
+  justify-self: start;
+}
+
+.topic:is(a) {
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.topic:is(a):hover {
+  background: rgb(255 255 255 / 0.22);
 }
 
 .topic img {
   width: 20px;
 }
 
-.cover h1 {
+.heading {
+  display: contents;
+}
+
+.title {
+  grid-column: 1 / -1;
   max-width: 17ch;
   margin-top: 18px;
   font-size: 56px;
@@ -127,7 +144,7 @@
     padding: 28px 24px;
   }
 
-  .cover h1 {
+  .title {
     font-size: 38px;
   }
 }
