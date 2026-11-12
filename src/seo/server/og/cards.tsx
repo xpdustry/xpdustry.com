@@ -6,12 +6,13 @@ import { Renderer } from "@takumi-rs/core";
 import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
 import { posts, translated } from "#app/blog/content/registry";
+import { postTitle } from "#app/blog/titles";
 import { topic } from "#app/blog/topics";
 import { projects } from "#app/brand/projects";
 import { services } from "#app/status/server/services";
 import { servers } from "#app/status/servers";
 import { DISPLAY_WEIGHT, FACE } from "#app/ui/styles/fonts";
-import { CARD_SIZE, postTitle } from "../../meta";
+import { CARD_SIZE } from "../../meta";
 import { BlogCard, HomeCard, PostCard, type CardLanguage, type CardPost } from "./Card";
 
 const MAX_AGE_MS = 60 * 60 * 1000;

@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { T, useLocale, Var } from "gt-tanstack-start";
 import { formatDate } from "#app/i18n/format";
-import { postTitle } from "#app/seo/meta";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";
 import { authors } from "./content/authors";
 import type { Post } from "./content/registry";
+import { postTitle } from "./titles";
 import { TopicChip } from "./TopicChip";
 import { topic } from "./topics";
 import { themed } from "./topicTheme";

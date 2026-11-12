@@ -1,4 +1,3 @@
-import type { BlogFrontmatter } from "#app/blog/content/schema";
 import { BLOG_TITLE } from "#app/blog/titles";
 import { SITE } from "#app/brand/site";
 import { withLocale } from "#app/i18n/localePath";
@@ -26,15 +25,6 @@ export function blogCard(m: Translate): PageImage {
 
 export function postCard(slug: string, title: string): PageImage {
   return { url: `/og/blog/${slug}.png`, alt: `${title} - ${SITE.name}` };
-}
-
-export function postTitle({
-  title,
-  topic,
-  topicVersion
-}: Pick<BlogFrontmatter, "title" | "topic" | "topicVersion">): string {
-  if (title.toLowerCase().includes(topic.toLowerCase())) return title;
-  return `${topic}${topicVersion ? ` ${topicVersion}` : ""} ${title}`;
 }
 
 export interface PageSeo {

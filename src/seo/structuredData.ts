@@ -1,10 +1,11 @@
 import { msg } from "gt-tanstack-start";
 import { authors } from "#app/blog/content/authors";
 import type { Post } from "#app/blog/content/registry";
+import { postTitle } from "#app/blog/titles";
 import { SITE } from "#app/brand/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
-import { postCard, postTitle, type Translate } from "./meta";
+import { postCard, type Translate } from "./meta";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonLd;
 export interface JsonLd {
