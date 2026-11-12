@@ -29,8 +29,15 @@ export function LocaleSwitch({ className }: { className?: string }) {
   );
 }
 
-const plainClick = (event: MouseEvent) =>
-  event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+/**
+ * A click the page may handle itself: the main button with no modifier, which would ask the browser
+ * for a new tab, a new window or a download.
+ */
+export function isPlainClick(
+  event: Pick<MouseEvent, "button" | "metaKey" | "ctrlKey" | "shiftKey" | "altKey">
+): boolean {
+  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+}
 
 /**
  * Every language the site is served in, by its own name; the page's is marked. Each is a link to
@@ -60,24 +67,45 @@ export function LocaleList({
     >
       {LOCALES.map((locale) => (
         <li key={locale}>
-          <a
+          <LocaleOption
+            locale={locale}
             href={withLocale(pathname, locale) + searchStr}
-            hrefLang={locale}
-            lang={locale}
-            className={styles.option}
-            aria-current={locale === current ? "true" : undefined}
-            onClick={(event) => {
-              if (!plainClick(event)) return;
-              event.preventDefault();
-              if (locale !== current) setLocale(locale);
-            }}
-          >
-            <span className={styles.code}>{locale}</span>
-            {localeInfo(locale).name}
-            {locale === current && <Check className={styles.tick} />}
-          </a>
+            current={locale === current}
+            choose={setLocale}
+          />
         </li>
       ))}
     </ul>
+  );
+}
+
+function LocaleOption({
+  locale,
+  href,
+  current,
+  choose
+}: {
+  locale: string;
+  href: string;
+  current: boolean;
+  choose: (locale: string) => void;
+}) {
+  return (
+    <a
+      href={href}
+      hrefLang={locale}
+      lang={locale}
+      className={styles.option}
+      aria-current={current ? "true" : undefined}
+      onClick={(event) => {
+        if (!isPlainClick(event)) return;
+        event.preventDefault();
+        if (!current) choose(locale);
+      }}
+    >
+      <span className={styles.code}>{locale}</span>
+      {localeInfo(locale).name}
+      {current && <Check className={styles.tick} />}
+    </a>
   );
 }
