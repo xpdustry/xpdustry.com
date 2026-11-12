@@ -1,16 +1,11 @@
 import { CopyButton } from "#app/components/ui/CopyButton";
+import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
-import { Texture } from "#app/components/ui/Texture";
 import type { PlayerCount as Count } from "#app/data/live";
+import { PATCHES } from "#app/data/patches";
 import { HUB } from "#app/data/servers";
-import { patches } from "#app/data/textures";
 import card from "#app/components/ui/Card.module.css";
 import styles from "./PlayCard.module.css";
-
-const TEXTURE = patches("#f7d08c", "#fbdfab", [
-  [0.97, 0.05, 0.42, 1],
-  [0.66, 1, 0.16, 1],
-]);
 
 /** The hub's address, to paste into the game, and how many are playing across the servers. */
 export function PlayCard({ players, className }: { players: Count; className?: string }) {
@@ -18,7 +13,7 @@ export function PlayCard({ players, className }: { players: Count; className?: s
   const labels = HUB.hostname.split(".");
   return (
     <section id="servers" className={`${card.card} spot ${styles.play} ${className ?? ""}`}>
-      <Texture settings={TEXTURE} drift />
+      <Patches patches={PATCHES.play} />
       <h2 className={styles.label}>Play with us</h2>
       <span className={styles.address}>
         {labels.slice(0, -2).join(".")}.<wbr />

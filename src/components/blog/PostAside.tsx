@@ -46,7 +46,7 @@ export function PostAside({ post, className }: { post: Post; className?: string 
           Copy link
         </CopyButton>
       </section>
-      <AskCard title="Questions or feedback?" spread={0.55} compact>
+      <AskCard title="Questions or feedback?" compact>
         Ask in our Discord, or ping {author} there.
       </AskCard>
     </aside>

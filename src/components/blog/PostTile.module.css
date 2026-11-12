@@ -1,3 +1,16 @@
+/* how far above the title the photo fades into the card */
+.big {
+  --fade: 54px;
+}
+
+.small {
+  --fade: 38px;
+}
+
+.listing {
+  --fade: 46px;
+}
+
 .tile {
   display: flex;
   flex-direction: column;

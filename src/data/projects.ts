@@ -3,15 +3,16 @@ import nohornyIcon from "#app/assets/brand/nohorny.svg";
 import copper from "#app/assets/mindustry/item-copper.png";
 import surgeAlloy from "#app/assets/mindustry/item-surge-alloy.png";
 import titanium from "#app/assets/mindustry/item-titanium.png";
-import { patches, type TextureSettings } from "#app/data/textures";
+import { PATCHES } from "#app/data/patches";
+import type { Patches } from "#app/data/textures";
 
 export type ProjectSlug = "nohorny" | "claj" | "toxopid" | "distributor";
 
 /** How a project's posts are dressed: their topic chip, and the cover of the post page. */
 export interface ProjectTheme {
-  /** The cover's ground and its texture. */
+  /** The cover's ground and its patches. */
   ground: string;
-  texture: TextureSettings;
+  patches: Patches;
   /** Secondary text on the cover. */
   muted: string;
   /** The topic chip on light cards. */
@@ -20,11 +21,14 @@ export interface ProjectTheme {
   accent: string;
 }
 
+/** A card's colours for its piece of the grid's labyrinth: the patch, and the lines in its core. */
+export type PieceTones = readonly [color: string, inner: string];
+
 /** The featured project gets the wide card, with a screenshot of it at work. */
 interface FeaturedCard {
   kind: "featured";
   ground: string;
-  texture: TextureSettings;
+  piece: PieceTones;
   muted: string;
   screenshot: string;
 }
@@ -33,7 +37,7 @@ interface FeaturedCard {
 interface ItemCard {
   kind: "item";
   ground: string;
-  texture: TextureSettings;
+  piece: PieceTones;
   item: string;
 }
 
@@ -49,20 +53,11 @@ export interface Project {
 
 const NOHORNY_THEME: ProjectTheme = {
   ground: "#2a1520",
-  texture: patches("#4d2238", "#3b1b2c", [
-    [0.95, 0.1, 0.42, 1],
-    [0.78, 1.05, 0.22, 1],
-    [0.04, 1.1, 0.14, 1],
-  ]),
+  patches: PATCHES.nohornyCover,
   muted: "#f3d3e1",
   chip: { background: "#f9a3c7", color: "#3a0f22" },
   accent: "#f9cfe1",
 };
-
-const itemPatches = [
-  [0.83, 0.68, 0.4, 1],
-  [0.42, 1.04, 0.12, 1],
-] as const;
 
 /** In display order. */
 export const projects: readonly Project[] = [
@@ -76,10 +71,7 @@ export const projects: readonly Project[] = [
     card: {
       kind: "featured",
       ground: NOHORNY_THEME.ground,
-      texture: patches("#4d2238", "#3b1b2c", [
-        [1.02, 0, 0.32, 1],
-        [0.02, 0.55, 0.16, 1],
-      ]),
+      piece: ["#4d2238", "#3b1b2c"],
       muted: NOHORNY_THEME.muted,
       screenshot: "/blog/nohorny-admin-overview-dark.png",
     },
@@ -94,7 +86,7 @@ export const projects: readonly Project[] = [
     card: {
       kind: "item",
       ground: "#d99d73",
-      texture: patches("#bf7b50", "#cc8b60", itemPatches),
+      piece: ["#bf7b50", "#cc8b60"],
       item: copper,
     },
   },
@@ -106,7 +98,7 @@ export const projects: readonly Project[] = [
     card: {
       kind: "item",
       ground: "#8da1e3",
-      texture: patches("#6c80d2", "#7d90da", itemPatches),
+      piece: ["#6c80d2", "#7d90da"],
       item: titanium,
     },
   },
@@ -118,7 +110,7 @@ export const projects: readonly Project[] = [
     card: {
       kind: "item",
       ground: "#e8dc80",
-      texture: patches("#ccc15a", "#d9d06f", itemPatches),
+      piece: ["#ccc15a", "#d9d06f"],
       item: surgeAlloy,
     },
   },

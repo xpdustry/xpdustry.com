@@ -8,7 +8,7 @@ export interface PlinthStyle {
   size?: "md" | "sm";
   /** A square button around a single icon; give it an `aria-label`. */
   icon?: boolean;
-  /** Pressed in, as after a copy. */
+  /** Teal, as after a copy. */
   done?: boolean;
   className?: string;
 }

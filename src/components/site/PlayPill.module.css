@@ -1,0 +1,22 @@
+.count,
+.address {
+  font: 500 13.5px / 1 var(--font-mono);
+  letter-spacing: 0;
+}
+
+.address {
+  margin-left: -2px;
+  padding-left: 10px;
+  border-left: 2px solid rgb(43 26 0 / 0.16);
+}
+
+.pill svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 520px) {
+  .address {
+    display: none;
+  }
+}

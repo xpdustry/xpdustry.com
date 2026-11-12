@@ -1,27 +1,25 @@
-// Renders textures off the main thread: a page asks for a few dozen at load, and again on resize.
+// Renders one texture at a time off the main thread; `textures.ts` keeps a few of these busy.
 
 import type { TextureSettings } from "#app/data/textures";
 import { renderTexture } from "#app/lib/reticulate/field";
 import { loadLabyrinth } from "#app/lib/reticulate/labyrinth";
 
 export interface TextureRequest {
-  id: number;
   settings: TextureSettings;
   width: number;
   height: number;
 }
 
-export type TextureResponse = { id: number; blob: Blob } | { id: number; error: string };
+export type TextureResponse = { blob: Blob } | { error: string };
 
 self.addEventListener("message", async (event: MessageEvent<TextureRequest>) => {
-  const { id, settings, width, height } = event.data;
+  const { settings, width, height } = event.data;
   try {
     const { pixels, ...size } = renderTexture(await loadLabyrinth(), settings, width, height);
     const canvas = new OffscreenCanvas(size.width, size.height);
     canvas.getContext("2d")!.putImageData(new ImageData(pixels, size.width, size.height), 0, 0);
-    const blob = await canvas.convertToBlob();
-    self.postMessage({ id, blob } satisfies TextureResponse);
+    self.postMessage({ blob: await canvas.convertToBlob() } satisfies TextureResponse);
   } catch (error) {
-    self.postMessage({ id, error: String(error) } satisfies TextureResponse);
+    self.postMessage({ error: String(error) } satisfies TextureResponse);
   }
 });

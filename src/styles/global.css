@@ -47,6 +47,8 @@
   --font-mono: "DM Mono", ui-monospace, monospace;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* a patch of labyrinth growing under the pointer: steady, then settling */
+  --ease-grow: cubic-bezier(0.3, 0.5, 0.4, 1);
 
   -webkit-text-size-adjust: 100%;
   scroll-padding-top: 16px;
@@ -58,8 +60,9 @@
   }
 }
 
+/* only once hydrated, so the router's restoring a reload's scroll before then lands at once */
 @media (prefers-reduced-motion: no-preference) {
-  :root {
+  :root[data-hydrated] {
     scroll-behavior: smooth;
   }
 }
@@ -163,6 +166,13 @@ canvas {
 
 .skip-link:focus-visible {
   translate: none;
+}
+
+/* a block of the page, hidden until the crown and the footer's ridge are in, then raised in with
+   the others on screen; the backdrop fades in once its own tiles are (see `lib/reveal.ts`) */
+:root[data-wait-frame] :is(.reveal, [data-crown]),
+:root[data-wait-backdrop] [data-backdrop] {
+  opacity: 0;
 }
 
 /* Mindustry sprites are pixel art: scale them up without smoothing */

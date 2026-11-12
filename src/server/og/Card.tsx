@@ -75,7 +75,14 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 760 }}>{children}</div>
-        <img src={mark} alt="" width={200} height={200} style={{ flex: "none" }} />
+        {/* contained, so a mark that is not square (NoHorny's) keeps its shape */}
+        <img
+          src={mark}
+          alt=""
+          width={200}
+          height={200}
+          style={{ flex: "none", objectFit: "contain" }}
+        />
       </div>
       <div style={{ position: "relative", marginTop: "auto", height: 2, background: color.hair }} />
       <div style={{ position: "relative", display: "flex", gap: 56, marginTop: 30 }}>{stats}</div>

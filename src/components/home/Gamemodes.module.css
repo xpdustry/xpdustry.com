@@ -24,6 +24,17 @@
   background-color: var(--tint);
 }
 
+/* the open mode sits pressed in, its shadow over the icon's blobs */
+.row[aria-expanded="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.14);
+  pointer-events: none;
+}
+
 .row:focus-visible {
   outline-color: var(--t9);
   border-radius: var(--r);
@@ -63,6 +74,9 @@
 }
 
 .panel {
+  /* how far above the title (or the description, where the title is hidden) the photo fades
+     into the card */
+  --fade: 56px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -83,14 +97,12 @@
   object-fit: cover;
 }
 
-.head {
-  position: relative;
-}
-
+/* standing on the title, from where they would sit: the head is not positioned, so the title's
+   fade spans the panel */
 .figures {
   position: absolute;
-  bottom: calc(100% + 4px);
-  left: -2px;
+  margin-left: -2px;
+  translate: 0 calc(-100% - 4px);
   display: flex;
   align-items: end;
   gap: 2px;

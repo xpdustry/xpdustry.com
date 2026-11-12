@@ -4,7 +4,7 @@ import { PostAside } from "#app/components/blog/PostAside";
 import { PostBody } from "#app/components/blog/PostBody";
 import { PostCover } from "#app/components/blog/PostCover";
 import { PostTile } from "#app/components/blog/PostTile";
-import { Tray, Trays } from "#app/components/tray/Tray";
+import { Tray } from "#app/components/tray/Tray";
 import { authors } from "#app/content/authors";
 import { nearbyPosts, postsBySlug } from "#app/content/registry";
 import { postCard, seo } from "#app/lib/seo";
@@ -43,28 +43,26 @@ function PostPage() {
   return (
     <>
       <main id="main" className={styles.post}>
-        <PostCover post={post} className={styles.cover} />
-        <article className={styles.article}>
+        <PostCover post={post} className={`${styles.cover} reveal`} />
+        <article className={`${styles.article} reveal`}>
           <PostBody document={document} />
         </article>
-        <PostAside post={post} />
+        <PostAside post={post} className="reveal" />
       </main>
       {nearby.length > 0 && (
-        <Trays>
-          <Tray
-            id="more"
-            icon={mender}
-            title="More posts"
-            subtitle="Release notes and updates from the team"
-            action={{ to: "/blog", label: "All posts" }}
-          >
-            <div className={styles.more}>
-              {nearby.map((other) => (
-                <PostTile key={other.slug} post={other} variant="small" className={styles.tile} />
-              ))}
-            </div>
-          </Tray>
-        </Trays>
+        <Tray
+          id="more"
+          icon={mender}
+          title="More posts"
+          subtitle="Release notes and updates from the team"
+          action={{ to: "/blog", label: "All posts" }}
+        >
+          <div className={styles.more}>
+            {nearby.map((other) => (
+              <PostTile key={other.slug} post={other} variant="small" className={styles.tile} />
+            ))}
+          </div>
+        </Tray>
       )}
     </>
   );

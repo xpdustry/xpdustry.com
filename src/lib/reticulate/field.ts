@@ -1,5 +1,5 @@
-// The reticulate texture's maths, shared by the CPU renderer and the drift shader.
-// No DOM here: this module also runs inside the texture worker.
+// The reticulate texture's maths. No DOM here: it runs inside the texture worker, and in Node
+// for `pnpm textures`.
 
 import type { TextureSettings } from "#app/data/textures";
 
@@ -7,6 +7,15 @@ import type { TextureSettings } from "#app/data/textures";
 export interface Labyrinth {
   data: Float32Array;
   size: number;
+}
+
+/** The labyrinth from its decoded PNG, whose alpha is the pattern: `channels` values per pixel, alpha last. */
+export function toLabyrinth(pixels: ArrayLike<number>, channels: number, size: number): Labyrinth {
+  let max = 0;
+  for (let i = channels - 1; i < pixels.length; i += channels) max = Math.max(max, pixels[i]!);
+  const data = new Float32Array(size * size);
+  for (let i = 0; i < data.length; i++) data[i] = pixels[i * channels + channels - 1]! / max;
+  return { data, size };
 }
 
 export type Rgba = readonly [number, number, number, number];
@@ -77,6 +86,15 @@ export function resolve(settings: TextureSettings) {
   } satisfies TextureSettings & Record<string, unknown>;
 }
 
+/** `blobs` laid side by side every `span` widths, a span past either edge so none is cut off. */
+function spread(blobs: NonNullable<TextureSettings["blobs"]>, span: number) {
+  const spread: (typeof blobs)[number][] = [];
+  for (let k = -1; k * span < 1 + span; k++) {
+    for (const [x, y, r, w] of blobs) spread.push([(k + x) * span, y, r, w]);
+  }
+  return spread;
+}
+
 /** The labyrinth resampled to `tile` px once per tile size, so whole-pixel lookups are one read. */
 const tables = new Map<number, Float32Array>();
 function labyrinthTable(labyrinth: Labyrinth, tile: number): Float32Array {
@@ -123,27 +141,30 @@ export function renderTexture(
   const color = parseHex(s.color);
   const inner = s.inner ? parseHex(s.inner) : undefined;
   const aspect = w / h;
+  const blobs = s.span ? spread(s.blobs, s.span / aspect) : s.blobs;
   const noise = s.noise ? makeNoise(s.noise.seed ?? 7, s.repeat ? s.noise.scale : 0) : undefined;
-  const warpX = makeNoise(s.seed);
-  const warpY = makeNoise(s.seed + 1);
-  // a wave stays a clean curve unless it asks for warp, which makes its crest lumpy
-  const warped = s.blobs.length > 0 || (s.ramp && (!s.wave || s.warp > 0));
+  // a ramp's edge stays straight unless it asks for warp, which makes it lumpy
+  const warped = blobs.length > 0 || (s.ramp && s.warp > 0);
 
+  // the warp's frame: by default the render's height, the lumps scaling with it
+  const kx = s.lumps ? w / s.lumps : aspect;
+  const ky = s.lumps ? h / s.lumps : 1;
+  // seamless, the warp comes round again after a whole number of lumps across
+  const across = s.seamless ? Math.max(1, Math.round(2.1 * kx)) : 2.1 * kx;
+  const warpX = makeNoise(s.seed, s.seamless ? across : 0);
+  const warpY = makeNoise(s.seed + 1, s.seamless ? across : 0);
   const field = (u: number, v: number) => {
     let b = 0;
     // domain warp, so outlines are lumpy instead of round
-    const wu = warped ? u + s.warp * 0.5 * (warpX(u * 2.1 * aspect, v * 2.1, 3) - 0.5) : u;
-    const wv = warped ? v + s.warp * 0.5 * (warpY(u * 2.1 * aspect, v * 2.1, 3) - 0.5) : v;
-    for (const [bx, by, br, bw] of s.blobs) {
+    const wu = warped
+      ? u + (s.warp * 0.5 * (warpX(u * across, v * 2.1 * ky, 3) - 0.5)) / (s.lumps ? kx : 1)
+      : u;
+    const wv = warped ? v + (s.warp * 0.5 * (warpY(u * across, v * 2.1 * ky, 3) - 0.5)) / ky : v;
+    for (const [bx, by, br, bw] of blobs) {
       const d = Math.hypot((wu - bx) * aspect, wv - by) / br;
       b += bw * Math.exp(-(d ** s.hard));
     }
-    if (s.ramp) {
-      const rv = s.wave
-        ? wv + s.wave[0] * Math.sin(2 * Math.PI * (wu * s.wave[1] + s.wave[2]))
-        : wv;
-      b += Math.min(1, Math.max(0, (rv - s.ramp[0]) / (s.ramp[1] - s.ramp[0])));
-    }
+    if (s.ramp) b += Math.min(1, Math.max(0, (wv - s.ramp[0]) / (s.ramp[1] - s.ramp[0])));
     if (noise && s.noise) {
       const n = noise(u * s.noise.scale * aspect, v * s.noise.scale);
       b += Math.max(0, (n - s.noise.bias) * s.noise.amp);

@@ -63,19 +63,13 @@
   --plinth-on: var(--ink);
 }
 
-/* pressed in: the current page (not a section of it), or a copy that just landed */
+/* teal: the current page (not a section of it), or a copy that just landed */
 .plinth[aria-current]:not([href*="#"]),
 .done {
   --plinth-face: var(--t9);
   --plinth-hover: var(--t9);
   --plinth-wall: var(--wall);
   --plinth-on: #08201e;
-}
-
-.plinth[aria-current]:not([href*="#"]) > .face {
-  transform: none;
-  background-image: none;
-  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.14);
 }
 
 .sm > .face {

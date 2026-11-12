@@ -2,18 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { AskCard } from "#app/components/blog/AskCard";
 import { LeadPost } from "#app/components/blog/LeadPost";
 import { PostTile } from "#app/components/blog/PostTile";
-import { Texture } from "#app/components/ui/Texture";
+import { Patches } from "#app/components/ui/Patches";
 import { posts } from "#app/content/registry";
+import { PATCHES } from "#app/data/patches";
 import { BLOG_DESCRIPTION } from "#app/data/site";
-import { patches } from "#app/data/textures";
 import { BLOG_CARD, seo } from "#app/lib/seo";
 import styles from "#app/components/blog/BlogIndex.module.css";
 import card from "#app/components/ui/Card.module.css";
-
-const INTRO_TEXTURE = patches("#86d8cf", "#a6e7e0", [
-  [0.92, 0.5, 0.34, 1],
-  [0.5, 1.08, 0.12, 1],
-]);
 
 export const Route = createFileRoute("/blog/")({
   head: () =>
@@ -25,16 +20,16 @@ function BlogIndex() {
   const [latest, ...earlier] = posts;
   return (
     <main id="main" className={styles.blog}>
-      <section className={`${card.card} spot ${styles.intro}`}>
-        <Texture settings={INTRO_TEXTURE} drift />
+      <section className={`${card.card} spot ${styles.intro} reveal`}>
+        <Patches patches={PATCHES.blogIntro} />
         <h1>Blog</h1>
         <p>{BLOG_DESCRIPTION}</p>
       </section>
-      <AskCard title="Questions about a release?" className={styles.ask} drift>
+      <AskCard title="Questions about a release?" className={`${styles.ask} reveal`}>
         Ask in our Discord.
       </AskCard>
       {latest ? (
-        <LeadPost post={latest} className={styles.lead} />
+        <LeadPost post={latest} className={`${styles.lead} reveal`} />
       ) : (
         <p className={styles.empty}>Nothing published yet.</p>
       )}
@@ -44,7 +39,7 @@ function BlogIndex() {
           post={post}
           variant="listing"
           heading="h2"
-          className={styles.tile}
+          className={`${styles.tile} reveal`}
         />
       ))}
     </main>

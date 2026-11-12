@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Discord } from "#app/components/ui/Icons";
-import { Texture } from "#app/components/ui/Texture";
+import { Patches } from "#app/components/ui/Patches";
+import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
-import { patches } from "#app/data/textures";
 import card from "#app/components/ui/Card.module.css";
 import styles from "./AskCard.module.css";
 
@@ -10,16 +10,11 @@ import styles from "./AskCard.module.css";
 export function AskCard({
   title,
   children,
-  spread = 0.62,
-  drift = false,
   compact = false,
   className,
 }: {
   title: string;
   children: ReactNode;
-  /** How far the texture's patch reaches from the top-right corner. */
-  spread?: number;
-  drift?: boolean;
   /** The sidebar size: icon above a smaller title. */
   compact?: boolean;
   className?: string;
@@ -29,7 +24,7 @@ export function AskCard({
       href={SITE.discord}
       className={`${card.card} spot ${styles.ask} ${compact ? styles.compact : ""} ${className ?? ""}`}
     >
-      <Texture settings={patches("#4652b5", "#4f5cc3", [[1, 0, spread, 1]])} drift={drift} />
+      <Patches patches={compact ? PATCHES.askCompact : PATCHES.ask} />
       <Discord className={styles.glyph} />
       <strong className={styles.title}>{title}</strong>
       <span className={styles.text}>{children}</span>

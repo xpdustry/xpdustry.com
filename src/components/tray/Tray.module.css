@@ -1,15 +1,59 @@
 .tray {
+  /* the widest tab's width, which every tab takes so their buttons line up */
+  --tab: 484px;
+  --tray-r: calc(var(--r) + var(--gap));
+  /* the tray's width; a container's own size is its content box's */
+  --tray-width: calc(100cqw + 2 * var(--gap));
   position: relative;
   isolation: isolate;
+  container-type: inline-size;
   /* the tab stands in the margin */
   margin-top: calc(71px + var(--group));
   padding: var(--gap);
-  border-radius: 0 calc(var(--r) + var(--gap)) calc(var(--r) + var(--gap));
 }
 
-.shell {
+/* the tray, its top-right corner tightening when the shelf beside the tab is short */
+.body {
   position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 2px solid var(--outline);
+  border-radius: 0 clamp(0px, var(--tray-width) - var(--tab) - 31.5px, var(--tray-r)) var(--tray-r)
+    var(--tray-r);
+  background: var(--tray);
+}
+
+.tab {
+  position: absolute;
+  bottom: calc(100% - 2px);
   left: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: var(--tab);
+  max-width: 100%;
+  height: 72px;
+  padding: 11px 44px 3px 14px;
+  border-radius: 24px 24px 0 0;
+}
+
+/* the tab up to its slant, over the tray's top edge */
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: 0 31.5px 0 0;
+  z-index: -1;
+  border: solid var(--outline);
+  border-width: 2px 0 0 2px;
+  border-radius: 24px 0 0;
+  background: var(--tray);
+}
+
+/* centred on the tab's right edge */
+.slant {
+  position: absolute;
+  top: 0;
+  left: calc(100% - 31.5px);
   z-index: -1;
   overflow: visible;
   pointer-events: none;
@@ -25,33 +69,23 @@
   stroke-width: 2;
 }
 
-.tab {
-  position: absolute;
-  bottom: calc(100% - 1px);
-  left: 0;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  max-width: 100%;
-  height: 72px;
-  padding: 12px 44px 2px 14px;
-  border-radius: 24px 24px 0 0;
-}
+/* too little shelf beside the tab reads as a glitch: the tab runs into the tray's side instead
+   (the narrowest tab that has a shelf, plus a slant and a shelf, less the tray's padding) */
+@container (width < 273px) {
+  .body {
+    border-top-right-radius: 0;
+  }
 
-/* before the shell is drawn: a flat tray, its tab joined to it by a concave fillet */
-.tray:not([data-shell]),
-.tray:not([data-shell]) .tab {
-  background: var(--tray);
-}
+  .tab::before {
+    right: auto;
+    width: var(--tray-width);
+    border-right-width: 2px;
+    border-top-right-radius: 24px;
+  }
 
-.tray:not([data-shell]) .tab::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 100%;
-  width: 24px;
-  height: 24px;
-  background: radial-gradient(circle at 100% 0, transparent 23.5px, var(--tray) 24px);
+  .slant {
+    display: none;
+  }
 }
 
 .icon {
@@ -122,12 +156,20 @@
 }
 
 @media (max-width: 700px) {
+  .tray {
+    --tab: 331px;
+  }
+
   .subtitle {
     display: none;
   }
 }
 
 @media (max-width: 640px) {
+  .tray {
+    --tab: 293px;
+  }
+
   .tab {
     gap: 10px;
     padding-left: 10px;
@@ -153,6 +195,10 @@
 }
 
 @media (max-width: 420px) {
+  .tray {
+    --tab: 245px;
+  }
+
   .icon {
     display: none;
   }
@@ -163,6 +209,10 @@
 }
 
 @media (max-width: 360px) {
+  .tray {
+    --tab: 232px;
+  }
+
   .titles h2 {
     font-size: 20px;
   }

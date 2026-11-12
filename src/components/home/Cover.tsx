@@ -8,9 +8,9 @@ import styles from "./Cover.module.css";
 export function Cover({ live }: { live: LiveData }) {
   return (
     <div className={styles.cover}>
-      <Hero className={styles.hero} />
-      <PlayCard players={playerCount(live.servers.servers)} className={styles.play} />
-      <DiscordCard counts={live.discord} className={styles.discord} />
+      <Hero className={`${styles.hero} reveal`} />
+      <PlayCard players={playerCount(live.servers.servers)} className={`${styles.play} reveal`} />
+      <DiscordCard counts={live.discord} className={`${styles.discord} reveal`} />
     </div>
   );
 }

@@ -1,0 +1,87 @@
+/* how far out from each hovered patch's middle its grown masks show, as a share of its reach;
+   it starts at the resting patch's edge, as a sprite's does */
+@property --maze-grow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.45;
+}
+
+.grid {
+  transition: --maze-grow 0.6s ease-in-out;
+}
+
+.grid[data-maze-grow] {
+  --maze-grow: 1;
+  transition: --maze-grow 1.2s var(--ease-grow);
+}
+
+/* zero specificity, so a card can restyle its piece */
+:where(.piece) {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+[data-maze-ready] .piece {
+  opacity: 1;
+}
+
+.piece::before,
+.piece::after,
+.grown::before,
+.grown::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  mask-repeat: no-repeat;
+  mask-position: var(--maze-at, 0 0);
+  mask-size: var(--maze-size, 100% 100%);
+}
+
+.piece::before,
+.grown::before {
+  background: var(--maze-inner);
+}
+
+.piece::after,
+.grown::after {
+  background: var(--maze-color);
+}
+
+.piece::before {
+  mask-image: var(--maze-whole, none);
+}
+
+.piece::after {
+  mask-image: var(--maze-outer, none);
+}
+
+/* the grown masks over them, shown only around the hovered card's patches */
+.grown {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: none;
+}
+
+[data-maze-grown] .grown {
+  display: block;
+}
+
+.grown::before,
+.grown::after {
+  mask-composite: var(--maze-composite, intersect);
+}
+
+.grown::before {
+  mask-image: var(--maze-grown-whole), var(--maze-reveal);
+}
+
+.grown::after {
+  mask-image: var(--maze-grown-outer), var(--maze-reveal);
+}

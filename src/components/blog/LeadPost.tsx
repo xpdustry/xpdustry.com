@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import { Texture } from "#app/components/ui/Texture";
+import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import { heroImage } from "#app/content/hero";
 import type { Post } from "#app/content/registry";
+import { seeded } from "#app/data/textures";
 import { topic } from "#app/data/topics";
 import { formatDate } from "#app/lib/format";
 import card from "#app/components/ui/Card.module.css";
@@ -27,7 +28,7 @@ export function LeadPost({ post, className }: { post: Post; className?: string }
         } as CSSProperties
       }
     >
-      <Texture settings={theme.texture} drift />
+      <Patches patches={seeded(theme.patches, post.slug)} />
       <span className={styles.text}>
         <span className={styles.tags}>
           <span>Latest</span>

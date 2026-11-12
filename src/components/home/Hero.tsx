@@ -1,22 +1,16 @@
 import { PressableLogo } from "#app/components/home/PressableLogo";
 import { GitHub } from "#app/components/ui/Icons";
+import { Patches } from "#app/components/ui/Patches";
 import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
-import { Texture } from "#app/components/ui/Texture";
+import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
-import { patches } from "#app/data/textures";
 import card from "#app/components/ui/Card.module.css";
 import styles from "./Hero.module.css";
-
-const TEXTURE = patches("#86d8cf", "#a6e7e0", [
-  [0.86, 0.82, 0.46, 1],
-  [0.56, 0.07, 0.12, 1],
-  [0.02, 1, 0.17, 1],
-]);
 
 export function Hero({ className }: { className?: string }) {
   return (
     <section className={`${card.card} spot ${styles.hero} ${className ?? ""}`}>
-      <Texture settings={TEXTURE} drift />
+      <Patches patches={PATCHES.hero} />
       <div className={styles.brand}>
         <PressableLogo className={styles.mark} />
         <h1>{SITE.name}</h1>

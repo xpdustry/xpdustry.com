@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { ChevronLeft } from "#app/components/ui/Icons";
-import { Texture } from "#app/components/ui/Texture";
+import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
+import { seeded } from "#app/data/textures";
 import { topic } from "#app/data/topics";
 import { formatDate } from "#app/lib/format";
 import styles from "./PostCover.module.css";
@@ -24,7 +25,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
         } as CSSProperties
       }
     >
-      <Texture settings={theme.texture} />
+      <Patches patches={seeded(theme.patches, post.slug)} />
       {theme.icon && <img className={styles.logo} src={theme.icon} alt="" />}
       <div className={styles.crumbs}>
         <Link to="/blog" className={styles.back}>

@@ -1,15 +1,14 @@
-import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { flushSync } from "react-dom";
 import router from "#app/assets/mindustry/router.png";
 import { Tray } from "#app/components/tray/Tray";
 import { CopyButton } from "#app/components/ui/CopyButton";
 import { ChevronDown } from "#app/components/ui/Icons";
+import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
-import { Texture } from "#app/components/ui/Texture";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
 import { findServer, playerCount } from "#app/data/live";
 import type { ServerSnapshot } from "#app/data/snapshots";
-import { wave } from "#app/data/textures";
 import { useMediaQuery } from "#app/lib/useMediaQuery";
 import card from "#app/components/ui/Card.module.css";
 import styles from "./Gamemodes.module.css";
@@ -35,6 +34,16 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
   }
 
   const expanded = (mode: Gamemode) => mode.server === current && (wide || open);
+
+  // the screenshots are the page's heaviest images: only the open panel's loads with the page,
+  // the others once it has loaded, or when they open first
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    const all = () => setLoaded(true);
+    if (document.readyState === "complete") return all();
+    addEventListener("load", all, { once: true });
+    return () => removeEventListener("load", all);
+  }, []);
 
   const toggle = (mode: Gamemode) => {
     const motion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -97,9 +106,10 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
         <PlayerCount
           count={playerCount(snapshot.servers)}
           className={styles.total}
-          unit={(players) =>
-            players === 1 ? " player online right now" : " players online right now"
-          }
+          unit={(players) => {
+            const servers = snapshot.servers.filter((server) => server.status === "online").length;
+            return ` ${players === 1 ? "player" : "players"} on ${servers} ${servers === 1 ? "server" : "servers"} right now`;
+          }}
         />
       }
     >
@@ -125,8 +135,8 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
                 onKeyDown={(event) => moveFocus(event, index)}
               >
                 <span className={styles.icon} aria-hidden="true">
-                  {mode.icon.patches.map((settings, at) => (
-                    <Texture key={at} settings={settings} drift="solo" />
+                  {mode.icon.patches.map((patches, at) => (
+                    <Patches key={at} patches={patches} />
                   ))}
                   {mode.icon.sprites.map((sprite, at) => (
                     <img
@@ -153,6 +163,7 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
               >
                 <Panel
                   mode={mode}
+                  load={loaded || mode.server === current}
                   count={count}
                   hostname={hostname}
                   map={server?.status === "online" ? server.info.map : undefined}
@@ -168,11 +179,14 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
 
 function Panel({
   mode,
+  load,
   count,
   hostname,
   map,
 }: {
   mode: Gamemode;
+  /** Whether its screenshot loads yet. */
+  load: boolean;
   count: ReturnType<typeof playerCount>;
   hostname: string;
   map?: string;
@@ -181,12 +195,11 @@ function Panel({
     <div className={styles.panel}>
       <img
         className={styles.photo}
-        src={mode.screenshot.src}
+        src={load ? mode.screenshot.src : undefined}
         alt=""
         style={{ objectPosition: mode.screenshot.position }}
       />
-      <Texture settings={wave([22, 110], [0.05, 0.8, mode.wavePhase])} />
-      <div className={styles.head}>
+      <div>
         <span className={styles.figures} aria-hidden="true">
           {mode.figures.map((figure, at) => (
             <img
@@ -198,9 +211,9 @@ function Panel({
             />
           ))}
         </span>
-        <h3>{mode.name}</h3>
+        <h3 className={card.fade}>{mode.name}</h3>
       </div>
-      <p data-fit="">{mode.description}</p>
+      <p className={card.fade}>{mode.description}</p>
       <div className={styles.foot}>
         <dl>
           <div>

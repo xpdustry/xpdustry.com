@@ -5,10 +5,12 @@
   color: #eaf7f5;
 }
 
+/* the deep teal's top edge, a ridge of colonies; `pnpm textures` renders it from `RIDGE` */
 .ridge {
   position: absolute;
   inset: auto 0 calc(100% - 1px);
   height: 160px;
+  background: url("../../assets/ridge.webp") 50% 100% / auto 100% repeat-x;
   pointer-events: none;
 }
 
@@ -21,14 +23,18 @@
   align-items: start;
   gap: 18px 64px;
   padding: 40px calc(var(--gap) + 6px) 72px;
+  /* the brand's sizes, set here so the copyright can line up under the name */
+  --mark: 52px;
+  --name: 40px;
+  --beside: 14px;
 }
 
 .footer .brand {
-  --mark: 52px;
-  --name: 40px;
+  --mark: inherit;
+  --name: inherit;
   grid-area: brand;
   justify-self: start;
-  gap: 14px;
+  gap: var(--beside);
   line-height: 1;
 }
 
@@ -62,6 +68,7 @@
 
 .copyright {
   grid-area: copy;
+  padding-left: calc(var(--mark) + var(--beside));
   align-self: end;
   white-space: nowrap;
   color: var(--deep-ink);
@@ -87,6 +94,11 @@
   .footer .top {
     align-self: center;
   }
+
+  /* under the links now, so it lines up with them */
+  .copyright {
+    padding-left: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -111,16 +123,16 @@
     padding: 10px;
   }
 
-  .footer .brand {
+  .footer .inner {
     --mark: 44px;
     --name: 32px;
   }
 }
 
 @media (max-width: 400px) {
-  .footer .brand {
+  .footer .inner {
     --mark: 34px;
     --name: 26px;
-    gap: 10px;
+    --beside: 10px;
   }
 }

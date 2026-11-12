@@ -1,6 +1,5 @@
 import type { LinkComponentProps } from "@tanstack/react-router";
-import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { measureShell, shellPath } from "#app/components/tray/shell";
+import type { ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "#app/components/ui/Icons";
 import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
 import styles from "./Tray.module.css";
@@ -22,18 +21,44 @@ interface TrayProps {
   children: ReactNode;
 }
 
+// The tab's right side slants down to the tray's top, its bends softened: a fixed piece, as
+// the tab is always as tall. In px.
+const RISE = 70;
+const RUN = 35;
+const BEND = 14;
+const SLANT = { width: RUN + 2 * BEND, height: RISE + 2 };
+
 /**
- * A folder of cards: a tray with a tab on its top-left. Until the shell is drawn (and without
- * JavaScript) it is a flat tray; `Trays` then outlines it.
+ * The slant's outline, inset by `inset` px (half the stroke, for the line). Rounded, as engines
+ * print floats differently and the server's path must match the browser's.
+ */
+function slantPath(inset: number): string {
+  const length = Math.hypot(RUN, RISE);
+  const [u, v] = [(RUN / length) * BEND, (RISE / length) * BEND];
+  const [x0, x1, i] = [BEND, BEND + RUN, inset];
+  const n = (value: number) => Math.round(value * 100) / 100;
+  return (
+    `M0 ${i}Q${x0} ${i} ${n(x0 + u)} ${n(i + v)}L${n(x1 - u)} ${n(RISE + i - v)}` +
+    `Q${x1} ${RISE + i} ${SLANT.width} ${RISE + i}`
+  );
+}
+
+const SLANT_LINE = slantPath(1);
+const SLANT_FACE = `${slantPath(0)}V${SLANT.height}H0Z`;
+
+/**
+ * A folder of cards: a tray with a tab on its top-left, drawn in CSS around the tab's fixed
+ * width, so it is whole before any script runs.
  */
 export function Tray({ id, icon, title, subtitle, action, className, children }: TrayProps) {
   return (
-    <section id={id} className={`${styles.tray} ${className ?? ""}`} data-tray="">
-      <svg className={styles.shell} aria-hidden="true">
-        <path className={styles.face} />
-        <path className={styles.line} />
-      </svg>
-      <header className={styles.tab} data-tray-tab="">
+    <section id={id} className={`${styles.tray} reveal ${className ?? ""}`}>
+      <span className={styles.body} aria-hidden="true" />
+      <header className={styles.tab}>
+        <svg className={styles.slant} width={SLANT.width} height={SLANT.height} aria-hidden="true">
+          <path className={styles.face} d={SLANT_FACE} />
+          <path className={styles.line} d={SLANT_LINE} />
+        </svg>
         <span className={styles.icon}>
           <img className="sprite" src={icon} alt="" />
         </span>
@@ -68,47 +93,4 @@ export function Tray({ id, icon, title, subtitle, action, className, children }:
       {children}
     </section>
   );
-}
-
-/**
- * Lays out the trays inside: every tab gets the widest tab's width, so the buttons line up, then
- * each tray's shell is drawn around its tab. Redone whenever the page resizes.
- */
-export function Trays({ children }: { children: ReactNode }) {
-  const root = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const redraw = () => {
-      const trays = [...root.current!.querySelectorAll<HTMLElement>("[data-tray]")];
-      const tabs = trays.map((tray) => tray.querySelector<HTMLElement>("[data-tray-tab]")!);
-      for (const tab of tabs) tab.style.width = "";
-      const widest = Math.max(...tabs.map((tab) => tab.getBoundingClientRect().width));
-      for (const tab of tabs) tab.style.width = `${widest}px`;
-
-      trays.forEach((tray, index) => drawShell(tray, tabs[index]!));
-    };
-
-    redraw();
-    void document.fonts.ready.then(redraw);
-    const observer = new ResizeObserver(redraw);
-    observer.observe(document.body);
-    return () => observer.disconnect();
-  }, []);
-
-  return <div ref={root}>{children}</div>;
-}
-
-/** How far below the shell's face its wall reaches, so the outline's bottom is never clipped. */
-const WALL = 8;
-
-function drawShell(tray: HTMLElement, tab: HTMLElement): void {
-  const geometry = measureShell(tray, tab);
-  const svg = tray.querySelector<SVGSVGElement>(":scope > svg")!;
-  const [face, line] = svg.querySelectorAll("path");
-  svg.style.top = `${-geometry.rise}px`;
-  svg.setAttribute("width", String(geometry.width));
-  svg.setAttribute("height", String(geometry.height + geometry.rise + WALL));
-  face!.setAttribute("d", shellPath(geometry));
-  line!.setAttribute("d", shellPath(geometry, 1));
-  tray.dataset.shell = "";
 }

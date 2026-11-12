@@ -1,58 +1,14 @@
 import { useEffect, useRef } from "react";
-import logoSource from "#app/assets/logo.svg?raw";
+import relief from "#app/assets/logo-relief.webp";
+import { DEPTH, LIFT, drawFrame, frameIndex } from "#app/lib/logo";
+import { loadLogoFrames } from "#app/lib/relief";
 import styles from "./PressableLogo.module.css";
-
-/** Depth of the logo's extrusion, and the extra rise on hover, in logo units. */
-const DEPTH = 30.72;
-const LIFT = 19.2;
-const LAYER = 0.96;
-/** Frames between fully raised and pressed flat. */
-const FRAMES = 24;
-
-// The stock logo's extrusion, rebuilt deeper: one layer per LAYER from the pressed depth up to the
-// hover lift, so the face can move anywhere in that range with the walls folding in under it.
-const template = (() => {
-  let svg = logoSource
-    .slice(logoSource.indexOf("<svg"))
-    .replace('role="img" aria-label="Xpdustry"', 'aria-hidden="true" focusable="false"')
-    .replace(/\s*<title>.*?<\/title>/, "");
-  for (const part of ["cog", "x"]) {
-    svg = svg.replace(
-      new RegExp(`(<g class="xp-w xp-w--${part}"[^>]*>).*?(</g>)`, "s"),
-      `$1{{${part}}}$2`,
-    );
-  }
-  return svg;
-})();
-
-const steps = Array.from(
-  { length: Math.round(DEPTH / LAYER) + Math.round(LIFT / LAYER) + 1 },
-  (_, index) => (Math.round(DEPTH / LAYER) - index) * LAYER,
-);
-
-/** The logo with its face `offset` logo units below its resting place: -LIFT raised, DEPTH flat. */
-function logoAt(offset: number): string {
-  const layers = (part: string) =>
-    steps
-      .map(
-        (t) =>
-          `<use href="#xp-${part}" transform="translate(0 ${Math.max(t, offset).toFixed(2)})"/>`,
-      )
-      .join("");
-  return template
-    .replace("{{cog}}", layers("cog"))
-    .replace("{{x}}", layers("x"))
-    .replaceAll('<g class="xp-f ', `<g transform="translate(0 ${offset.toFixed(2)})" class="xp-f `);
-}
-
-const RESTING = logoAt(0);
 
 const ease = (t: number) => 1 - (1 - t) ** 4; // close to the plinths' cubic-bezier(.22,1,.36,1)
 
 /**
- * The logo as a plinth: it rises on hover, presses flat, and pops back up. Moving ~100 layers
- * live would rebuild the SVG and re-run its outline blur every frame, so the states are rendered
- * once into bitmaps after hydration, and the animation only picks one to draw.
+ * The logo as a plinth: it rises on hover, presses flat, and pops back up, drawn from the relief
+ * logo's pre-rendered frames.
  */
 export function PressableLogo({ className }: { className?: string }) {
   const button = useRef<HTMLButtonElement>(null);
@@ -65,16 +21,7 @@ export function PressableLogo({ className }: { className?: string }) {
     let raf = 0;
 
     void (async () => {
-      const frames: HTMLCanvasElement[] = [];
-      for (let i = 0; i <= FRAMES; i++) {
-        const image = new Image();
-        image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(logoAt(-LIFT + ((DEPTH + LIFT) * i) / FRAMES))}`;
-        await image.decode();
-        const frame = document.createElement("canvas");
-        frame.width = frame.height = size;
-        frame.getContext("2d")!.drawImage(image, 0, 0, size, size);
-        frames.push(frame);
-      }
+      const sheet = await loadLogoFrames();
       if (abort.signal.aborted) return;
 
       const view = document.createElement("canvas");
@@ -92,13 +39,9 @@ export function PressableLogo({ className }: { className?: string }) {
       let held = false;
 
       const draw = () => {
-        const index = Math.max(
-          0,
-          Math.min(FRAMES, Math.round(((offset + LIFT) / (DEPTH + LIFT)) * FRAMES)),
-        );
+        const index = frameIndex(offset);
         if (index === shown) return;
-        context.clearRect(0, 0, size, size);
-        context.drawImage(frames[index]!, 0, 0);
+        drawFrame(context, sheet, index);
         shown = index;
       };
       const tick = (now: number) => {
@@ -157,8 +100,9 @@ export function PressableLogo({ className }: { className?: string }) {
       type="button"
       className={`${styles.mark} ${className ?? ""}`}
       aria-label="Press the logo"
-      // the resting logo, until the frames are ready
-      dangerouslySetInnerHTML={{ __html: RESTING }}
-    />
+    >
+      {/* at rest, until the frames are ready */}
+      <img src={relief} alt="" width={320} height={320} fetchPriority="high" />
+    </button>
   );
 }
