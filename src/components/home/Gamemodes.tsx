@@ -12,6 +12,7 @@ import { findServer, playerCount } from "#app/data/live";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
 import { Check, Copy, GameController, X } from "#app/lib/icons";
 import { useCopy } from "#app/lib/useCopy";
+import { useSeen } from "#app/lib/useSeen";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Gamemodes.css";
 
@@ -23,6 +24,8 @@ const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
 
 export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
   const gt = useGT();
+  const list = useRef<HTMLUListElement>(null);
+  const seen = useSeen(list);
   return (
     <Tray
       id="gamemodes"
@@ -30,16 +33,29 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
       title={gt("Gamemodes")}
       subtitle={<PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />}
     >
-      <ul className={styles.modes}>
+      <ul ref={list} className={styles.modes}>
         {gamemodes.map((mode) => (
-          <Mode key={mode.server} mode={mode} server={findServer(snapshot, mode.server)} />
+          <Mode
+            key={mode.server}
+            mode={mode}
+            server={findServer(snapshot, mode.server)}
+            seen={seen}
+          />
         ))}
       </ul>
     </Tray>
   );
 }
 
-function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem }) {
+function Mode({
+  mode,
+  server,
+  seen,
+}: {
+  mode: Gamemode;
+  server?: ServerSnapshotItem;
+  seen: boolean;
+}) {
   const gt = useGT();
   const m = useMessages();
   const count = playerCount(server ? [server] : []);
@@ -95,7 +111,12 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
           }}
         />
       </span>
-      <Spread tiles={mode.spread} on={copied} origin={spread?.origin} reach={spread?.reach} />
+      <Spread
+        tiles={seen ? mode.spread : undefined}
+        on={copied}
+        origin={spread?.origin}
+        reach={spread?.reach}
+      />
       <div className={styles.band}>
         <Icon className={styles.icon} />
         <div className={styles.id}>

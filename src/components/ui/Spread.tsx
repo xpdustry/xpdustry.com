@@ -8,8 +8,8 @@ const TILES = import.meta.glob<string>("/src/assets/spread/*.webp", {
   import: "default",
 });
 
-const tile = (tiles: SpreadTiles, stage: SpreadStage) =>
-  `url("${TILES[`/src/assets/spread/${tiles[stage].name}.webp`]}")`;
+const tile = (tiles: SpreadTiles | undefined, stage: SpreadStage) =>
+  tiles && `url("${TILES[`/src/assets/spread/${tiles[stage].name}.webp`]}")`;
 
 /** Where a spread starts, in px from its parent's top left corner. */
 export type SpreadOrigin = readonly [x: number, y: number];
@@ -18,6 +18,9 @@ export type SpreadOrigin = readonly [x: number, y: number];
  * A palette's reticulate spreading over its positioned parent, behind the content, while `on`:
  * out from `origin` as thin threads that thicken and fuse solid behind them, until it has closed
  * over the farthest corner. It fades away once `on` is over.
+ *
+ * It stays invisible until it plays, so its `tiles` can be left out until it might: a browser
+ * downloads a background even under `opacity: 0`, and a page of spreads weighs hundreds of KiB.
  */
 export function Spread({
   tiles,
@@ -25,7 +28,7 @@ export function Spread({
   origin,
   reach,
 }: {
-  tiles: SpreadTiles;
+  tiles?: SpreadTiles;
   on: boolean;
   origin?: SpreadOrigin;
   /** How far the farthest corner is from `origin`, in px. */
