@@ -31,14 +31,18 @@ const short = cached(
 );
 const number = cached((tag) => new Intl.NumberFormat(tag));
 
-export function formatDate(iso: string, locale: string = DEFAULT_LOCALE): string {
+/** An ISO date in `format`, or nothing for a date that does not parse. */
+function formatIso(iso: string, format: Intl.DateTimeFormat): string {
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "" : long(locale).format(date);
+  return Number.isNaN(date.getTime()) ? "" : format.format(date);
+}
+
+export function formatDate(iso: string, locale: string = DEFAULT_LOCALE): string {
+  return formatIso(iso, long(locale));
 }
 
 export function formatShortDate(iso: string, locale: string = DEFAULT_LOCALE): string {
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "" : short(locale).format(date);
+  return formatIso(iso, short(locale));
 }
 
 export function formatNumber(value: number, locale: string = DEFAULT_LOCALE): string {
