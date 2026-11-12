@@ -1,4 +1,5 @@
 import type { StyleRule } from "@vanilla-extract/css";
+import { radius } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
 const DURATION = "0.18s";
@@ -34,7 +35,7 @@ export const MOVING = "data-moving";
 /** For visitors who accept motion. Visibility waits for the fade when shutting. */
 const popoverTransition = `opacity ${DURATION} ${vars.easeOut}, translate ${DURATION} ${vars.easeOut}, scale ${DURATION} ${vars.easeOut}, visibility 0s ${DURATION}`;
 
-export const popoverOpen: StyleRule = {
+const popoverOpen: StyleRule = {
   visibility: "visible",
   opacity: 1,
   translate: "0",
@@ -55,7 +56,31 @@ export const popoverMoving = {
  * layer and so measures it from the top left of the page: under the header's right end. It follows
  * the page's `.wrap` and the header's own padding.
  */
-export const popoverFallbackPlace = {
+const popoverFallbackPlace = {
   top: `calc(${vars.gap} + 60px)`,
   right: `calc(clamp(20px, 5vw, 56px) + ${vars.gap} + 6px)`
 };
+
+/** A panel's face: the deep colour behind a wall, lifted from the page by its shadow. */
+export const popoverPanel: StyleRule = {
+  border: `2px solid ${vars.deepWall}`,
+  borderRadius: radius.lg,
+  background: vars.deep,
+  boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)"
+};
+
+/** Where a panel hangs under its button, the anchor named `anchor`: 10px below, flush right. */
+export function hangUnder(anchor: string) {
+  return { top: `calc(anchor(${anchor} bottom) + 10px)`, right: `anchor(${anchor} right)` };
+}
+
+/** An open panel, hung under its button, or at the fallback place without anchor positioning. */
+export function popoverOpenUnder(place: { top: string; right: string }) {
+  return {
+    "&:popover-open": {
+      ...popoverOpen,
+      top: [popoverFallbackPlace.top, place.top],
+      right: [popoverFallbackPlace.right, place.right]
+    }
+  };
+}

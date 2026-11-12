@@ -1,12 +1,12 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { radius } from "#app/ui/styles/scale";
 import { onDeep } from "./onDeep";
 import {
+  hangUnder,
   popoverBox,
-  popoverFallbackPlace,
   popoverMoving,
-  popoverOpen,
+  popoverOpenUnder,
+  popoverPanel,
   popoverShut
 } from "./popover";
 import { tone, wall } from "#app/ui/Plinth.css";
@@ -71,8 +71,7 @@ globalStyle(`${brand} span`, {
   }
 });
 
-const top = `calc(anchor(${ANCHOR} bottom) + 10px)`;
-const right = `anchor(${ANCHOR} right)`;
+const hung = hangUnder(ANCHOR);
 
 /**
  * Where it sits in the header, the navigation takes the room left, and only needs its widest link:
@@ -93,25 +92,16 @@ export const nav = style({
   "@media": {
     [folded]: {
       position: "absolute",
-      top: [`calc(100% - ${below} + 10px)`, top],
-      right: [6, right],
+      top: [`calc(100% - ${below} + 10px)`, hung.top],
+      right: [6, hung.right],
       ...popoverShut,
       flexDirection: "column",
       gap: 10,
       minWidth: 210,
       margin: 0,
       padding: "12px 12px 14px",
-      border: `2px solid ${vars.deepWall}`,
-      borderRadius: radius.lg,
-      background: vars.deep,
-      boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)",
-      selectors: {
-        "&:popover-open": {
-          ...popoverOpen,
-          top: [popoverFallbackPlace.top, top],
-          right: [popoverFallbackPlace.right, right]
-        }
-      }
+      ...popoverPanel,
+      selectors: popoverOpenUnder(hung)
     },
     /*
      * Without JavaScript nothing shuts a menu left open while the window widens past the fold, and

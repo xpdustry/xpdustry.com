@@ -2,10 +2,11 @@ import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
 import { font, leading, radius, rem } from "#app/ui/styles/scale";
 import {
+  hangUnder,
   popoverBox,
-  popoverFallbackPlace,
   popoverMoving,
-  popoverOpen,
+  popoverOpenUnder,
+  popoverPanel,
   popoverShut
 } from "./popover";
 import { vars } from "#app/ui/styles/theme.css";
@@ -41,29 +42,19 @@ export const list = style({
   gap: 2
 });
 
-const top = `calc(anchor(${ANCHOR} bottom) + 10px)`;
-const right = `anchor(${ANCHOR} right)`;
+const hung = hangUnder(ANCHOR);
 
 export const panel = style({
   ...popoverBox,
   position: "absolute",
-  top: ["calc(100% + 10px)", top],
-  right: [0, right],
+  top: ["calc(100% + 10px)", hung.top],
+  right: [0, hung.right],
   zIndex: 6,
   ...popoverShut,
   minWidth: 170,
   padding: 8,
-  border: `2px solid ${vars.deepWall}`,
-  borderRadius: radius.lg,
-  background: vars.deep,
-  boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)",
-  selectors: {
-    "&:popover-open": {
-      ...popoverOpen,
-      top: [popoverFallbackPlace.top, top],
-      right: [popoverFallbackPlace.right, right]
-    }
-  },
+  ...popoverPanel,
+  selectors: popoverOpenUnder(hung),
   "@media": {
     [media.motion]: {
       selectors: popoverMoving
