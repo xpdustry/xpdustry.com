@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { postTitle, seo } from "#app/lib/seo";
+import { postTitle, seo } from "./meta";
 
 test.each([
   ["Beta 11: Admin panel", "4", "NoHorny 4 Beta 11: Admin panel"],

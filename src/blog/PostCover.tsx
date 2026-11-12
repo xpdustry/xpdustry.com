@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { T, useLocale, Var } from "gt-tanstack-start";
 import { formatDate } from "#app/i18n/format";
-import { postTitle } from "#app/lib/seo";
+import { postTitle } from "#app/seo/meta";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";

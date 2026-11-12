@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getLocale, getMessages } from "gt-tanstack-start";
-import { readCard } from "#app/server/og/cards";
+import { readCard } from "#app/seo/server/og/cards";
 
 export const Route = createFileRoute("/og/$")({
   server: {

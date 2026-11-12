@@ -5,9 +5,9 @@ import logo from "#app/brand/logo.svg?raw";
 import { SITE } from "#app/brand/site";
 import { formatNumber, formatShortDate } from "#app/i18n/format";
 import { withLocale } from "#app/i18n/localePath";
-import { CARD_SIZE } from "#app/lib/seo";
 import texture from "#app/textures/assets/reticulate.png?inline";
 import { FACE } from "#app/ui/styles/fonts";
+import { CARD_SIZE } from "../../meta";
 
 export interface CardPost {
   slug: string;

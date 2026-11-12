@@ -4,7 +4,7 @@ import type { Post } from "#app/blog/content/registry";
 import { SITE } from "#app/brand/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
-import { postCard, postTitle, type Translate } from "#app/lib/seo";
+import { postCard, postTitle, type Translate } from "./meta";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonLd;
 export interface JsonLd {

@@ -3,7 +3,7 @@ import { BLOG_TITLE } from "#app/blog/titles";
 import { SITE } from "#app/brand/site";
 import { withLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE, LOCALES, localeInfo } from "#app/i18n/locales";
-import type { JsonLd } from "#app/lib/structuredData";
+import type { JsonLd } from "./structuredData";
 
 export interface PageImage {
   /** Site-relative, e.g. `/og/home.png`. */

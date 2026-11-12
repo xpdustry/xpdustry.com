@@ -4,7 +4,7 @@ import { posts, translated } from "#app/blog/content/registry";
 import { LeadPost } from "#app/blog/LeadPost";
 import { PostTile } from "#app/blog/PostTile";
 import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/blog/titles";
-import { blogCard, seo } from "#app/lib/seo";
+import { blogCard, seo } from "#app/seo/meta";
 import { DiscordCard } from "#app/status/DiscordCard";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";

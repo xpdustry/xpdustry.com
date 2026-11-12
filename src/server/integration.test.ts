@@ -4,7 +4,7 @@ import { once } from "node:events";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, test } from "vitest";
-import { LEGACY_MEDIA_REDIRECTS } from "./redirects";
+import { LEGACY_MEDIA_REDIRECTS } from "#app/seo/server/redirects";
 
 const entryPath = fileURLToPath(new URL("../../dist/server/server.js", import.meta.url));
 const clientRoot = fileURLToPath(new URL("../../dist/client/", import.meta.url));

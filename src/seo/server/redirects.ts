@@ -1,4 +1,4 @@
-import { withoutLocale } from "../i18n/localePath.ts";
+import { withoutLocale } from "#app/i18n/localePath.ts";
 const convertedBlogImages = [
   "nohorny-admin-overview-dark",
   "nohorny-admin-requests-dark",

@@ -6,8 +6,8 @@ import { Cover } from "#app/landing/Cover";
 import { Gamemodes } from "#app/landing/Gamemodes";
 import { News } from "#app/landing/News";
 import { Projects } from "#app/landing/Projects";
-import { seo, siteCard } from "#app/lib/seo";
-import { homeStructuredData } from "#app/lib/structuredData";
+import { seo, siteCard } from "#app/seo/meta";
+import { homeStructuredData } from "#app/seo/structuredData";
 
 const REFRESH_MS = 30_000;
 
