@@ -78,6 +78,28 @@ function Tile({
   );
 }
 
+/** A project's card, leading to its website, or else to its repository. */
+function ProjectTile({
+  project,
+  className,
+  children
+}: {
+  project: Project;
+  className: string;
+  children: ReactNode;
+}) {
+  return (
+    <Tile
+      href={project.website ?? repositoryUrl(project)}
+      ground={project.card.ground}
+      patches={project.card.patches}
+      className={className}
+    >
+      {children}
+    </Tile>
+  );
+}
+
 interface CardProps<Kind extends Project["card"]["kind"]> {
   project: Project;
   card: CardOf<Kind>;
@@ -91,12 +113,7 @@ function Version({ tag }: { tag?: string }) {
 function Featured({ project, card, release }: CardProps<"featured">) {
   const m = useMessages();
   return (
-    <Tile
-      href={project.website ?? repositoryUrl(project)}
-      ground={card.ground}
-      patches={card.patches}
-      className={styles.featured}
-    >
+    <ProjectTile project={project} className={styles.featured}>
       <span className={styles.top}>
         {project.icon && <img src={project.icon} alt="" />}
         <h3>{project.name}</h3>
@@ -112,23 +129,18 @@ function Featured({ project, card, release }: CardProps<"featured">) {
           decoding="async"
         />
       </span>
-    </Tile>
+    </ProjectTile>
   );
 }
 
-function Item({ project, card: { symbol: Glyph, ...card }, release }: CardProps<"item">) {
+function Item({ project, card: { symbol: Glyph }, release }: CardProps<"item">) {
   const m = useMessages();
   return (
-    <Tile
-      href={project.website ?? repositoryUrl(project)}
-      ground={card.ground}
-      patches={card.patches}
-      className={styles.item}
-    >
+    <ProjectTile project={project} className={styles.item}>
       <Glyph className={styles.symbol} />
       <h3>{project.name}</h3>
       <p>{m(project.summary)}</p>
       <Version tag={release} />
-    </Tile>
+    </ProjectTile>
   );
 }
