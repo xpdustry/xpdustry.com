@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import sharp from "sharp";
 import { expect, test } from "vitest";
-import { PATCHES } from "#app/data/patches";
+import { FRINGES, PATCHES, SPREADS } from "#app/data/patches";
 import {
   BACKDROP,
   CROWN,
@@ -68,3 +68,17 @@ test.each([...sprites.keys()])("the %s sprite matches its patches", (name) => {
   const sprite = sprites.get(name)!;
   return expectRendered(`patches/${name}.webp`, sprite.settings, sprite.size);
 });
+
+const tiles = new Map(
+  Object.values(SPREADS).flatMap((spread) =>
+    Object.values(spread).map((tile) => [tile.name, tile] as const),
+  ),
+);
+
+test.each([...tiles.keys()])("the %s spread tile matches its palette", (name) =>
+  expectRendered(`spread/${name}.webp`, tiles.get(name)!.settings),
+);
+
+test.each(FRINGES)("the $name strip matches its colour", (strip) =>
+  expectRendered(`fringe/${strip.name}.webp`, strip.settings, strip.width, strip.height),
+);

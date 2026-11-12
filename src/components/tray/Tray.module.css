@@ -10,6 +10,8 @@
   /* the tab stands in the margin */
   margin-top: calc(71px + var(--group));
   padding: var(--gap);
+  /* a link to the tray lands on its tab */
+  scroll-margin-top: 70px;
 }
 
 /* the tray, its top-right corner tightening when the shelf beside the tab is short */
@@ -86,6 +88,12 @@
   .slant {
     display: none;
   }
+
+  /* with no slant to keep clear of, the tab is the tray's whole top and its button its corner's */
+  .tab {
+    width: 100%;
+    padding-right: 14px;
+  }
 }
 
 .icon {
@@ -99,8 +107,9 @@
   background: var(--tile);
 }
 
-.icon img {
-  width: 30px;
+.icon svg {
+  width: 26px;
+  height: 26px;
 }
 
 .titles {
@@ -185,8 +194,9 @@
     border-radius: 11px;
   }
 
-  .icon img {
-    width: 26px;
+  .icon svg {
+    width: 22px;
+    height: 22px;
   }
 
   .titles h2 {

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import { ChevronLeft } from "#app/components/ui/Icons";
+import { CaretLeft } from "#app/components/ui/Icons";
 import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
@@ -29,7 +29,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
       {theme.icon && <img className={styles.logo} src={theme.icon} alt="" />}
       <div className={styles.crumbs}>
         <Link to="/blog" className={styles.back}>
-          <ChevronLeft />
+          <CaretLeft />
           Blog
         </Link>
         <span className={styles.topic}>

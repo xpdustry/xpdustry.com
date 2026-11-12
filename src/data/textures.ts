@@ -26,6 +26,8 @@ export interface TextureSettings {
   hard?: number;
   /** How lumpy the outlines are. */
   warp?: number;
+  /** Which lumps they are: another seed, another outline. */
+  seed?: number;
   /**
    * The px size the lumps are measured against, so a large render's blobs are as lumpy as a
    * sprite's. By default, the render's height.
@@ -45,6 +47,9 @@ export interface TextureSettings {
 }
 
 const BASE = { tile: 280, hard: 6 } as const;
+
+/** The outlines a patch can take besides the usual one (`Patches.shape`), picked by eye. */
+const SHAPE_SEEDS = [23, 37, 52, 68, 91] as const;
 
 /**
  * The page's backdrop, two seamless tiles of scattered labyrinth that scroll at different speeds:
@@ -138,6 +143,8 @@ export interface Patches {
   blobs: readonly Blob[];
   /** How much bigger the blobs grow while the card is hovered or focused, if they do. */
   grow?: number;
+  /** Which outline the blobs take, of as many as are asked for; the usual one by default. */
+  shape?: number;
 }
 
 export function patches(
@@ -152,6 +159,14 @@ export function patches(
 /** The same patches, growing by `grow` under the pointer: for cards that are links. */
 export function growing(patches: Patches, grow = 1.35): Patches {
   return { ...patches, grow };
+}
+
+/**
+ * The same patches with another outline, so patches that sit side by side are not copies of each
+ * other. Each shape of a blob is a sprite of its own.
+ */
+export function shaped(patches: Patches, shape: number): Patches {
+  return { ...patches, shape };
 }
 
 /**
@@ -185,14 +200,18 @@ function generator(name: string) {
 
 /**
  * The sprite of one blob: a square around it, roomy enough for its lumps and fraying, its name
- * and the settings that render it. Blobs of one size and palette share a sprite.
+ * and the settings that render it. Blobs of one size, palette and shape share a sprite.
  *
  * A growing blob's sprite and its `grown` one are the same size, so their labyrinth and lumps
  * line up exactly and the bigger one only fuses more of it.
  */
-export function blobSprite({ color, inner, tile, grow }: Patches, radius: number, grown = false) {
+export function blobSprite(
+  { color, inner, tile, grow, shape = 0 }: Patches,
+  radius: number,
+  grown = false,
+) {
   const size = Math.ceil(radius * (grow ?? 1) * 3.2);
-  const name = `${color.slice(1)}-${inner.slice(1)}-${tile}-${radius}`;
+  const name = `${color.slice(1)}-${inner.slice(1)}-${tile}-${radius}${shape ? `s${shape}` : ""}`;
   return {
     name: grow ? `${name}x${grow}${grown ? "-grown" : ""}` : name,
     size,
@@ -201,6 +220,8 @@ export function blobSprite({ color, inner, tile, grow }: Patches, radius: number
       tile,
       color,
       inner,
+      // the renderer's own seed gives the usual outline
+      ...(shape && { seed: SHAPE_SEEDS[shape - 1]! }),
       blobs: [[0.5, 0.5, (grown && grow ? radius * grow : radius) / size, 1]],
     } satisfies TextureSettings,
   };
@@ -215,9 +236,57 @@ export function blobSprites(patches: Patches) {
   );
 }
 
+/** A field as strong as `level` all over, as a ramp so far away that it never changes. */
+const flat = (level: number) => [-1e6 * level, 1e6 * (1 - level)] as const;
+
+/** A palette's reticulate at one stage of spreading over a surface. */
+export type SpreadStage = "thin" | "thick" | "solid";
+
 /**
- * The card a photo fades into (`fade` in `Card.module.css`): solid, with the labyrinth showing
- * faintly in it. One seamless tile; `pnpm textures` renders it.
+ * A palette's reticulate spreading over a surface (`Spread`): seamless tiles of the labyrinth as
+ * thin threads, thickened, and fused solid with the inner tone still running through it. Laid over
+ * each other and uncovered one behind the next, they read as a patch fraying outward.
+ */
+export function spreadTiles(color: string, inner: string) {
+  const base = { ...BASE, repeat: 240, tile: 240, warp: 0, color } as const;
+  const palette = `${color.slice(1)}-${inner.slice(1)}`;
+  return {
+    thin: { name: `${palette}-thin`, settings: { ...base, ramp: flat(0.3) } },
+    thick: { name: `${palette}-thick`, settings: { ...base, ramp: flat(0.4) } },
+    // solid all over, as the fade is
+    solid: { name: `${palette}-solid`, settings: { ...base, reach: 0, inner, ramp: [-1, 0] } },
+  } as const satisfies Record<SpreadStage, { name: string; settings: TextureSettings }>;
+}
+
+export type SpreadTiles = ReturnType<typeof spreadTiles>;
+
+/**
+ * A colour's lower edge, frayed and lumpy instead of straight (`Fringe`): one seamless strip,
+ * solid along its top, to lay under where the colour ends; or `rising`, solid along its foot, for
+ * an upper edge. `pnpm textures` renders it.
+ */
+export function fringe(color: string, rising = false) {
+  return {
+    name: `${color.slice(1)}-${rising ? "rise" : "fringe"}`,
+    // a whole number of labyrinth tiles across, so the strip repeats without a seam
+    width: 648,
+    height: 64,
+    settings: {
+      ...BASE,
+      tile: 108,
+      color,
+      seamless: true,
+      warp: 1,
+      lumps: 90,
+      ramp: rising ? [0.2, 0.7] : [0.8, 0.3],
+    } satisfies TextureSettings,
+  } as const;
+}
+
+export type Fringe = ReturnType<typeof fringe>;
+
+/**
+ * A card's own surface, under its text: solid, with the labyrinth showing faintly in it. One seamless tile; `pnpm textures` renders it.
  */
 export const FADE = {
   ...BASE,

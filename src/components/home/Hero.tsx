@@ -1,7 +1,7 @@
 import { PressableLogo } from "#app/components/home/PressableLogo";
 import { GitHub } from "#app/components/ui/Icons";
 import { Patches } from "#app/components/ui/Patches";
-import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
+import { PlinthAnchor, PlinthSectionLink } from "#app/components/ui/Plinth";
 import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
 import card from "#app/components/ui/Card.module.css";
@@ -20,12 +20,10 @@ export function Hero({ className }: { className?: string }) {
         Mindustry, and run servers for people to play on.
       </p>
       <div className={styles.actions}>
-        <PlinthLink to="/" hash="projects">
-          Browse projects
-        </PlinthLink>
-        <PlinthLink tone="amber" to="/" hash="gamemodes">
+        <PlinthSectionLink hash="projects">Browse projects</PlinthSectionLink>
+        <PlinthSectionLink tone="amber" hash="gamemodes">
           Join a server
-        </PlinthLink>
+        </PlinthSectionLink>
         <PlinthAnchor tone="ink" href={SITE.github}>
           <GitHub />
           GitHub

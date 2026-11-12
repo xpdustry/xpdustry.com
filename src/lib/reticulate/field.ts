@@ -1,5 +1,5 @@
-// The reticulate texture's maths. No DOM here: it runs inside the texture worker, and in Node
-// for `pnpm textures`.
+// The reticulate texture's maths. No DOM here: it runs in Node, for `pnpm textures` and the test
+// that checks what it rendered.
 
 import type { TextureSettings } from "#app/data/textures";
 

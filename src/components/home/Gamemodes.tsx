@@ -1,240 +1,155 @@
-import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
-import { flushSync } from "react-dom";
-import router from "#app/assets/mindustry/router.png";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent,
+} from "react";
 import { Tray } from "#app/components/tray/Tray";
-import { CopyButton } from "#app/components/ui/CopyButton";
-import { ChevronDown } from "#app/components/ui/Icons";
+import { Check, Copy, GameController } from "#app/components/ui/Icons";
 import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
+import { Spread, spreadFrom } from "#app/components/ui/Spread";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
 import { findServer, playerCount } from "#app/data/live";
-import type { ServerSnapshot } from "#app/data/snapshots";
-import { useMediaQuery } from "#app/lib/useMediaQuery";
+import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
 import card from "#app/components/ui/Card.module.css";
 import styles from "./Gamemodes.module.css";
 
-const FOLD_MS = 280;
+const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
 
-/**
- * Wide, a list of modes beside the panel of the one picked; narrow, an accordion where each row
- * folds its own panel open beneath it. Either way at most one panel shows, and going wide always
- * shows the last one opened.
- */
+/** How long a card says its address was copied, or shows the address when it could not be. */
+const COPIED_MS = 1800;
+const FAILED_MS = 6000;
+
+/** One mode to a row, at every width: a press anywhere on it copies its server's address. */
 export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
-  const wide = useMediaQuery("(min-width: 901px)", true);
-  const [current, setCurrent] = useState(gamemodes[0]!.server);
-  const [open, setOpen] = useState(true);
-  const rows = useRef(new Map<string, HTMLButtonElement>());
-
-  // narrow, every fold can be shut; a change of layout opens the current one again
-  const [layout, setLayout] = useState(wide);
-  if (layout !== wide) {
-    setLayout(wide);
-    setOpen(true);
-  }
-
-  const expanded = (mode: Gamemode) => mode.server === current && (wide || open);
-
-  // the screenshots are the page's heaviest images: only the open panel's loads with the page,
-  // the others once it has loaded, or when they open first
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    const all = () => setLoaded(true);
-    if (document.readyState === "complete") return all();
-    addEventListener("load", all, { once: true });
-    return () => removeEventListener("load", all);
-  }, []);
-
-  const toggle = (mode: Gamemode) => {
-    const motion = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const fold = (server: string) => document.getElementById(foldId(server))!;
-
-    if (wide) {
-      if (mode.server === current) return;
-      flushSync(() => setCurrent(mode.server));
-      if (motion)
-        fold(mode.server).animate({ opacity: [0, 1] }, { duration: 180, easing: "ease-out" });
-      return;
-    }
-
-    // one fold at a time: the open one shuts while this one opens, both in the same motion
-    const closing = expanded(mode) ? mode : gamemodes.find(expanded);
-    const opening = expanded(mode) ? undefined : mode;
-    const heights = new Map(
-      [closing, opening].flatMap((m) => (m ? [[m.server, fold(m.server).offsetHeight]] : [])),
-    );
-    flushSync(() => {
-      if (opening) setCurrent(opening.server);
-      setOpen(opening !== undefined);
-    });
-    if (!motion) return;
-
-    for (const [server, from] of heights) {
-      const element = fold(server);
-      const to = server === opening?.server ? element.firstElementChild!.clientHeight : 0;
-      element.getAnimations().forEach((animation) => animation.cancel());
-      element.animate(
-        { height: [`${from}px`, `${to}px`], visibility: ["visible", "visible"] },
-        { duration: FOLD_MS, easing: "cubic-bezier(.22,1,.36,1)" },
-      );
-    }
-    // if the row ends up above the screen, it slides back into view
-    if (opening) {
-      setTimeout(() => {
-        const row = rows.current.get(opening.server);
-        if (row && row.getBoundingClientRect().top < 0) {
-          row.scrollIntoView({ block: "start", behavior: motion ? "smooth" : "instant" });
-        }
-      }, FOLD_MS + 20);
-    }
-  };
-
-  const moveFocus = (event: KeyboardEvent, index: number) => {
-    const step = { ArrowDown: 1, ArrowUp: -1 }[event.key];
-    if (!step) return;
-    event.preventDefault();
-    const next = gamemodes[(index + step + gamemodes.length) % gamemodes.length]!;
-    rows.current.get(next.server)?.focus();
-  };
-
   return (
     <Tray
       id="gamemodes"
-      icon={router}
+      icon={GameController}
       title="Gamemodes"
-      subtitle={
-        <PlayerCount
-          count={playerCount(snapshot.servers)}
-          className={styles.total}
-          unit={(players) => {
-            const servers = snapshot.servers.filter((server) => server.status === "online").length;
-            return ` ${players === 1 ? "player" : "players"} on ${servers} ${servers === 1 ? "server" : "servers"} right now`;
-          }}
-        />
-      }
+      subtitle={<PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />}
     >
-      <div className={styles.modes}>
-        {gamemodes.map((mode, index) => {
-          const server = findServer(snapshot, mode.server);
-          const count = playerCount(server ? [server] : []);
-          const hostname = server?.hostname ?? "";
-          return (
-            <div key={mode.server} className={styles.item}>
-              <button
-                ref={(row) => {
-                  if (row) rows.current.set(mode.server, row);
-                  else rows.current.delete(mode.server);
-                }}
-                type="button"
-                id={rowId(mode.server)}
-                className={`${card.card} spot ${styles.row}`}
-                style={{ "--tint": mode.tint } as CSSProperties}
-                aria-expanded={expanded(mode)}
-                aria-controls={foldId(mode.server)}
-                onClick={() => toggle(mode)}
-                onKeyDown={(event) => moveFocus(event, index)}
-              >
-                <span className={styles.icon} aria-hidden="true">
-                  {mode.icon.patches.map((patches, at) => (
-                    <Patches key={at} patches={patches} />
-                  ))}
-                  {mode.icon.sprites.map((sprite, at) => (
-                    <img
-                      key={at}
-                      className="sprite"
-                      src={sprite.src}
-                      alt=""
-                      style={{ left: sprite.left, top: sprite.top, width: sprite.width }}
-                    />
-                  ))}
-                </span>
-                <span className={styles.name}>{mode.name}</span>
-                <PlayerCount
-                  count={count}
-                  className={styles.online}
-                  unit={<span className={styles.unit}> online</span>}
-                />
-                <ChevronDown className={styles.chevron} />
-              </button>
-              <section
-                id={foldId(mode.server)}
-                className={styles.fold}
-                aria-labelledby={rowId(mode.server)}
-              >
-                <Panel
-                  mode={mode}
-                  load={loaded || mode.server === current}
-                  count={count}
-                  hostname={hostname}
-                  map={server?.status === "online" ? server.info.map : undefined}
-                />
-              </section>
-            </div>
-          );
-        })}
-      </div>
+      <ul className={styles.modes}>
+        {gamemodes.map((mode) => (
+          <Mode key={mode.server} mode={mode} server={findServer(snapshot, mode.server)} />
+        ))}
+      </ul>
     </Tray>
   );
 }
 
-function Panel({
-  mode,
-  load,
-  count,
-  hostname,
-  map,
-}: {
-  mode: Gamemode;
-  /** Whether its screenshot loads yet. */
-  load: boolean;
-  count: ReturnType<typeof playerCount>;
-  hostname: string;
-  map?: string;
-}) {
-  return (
-    <div className={styles.panel}>
-      <img
-        className={styles.photo}
-        src={load ? mode.screenshot.src : undefined}
-        alt=""
-        style={{ objectPosition: mode.screenshot.position }}
-      />
-      <div>
-        <span className={styles.figures} aria-hidden="true">
-          {mode.figures.map((figure, at) => (
-            <img
-              key={at}
-              className="sprite"
-              src={figure.src}
-              alt=""
-              style={{ width: figure.width }}
-            />
-          ))}
-        </span>
-        <h3 className={card.fade}>{mode.name}</h3>
-      </div>
-      <p className={card.fade}>{mode.description}</p>
-      <div className={styles.foot}>
-        <dl>
-          <div>
-            <dt>Map</dt>
-            <dd>{map ?? "Unknown"}</dd>
-          </div>
-          <div className={styles.live}>
-            <dt>Online</dt>
-            <dd>
-              <PlayerCount count={count} unit="" />
-            </dd>
-          </div>
-        </dl>
-        <div className={styles.join}>
-          <code>{hostname}</code>
-          <CopyButton text={hostname} label={`Copy ${hostname}`} />
-        </div>
-      </div>
-    </div>
-  );
+/** The last copy from a card: whether it landed, and where the click that asked for it did. */
+interface Copied extends ReturnType<typeof spreadFrom> {
+  ok: boolean;
 }
 
-const rowId = (server: string) => `gamemode-${server}`;
-const foldId = (server: string) => `gamemode-${server}-panel`;
+function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem }) {
+  const count = playerCount(server ? [server] : []);
+  const hostname = server?.hostname ?? "";
+  const [copied, setCopied] = useState<Copied>();
+  const [shown, setShown] = useState(false);
+  // the long message, unless the header is too narrow for it
+  const [brief, setBrief] = useState(false);
+  const said = useRef<HTMLSpanElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  useLayoutEffect(() => {
+    const line = said.current;
+    if (shown && line && line.scrollWidth > line.clientWidth) setBrief(true);
+  }, [shown, copied]);
+
+  const copy = async (event: MouseEvent<HTMLButtonElement>) => {
+    // the reticulate spreads over the whole card, from the press; a keyboard press has no place
+    // of its own, and spreads from the copy mark
+    const box = event.currentTarget.closest("li")!.getBoundingClientRect();
+    const mark = event.currentTarget.lastElementChild!.getBoundingClientRect();
+    const [x, y] = event.detail
+      ? [event.clientX, event.clientY]
+      : [mark.left + mark.width / 2, mark.top + mark.height / 2];
+    const origin = [x - box.left, y - box.top] as const;
+    // no clipboard at all, as on a page served without https, fails like a refused write
+    const ok = await Promise.resolve()
+      .then(() => navigator.clipboard.writeText(hostname))
+      .then(
+        () => true,
+        () => false,
+      );
+    setCopied({ ok, ...spreadFrom(origin, box.width, box.height) });
+    setBrief(false);
+    setShown(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setShown(false), ok ? COPIED_MS : FAILED_MS);
+  };
+
+  const landed = shown && copied?.ok === true;
+  const failed = shown && copied?.ok === false;
+  const empty = count.state === "online" && count.players === 0;
+  const Icon = mode.icon;
+  return (
+    <li
+      className={`${card.card} ${styles.mode} ${landed ? styles.copied : ""} ${failed ? styles.failed : ""}`}
+      style={{ "--tint": mode.edge.side.color } as CSSProperties}
+    >
+      {/* the mode's colour, ending in a frayed edge instead of a line */}
+      <span className={styles.tinted} aria-hidden="true">
+        <span className={`${styles.edge} ${styles.side}`}>
+          <Patches patches={mode.edge.side} className={styles.patches} />
+        </span>
+        <span
+          className={`${styles.edge} ${styles.below}`}
+          style={{
+            backgroundImage: `url("${FRINGES[`/src/assets/fringe/${mode.edge.below.name}.webp`]}")`,
+          }}
+        />
+      </span>
+      <Spread tiles={mode.spread} on={landed} origin={copied?.origin} reach={copied?.reach} />
+      <h3 className={styles.head}>
+        {/* the whole card answers to it */}
+        <button
+          type="button"
+          className={styles.band}
+          title={`Copy ${hostname}`}
+          disabled={!hostname}
+          onClick={copy}
+        >
+          <Icon className={styles.icon} />
+          <span className={styles.id}>
+            <span className={styles.name}>{mode.name}</span>
+            <span className={styles.line}>
+              <PlayerCount
+                count={count}
+                className={`${styles.count} ${empty ? styles.empty : ""}`}
+              />
+              {/* said aloud by the output below */}
+              <span ref={said} className={styles.said} aria-hidden="true">
+                {copied?.ok === false
+                  ? hostname
+                  : brief
+                    ? "Copied"
+                    : "Copied, paste it in Join game"}
+              </span>
+            </span>
+            <span className="sr-only">. Copy the server address</span>
+          </span>
+          <span className={styles.mark} aria-hidden="true">
+            <Copy className={styles.glyph} />
+            <Check className={styles.tick} />
+          </span>
+        </button>
+      </h3>
+      <p className={styles.about}>{mode.description}</p>
+      <output className="sr-only">
+        {landed && `Copied ${hostname}. Paste it in Play, Join game, Add server.`}
+        {failed && `Could not copy. The address is ${hostname}.`}
+      </output>
+    </li>
+  );
+}

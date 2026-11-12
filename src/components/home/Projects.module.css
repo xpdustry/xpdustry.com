@@ -48,12 +48,13 @@
   line-height: 1.45;
 }
 
+/* in the flow, under the summary however many lines that runs to; the card cuts it off */
 .screenshot {
-  position: absolute;
-  top: 150px;
-  left: 24px;
-  width: calc(100% - 4px);
+  flex: none;
+  align-self: flex-start;
+  width: calc(100% + 44px);
   max-width: none;
+  margin-top: 19px;
   border: 1px solid rgb(255 255 255 / 0.12);
   border-radius: 12px;
   box-shadow: 0 20px 50px -18px rgb(0 0 0 / 0.7);
@@ -64,7 +65,7 @@
   translate: 0 -8px;
 }
 
-/* the others, in a Mindustry item's colours, each with the item's sprite */
+/* the others, in a Mindustry item's colours, each with an icon of what it does */
 .item {
   grid-column: span 3;
   grid-row: span 2;
@@ -94,17 +95,19 @@
   background: rgb(255 255 255 / 0.45);
 }
 
-.sprite {
+.symbol {
   position: absolute;
-  right: 14px;
-  bottom: 12px;
-  width: 62px;
+  right: 16px;
+  bottom: 14px;
+  width: 58px;
+  height: 58px;
   transform: rotate(-8deg);
-  filter: drop-shadow(0 6px 0 rgb(0 0 0 / 0.2));
+  filter: drop-shadow(0 5px 0 rgb(0 0 0 / 0.16));
   transition: transform 0.45s var(--ease-spring);
 }
 
-.item:hover .sprite {
+.item:hover .symbol,
+.more:hover .symbol {
   transform: rotate(0deg) translateY(-8px) scale(1.06);
 }
 
@@ -132,9 +135,10 @@
   color: var(--deep-ink);
 }
 
-.more .browse {
-  align-self: start;
-  margin-top: auto;
+.more .symbol {
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 5px 0 rgb(0 0 0 / 0.35));
 }
 
 @media (max-width: 1100px) {
@@ -162,5 +166,10 @@
 
   .item p {
     margin-bottom: 12px;
+  }
+
+  /* the screenshot only peeks in */
+  .grid > .featured {
+    height: 300px;
   }
 }

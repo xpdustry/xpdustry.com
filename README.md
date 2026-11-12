@@ -41,7 +41,7 @@ Set `XPD_DISABLE_STATUS=1` to stop the server from polling the Mindustry servers
 - `src/content`: the blog posts and their authors.
 - `src/server`: everything that only runs on the server: the Mindustry status poller, the Discord and GitHub
   fetchers, and the social cards.
-- `src/lib/reticulate`: the reticulate pattern, rendered in a worker and animated with WebGL.
+- `src/lib/reticulate`: the reticulate pattern's renderer; `pnpm textures` draws every texture with it ahead of time.
 
 ## Add a blog post
 
@@ -92,4 +92,4 @@ Then run `pnpm check`. Invalid frontmatter, broken media comments and duplicate 
 - [Fancy leopard pattern generator](https://github.com/mgmalheiros/reaction-diffusion)
   All I could find were goofy aah AI generators for this,
   until I found this absolute GEM from a Brazilian researcher. Say thank you to claude for porting it to js.
-- The Mindustry sprites in `src/assets/mindustry` are by Anuke, under the GPLv3 (see the notes there).
+- [Phosphor](https://phosphoricons.com) for the icons, in their bold weight (see `THIRD_PARTY_NOTICES.md`).

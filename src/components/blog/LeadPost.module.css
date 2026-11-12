@@ -101,9 +101,20 @@
   scale: 1.03;
 }
 
+.logo {
+  align-self: center;
+  justify-self: center;
+  width: 168px;
+  filter: drop-shadow(0 8px 0 rgb(0 0 0 / 0.28));
+}
+
 @media (max-width: 1100px) {
   .lead {
     grid-template-columns: 1fr;
+  }
+
+  .logo {
+    display: none;
   }
 
   .shot {

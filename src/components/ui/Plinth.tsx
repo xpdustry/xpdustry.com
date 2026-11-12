@@ -1,5 +1,11 @@
 import { createLink } from "@tanstack/react-router";
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from "react";
+import type {
+  AnchorHTMLAttributes,
+  ButtonHTMLAttributes,
+  ComponentProps,
+  ReactNode,
+  Ref,
+} from "react";
 import styles from "./Plinth.module.css";
 
 export interface PlinthStyle {
@@ -53,7 +59,21 @@ export function PlinthAnchor({
 /** A plinth to a page of the site, with the router's typed `to`, preloading and active state. */
 export const PlinthLink = createLink(PlinthAnchor);
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & PlinthStyle;
+type SectionLinkProps = Omit<ComponentProps<typeof PlinthLink>, "to" | "hash" | "resetScroll"> & {
+  hash: "projects" | "gamemodes";
+};
+
+/**
+ * A plinth to a section of the home page. It goes straight to the section, even from the home
+ * page with the section already in the address: the router takes a link to where it already is
+ * for a reload, and would put the scroll back where it was.
+ */
+export function PlinthSectionLink({ hash, ...props }: SectionLinkProps) {
+  return <PlinthLink {...props} to="/" hash={hash} resetScroll={false} />;
+}
+
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  PlinthStyle & { ref?: Ref<HTMLButtonElement> };
 
 export function PlinthButton({
   tone,

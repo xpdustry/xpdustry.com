@@ -1,11 +1,11 @@
-// Renders the textures that never change: the backdrop's tiles, the page's crown and the footer's
-// ridge, the photos'
-// fade, the relief logo's frames and a sprite for every card's blob, so they paint with the page instead of waiting on the texture worker. Sprites no card
-// uses any more are deleted. `prerendered.test.ts` fails when any of them is out of date.
+// Renders every texture, as none changes after a build: the backdrop's tiles, the page's crown and
+// the footer's ridge, the cards' own labyrinth, the relief logo's frames, a sprite for every card's
+// blob, the tiles of every spread and every fringe. Sprites, tiles and fringes nothing uses any
+// more are deleted. `prerendered.test.ts` fails when any of them is out of date.
 
 import { mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import sharp from "sharp";
-import { PATCHES } from "../src/data/patches.ts";
+import { FRINGES, PATCHES, SPREADS } from "../src/data/patches.ts";
 import {
   BACKDROP,
   CROWN,
@@ -19,6 +19,8 @@ import { renderTexture, toLabyrinth } from "../src/lib/reticulate/field.ts";
 
 const assets = new URL("../src/assets/", import.meta.url);
 const sprites = new URL("patches/", assets);
+const spreads = new URL("spread/", assets);
+const fringes = new URL("fringe/", assets);
 
 const { data, info } = await sharp(new URL("reticulate.png", assets).pathname)
   .raw()
@@ -61,6 +63,28 @@ for (const file of readdirSync(sprites)) {
 for (const [file, sprite] of wanted) {
   await write(new URL(file, sprites), sprite.settings, sprite.size, sprite.size);
 }
+
+mkdirSync(spreads, { recursive: true });
+const tiles = new Map(
+  Object.values(SPREADS).flatMap((spread) =>
+    Object.values(spread).map((tile): [string, typeof tile] => [`${tile.name}.webp`, tile]),
+  ),
+);
+for (const file of readdirSync(spreads)) {
+  if (!tiles.has(file)) rmSync(new URL(file, spreads));
+}
+for (const [file, tile] of tiles) {
+  await write(new URL(file, spreads), tile.settings);
+}
+
+mkdirSync(fringes, { recursive: true });
+const strips = new Map(FRINGES.map((strip) => [`${strip.name}.webp`, strip]));
+for (const file of readdirSync(fringes)) {
+  if (!strips.has(file)) rmSync(new URL(file, fringes));
+}
+for (const [file, strip] of strips) {
+  await write(new URL(file, fringes), strip.settings, strip.width, strip.height);
+}
 console.log(
-  `${Object.keys(BACKDROP).length} backdrop tiles, the crown, the ridge, the fade, the logo, ${wanted.size} sprites`,
+  `${Object.keys(BACKDROP).length} backdrop tiles, the crown, the ridge, the fade, the logo, ${wanted.size} sprites, ${tiles.size} spread tiles, ${strips.size} fringes`,
 );

@@ -9,17 +9,3 @@
   color: inherit;
   text-decoration: none;
 }
-
-/* A photo's fade into the card: a clean, straight edge `--fade` px above this element, however
-   it wraps, and the card below it. Not positioned itself, so its layer spans the whole card from
-   where it would sit, over the photo and under the card's patches. */
-:where(.fade)::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: -2;
-  height: 100%;
-  margin-top: calc(-1 * var(--fade, 50px));
-  background: url("../../assets/fade.webp") 0 0 / 240px;
-}

@@ -1,6 +1,6 @@
 import type { LinkComponentProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ArrowRight, ArrowUpRight } from "#app/components/ui/Icons";
+import { ArrowRight, ArrowUpRight, type Icon } from "#app/components/ui/Icons";
 import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
 import styles from "./Tray.module.css";
 
@@ -11,8 +11,8 @@ type TrayAction = { label: string } & (
 
 interface TrayProps {
   id: string;
-  /** A Mindustry sprite on the tab. */
-  icon: string;
+  /** What the tray holds, on its tab. */
+  icon: Icon;
   title: string;
   subtitle?: ReactNode;
   /** The tab's button, which the whole tab answers to. */
@@ -50,7 +50,7 @@ const SLANT_FACE = `${slantPath(0)}V${SLANT.height}H0Z`;
  * A folder of cards: a tray with a tab on its top-left, drawn in CSS around the tab's fixed
  * width, so it is whole before any script runs.
  */
-export function Tray({ id, icon, title, subtitle, action, className, children }: TrayProps) {
+export function Tray({ id, icon: Icon, title, subtitle, action, className, children }: TrayProps) {
   return (
     <section id={id} className={`${styles.tray} reveal ${className ?? ""}`}>
       <span className={styles.body} aria-hidden="true" />
@@ -60,7 +60,7 @@ export function Tray({ id, icon, title, subtitle, action, className, children }:
           <path className={styles.line} d={SLANT_LINE} />
         </svg>
         <span className={styles.icon}>
-          <img className="sprite" src={icon} alt="" />
+          <Icon />
         </span>
         <span className={styles.titles}>
           <h2>{title}</h2>

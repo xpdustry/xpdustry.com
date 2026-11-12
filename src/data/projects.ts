@@ -1,8 +1,6 @@
 import clajIcon from "#app/assets/brand/claj.png";
 import nohornyIcon from "#app/assets/brand/nohorny.svg";
-import copper from "#app/assets/mindustry/item-copper.png";
-import surgeAlloy from "#app/assets/mindustry/item-surge-alloy.png";
-import titanium from "#app/assets/mindustry/item-titanium.png";
+import { Package, PlugsConnected, Toolbox, type Icon } from "#app/components/ui/Icons";
 import { PATCHES } from "#app/data/patches";
 import type { Patches } from "#app/data/textures";
 
@@ -21,24 +19,23 @@ export interface ProjectTheme {
   accent: string;
 }
 
-/** A card's colours for its piece of the grid's labyrinth: the patch, and the lines in its core. */
-export type PieceTones = readonly [color: string, inner: string];
-
 /** The featured project gets the wide card, with a screenshot of it at work. */
 interface FeaturedCard {
   kind: "featured";
   ground: string;
-  piece: PieceTones;
+  /** The patches in its corners. */
+  patches: Patches;
   muted: string;
   screenshot: string;
 }
 
-/** The others are small cards in a Mindustry item's colours, with the item's sprite. */
+/** The others are small cards in a Mindustry item's colours, with an icon of what they do. */
 interface ItemCard {
   kind: "item";
   ground: string;
-  piece: PieceTones;
-  item: string;
+  /** The patches in its corners. */
+  patches: Patches;
+  symbol: Icon;
 }
 
 export interface Project {
@@ -71,7 +68,7 @@ export const projects: readonly Project[] = [
     card: {
       kind: "featured",
       ground: NOHORNY_THEME.ground,
-      piece: ["#4d2238", "#3b1b2c"],
+      patches: PATCHES.nohornyCard,
       muted: NOHORNY_THEME.muted,
       screenshot: "/blog/nohorny-admin-overview-dark.webp",
     },
@@ -86,8 +83,8 @@ export const projects: readonly Project[] = [
     card: {
       kind: "item",
       ground: "#d99d73",
-      piece: ["#bf7b50", "#cc8b60"],
-      item: copper,
+      patches: PATCHES.clajCard,
+      symbol: PlugsConnected,
     },
   },
   {
@@ -98,8 +95,8 @@ export const projects: readonly Project[] = [
     card: {
       kind: "item",
       ground: "#8da1e3",
-      piece: ["#6c80d2", "#7d90da"],
-      item: titanium,
+      patches: PATCHES.toxopidCard,
+      symbol: Package,
     },
   },
   {
@@ -110,8 +107,8 @@ export const projects: readonly Project[] = [
     card: {
       kind: "item",
       ground: "#e8dc80",
-      piece: ["#ccc15a", "#d9d06f"],
-      item: surgeAlloy,
+      patches: PATCHES.distributorCard,
+      symbol: Toolbox,
     },
   },
 ];

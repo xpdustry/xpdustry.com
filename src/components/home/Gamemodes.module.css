@@ -4,315 +4,377 @@
 
 .modes {
   display: grid;
-  gap: 10px var(--gap);
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.row {
+/* One mode to a row: its header names it, what it is follows, and a press anywhere copies its
+   address, spreading the mode's reticulate over the card from where it landed. */
+.mode {
+  /* the header's share of the row, which its colour fills */
+  --band: clamp(332px, 32cqi, 372px);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: var(--band) minmax(0, 1fr);
   align-items: center;
-  column-gap: 14px;
-  width: 100%;
-  padding: 8px 20px 8px 76px;
-  border-width: 0;
-  font: inherit;
-  text-align: left;
   cursor: pointer;
 }
 
-.row[aria-expanded="true"] {
-  background-color: var(--tint);
-}
-
-/* the open mode sits pressed in, its shadow over the icon's blobs */
-.row[aria-expanded="true"]::before {
+/* the card's own labyrinth, as under every card's text */
+.mode::before {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 1;
-  border-radius: inherit;
-  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.14);
-  pointer-events: none;
+  z-index: -2;
+  background: url("../../assets/fade.webp") 0 -60px / 240px;
 }
 
-.row:focus-visible {
-  outline-color: var(--t9);
-  border-radius: var(--r);
+/* the mode's colour under the header: it stops short of the header's end, where its patches
+   carry it on into a frayed edge */
+.tinted {
+  position: absolute;
+  inset: 0 auto 0 0;
+  z-index: -2;
+  width: calc(var(--band) - 34px);
+  background: var(--tint);
 }
 
+/* a line the patches are centred on: down the colour's side */
+.edge {
+  position: absolute;
+}
+
+.side {
+  inset: 0 auto 0 100%;
+  width: 0;
+}
+
+.below {
+  display: none;
+}
+
+.patches {
+  overflow: visible;
+}
+
+/* the patches grow under the pointer, as a linked card's do */
+.mode:is(:hover, :has(:focus-visible)) .edge {
+  --grow: 1;
+}
+
+.head {
+  align-self: stretch;
+  display: grid;
+}
+
+/* the header: its icon, its name and who is on it; the whole card answers to it */
+.band {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 92px;
+  padding: 0 16px 0 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: inherit;
+}
+
+.band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.mode:has(.band:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.band:focus-visible {
+  outline: none;
+}
+
+.mode:has(.band:disabled) {
+  cursor: default;
+}
+
+/* the icon gives under the press and springs back as the copy lands */
 .icon {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 120px;
-  height: 84px;
-  translate: 0 -50%;
+  justify-self: center;
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(0 4px 0 rgb(0 0 0 / 0.14));
+  transition: scale 0.18s var(--ease-out);
 }
 
-.icon img {
-  position: absolute;
-  translate: -50% -50%;
-  filter: drop-shadow(0 3px 0 rgb(0 0 0 / 0.18));
+.mode:active .icon {
+  scale: 0.9;
+  transition-duration: 0.06s;
+}
+
+.copied .icon {
+  animation: pop 0.5s var(--ease-out);
+}
+
+@keyframes pop {
+  0% {
+    scale: 0.9;
+  }
+
+  45% {
+    scale: 1.12;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+.id {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px 0;
 }
 
 .name {
-  font-size: 19px;
+  font-size: 24px;
   line-height: 1.05;
   letter-spacing: -0.015em;
-}
-
-.online {
-  font: 500 12.5px var(--font-mono);
-  color: var(--ink);
-}
-
-.chevron {
-  display: none;
-  width: 22px;
-  height: 22px;
-  transition: rotate 0.28s var(--ease-out);
-}
-
-.panel {
-  /* how far above the title (or the description, where the title is hidden) the photo fades
-     into the card */
-  --fade: 56px;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  padding: 0 26px 22px;
-  background: var(--tile);
-}
-
-.photo {
-  position: relative;
-  z-index: -2;
-  flex: 1 1 0;
-  width: calc(100% + 52px);
-  max-width: none;
-  min-height: 210px;
-  margin: 0 -26px -44px;
-  object-fit: cover;
-}
-
-/* standing on the title, from where they would sit: the head is not positioned, so the title's
-   fade spans the panel */
-.figures {
-  position: absolute;
-  margin-left: -2px;
-  translate: 0 calc(-100% - 4px);
-  display: flex;
-  align-items: end;
-  gap: 2px;
-  transform-origin: 0 100%;
-  scale: 0.75;
-}
-
-.figures img {
-  filter: drop-shadow(0 6px 0 rgb(0 0 0 / 0.3));
-}
-
-.panel h3 {
-  font-size: 38px;
-  line-height: 1;
-  letter-spacing: -0.02em;
-}
-
-.panel p {
-  max-width: 46ch;
-  margin-top: 6px;
-  font-size: 15px;
-  line-height: 1.45;
-  color: var(--muted);
-}
-
-.foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: end;
-  justify-content: space-between;
-  gap: 14px 28px;
-  margin-top: 16px;
-}
-
-.foot dl {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 28px;
   white-space: nowrap;
 }
 
-.foot dt {
-  font-size: 12.5px;
+/* the count and what replaces it share one line: one leaves upward as the other rises in */
+.line {
+  display: grid;
+  overflow: hidden;
+  margin: -3px 0;
+  padding: 3px 0;
+}
+
+.line > * {
+  grid-area: 1 / 1;
+  transition:
+    translate 0.32s var(--ease-out),
+    opacity 0.2s;
+}
+
+.count {
+  justify-self: start;
+  padding-left: 3px;
+  font: 500 12.5px / 1 var(--font-mono);
+  letter-spacing: 0;
+}
+
+/* nobody on: the light is out and the line is quiet, as in the game's own list */
+.count.empty {
   color: var(--muted);
 }
 
-.foot dd {
-  margin-top: 2px;
-  font-size: 16px;
+.count.empty::before {
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--n10);
 }
 
-.join {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.said {
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 12.5px;
+  white-space: nowrap;
+  translate: 0 110%;
+  opacity: 0;
 }
 
-.join code {
-  font: 500 14px var(--font-mono);
-  color: var(--ink);
+/* the address itself, when it could not be copied: all of it, on a second line if it must */
+.failed .said {
+  font: 500 12.5px / 1.25 var(--font-mono);
+  letter-spacing: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
-.join > button {
-  margin-top: 0;
+:is(.copied, .failed) .count {
+  translate: 0 -110%;
+  opacity: 0;
 }
 
-@media (min-width: 901px) {
-  .modes {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    grid-template-rows: repeat(5, minmax(68px, auto));
-  }
-
-  .item {
-    display: contents;
-  }
-
-  .row {
-    grid-column: 2;
-    border-width: 2px;
-    transition: background-color 0.13s;
-  }
-
-  .row:hover {
-    background-color: var(--n2);
-  }
-
-  .row[aria-expanded="true"] {
-    background-color: var(--tint);
-    cursor: default;
-  }
-
-  .fold {
-    grid-column: 1;
-    grid-row: 1 / -1;
-    display: flex;
-  }
-
-  .row[aria-expanded="false"] + .fold {
-    visibility: hidden;
-  }
-
-  .panel {
-    flex: 1;
-    border: 2px solid var(--outline);
-    border-radius: var(--r);
-  }
+:is(.copied, .failed) .said {
+  translate: 0;
+  opacity: 1;
 }
 
-@media (min-width: 901px) and (max-width: 1100px) {
-  .modes {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-
-  .panel h3 {
-    font-size: 34px;
-  }
+/* the copy mark turns into a tick in place */
+.mark {
+  display: grid;
+  margin-left: 10px;
 }
 
-@media (max-width: 900px) {
-  /* the browser's scroll anchoring would fight the folds */
-  .modes {
-    overflow-anchor: none;
+.mark svg {
+  grid-area: 1 / 1;
+  width: 18px;
+  height: 18px;
+  transition:
+    scale 0.28s var(--ease-out),
+    rotate 0.28s var(--ease-out),
+    opacity 0.16s;
+}
+
+.glyph {
+  opacity: 0.75;
+}
+
+.mode:hover .glyph {
+  opacity: 1;
+}
+
+.tick {
+  scale: 0.4;
+  rotate: -30deg;
+  opacity: 0;
+}
+
+/* over the hover's own say on the mark */
+.mode.copied .glyph {
+  scale: 0.4;
+  opacity: 0;
+}
+
+.copied .tick {
+  scale: 1;
+  rotate: 0deg;
+  opacity: 1;
+  transition-timing-function: var(--ease-spring);
+}
+
+.about {
+  /* about 50 characters to a line, however wide the row; clear of the colour's frayed edge */
+  max-width: calc(40ch + 60px);
+  padding: 14px 22px 14px 38px;
+  font-size: 14.5px;
+  line-height: 1.42;
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+/* narrower: the header lies across the top, the text under it, the frayed edge between them */
+@container (width < 660px) {
+  .mode {
+    --head: 68px;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .item {
-    isolation: isolate;
-    overflow: hidden;
-    border: 2px solid var(--outline);
-    border-radius: var(--r);
-    background: var(--tile);
-    scroll-margin-top: 12px;
+  .tinted {
+    inset: 0 0 auto;
+    width: auto;
+    height: calc(var(--head) - 22px);
   }
 
-  .row {
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    column-gap: 12px;
-    min-height: 60px;
-    padding: 8px 16px 8px 74px;
-    border-radius: 0;
-    background-color: transparent;
-  }
-
-  .row::after {
+  .side {
     display: none;
   }
 
-  .row:focus-visible {
-    outline-offset: -5px;
-    border-radius: calc(var(--r) - 2px);
+  /* the colour's foot, frayed: a fringe, drawn at three quarters its size */
+  .below {
+    inset: 100% 0 auto;
+    display: block;
+    height: 48px;
+    background: 0 0 / 486px 48px repeat-x;
   }
 
-  .name {
-    font-size: 18px;
+  /* the strip repeats without a seam: each row starts it somewhere else, so no two match */
+  .mode:nth-child(2) .below {
+    background-position-x: -190px;
+  }
+
+  .mode:nth-child(3) .below {
+    background-position-x: -75px;
+  }
+
+  .mode:nth-child(4) .below {
+    background-position-x: -330px;
+  }
+
+  .mode:nth-child(5) .below {
+    background-position-x: -255px;
+  }
+
+  .band {
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    height: var(--head);
+    min-height: 0;
   }
 
   .icon {
-    left: -4px;
+    width: 34px;
+    height: 34px;
   }
 
-  .chevron {
-    display: block;
+  .id {
+    gap: 6px;
+    padding: 0;
   }
 
-  .row[aria-expanded="true"] .chevron {
-    rotate: 180deg;
-  }
-
-  .unit {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
-  .fold {
-    overflow: hidden;
-  }
-
-  .row[aria-expanded="false"] + .fold {
-    height: 0;
-    visibility: hidden;
-  }
-
-  .panel {
-    padding: 0 20px 20px;
-    border-top: 2px solid var(--outline);
-  }
-
-  .photo {
-    flex: none;
-    width: calc(100% + 40px);
-    height: 170px;
-    min-height: 0;
-    margin: 0 -20px -40px;
-  }
-
-  /* the row above already names the mode and counts its players */
-  .panel h3,
-  .live {
-    display: none;
-  }
-
-  .figures {
-    scale: 0.65;
+  .about {
+    padding: 22px 18px 14px 20px;
   }
 }
 
-@media (max-width: 420px) {
-  .foot dl {
-    column-gap: 22px;
+/* a phone */
+@container (width < 440px) {
+  .mode {
+    --head: 64px;
+  }
+
+  .band {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    padding-right: 14px;
+  }
+
+  .icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .name {
+    font-size: 21px;
+  }
+
+  .about {
+    padding: 22px 16px 14px;
+  }
+}
+
+/* the narrowest phones: the longest name still on one line */
+@container (width < 270px) {
+  .band {
+    grid-template-columns: 50px minmax(0, 1fr) auto;
+  }
+
+  .name {
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon,
+  .line > *,
+  .mark svg {
+    transition: opacity 0.15s;
+    animation: none;
+  }
+
+  .said,
+  :is(.copied, .failed) .count {
+    translate: none;
+  }
+
+  .tick,
+  .mode.copied .glyph {
+    scale: 1;
+    rotate: none;
   }
 }

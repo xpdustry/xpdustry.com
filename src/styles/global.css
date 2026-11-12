@@ -175,11 +175,6 @@ canvas {
   opacity: 0;
 }
 
-/* Mindustry sprites are pixel art: scale them up without smoothing */
-.sprite {
-  image-rendering: pixelated;
-}
-
 /* A card that glows along its edge as the pointer comes near (see useSpotlight). */
 :where(.spot)::after {
   content: "";

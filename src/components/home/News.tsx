@@ -1,6 +1,6 @@
-import mender from "#app/assets/mindustry/mender.png";
 import { PostTile } from "#app/components/blog/PostTile";
 import { Tray } from "#app/components/tray/Tray";
+import { Newspaper } from "#app/components/ui/Icons";
 import { posts } from "#app/content/registry";
 import styles from "./News.module.css";
 
@@ -11,7 +11,7 @@ export function News() {
   return (
     <Tray
       id="news"
-      icon={mender}
+      icon={Newspaper}
       title="Latest news"
       subtitle="Release notes and updates from the team"
       action={{ to: "/blog", label: "All posts" }}

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { PostArt } from "#app/components/blog/PostArt";
 import { TopicChip } from "#app/components/blog/TopicChip";
 import { Patches } from "#app/components/ui/Patches";
-import { heroImage } from "#app/content/hero";
 import type { Post } from "#app/content/registry";
 import { PATCHES } from "#app/data/patches";
 import { seeded } from "#app/data/textures";
@@ -18,7 +18,10 @@ interface PostTileProps {
   className?: string;
 }
 
-/** A post over its hero image, which fades into the card just above the title. */
+/**
+ * A post over its hero image, or its art, with the card rising over it in a frayed edge from just
+ * above the title. The card's patches keep to the card: they never spread up into the photo.
+ */
 export function PostTile({ post, variant, heading: Heading = "h3", className }: PostTileProps) {
   const { title, description, topic, author, publishedAt } = post.frontmatter;
 
@@ -28,14 +31,16 @@ export function PostTile({ post, variant, heading: Heading = "h3", className }: 
       params={{ slug: post.slug }}
       className={`${card.card} spot ${styles.tile} ${styles[variant]} ${className ?? ""}`}
     >
-      <img className={styles.photo} src={heroImage(post)} alt="" loading="lazy" decoding="async" />
-      <Patches patches={seeded(PATCHES.tile, post.slug)} />
+      <PostArt post={post} className={styles.photo} />
       <TopicChip name={topic} className={styles.chip} />
-      <Heading className={`${styles.title} ${card.fade}`}>{title}</Heading>
-      {variant === "listing" && <p className={styles.description}>{description}</p>}
-      <span className={styles.byline}>
-        {variant === "big" && `${author}, `}
-        <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+      <span className={styles.foot}>
+        <Patches patches={seeded(PATCHES.tile, post.slug)} />
+        <Heading className={styles.title}>{title}</Heading>
+        {variant === "listing" && <p className={styles.description}>{description}</p>}
+        <span className={styles.byline}>
+          {variant === "big" && `${author}, `}
+          <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+        </span>
       </span>
     </Link>
   );

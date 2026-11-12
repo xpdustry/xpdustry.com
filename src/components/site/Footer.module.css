@@ -1,4 +1,6 @@
 .footer {
+  /* the teal ring is lost on the deep teal */
+  --focus: var(--t9);
   position: relative;
   margin-top: calc(160px + var(--group));
   background: var(--deep);
@@ -16,14 +18,14 @@
 
 .footer .inner {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  /* the brand and the way back up, then the small print and the links on one line under them */
+  grid-template-columns: 1fr auto;
   grid-template-areas:
-    "brand links top"
-    "copy links top";
-  align-items: start;
-  gap: 18px 64px;
-  padding: 40px calc(var(--gap) + 6px) 72px;
-  /* the brand's sizes, set here so the copyright can line up under the name */
+    "brand top"
+    "copy links";
+  align-items: center;
+  gap: 30px 32px;
+  padding: 40px calc(var(--gap) + 6px) 64px;
   --mark: 52px;
   --name: 40px;
   --beside: 14px;
@@ -45,9 +47,9 @@
 .links {
   grid-area: links;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 26px;
 }
 
 .links a {
@@ -68,15 +70,13 @@
 
 .copyright {
   grid-area: copy;
-  padding-left: calc(var(--mark) + var(--beside));
-  align-self: end;
   white-space: nowrap;
   color: var(--deep-ink);
 }
 
 .footer .top {
   grid-area: top;
-  align-self: end;
+  justify-self: end;
   margin-top: 0;
 }
 
@@ -87,17 +87,11 @@
       "brand top"
       "links links"
       "copy copy";
-    align-items: center;
     gap: 22px 16px;
   }
 
-  .footer .top {
-    align-self: center;
-  }
-
-  /* under the links now, so it lines up with them */
-  .copyright {
-    padding-left: 0;
+  .links {
+    justify-content: flex-start;
   }
 }
 

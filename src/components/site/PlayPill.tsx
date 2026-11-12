@@ -17,8 +17,13 @@ export function PlayPill({ players, className }: { players: Count; className?: s
     >
       {(copied) => (
         <>
-          <PlayerCount count={players} unit="" className={styles.count} />
+          <PlayerCount
+            count={players}
+            unit=""
+            className={`${styles.count} ${players.state === "online" ? "" : styles.waiting}`}
+          />
           <span className={styles.address}>{HUB.hostname}</span>
+          <span className={styles.brief}>IP</span>
           {copied ? <Check /> : <Copy />}
         </>
       )}
