@@ -309,7 +309,7 @@ test("the production file server preserves every public URL from the previous si
 test("the production server runs from what the container image ships", async () => {
   const root = new URL("../", import.meta.url);
   const shipped = [
-    ...(await readFile(new URL("Containerfile", root), "utf8")).matchAll(
+    ...(await readFile(new URL("Dockerfile", root), "utf8")).matchAll(
       /^COPY --from=build \S+ \/app\/(\S+)/gm
     )
   ].map(([, path]) => path);
