@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import { Background } from "#app/components/site/Background";
 import { Footer } from "#app/components/site/Footer";
 import { Header } from "#app/components/site/Header";
+import { RouteAnnouncer } from "#app/components/site/RouteAnnouncer";
 import { playerCount } from "#app/data/live";
 import { getLiveData } from "#app/data/live.functions";
 import { CROWN } from "#app/data/textures";
@@ -109,6 +110,7 @@ function Document({ children }: { children: ReactNode }) {
           </div>
           <Footer />
         </GTProvider>
+        <RouteAnnouncer />
         <Scripts />
       </body>
     </html>
