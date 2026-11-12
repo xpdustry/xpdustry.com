@@ -15,19 +15,7 @@ import * as styles from "./PostCover.css";
 import { avatar, pill } from "./topicTheme.css";
 
 export function PostCover({ post, className }: { post: Post; className?: string }) {
-  const locale = useLocale();
-  const { title, description, author, publishedAt, updatedAt, topicVersion } = post.frontmatter;
   const theme = topic(post.frontmatter.topic);
-  const profile = authors[author];
-  const chip = (
-    <TopicChip
-      name={theme.name}
-      version={topicVersion}
-      tone="cover"
-      linked
-      className={styles.topic}
-    />
-  );
   return (
     <header className={`${card.card} ${styles.cover} ${className ?? ""}`} style={themed(theme)}>
       <Patches patches={seeded(theme.patches, post.slug)} priority />
@@ -37,37 +25,61 @@ export function PostCover({ post, className }: { post: Post; className?: string 
           <CaretLeft />
           <T>Blog</T>
         </Link>
-        {postTitle(post.frontmatter) === title ? (
-          <>
-            {chip}
-            <h1 className={styles.title}>{title}</h1>
-          </>
-        ) : (
-          <h1 className={styles.heading}>
-            {chip} <span className={styles.title}>{title}</span>
-          </h1>
-        )}
+        <CoverTitle frontmatter={post.frontmatter} />
       </div>
-      <p className={styles.description}>{description}</p>
-      <div className={styles.byline}>
-        <a className={pill} href={profile.url} target="_blank" rel="noreferrer">
-          <img className={avatar} src={profile.avatar} alt="" />
-          {author}
-        </a>
-        <time className={pill} dateTime={publishedAt}>
-          {formatDate(publishedAt, locale)}
-        </time>
-        {updatedAt && (
-          <span className={pill}>
-            <T>
-              Updated{" "}
-              <time dateTime={updatedAt}>
-                <Var>{formatDate(updatedAt, locale)}</Var>
-              </time>
-            </T>
-          </span>
-        )}
-      </div>
+      <p className={styles.description}>{post.frontmatter.description}</p>
+      <Byline frontmatter={post.frontmatter} />
     </header>
+  );
+}
+
+/**
+ * The heading reads as the post's full title: a title that does not name its topic takes the topic
+ * chip inside the heading, and one that does leaves the chip beside it.
+ */
+function CoverTitle({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
+  const { title, topic, topicVersion } = frontmatter;
+  const chip = (
+    <TopicChip name={topic} version={topicVersion} tone="cover" linked className={styles.topic} />
+  );
+  if (postTitle(frontmatter) === title) {
+    return (
+      <>
+        {chip}
+        <h1 className={styles.title}>{title}</h1>
+      </>
+    );
+  }
+  return (
+    <h1 className={styles.heading}>
+      {chip} <span className={styles.title}>{title}</span>
+    </h1>
+  );
+}
+
+function Byline({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
+  const locale = useLocale();
+  const { author, publishedAt, updatedAt } = frontmatter;
+  const profile = authors[author];
+  return (
+    <div className={styles.byline}>
+      <a className={pill} href={profile.url} target="_blank" rel="noreferrer">
+        <img className={avatar} src={profile.avatar} alt="" />
+        {author}
+      </a>
+      <time className={pill} dateTime={publishedAt}>
+        {formatDate(publishedAt, locale)}
+      </time>
+      {updatedAt && (
+        <span className={pill}>
+          <T>
+            Updated{" "}
+            <time dateTime={updatedAt}>
+              <Var>{formatDate(updatedAt, locale)}</Var>
+            </time>
+          </T>
+        </span>
+      )}
+    </div>
   );
 }
