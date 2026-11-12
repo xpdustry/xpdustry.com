@@ -362,6 +362,37 @@ describe("built API", () => {
     expect(body).not.toMatch(/token|Bearer|_mindustry\._tcp|\.internal|at .*\.js:\d+/i);
   });
 
+  const sameOrigin = { origin: "https://xpdustry.com", "sec-fetch-site": "same-origin" };
+
+  test.each(["unknown", "__proto__", "constructor", "", "unknown?payload=garbage"])(
+    "server function %j is a plain 404",
+    async (id) => {
+      const response = await fetchApp(
+        new Request(`https://xpdustry.com/_serverFn/${id}`, { headers: sameOrigin }),
+      );
+      expect(response.status).toBe(404);
+      expect(response.headers.has("set-cookie")).toBe(false);
+      expect(await response.text()).toBe("Not Found");
+    },
+  );
+
+  test("every server function the build defines still answers", async () => {
+    const assets = fileURLToPath(new URL("../../dist/server/assets/", import.meta.url));
+    const ids: string[] = [];
+    for (const file of await readdir(assets)) {
+      if (!file.endsWith(".js")) continue;
+      const code = await readFile(assets + file, "utf8");
+      ids.push(...[...code.matchAll(/createServerRpc\(\{\s*id: "(\w+)"/g)].map(([, id]) => id!));
+    }
+    expect(ids.length).toBeGreaterThan(0);
+    for (const id of ids) {
+      const response = await fetchApp(
+        new Request(`https://xpdustry.com/_serverFn/${id}`, { headers: sameOrigin }),
+      );
+      expect(response.status, id).toBe(200);
+    }
+  });
+
   test("server status ignores request-supplied targets and hides resolved endpoints", async () => {
     const response = await get("/api/servers?hostname=127.0.0.1&port=53");
     const body = await response.text();

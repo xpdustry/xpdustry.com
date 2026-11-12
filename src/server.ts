@@ -2,6 +2,7 @@ import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { pathLocale, withoutLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { requestRedirect } from "#app/server/redirects";
+import { unknownServerFunction } from "#app/server/serverFunctions";
 import { startServices } from "#app/server/services";
 
 startServices();
@@ -68,8 +69,8 @@ function withHeaders(response: Response, edit: (headers: Headers) => void): Resp
 
 export default createServerEntry({
   async fetch(request, opts) {
-    const redirect = requestRedirect(request);
-    if (redirect) return redirect;
+    const early = requestRedirect(request) ?? unknownServerFunction(request);
+    if (early) return early;
 
     const { pathname } = new URL(request.url);
     if (isShared(pathname)) {
