@@ -67,6 +67,12 @@ export const nav = style({
       background: vars.deep,
       boxShadow: "0 18px 40px -12px rgb(0 0 0 / 0.55)",
     },
+  },
+});
+
+/** Set while the visitor opens or shuts the menu, so a resize across the fold does not animate it. */
+export const moving = style({
+  "@media": {
     [`${folded} and ${media.motion}`]: { transition: popoverTransition },
   },
 });
@@ -88,6 +94,16 @@ globalStyle(`${nav} > a > span`, {
   },
 });
 
+const end = style({
+  selectors: {
+    [`${header} &`]: { marginLeft: -12 },
+  },
+});
+
+globalStyle(`${header} ${end} > span`, {
+  padding: 9,
+});
+
 export const play = style({
   selectors: {
     [`${header} &`]: { marginLeft: "auto" },
@@ -99,19 +115,10 @@ globalStyle(`${header} ${play} > span`, {
   padding: "10px 13px 10px 14px",
 });
 
-const end = style({
-  selectors: {
-    [`${header} &`]: { marginLeft: -12 },
-  },
-});
-
-globalStyle(`${header} ${end} > span`, {
-  padding: 9,
-});
-
 export const language = style({
   selectors: {
-    [`${header} &`]: { marginLeft: -12 },
+    [`${header} &`]: { marginLeft: "auto" },
+    [`${header} ${play} ~ &`]: { marginLeft: -12 },
   },
   "@media": {
     [narrow]: { display: "none" },
@@ -151,7 +158,10 @@ export const toggle = style([
         selectors: { [`${header} &`]: { order: 1, display: "inline-flex" } },
       },
       [narrow]: {
-        selectors: { [`${header} &`]: { marginLeft: 0 } },
+        selectors: {
+          [`${header} &`]: { marginLeft: "auto" },
+          [`${header}:has(${play}) &`]: { marginLeft: 0 },
+        },
       },
     },
   },

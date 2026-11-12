@@ -46,10 +46,12 @@ export const PATCHES = {
     [0.56, 0.07, 49],
     [0.02, 1, 69],
   ]),
-  play: patches("#f7d08c", "#fbdfab", [
-    [0.97, 0.05, 81],
-    [0.66, 1, 31],
-  ]),
+  play: growing(
+    patches("#f7d08c", "#fbdfab", [
+      [0.97, 0.05, 81],
+      [0.66, 1, 31],
+    ]),
+  ),
   discord: growing(
     patches(...BLURPLE, [
       [1, 0, 97],

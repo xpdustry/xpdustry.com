@@ -1,18 +1,18 @@
 # Live status
 
-The site shows who is playing right now: a count on every gamemode and on the header pill, the Discord server's online and member counts, and the GitHub star total on the home card. The server polls those sources every 30 seconds and pages refresh from it.
+The site shows who is playing right now: a count on every gamemode and on the `Play with us` card, the Discord server's online and member counts, and the GitHub star total on the home card. The server polls those sources every 30 seconds and pages refresh from it.
 
 ## Sub-features
 
 - `live-health` reports when each source was last reached, at `/healthz`.
 - `live-api` serves the server list with status and player counts at `/api/servers`.
-- `live-counts` shows counts on the gamemode cards, the section total and the header pill.
+- `live-counts` shows counts on the gamemode cards, the section total and the `Play with us` card.
 - `live-discord` shows online and member counts on the Discord card.
 - `live-offline` shows `Offline` for a server that does not answer, without breaking the page.
 
 ## How to get to it (user POV)
 
-- Open the home page: the header pill, the `Play with us` card, `Gamemodes` and the Discord card all carry counts.
+- Open the home page: the `Play with us` card, `Gamemodes` and the Discord card all carry counts.
 - Leave the page open; the counts update without a reload.
 
 ## Driving it with verify.ts
@@ -43,7 +43,7 @@ await snap(page, "1-live-home");
 EOF
 ```
 
-- **Expected.** Every source in `live-health` has a `lastSuccessAt`; the section header reads like `Gamemodes 3 online`; the Discord card ends with `<n> online, <n> members`; each mode card shows its own server's `players` value from `live-api`. The totals on the `Gamemodes` header, the header pill and the `Play with us` card count every server, the hub included, so they are larger than the sum of the mode cards.
+- **Expected.** Every source in `live-health` has a `lastSuccessAt`; the section header reads like `Gamemodes 3 online`; the Discord card ends with `<n> online, <n> members`; each mode card shows its own server's `players` value from `live-api`. The totals on the `Gamemodes` header and the `Play with us` card count every server, the hub included, so they are larger than the sum of the mode cards.
 - **live-offline.** Only provable when a server that has a card is down: its card then reads `Offline`. The `hub` and `event` servers have no card, so `event` being offline proves nothing. Do not fake it by editing hostnames; report it as not exercised.
 
 ## Gotchas

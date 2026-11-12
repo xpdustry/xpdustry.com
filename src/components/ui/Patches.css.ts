@@ -1,4 +1,5 @@
 import { createGlobalVar, globalStyle, style } from "@vanilla-extract/css";
+import { cover } from "#app/components/ui/Card.css";
 import { vars } from "#app/styles/theme.css";
 
 const GROW = "--grow";
@@ -29,9 +30,10 @@ export const grown = style({
   mask: `radial-gradient(closest-side, #000 calc(${grow} * 100% - 6%), transparent calc(${grow} * 100%))`,
   transition: `${GROW} 0.6s ease-in-out`,
   selectors: {
-    ":is(a, button):is(:hover, :focus-visible) &": {
-      vars: { [grow]: "1" },
-      transition: `${GROW} 1.2s ${vars.easeGrow}`,
-    },
+    [`:is(a, button):is(:hover, :focus-visible) &, ${cover}:is(:hover, :focus-visible) ~ ${patches} &`]:
+      {
+        vars: { [grow]: "1" },
+        transition: `${GROW} 1.2s ${vars.easeGrow}`,
+      },
   },
 });

@@ -1,5 +1,5 @@
-import { globalStyle, style } from "@vanilla-extract/css";
-import { font, leading, radius } from "#app/styles/scale";
+import { style } from "@vanilla-extract/css";
+import { font, leading } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const BLURPLE = "#5b6bd7";
@@ -26,24 +26,9 @@ export const glyph = style({
 });
 
 export const go = style({
-  position: "absolute",
-  top: 16,
-  right: 16,
-  display: "grid",
-  placeItems: "center",
-  width: 34,
-  height: 34,
-  borderRadius: radius.md,
-  background: "rgb(255 255 255 / 0.16)",
-  transition: `transform 0.25s ${vars.easeSpring}`,
   selectors: {
     [`${discord}:hover &`]: { transform: "translate(2px, -2px)" },
   },
-});
-
-globalStyle(`${go} svg`, {
-  width: 18,
-  height: 18,
 });
 
 export const title = style({

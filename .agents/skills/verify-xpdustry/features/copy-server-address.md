@@ -5,15 +5,16 @@ Mindustry has no join links, so the site's main action is copying a server addre
 ## Sub-features
 
 - `copy-mode` copies a gamemode server's address from its card in `Gamemodes`.
-- `copy-hub` copies the hub address from the header pill and from the `Play with us` card.
+- `copy-hub` copies the hub address from a press anywhere on the `Play with us` card.
+- `copy-pill` copies the hub address from the header pill, which every page except the landing page shows.
 - `copy-confirm` shows a confirmation on the control and announces it to screen readers with the paste instructions.
 - `copy-fit` falls back to the short confirmation (`Copied`) when the long one does not fit the card.
 
 ## How to get to it (user POV)
 
 - Scroll to `Gamemodes` on the home page and choose a mode card (Survival, PvP, Attack, Tower Defense, Sandbox).
-- Choose the pill in the header showing `hub.md.xpdustry.com` (any page).
-- Choose the copy button on the `Play with us` card at the top of the home page.
+- Press anywhere on the `Play with us` card at the top of the home page.
+- Choose the pill in the header showing `hub.md.xpdustry.com`, on the blog or any page other than the landing page.
 
 ## Driving it with verify.ts
 
@@ -31,10 +32,17 @@ print("copy-mode:", await clipboard(page));
 print("copy-confirm:", await modes.locator("output").first().innerText());
 await snap(page, "1-survival-copied");
 
-await page.getByRole("banner").getByRole("button", { name: "Copy hub.md.xpdustry.com" }).click();
+await page.locator("#servers").click({ position: { x: 24, y: 24 } }); // a corner of the card, away from its button
 await page.waitForFunction(() => navigator.clipboard.readText().then((t) => t === "hub.md.xpdustry.com"));
 print("copy-hub:", await clipboard(page));
 await snap(page, "2-hub-copied");
+print("no pill on the landing page:", await page.getByRole("banner").getByRole("button", { name: /^Copy/ }).count()); // 0
+
+await go(page, "/blog");
+await page.getByRole("banner").getByRole("button", { name: "Copy hub.md.xpdustry.com" }).click();
+await page.waitForFunction(() => navigator.clipboard.readText().then((t) => t === "hub.md.xpdustry.com"));
+print("copy-pill:", await clipboard(page));
+await snap(page, "3-pill-copied");
 EOF
 ```
 

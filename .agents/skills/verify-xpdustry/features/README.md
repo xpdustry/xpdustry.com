@@ -29,7 +29,7 @@ Each file has an H1, one paragraph on what the visitor gets, then `Sub-features`
 ## Features
 
 - [Languages](languages.md): first-visit language, the switcher, prefixed URLs, the remembered choice.
-- [Copy a server address](copy-server-address.md): the gamemode cards, the header pill and the play card.
+- [Copy a server address](copy-server-address.md): the gamemode cards, the play card, and the header pill on other pages.
 - [Blog](blog.md): the index, a post with its media and callouts, translated posts, missing posts.
 - [Search and social metadata](search-metadata.md): titles, canonical and alternate links, structured data, sitemap, social cards.
 - [Live status](live-status.md): player counts, Discord and GitHub figures, the health endpoint.

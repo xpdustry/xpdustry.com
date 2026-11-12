@@ -32,7 +32,7 @@ export function DiscordCard({
     >
       <Patches patches={compact ? PATCHES.discordCompact : PATCHES.discord} />
       <Discord className={styles.glyph} />
-      <span className={styles.go}>
+      <span className={`${card.hint} ${styles.go}`}>
         <ArrowUpRight />
       </span>
       <span>

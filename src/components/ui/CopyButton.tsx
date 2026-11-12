@@ -1,9 +1,8 @@
 import { useGT } from "gt-tanstack-start";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { PlinthButton, type PlinthStyle } from "#app/components/ui/Plinth";
 import { Check, Copy } from "#app/lib/icons";
-
-const SHOWN_MS = 1400;
+import { useCopy } from "#app/lib/useCopy";
 
 interface CopyButtonProps {
   text: string;
@@ -21,16 +20,7 @@ interface CopyButtonProps {
 /** Copies `text`, then shows a check (or "Copied") for a moment and says so to screen readers. */
 export function CopyButton({ text, label, children, tone = "ink", className }: CopyButtonProps) {
   const gt = useGT();
-  const [copied, setCopied] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-
-  const copy = () => {
-    navigator.clipboard?.writeText(text).catch(() => {});
-    setCopied(true);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => setCopied(false), SHOWN_MS);
-  };
+  const { copied, copy } = useCopy(text);
 
   const named = typeof children !== "function" && Boolean(children);
   const face =

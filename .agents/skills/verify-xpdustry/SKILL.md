@@ -76,7 +76,7 @@ $V audit                   # every language, 8 widths, 5 pages (about a minute)
 $V audit fr               # one language
 ```
 
-`audit` looks for translated text that no longer fits: a page that scrolls sideways, a navigation item that wraps, a section title that runs under its button, a truncated section subtitle, text that leaves the screen. The widths are 1440, 1280, 1160, 1000, 760, 600, 390 and 320px. It prints one line per finding, as `<width> <url>: <what>`, and exits 1 if there is any. It is the check for visible text; `seo` does not notice a label that wraps. Run it after every change to `src/_gt/*.json`, to a heading, or to layout styles.
+`audit` looks for translated text that no longer fits: a page that scrolls sideways, a navigation item that wraps, a header control left adrift from the group on the right, a section title that runs under its button, a truncated section subtitle, text that leaves the screen. The widths are 1440, 1280, 1160, 1000, 760, 600, 390 and 320px. It prints one line per finding, as `<width> <url>: <what>`, and exits 1 if there is any. It is the check for visible text; `seo` does not notice a label that wraps. Run it after every change to `src/_gt/*.json`, to a heading, or to layout styles.
 
 ```sh
 $V seo            # every sitemap page: fixed rules, then a comparison with the baseline

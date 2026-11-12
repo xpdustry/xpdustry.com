@@ -65,6 +65,12 @@ export const Route = createRootRoute({
   shellComponent: Document,
 });
 
+/**
+ * The colour a browser shows before the stylesheet arrives, in place of white. The stylesheet's own
+ * `:root` rule outranks `:where()` and clears it, so the body's background reaches the canvas.
+ */
+const UNSTYLED_CANVAS = `:where(html){background:${CROWN.settings.color}}`;
+
 function useSmoothScrollOnceHydrated() {
   useEffect(() => {
     document.documentElement.dataset.hydrated = "";
@@ -89,6 +95,7 @@ function Document({ children }: { children: ReactNode }) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
+        <style>{UNSTYLED_CANVAS}</style>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: REVEAL }} />
       </head>

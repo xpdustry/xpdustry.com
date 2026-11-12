@@ -3,6 +3,7 @@ import { media } from "./media";
 import { vars } from "./theme.css";
 
 globalStyle(":root", {
+  background: "none",
   colorScheme: "light",
   WebkitTextSizeAdjust: "100%",
   scrollPaddingTop: 16,

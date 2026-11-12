@@ -1,3 +1,4 @@
+import { useLocation } from "@tanstack/react-router";
 import { T, useGT } from "gt-tanstack-start";
 import { useCallback, useId, useRef, useState } from "react";
 import { Brand } from "#app/components/site/Brand";
@@ -15,6 +16,7 @@ import { GitHub, List, X } from "#app/lib/icons";
 import { useDismiss } from "#app/lib/useDismiss";
 import * as styles from "./Header.css";
 
+/** `players` feeds the address pill, shown where the page has no play card of its own. */
 export function Header({ players }: { players: PlayerCount }) {
   const [open, setOpen] = useState<"menu" | "languages">();
   const header = useRef<HTMLElement>(null);
@@ -22,9 +24,15 @@ export function Header({ players }: { players: PlayerCount }) {
   const languageToggle = useRef<HTMLButtonElement>(null);
   const menu = useId();
   const gt = useGT();
+  const onLanding = useLocation({ select: (location) => location.pathname === "/" });
 
-  const shut = useCallback(() => setOpen(undefined), []);
-  const toggle = (popover: "menu" | "languages") => setOpen(open === popover ? undefined : popover);
+  const [moving, setMoving] = useState(false);
+  const show = useCallback((popover?: "menu" | "languages") => {
+    setMoving(true);
+    setOpen(popover);
+  }, []);
+  const shut = useCallback(() => show(), [show]);
+  const toggle = (popover: "menu" | "languages") => show(open === popover ? undefined : popover);
   useDismiss({
     open: open !== undefined,
     within: header,
@@ -48,8 +56,9 @@ export function Header({ players }: { players: PlayerCount }) {
       </PlinthButton>
       <nav
         id={menu}
-        className={`${styles.nav} ${open === "menu" ? styles.open : ""}`}
+        className={`${styles.nav} ${open === "menu" ? styles.open : ""} ${moving ? styles.moving : ""}`}
         aria-label={gt("Main")}
+        onTransitionEnd={(event) => event.target === event.currentTarget && setMoving(false)}
       >
         <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }} onClick={shut}>
           <T>Home</T>
@@ -68,7 +77,7 @@ export function Header({ players }: { players: PlayerCount }) {
         </PlinthAnchor>
         <LocaleList className={styles.languages} />
       </nav>
-      <PlayPill players={players} className={styles.play} />
+      {!onLanding && <PlayPill players={players} className={styles.play} />}
       <LocaleSwitch
         className={styles.language}
         button={languageToggle}

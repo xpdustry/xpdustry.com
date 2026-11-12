@@ -369,6 +369,17 @@ function layoutIssues(): string[] {
     }
     if (lines.size > 1) found.add(`nav item wraps: ${link.textContent.trim()}`);
   }
+  const controls = [...document.querySelectorAll("body > div > header > :is(button, a, div)")]
+    .slice(1)
+    .map((control) => control.getBoundingClientRect())
+    .filter((box) => box.width > 2)
+    .sort((one, other) => one.left - other.left);
+  for (const [index, box] of controls.entries()) {
+    const next = controls[index + 1];
+    if (next && next.left - box.right > 24) {
+      found.add(`header control stranded ${Math.round(next.left - box.right)}px from the next one`);
+    }
+  }
   for (const tab of document.querySelectorAll("section > header")) {
     const title = tab.querySelector("h2");
     const action = tab.querySelector("a");

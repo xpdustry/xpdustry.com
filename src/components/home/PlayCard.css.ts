@@ -1,4 +1,5 @@
-import { createContainer, style } from "@vanilla-extract/css";
+import { createContainer, keyframes, style } from "@vanilla-extract/css";
+import { media } from "#app/styles/media";
 import { font, leading, tracking } from "#app/styles/scale";
 import { figures } from "./shared";
 import { vars } from "#app/styles/theme.css";
@@ -25,7 +26,6 @@ export const address = style({
   letterSpacing: tracking.heading,
   color: vars.ink,
   whiteSpace: "nowrap",
-  userSelect: "all",
   "@container": {
     [`${card} (max-width: 180px)`]: { whiteSpace: "normal" },
   },
@@ -38,22 +38,30 @@ export const how = style({
   textWrap: "balance",
 });
 
-export const row = style({
-  display: "flex",
-  alignItems: "center",
-  gap: 12,
+export const online = style({
+  alignSelf: "start",
   marginTop: "auto",
   paddingTop: 12,
-  whiteSpace: "nowrap",
-});
-
-export const online = style({
   font: figures(),
   color: vars.ink,
 });
 
-export const copy = style({
+export const copied = style({});
+
+const pop = keyframes({
+  "0%": { scale: "0.9" },
+  "45%": { scale: "1.12" },
+  "100%": { scale: "1" },
+});
+
+export const hint = style({
+  color: vars.a11,
   selectors: {
-    [`${play} &`]: { marginLeft: "auto" },
+    [`${play}:has(> button:hover) &`]: { transform: "scale(1.08)" },
+    [`${copied} &`]: {
+      background: vars.t9,
+      color: vars.onTeal,
+      "@media": { [media.motion]: { animation: `${pop} 0.5s ${vars.easeOut}` } },
+    },
   },
 });
