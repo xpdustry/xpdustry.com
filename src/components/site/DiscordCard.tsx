@@ -1,14 +1,13 @@
-import { useGT } from "gt-tanstack-start";
+import { useGT, useLocale } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { Patches } from "#app/components/ui/Patches";
 import type { DiscordCounts } from "#app/data/live";
 import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
+import { formatNumber } from "#app/lib/format";
 import { ArrowUpRight, Discord } from "#app/lib/icons";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./DiscordCard.css";
-
-const number = new Intl.NumberFormat("en-US");
 
 export function DiscordCard({
   title,
@@ -26,6 +25,7 @@ export function DiscordCard({
   className?: string;
 }) {
   const gt = useGT();
+  const locale = useLocale();
   return (
     <a
       href={SITE.discord}
@@ -42,8 +42,8 @@ export function DiscordCard({
         {counts && (
           <small className={styles.counts}>
             {gt("{online} online, {members} members", {
-              online: number.format(counts.online),
-              members: number.format(counts.members),
+              online: formatNumber(counts.online, locale),
+              members: formatNumber(counts.members, locale),
             })}
           </small>
         )}

@@ -156,9 +156,29 @@ describe("locales", () => {
       const html = await (await get(`/${locale}/blog`)).text();
       expect(html).toContain(`<html lang="${locale}"`);
       expect(html).toContain(`href="/${locale}/blog/nohorny-4-beta-8"`);
-      expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/blog"');
+      expect(html).toContain(`<link rel="canonical" href="https://xpdustry.com/${locale}/blog"`);
     },
   );
+
+  test("every page names its other languages, to crawlers and in the sitemap", async () => {
+    const html = await (await get("/blog/nohorny-4-beta-8")).text();
+    for (const [lang, path] of [
+      ["en", "/blog/nohorny-4-beta-8"],
+      ["fr", "/fr/blog/nohorny-4-beta-8"],
+      ["ru", "/ru/blog/nohorny-4-beta-8"],
+      ["x-default", "/blog/nohorny-4-beta-8"],
+    ]) {
+      expect(html).toMatch(
+        new RegExp(
+          `<link rel="alternate" hrefLang="${lang}" href="https://xpdustry.com${path}"`,
+          "i",
+        ),
+      );
+    }
+    const sitemap = await (await get("/sitemap.xml")).text();
+    expect(sitemap).toContain("<loc>https://xpdustry.com/ru/blog</loc>");
+    expect(sitemap).toContain('hreflang="fr" href="https://xpdustry.com/fr/blog"');
+  });
 
   test("a request that states no language gets the default one", async () => {
     const response = await get("/blog");
@@ -267,7 +287,7 @@ describe("post body chunks", () => {
   test("each post body remains a separate dynamic chunk", async () => {
     const files = await readdir(`${clientRoot}assets`);
     const bodies = files.filter((file) => /^nohorny-4-beta-\d+-[^.]+\.js$/.test(file));
-    const posts = await readdir(new URL("../content/blog/", import.meta.url));
+    const posts = await readdir(new URL("../content/blog/en/", import.meta.url));
     expect(bodies).toHaveLength(posts.filter((file) => file.endsWith(".md")).length);
     for (const body of bodies) {
       expect(await readFile(`${clientRoot}assets/${body}`, "utf8")).toContain("children");

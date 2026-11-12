@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useGT } from "gt-tanstack-start";
+import { T, useLocale } from "gt-tanstack-start";
 import logo from "#app/assets/logo.svg";
 import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
@@ -14,9 +14,9 @@ import * as styles from "./LeadPost.css";
 import * as themedStyles from "./themed.css";
 
 export function LeadPost({ post, className }: { post: Post; className?: string }) {
+  const locale = useLocale();
   const { title, description, author, publishedAt, hero } = post.frontmatter;
   const theme = topic(post.frontmatter.topic);
-  const gt = useGT();
   return (
     <Link
       to="/blog/$slug"
@@ -27,14 +27,16 @@ export function LeadPost({ post, className }: { post: Post; className?: string }
       <Patches patches={seeded(theme.patches, post.slug)} />
       <span className={styles.text}>
         <span className={styles.tags}>
-          <span className={`${themedStyles.pill} ${themedStyles.solid}`}>{gt("Latest")}</span>
+          <span className={`${themedStyles.pill} ${themedStyles.solid}`}>
+            <T>Latest</T>
+          </span>
           <TopicChip name={theme.name} tone="cover" />
         </span>
         <h2>{title}</h2>
         <p>{description}</p>
         <span className={styles.byline}>
           <img className={themedStyles.avatar} src={authors[author].avatar} alt="" />
-          {author}, <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+          {author}, <time dateTime={publishedAt}>{formatDate(publishedAt, locale)}</time>
         </span>
       </span>
       {hero ? (

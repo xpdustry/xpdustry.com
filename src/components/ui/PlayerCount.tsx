@@ -1,8 +1,7 @@
-import { useGT } from "gt-tanstack-start";
+import { useGT, useLocale } from "gt-tanstack-start";
 import { Online } from "#app/components/ui/Online";
 import type { PlayerCount as Count } from "#app/data/live";
-
-const number = new Intl.NumberFormat("en-US");
+import { formatNumber } from "#app/lib/format";
 
 /** "31 online" with a green light, or a grey one while the servers are being checked or are down. */
 export function PlayerCount({
@@ -16,13 +15,14 @@ export function PlayerCount({
   bare?: boolean;
 }) {
   const gt = useGT();
+  const locale = useLocale();
   if (count.state === "online") {
     return (
       <Online className={className}>
         <span>
           {bare
-            ? number.format(count.players)
-            : gt("{players} online", { players: number.format(count.players) })}
+            ? formatNumber(count.players, locale)
+            : gt("{players} online", { players: formatNumber(count.players, locale) })}
         </span>
       </Online>
     );

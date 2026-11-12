@@ -1,27 +1,51 @@
-const LONG = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
+import { DEFAULT_LOCALE, localeInfo } from "#app/i18n/locales";
 
-const SHORT = new Intl.DateTimeFormat("en-GB", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-});
+const cached = <Format>(create: (tag: string) => Format) => {
+  const formats = new Map<string, Format>();
+  return (locale: string) => {
+    const tag = localeInfo(locale).format;
+    let format = formats.get(tag);
+    if (!format) formats.set(tag, (format = create(tag)));
+    return format;
+  };
+};
+
+// Pinned to UTC, so the server and the browser render the same dates.
+const long = cached(
+  (tag) =>
+    new Intl.DateTimeFormat(tag, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }),
+);
+const short = cached(
+  (tag) =>
+    new Intl.DateTimeFormat(tag, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    }),
+);
+const number = cached((tag) => new Intl.NumberFormat(tag));
 
 /** "7 October 2026" */
-export function formatDate(iso: string): string {
+export function formatDate(iso: string, locale: string = DEFAULT_LOCALE): string {
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "" : LONG.format(date);
+  return Number.isNaN(date.getTime()) ? "" : long(locale).format(date);
 }
 
 /** "07 Oct 2026" */
-export function formatShortDate(iso: string): string {
+export function formatShortDate(iso: string, locale: string = DEFAULT_LOCALE): string {
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? "" : SHORT.format(date);
+  return Number.isNaN(date.getTime()) ? "" : short(locale).format(date);
+}
+
+/** "2,762" */
+export function formatNumber(value: number, locale: string = DEFAULT_LOCALE): string {
+  return number(locale).format(value);
 }
 
 /** A release tag as a version: "v4.0.0-beta.11" reads "4.0.0-beta.11". */

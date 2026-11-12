@@ -1,5 +1,5 @@
 import { createFileRoute, getRouteApi, rootRouteId, useRouter } from "@tanstack/react-router";
-import { getMessages } from "gt-tanstack-start";
+import { getLocale, getMessages } from "gt-tanstack-start";
 import { useEffect } from "react";
 import { Cover } from "#app/components/home/Cover";
 import { Gamemodes } from "#app/components/home/Gamemodes";
@@ -16,12 +16,14 @@ const root = getRouteApi(rootRouteId);
 export const Route = createFileRoute("/")({
   head: async () => {
     const m = await getMessages();
+    const locale = getLocale();
     return seo({
+      locale,
       title: m(SITE.title),
       fullTitle: true,
       description: m(SITE.description),
       path: "/",
-      jsonLd: homeStructuredData(),
+      jsonLd: homeStructuredData(locale),
     });
   },
   component: Home,

@@ -5,6 +5,9 @@
   "files": {
     "gt": {
       "output": "src/_gt/[locale].json"
+    },
+    "md": {
+      "include": ["src/content/blog/[locale]/*.md"]
     }
   }
 }

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getMessages, useGT, useMessages } from "gt-tanstack-start";
+import { getLocale, getMessages, T, useGT, useMessages, useLocale } from "gt-tanstack-start";
 import { LeadPost } from "#app/components/blog/LeadPost";
 import { PostTile } from "#app/components/blog/PostTile";
 import { DiscordCard } from "#app/components/site/DiscordCard";
 import { Patches } from "#app/components/ui/Patches";
-import { posts } from "#app/content/registry";
+import { posts, translated } from "#app/content/registry";
 import { PATCHES } from "#app/data/patches";
 import { BLOG_DESCRIPTION, BLOG_TITLE } from "#app/data/site";
 import { BLOG_CARD, seo } from "#app/lib/seo";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/blog/")({
   head: async () => {
     const m = await getMessages();
     return seo({
+      locale: getLocale(),
       title: m(BLOG_TITLE),
       fullTitle: true,
       description: m(BLOG_DESCRIPTION),
@@ -29,21 +30,26 @@ export const Route = createFileRoute("/blog/")({
 function BlogIndex() {
   const gt = useGT();
   const m = useMessages();
-  const [latest, ...earlier] = posts;
+  const locale = useLocale();
+  const [latest, ...earlier] = posts.map((post) => translated(post, locale));
   return (
     <main id="main" className={grid}>
       <section className={`${card.card} spot ${styles.intro} reveal`}>
         <Patches patches={PATCHES.blogIntro} />
-        <h1>{gt("Blog")}</h1>
+        <h1>
+          <T>Blog</T>
+        </h1>
         <p>{m(BLOG_DESCRIPTION)}</p>
       </section>
       <DiscordCard title={gt("Questions about a release?")} className={`${styles.ask} reveal`}>
-        {gt("Ask in our Discord.")}
+        <T>Ask in our Discord.</T>
       </DiscordCard>
       {latest ? (
         <LeadPost post={latest} className={`${styles.wide} reveal`} />
       ) : (
-        <p className={styles.empty}>{gt("Nothing published yet.")}</p>
+        <p className={styles.empty}>
+          <T>Nothing published yet.</T>
+        </p>
       )}
       {earlier.map((post) => (
         <PostTile

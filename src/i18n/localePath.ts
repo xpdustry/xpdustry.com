@@ -1,6 +1,8 @@
-import gtConfig from "../../gt.config.json" with { type: "json" };
+import { DEFAULT_LOCALE, LOCALES } from "./locales.ts";
 
-const PREFIX = new RegExp(`^/(${gtConfig.locales.join("|")})(?=/|$)`);
+const PREFIX = new RegExp(
+  `^/(${LOCALES.filter((locale) => locale !== DEFAULT_LOCALE).join("|")})(?=/|$)`,
+);
 
 /** The locale a public path is prefixed with, if any: `/fr/blog` is `fr`. */
 export function pathLocale(pathname: string): string | undefined {
@@ -15,6 +17,6 @@ export function withoutLocale(pathname: string): string {
 /** A route's path as `locale` visits it; the default locale's stays as it is. */
 export function withLocale(pathname: string, locale: string): string {
   const bare = withoutLocale(pathname);
-  if (locale === gtConfig.defaultLocale || !gtConfig.locales.includes(locale)) return bare;
+  if (locale === DEFAULT_LOCALE || !LOCALES.includes(locale)) return bare;
   return bare === "/" ? `/${locale}` : `/${locale}${bare}`;
 }

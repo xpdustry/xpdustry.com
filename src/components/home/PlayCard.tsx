@@ -1,4 +1,4 @@
-import { useGT } from "gt-tanstack-start";
+import { T, useGT } from "gt-tanstack-start";
 import { CopyButton } from "#app/components/ui/CopyButton";
 import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
@@ -14,12 +14,16 @@ export function PlayCard({ players, className }: { players: Count; className?: s
   return (
     <section id="servers" className={`${card.card} spot ${styles.play} ${className ?? ""}`}>
       <Patches patches={PATCHES.play} />
-      <h2 className={styles.label}>{gt("Play with us")}</h2>
+      <h2 className={styles.label}>
+        <T>Play with us</T>
+      </h2>
       <span className={styles.address}>
         {labels.slice(0, -2).join(".")}.<wbr />
         {labels.slice(-2).join(".")}
       </span>
-      <span className={styles.how}>{gt("Paste it in Play › Join game › Add server")}</span>
+      <span className={styles.how}>
+        <T>Paste it in Play › Join game › Add server</T>
+      </span>
       <span className={styles.row}>
         <PlayerCount count={players} className={styles.online} />
         <CopyButton

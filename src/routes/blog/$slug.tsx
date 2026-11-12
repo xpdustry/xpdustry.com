@@ -1,12 +1,12 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useGT, useMessages } from "gt-tanstack-start";
+import { getLocale, useGT, useMessages, useLocale } from "gt-tanstack-start";
 import { PostAside } from "#app/components/blog/PostAside";
 import { PostBody } from "#app/components/blog/PostBody";
 import { PostCover } from "#app/components/blog/PostCover";
 import { PostTile } from "#app/components/blog/PostTile";
 import { Tray } from "#app/components/tray/Tray";
 import { authors } from "#app/content/authors";
-import { nearbyPosts, postsBySlug } from "#app/content/registry";
+import { nearbyPosts, postsBySlug, translated } from "#app/content/registry";
 import { BLOG_TAGLINE } from "#app/data/site";
 import { Newspaper } from "#app/lib/icons";
 import { postCard, postTitle, seo } from "#app/lib/seo";
@@ -18,14 +18,17 @@ export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const post = postsBySlug.get(params.slug);
     if (!post) throw notFound();
-    return { document: await post.load() };
+    return { document: await translated(post, getLocale()).load() };
   },
   head: ({ params }) => {
-    const post = postsBySlug.get(params.slug);
-    if (!post) return {};
+    const original = postsBySlug.get(params.slug);
+    if (!original) return {};
+    const locale = getLocale();
+    const post = translated(original, locale);
     const { description, publishedAt, updatedAt, author } = post.frontmatter;
     const title = postTitle(post.frontmatter);
     return seo({
+      locale,
       title,
       description,
       path: `/blog/${post.slug}`,
@@ -34,7 +37,7 @@ export const Route = createFileRoute("/blog/$slug")({
       publishedAt,
       updatedAt,
       authorUrl: authors[author].url,
-      jsonLd: postStructuredData(post),
+      jsonLd: postStructuredData(post, locale),
     });
   },
   component: PostPage,
@@ -43,8 +46,9 @@ export const Route = createFileRoute("/blog/$slug")({
 function PostPage() {
   const { slug } = Route.useParams();
   const { document } = Route.useLoaderData();
-  const post = postsBySlug.get(slug)!;
-  const nearby = nearbyPosts(slug);
+  const locale = useLocale();
+  const post = translated(postsBySlug.get(slug)!, locale);
+  const nearby = nearbyPosts(slug).map((other) => translated(other, locale));
   const gt = useGT();
   const m = useMessages();
 

@@ -1,4 +1,4 @@
-import { useGT } from "gt-tanstack-start";
+import { T, useGT } from "gt-tanstack-start";
 import { DiscordCard } from "#app/components/site/DiscordCard";
 import { CopyButton } from "#app/components/ui/CopyButton";
 import { PlinthAnchor } from "#app/components/ui/Plinth";
@@ -17,7 +17,9 @@ export function PostAside({ post, className }: { post: Post; className?: string 
     <aside className={`${styles.aside} ${className ?? ""}`}>
       {releases.length > 0 && (
         <section className={`${card.card} ${styles.panel}`} aria-label={gt("This post covers")}>
-          <p className={styles.label}>{gt("This post covers")}</p>
+          <p className={styles.label}>
+            <T>This post covers</T>
+          </p>
           {releases.map((id) => {
             const release = parseReleaseId(id);
             const label =
@@ -34,7 +36,7 @@ export function PostAside({ post, className }: { post: Post; className?: string 
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {gt("Changelog")}
+                  <T>Changelog</T>
                 </PlinthAnchor>
               </div>
             );
@@ -45,12 +47,14 @@ export function PostAside({ post, className }: { post: Post; className?: string 
         className={`${card.card} ${styles.panel} ${styles.share}`}
         aria-label={gt("Share this post")}
       >
-        <p className={styles.label}>{gt("Share this post")}</p>
+        <p className={styles.label}>
+          <T>Share this post</T>
+        </p>
         <CopyButton
           text={`${SITE.origin}/blog/${post.slug}`}
           label={gt("Copy the link to this post")}
         >
-          {gt("Copy link")}
+          <T>Copy link</T>
         </CopyButton>
       </section>
       <DiscordCard title={gt("Questions or feedback?")} compact>

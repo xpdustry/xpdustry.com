@@ -107,6 +107,27 @@ globalStyle(`${header} ${end} > span`, {
   padding: 9,
 });
 
+/** The language button, where the header has room for it; narrower, the menu lists the languages. */
+export const language = style({
+  selectors: {
+    [`${header} &`]: { marginLeft: -12 },
+  },
+  "@media": {
+    [narrow]: { display: "none" },
+  },
+});
+
+export const languages = style({
+  display: "none",
+  "@media": {
+    [narrow]: {
+      display: "flex",
+      paddingTop: 10,
+      borderTop: `2px solid ${vars.deepWall}`,
+    },
+  },
+});
+
 export const github = style([
   end,
   {

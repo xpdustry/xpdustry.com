@@ -8,7 +8,7 @@ import {
   rootRouteId,
   useMatch,
 } from "@tanstack/react-router";
-import { GTProvider, getLocale, getTranslationsSnapshot, useGT } from "gt-tanstack-start";
+import { getLocale, getTranslationsSnapshot, GTProvider, T } from "gt-tanstack-start";
 import { useEffect, type ReactNode } from "react";
 import { Background } from "#app/components/site/Background";
 import { Footer } from "#app/components/site/Footer";
@@ -71,10 +71,9 @@ function useSmoothScrollOnceHydrated() {
 }
 
 function SkipLink() {
-  const gt = useGT();
   return (
     <a className="skip-link" href="#main">
-      {gt("Skip to content")}
+      <T>Skip to content</T>
     </a>
   );
 }

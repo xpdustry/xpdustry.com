@@ -1,4 +1,4 @@
-import { useGT } from "gt-tanstack-start";
+import { T, useGT } from "gt-tanstack-start";
 import { Hero } from "#app/components/home/Hero";
 import { PlayCard } from "#app/components/home/PlayCard";
 import { DiscordCard } from "#app/components/site/DiscordCard";
@@ -16,7 +16,7 @@ export function Cover({ live }: { live: LiveData }) {
         counts={live.discord}
         className={`${styles.side} reveal`}
       >
-        {gt("Events, announcements and help all happen there.")}
+        <T>Events, announcements and help all happen there.</T>
       </DiscordCard>
     </div>
   );

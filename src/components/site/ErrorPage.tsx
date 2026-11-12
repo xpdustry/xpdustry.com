@@ -1,5 +1,5 @@
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
-import { useGT } from "gt-tanstack-start";
+import { T, useGT } from "gt-tanstack-start";
 import { Message } from "#app/components/site/Message";
 import { PlinthButton, PlinthLink } from "#app/components/ui/Plinth";
 
@@ -8,7 +8,9 @@ export function ErrorPage({ reset }: ErrorComponentProps) {
   const gt = useGT();
   return (
     <Message code="500" title={gt("Something broke on our side")}>
-      <p>{gt("Try again in a moment. If it keeps happening, tell us on Discord.")}</p>
+      <p>
+        <T>Try again in a moment. If it keeps happening, tell us on Discord.</T>
+      </p>
       <div>
         <PlinthButton
           onClick={() => {
@@ -16,10 +18,10 @@ export function ErrorPage({ reset }: ErrorComponentProps) {
             void router.invalidate();
           }}
         >
-          {gt("Try again")}
+          <T>Try again</T>
         </PlinthButton>
         <PlinthLink tone="ink" to="/">
-          {gt("Home")}
+          <T>Home</T>
         </PlinthLink>
       </div>
     </Message>

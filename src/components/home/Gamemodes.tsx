@@ -1,5 +1,5 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import { useGT, useMessages } from "gt-tanstack-start";
+import { T, useGT, useMessages } from "gt-tanstack-start";
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { Tray } from "#app/components/tray/Tray";
 import { Patches } from "#app/components/ui/Patches";
@@ -126,7 +126,9 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
                     : gt("Copied, paste it in Join game")}
               </span>
             </span>
-            <span className="sr-only">{gt(". Copy the server address")}</span>
+            <span className="sr-only">
+              <T>. Copy the server address</T>
+            </span>
           </span>
           <span className={styles.mark} aria-hidden="true">
             <Copy className={styles.glyph} />

@@ -1,6 +1,7 @@
-import { useGT } from "gt-tanstack-start";
-import { useEffect, useId, useRef, useState } from "react";
+import { T, useGT } from "gt-tanstack-start";
+import { useCallback, useId, useRef, useState } from "react";
 import { Brand } from "#app/components/site/Brand";
+import { LocaleList, LocaleSwitch } from "#app/components/site/LocaleSwitch";
 import { PlayPill } from "#app/components/site/PlayPill";
 import {
   PlinthAnchor,
@@ -11,6 +12,7 @@ import {
 import type { PlayerCount } from "#app/data/live";
 import { SITE } from "#app/data/site";
 import { GitHub, List, X } from "#app/lib/icons";
+import { useDismiss } from "#app/lib/useDismiss";
 import * as styles from "./Header.css";
 
 export function Header({ players }: { players: PlayerCount }) {
@@ -20,25 +22,8 @@ export function Header({ players }: { players: PlayerCount }) {
   const menu = useId();
   const gt = useGT();
 
-  useEffect(() => {
-    if (!open) return;
-    const inside = (node: unknown) => header.current?.contains(node as Node) ?? false;
-    const shut = (event: KeyboardEvent | PointerEvent) => {
-      if (event instanceof KeyboardEvent) {
-        if (event.key !== "Escape") return;
-        if (inside(document.activeElement)) toggle.current?.focus();
-      } else if (inside(event.target)) return;
-      setOpen(false);
-    };
-    addEventListener("keydown", shut);
-    addEventListener("pointerdown", shut);
-    return () => {
-      removeEventListener("keydown", shut);
-      removeEventListener("pointerdown", shut);
-    };
-  }, [open]);
-
-  const shut = () => setOpen(false);
+  const shut = useCallback(() => setOpen(false), []);
+  useDismiss({ open, within: header, returnTo: toggle, close: shut });
   return (
     <header ref={header} className={`${styles.header} reveal`}>
       <Brand className={styles.brand} />
@@ -56,22 +41,24 @@ export function Header({ players }: { players: PlayerCount }) {
       </PlinthButton>
       <nav id={menu} className={`${styles.nav} ${open ? styles.open : ""}`} aria-label={gt("Main")}>
         <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }} onClick={shut}>
-          {gt("Home")}
+          <T>Home</T>
         </PlinthLink>
         <PlinthSectionLink tone="ink" hash="projects" onClick={shut}>
-          {gt("Projects")}
+          <T>Projects</T>
         </PlinthSectionLink>
         <PlinthSectionLink tone="ink" hash="gamemodes" onClick={shut}>
-          {gt("Gamemodes")}
+          <T>Gamemodes</T>
         </PlinthSectionLink>
         <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }} onClick={shut}>
-          {gt("Blog")}
+          <T>Blog</T>
         </PlinthLink>
         <PlinthAnchor tone="ink" href={SITE.maven} onClick={shut}>
           Maven
         </PlinthAnchor>
+        <LocaleList className={styles.languages} />
       </nav>
       <PlayPill players={players} className={styles.play} />
+      <LocaleSwitch className={styles.language} />
       <PlinthAnchor
         tone="ink"
         icon

@@ -1,6 +1,8 @@
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
 import { SITE } from "#app/data/site";
+import { withLocale } from "#app/i18n/localePath";
+import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { postCard, postTitle } from "#app/lib/seo";
 
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonLd;
@@ -11,7 +13,8 @@ export interface JsonLd {
 const CONTEXT = "https://schema.org";
 const ORGANIZATION_ID = `${SITE.origin}/#organization`;
 
-export function homeStructuredData(): JsonLd {
+export function homeStructuredData(locale: string = DEFAULT_LOCALE): JsonLd {
+  const home = `${SITE.origin}${withLocale("/", locale)}`;
   return {
     "@context": CONTEXT,
     "@graph": [
@@ -19,7 +22,8 @@ export function homeStructuredData(): JsonLd {
         "@type": "WebSite",
         "@id": `${SITE.origin}/#website`,
         name: SITE.name,
-        url: `${SITE.origin}/`,
+        url: home,
+        inLanguage: locale,
         publisher: { "@id": ORGANIZATION_ID },
       },
       {
@@ -35,10 +39,14 @@ export function homeStructuredData(): JsonLd {
   };
 }
 
-export function postStructuredData(post: Pick<Post, "slug" | "frontmatter">): JsonLd {
+export function postStructuredData(
+  post: Pick<Post, "slug" | "frontmatter">,
+  locale: string = DEFAULT_LOCALE,
+): JsonLd {
+  const at = (path: string) => `${SITE.origin}${withLocale(path, locale)}`;
   const { description, author, publishedAt, updatedAt } = post.frontmatter;
   const title = postTitle(post.frontmatter);
-  const url = `${SITE.origin}/blog/${post.slug}`;
+  const url = at(`/blog/${post.slug}`);
   return {
     "@context": CONTEXT,
     "@graph": [
@@ -47,6 +55,7 @@ export function postStructuredData(post: Pick<Post, "slug" | "frontmatter">): Js
         "@id": `${url}#post`,
         headline: title,
         description,
+        inLanguage: locale,
         datePublished: publishedAt,
         ...(updatedAt ? { dateModified: updatedAt } : {}),
         image: `${SITE.origin}${postCard(post.slug, title).url}`,
@@ -57,8 +66,8 @@ export function postStructuredData(post: Pick<Post, "slug" | "frontmatter">): Js
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: `${SITE.origin}/` },
-          { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE.origin}/blog` },
+          { "@type": "ListItem", position: 1, name: "Home", item: at("/") },
+          { "@type": "ListItem", position: 2, name: "Blog", item: at("/blog") },
           { "@type": "ListItem", position: 3, name: title, item: url },
         ],
       },

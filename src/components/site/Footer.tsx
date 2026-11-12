@@ -1,4 +1,4 @@
-import { useGT } from "gt-tanstack-start";
+import { T, useGT } from "gt-tanstack-start";
 import { Brand } from "#app/components/site/Brand";
 import { PlinthAnchor } from "#app/components/ui/Plinth";
 import { SITE } from "#app/data/site";
@@ -21,7 +21,9 @@ export function Footer() {
         <small className={styles.copyright}>© {new Date().getUTCFullYear()} Xpdustry</small>
         <PlinthAnchor className={styles.top} href="#top" aria-label={gt("Back to top")}>
           <ArrowUp />
-          <span className={styles.say}>{gt("Back to top")}</span>
+          <span className={styles.say}>
+            <T>Back to top</T>
+          </span>
         </PlinthAnchor>
       </div>
     </footer>

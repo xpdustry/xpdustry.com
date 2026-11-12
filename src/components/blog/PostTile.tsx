@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useLocale } from "gt-tanstack-start";
 import { PostArt } from "#app/components/blog/PostArt";
 import { TopicChip } from "#app/components/blog/TopicChip";
 import { Patches } from "#app/components/ui/Patches";
@@ -17,6 +18,7 @@ interface PostTileProps {
 }
 
 export function PostTile({ post, variant, heading: Heading = "h3", className }: PostTileProps) {
+  const locale = useLocale();
   const { title, description, topic, author, publishedAt } = post.frontmatter;
 
   return (
@@ -33,7 +35,7 @@ export function PostTile({ post, variant, heading: Heading = "h3", className }: 
         {variant === "listing" && <p className={styles.description}>{description}</p>}
         <span className={styles.byline}>
           {variant === "big" && `${author}, `}
-          <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
+          <time dateTime={publishedAt}>{formatDate(publishedAt, locale)}</time>
         </span>
       </span>
     </Link>

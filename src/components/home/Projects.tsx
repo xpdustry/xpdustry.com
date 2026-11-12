@@ -1,4 +1,4 @@
-import { useGT, useMessages } from "gt-tanstack-start";
+import { T, useGT, useMessages } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { Tray } from "#app/components/tray/Tray";
 import { Patches } from "#app/components/ui/Patches";
@@ -45,8 +45,12 @@ export function Projects({ releases }: { releases: LiveData["releases"] }) {
         })}
         <Tile href={SITE.github} patches={PATCHES.moreCard} className={styles.more}>
           <GitHub className={styles.symbol} />
-          <h3>{gt("Much more")}</h3>
-          <p>{gt("Everything we make is public on GitHub.")}</p>
+          <h3>
+            <T>Much more</T>
+          </h3>
+          <p>
+            <T>Everything we make is public on GitHub.</T>
+          </p>
         </Tile>
       </div>
     </Tray>

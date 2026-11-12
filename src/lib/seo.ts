@@ -1,5 +1,7 @@
 import type { BlogFrontmatter } from "#app/content/schema";
 import { BLOG_DESCRIPTION, SITE } from "#app/data/site";
+import { withLocale } from "#app/i18n/localePath";
+import { DEFAULT_LOCALE, LOCALES, localeInfo } from "#app/i18n/locales";
 import type { JsonLd } from "#app/lib/structuredData";
 
 export interface PageImage {
@@ -38,8 +40,10 @@ export interface PageSeo {
   /** Use the title as written, without appending the site name. */
   fullTitle?: boolean;
   description: string;
-  /** Site-relative, e.g. `/blog`. */
+  /** Site-relative and without a locale, e.g. `/blog`. */
   path: string;
+  /** The locale the page is rendered in; the default one when absent. */
+  locale?: string;
   type?: "website" | "article";
   image?: PageImage;
   publishedAt?: string;
@@ -53,7 +57,9 @@ export interface PageSeo {
 export function seo(page: PageSeo) {
   const title =
     page.fullTitle || page.title === SITE.name ? page.title : `${page.title} - ${SITE.name}`;
-  const url = `${SITE.origin}${page.path}`;
+  const locale = page.locale ?? DEFAULT_LOCALE;
+  const urlIn = (other: string) => `${SITE.origin}${withLocale(page.path, other)}`;
+  const url = urlIn(locale);
   const image = page.image ?? SITE_CARD;
   const imageUrl = `${SITE.origin}${image.url}`;
 
@@ -63,7 +69,11 @@ export function seo(page: PageSeo) {
       { name: "description", content: page.description },
       { property: "og:type", content: page.type ?? "website" },
       { property: "og:site_name", content: SITE.name },
-      { property: "og:locale", content: "en_US" },
+      { property: "og:locale", content: localeInfo(locale).openGraph },
+      ...LOCALES.filter((other) => other !== locale).map((other) => ({
+        property: "og:locale:alternate",
+        content: localeInfo(other).openGraph,
+      })),
       { property: "og:title", content: title },
       { property: "og:description", content: page.description },
       { property: "og:url", content: url },
@@ -83,7 +93,11 @@ export function seo(page: PageSeo) {
       ...(page.updatedAt ? [{ property: "article:modified_time", content: page.updatedAt }] : []),
       ...(page.authorUrl ? [{ property: "article:author", content: page.authorUrl }] : []),
     ],
-    links: [{ rel: "canonical", href: url }],
+    links: [
+      { rel: "canonical", href: url },
+      ...LOCALES.map((other) => ({ rel: "alternate", hrefLang: other, href: urlIn(other) })),
+      { rel: "alternate", hrefLang: "x-default", href: urlIn(DEFAULT_LOCALE) },
+    ],
     scripts: page.jsonLd
       ? [
           {

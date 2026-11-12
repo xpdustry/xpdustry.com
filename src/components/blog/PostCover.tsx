@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useGT } from "gt-tanstack-start";
+import { T, useLocale, Var } from "gt-tanstack-start";
 import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
@@ -15,10 +15,10 @@ import * as styles from "./PostCover.css";
 import { avatar, pill } from "./themed.css";
 
 export function PostCover({ post, className }: { post: Post; className?: string }) {
+  const locale = useLocale();
   const { title, description, author, publishedAt, updatedAt, topicVersion } = post.frontmatter;
   const theme = topic(post.frontmatter.topic);
   const profile = authors[author];
-  const gt = useGT();
   const chip = (
     <TopicChip
       name={theme.name}
@@ -35,7 +35,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
       <div className={styles.crumbs}>
         <Link to="/blog" activeOptions={{ exact: true }} className={`${pill} ${styles.back}`}>
           <CaretLeft />
-          {gt("Blog")}
+          <T>Blog</T>
         </Link>
         {postTitle(post.frontmatter) === title ? (
           <>
@@ -55,11 +55,16 @@ export function PostCover({ post, className }: { post: Post; className?: string 
           {author}
         </a>
         <time className={pill} dateTime={publishedAt}>
-          {formatDate(publishedAt)}
+          {formatDate(publishedAt, locale)}
         </time>
         {updatedAt && (
           <span className={pill}>
-            Updated <time dateTime={updatedAt}>{formatDate(updatedAt)}</time>
+            <T>
+              Updated{" "}
+              <time dateTime={updatedAt}>
+                <Var>{formatDate(updatedAt, locale)}</Var>
+              </time>
+            </T>
           </span>
         )}
       </div>

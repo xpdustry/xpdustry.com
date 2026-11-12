@@ -1,4 +1,4 @@
-import { useGT } from "gt-tanstack-start";
+import { T } from "gt-tanstack-start";
 import { PressableLogo } from "#app/components/home/PressableLogo";
 import { Patches } from "#app/components/ui/Patches";
 import { PlinthAnchor, PlinthSectionLink } from "#app/components/ui/Plinth";
@@ -9,7 +9,6 @@ import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Hero.css";
 
 export function Hero({ className }: { className?: string }) {
-  const gt = useGT();
   return (
     <section className={`${card.card} spot ${styles.hero} ${className ?? ""}`}>
       <Patches patches={PATCHES.hero} />
@@ -18,14 +17,17 @@ export function Hero({ className }: { className?: string }) {
         <h1>{SITE.name}</h1>
       </div>
       <p>
-        {gt(
-          "We’re a group of developers, making open source mods and plugins for Mindustry since 2019. We also run the Chaotic Neutral Mindustry servers.",
-        )}
+        <T>
+          We’re a group of developers, making open source mods and plugins for Mindustry since 2019.
+          We also run the Chaotic Neutral Mindustry servers.
+        </T>
       </p>
       <div className={styles.actions}>
-        <PlinthSectionLink hash="projects">{gt("Browse projects")}</PlinthSectionLink>
+        <PlinthSectionLink hash="projects">
+          <T>Browse projects</T>
+        </PlinthSectionLink>
         <PlinthSectionLink tone="amber" hash="gamemodes">
-          {gt("Join a server")}
+          <T>Join a server</T>
         </PlinthSectionLink>
         <PlinthAnchor tone="ink" href={SITE.github}>
           <GitHub />
