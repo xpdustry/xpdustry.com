@@ -14,9 +14,15 @@ const tile = (tiles: SpreadTiles | undefined, stage: SpreadStage) =>
 /** Where a spread starts, in px from its parent's top left corner. */
 export type SpreadOrigin = readonly [x: number, y: number];
 
+/** Where a spread starts, and how far the farthest corner is from there, in px. */
+export interface SpreadStart {
+  origin: SpreadOrigin;
+  reach: number;
+}
+
 /**
  * A palette's reticulate spreading over its positioned parent, behind the content, while `on`:
- * out from `origin` as thin threads that thicken and fuse solid behind them, until it has closed
+ * out from `from` as thin threads that thicken and fuse solid behind them, until it has closed
  * over the farthest corner. It fades away once `on` is over.
  *
  * It stays invisible until it plays, so its `tiles` can be left out until it might: a browser
@@ -25,22 +31,21 @@ export type SpreadOrigin = readonly [x: number, y: number];
 export function Spread({
   tiles,
   on,
-  origin,
-  reach
+  from
 }: {
   tiles?: SpreadTiles;
   on: boolean;
-  origin?: SpreadOrigin;
-  /** How far the farthest corner is from `origin`, in px. */
-  reach?: number;
+  from?: SpreadStart;
 }) {
   const style = assignInlineVars({
     [styles.tile.thin]: tile(tiles, "thin"),
     [styles.tile.thick]: tile(tiles, "thick"),
     [styles.tile.solid]: tile(tiles, "solid"),
-    [styles.x]: origin && `${origin[0]}px`,
-    [styles.y]: origin && `${origin[1]}px`,
-    [styles.reach]: reach === undefined ? undefined : `${reach}px`
+    ...(from && {
+      [styles.x]: `${from.origin[0]}px`,
+      [styles.y]: `${from.origin[1]}px`,
+      [styles.reach]: `${from.reach}px`
+    })
   });
   return (
     <span className={`${styles.spread} ${on ? styles.on : ""}`} style={style} aria-hidden="true">
@@ -49,8 +54,23 @@ export function Spread({
   );
 }
 
-/** A spread's `origin` and `reach` for a click at `origin` in an element of this size. */
-export function spreadFrom(origin: SpreadOrigin, width: number, height: number) {
+/** The spread for a press at `origin` in an element of this size, out to its farthest corner. */
+export function spreadFrom(origin: SpreadOrigin, width: number, height: number): SpreadStart {
   const [x, y] = origin;
   return { origin, reach: Math.hypot(Math.max(x, width - x), Math.max(y, height - y)) };
+}
+
+/**
+ * The spread for a press in `box`, both in viewport px: from the pointer, or from the middle of
+ * `fallback` for a key press, which has no pointer and reports a `detail` of 0.
+ */
+export function spreadFromPress(
+  press: { detail: number; clientX: number; clientY: number },
+  box: DOMRectReadOnly,
+  fallback: DOMRectReadOnly
+): SpreadStart {
+  const [x, y] = press.detail
+    ? [press.clientX, press.clientY]
+    : [fallback.left + fallback.width / 2, fallback.top + fallback.height / 2];
+  return spreadFrom([x - box.left, y - box.top], box.width, box.height);
 }
