@@ -34,7 +34,7 @@ function BlogIndex() {
   const [latest, ...earlier] = posts.map((post) => translated(post, locale));
   return (
     <main id="main" className={grid}>
-      <section className={`${card.card} spot ${styles.intro} reveal`}>
+      <section className={`${card.card} ${styles.intro} reveal`}>
         <Patches patches={PATCHES.blogIntro} />
         <h1>
           <T>Blog</T>

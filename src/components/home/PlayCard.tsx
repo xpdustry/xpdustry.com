@@ -19,7 +19,7 @@ export function PlayCard({ players, className }: { players: Count; className?: s
   return (
     <section
       id="servers"
-      className={`${card.card} spot ${styles.play} ${failed ? styles.failed : ""} ${className ?? ""}`}
+      className={`${card.card} ${styles.play} ${failed ? styles.failed : ""} ${className ?? ""}`}
     >
       <button
         type="button"

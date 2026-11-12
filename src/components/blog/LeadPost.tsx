@@ -21,7 +21,7 @@ export function LeadPost({ post, className }: { post: Post; className?: string }
     <Link
       to="/blog/$slug"
       params={{ slug: post.slug }}
-      className={`${card.card} spot ${styles.lead} ${className ?? ""}`}
+      className={`${card.card} ${styles.lead} ${className ?? ""}`}
       style={themed(theme)}
     >
       <Patches patches={seeded(theme.patches, post.slug)} />

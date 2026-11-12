@@ -25,7 +25,7 @@ export function PostTile({ post, variant, heading: Heading = "h3", className }: 
     <Link
       to="/blog/$slug"
       params={{ slug: post.slug }}
-      className={`${card.card} spot ${styles.tile} ${styles.variant[variant]} ${className ?? ""}`}
+      className={`${card.card} ${styles.tile} ${styles.variant[variant]} ${className ?? ""}`}
     >
       <PostArt post={post} className={styles.photo} />
       <TopicChip name={topic} className={styles.chip} />

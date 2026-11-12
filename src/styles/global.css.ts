@@ -98,19 +98,6 @@ globalStyle(".skip-link:focus-visible", {
   translate: "none",
 });
 
-globalStyle(":where(.spot)::after", {
-  content: '""',
-  position: "absolute",
-  inset: -2,
-  zIndex: 5,
-  padding: 2,
-  borderRadius: "inherit",
-  pointerEvents: "none",
-  opacity: "var(--spot, 0)",
-  background: `radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgb(${vars.glow}), transparent 70%)`,
-  mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
-});
-
 globalStyle("*, *::before, *::after", {
   "@media": {
     [media.still]: {

@@ -16,7 +16,6 @@ import { getLiveData } from "#app/data/live.functions";
 import { CROWN } from "#app/data/textures";
 import { fontPreloads } from "#app/lib/fontPreloads";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/lib/reveal";
-import { useSpotlight } from "#app/lib/useSpotlight";
 import gtConfig from "../../gt.config.json";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
@@ -80,7 +79,6 @@ function SkipLink() {
 }
 
 function Document({ children }: { children: ReactNode }) {
-  useSpotlight();
   useSmoothScrollOnceHydrated();
   const loaded = useMatch({ from: rootRouteId, select: (match) => match.loaderData });
   const live = loaded?.live;

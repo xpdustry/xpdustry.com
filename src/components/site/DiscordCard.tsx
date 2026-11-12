@@ -28,7 +28,7 @@ export function DiscordCard({
   return (
     <a
       href={SITE.discord}
-      className={`${card.card} spot ${styles.discord} ${compact ? styles.compact : ""} ${className ?? ""}`}
+      className={`${card.card} ${styles.discord} ${compact ? styles.compact : ""} ${className ?? ""}`}
     >
       <Patches patches={compact ? PATCHES.discordCompact : PATCHES.discord} />
       <Discord className={styles.glyph} />

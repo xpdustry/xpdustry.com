@@ -71,7 +71,7 @@ function Tile({
   children: ReactNode;
 }) {
   return (
-    <a href={href} className={`${card.card} spot ${className}`} style={{ background: ground }}>
+    <a href={href} className={`${card.card} ${className}`} style={{ background: ground }}>
       <Patches patches={patches} />
       {children}
     </a>

@@ -10,7 +10,7 @@ import * as styles from "./Hero.css";
 
 export function Hero({ className }: { className?: string }) {
   return (
-    <section className={`${card.card} spot ${styles.hero} ${className ?? ""}`}>
+    <section className={`${card.card} ${styles.hero} ${className ?? ""}`}>
       <Patches patches={PATCHES.hero} priority />
       <div className={styles.brand}>
         <PressableLogo className={styles.mark} />
