@@ -15,6 +15,8 @@ V="node .agents/skills/verify-xpdustry/verify.ts"
 
 Shell state does not carry between tool calls, so start every command with that `V=` line.
 
+`verify.ts` only dispatches; each command lives in a module beside it: `instance.ts` (`launch`, `doctor`, `stop`), `run.ts`, `audit.ts`, `seo.ts`. The checks `audit` runs inside the page are in `page-checks.ts`. Playwright sends each one to the browser as source text, so a check can use only what `installHelpers` puts on `window`, never an import.
+
 Run `pnpm install` first: the helper uses the repo's own `playwright` dev dependency. A machine that has never run it also needs the browser once: `pnpm exec playwright install chromium`. The helper says which of the two is missing.
 
 ## Launch
