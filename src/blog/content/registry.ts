@@ -32,7 +32,7 @@ export const postsBySlug: ReadonlyMap<string, Post> = new Map(
   posts.map((post) => [post.slug, post])
 );
 
-assertReleasesAreClaimedOnce();
+assertReleasesAreClaimedOnce(posts);
 
 function buildPosts(): Map<string, Map<string, Post>> {
   const byLocale = new Map<string, Map<string, Post>>();
@@ -49,16 +49,16 @@ export function translated(post: Post, locale: string): Post {
   return byLocale.get(locale)?.get(post.slug) ?? post;
 }
 
-function assertReleasesAreClaimedOnce(): void {
+/** A release belongs to one post at most, so the build fails on a second post that lists it. */
+export function assertReleasesAreClaimedOnce(posts: readonly Post[]): void {
   const claimedBy = new Map<string, string>();
-  for (const post of posts) {
-    for (const id of post.frontmatter.releases ?? []) {
-      const existing = claimedBy.get(id);
-      if (existing) {
-        throw new ContentError(post.slug, `release ${id} is already claimed by ${existing}`);
-      }
-      claimedBy.set(id, post.slug);
-    }
+  const claims = posts.flatMap((post) =>
+    (post.frontmatter.releases ?? []).map((id) => ({ id, slug: post.slug }))
+  );
+  for (const { id, slug } of claims) {
+    const existing = claimedBy.get(id);
+    if (existing) throw new ContentError(slug, `release ${id} is already claimed by ${existing}`);
+    claimedBy.set(id, slug);
   }
 }
 
