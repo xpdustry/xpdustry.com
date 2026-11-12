@@ -76,7 +76,22 @@ $V audit                   # every language, 8 widths, 5 pages (about a minute)
 $V audit fr               # one language
 ```
 
-`audit` looks for translated text that no longer fits: a page that scrolls sideways, a navigation item that wraps, a header control left adrift from the group on the right, a section title that runs under its button, a truncated section subtitle, text that leaves the screen. The widths are 1440, 1280, 1160, 1000, 760, 600, 390 and 320px. It prints one line per finding, as `<width> <url>: <what>`, and exits 1 if there is any. It is the check for visible text; `seo` does not notice a label that wraps. Run it after every change to `src/_gt/*.json`, to a heading, or to layout styles.
+`audit` looks for text that no longer fits. The widths are 1440, 1280, 1160, 1000, 760, 600, 390 and 320px. Each page is loaded once per width and checked under four text settings in turn:
+
+| Setting          | What it does                                                                                                                     | What it catches                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| default          | nothing                                                                                                                          | the design checks below, clipped text, sideways scrolling  |
+| `text 200%`      | sets the browser's own font size to 32px, as a reader does in the settings of Chrome, Edge or Firefox; rem breakpoints follow it | clipped text, sideways scrolling, text that keeps its size |
+| `text zoom 200%` | doubles the root font size while every breakpoint stays put, the worst case of a text-only zoom                                  | clipped text, sideways scrolling                           |
+| `text spacing`   | applies the WCAG 1.4.12 overrides: line height 1.5, letter spacing 0.12em, word spacing 0.16em, paragraphs 2em                   | clipped text, sideways scrolling                           |
+
+The design checks, at the default size only: a navigation item that wraps, a header control left adrift from the group on the right, a section title that runs under its button, a truncated section subtitle, text that leaves the screen. Under every setting:
+
+- `page scrolls sideways by Npx, <region>: <text>` names the widest element that is not inside a clipping box, and whether it is in the header, `main` or the footer.
+- `text clipped, <region>: <text>` is text cut off by a box with hidden overflow: a fixed height, `nowrap`, an ellipsis, a word too long for its column. Text that is visually hidden on purpose (`.sr-only`, transparent, a 1px box) is skipped.
+- `text ignores the font size setting, <region>: <text>` is text under 24px that kept its size when the browser's font size doubled: a font size in px. Font sizes go through `rem()` from `src/styles/scale.ts`, breakpoints through `media` and `upTo` from `src/styles/media.ts`, container queries through `narrowerThan`.
+
+It prints one line per finding, as `<width> <url>[, <setting>]: <what>`, and exits 1 if there is any. It is the check for visible text; `seo` does not notice a label that wraps. Run it after every change to `src/_gt/*.json`, to a heading, or to layout styles. A full run takes about a minute and a half.
 
 ```sh
 $V seo            # every sitemap page: fixed rules, then a comparison with the baseline

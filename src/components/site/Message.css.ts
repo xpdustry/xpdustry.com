@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, tracking } from "#app/styles/scale";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 export const message = style({
@@ -17,25 +17,25 @@ export const message = style({
 });
 
 export const code = style({
-  font: `500 ${font.small}px ${vars.fontMono}`,
+  font: `500 ${rem(font.small)} ${vars.fontMono}`,
   opacity: 0.8,
 });
 
 export const title = style({
   marginTop: 10,
   maxWidth: "16ch",
-  fontSize: font.display,
+  fontSize: rem(font.display),
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   textWrap: "balance",
   "@media": {
-    [media.phone]: { fontSize: font.h1 },
+    [media.phone]: { fontSize: rem(font.h1) },
   },
 });
 
 export const body = style({
   marginTop: 14,
-  fontSize: font.lead,
+  fontSize: rem(font.lead),
   lineHeight: leading.snug,
 });
 

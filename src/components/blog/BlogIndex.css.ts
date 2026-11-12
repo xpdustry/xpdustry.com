@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, tracking } from "#app/styles/scale";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 export const intro = style({
@@ -18,18 +18,18 @@ export const intro = style({
 });
 
 globalStyle(`${intro} h1`, {
-  fontSize: font.hero,
+  fontSize: rem(font.hero),
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   "@media": {
-    [media.phone]: { fontSize: font.display },
+    [media.phone]: { fontSize: rem(font.display) },
   },
 });
 
 globalStyle(`${intro} p`, {
   maxWidth: "36ch",
   marginTop: 12,
-  fontSize: font.lead,
+  fontSize: rem(font.lead),
   lineHeight: leading.snug,
   opacity: 0.85,
 });

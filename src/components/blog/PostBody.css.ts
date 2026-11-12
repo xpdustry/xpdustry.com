@@ -1,17 +1,17 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, radius, tracking } from "#app/styles/scale";
+import { font, leading, radius, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 export const prose = style({
   maxWidth: "66ch",
   fontFamily: vars.fontText,
-  fontSize: font.lead,
+  fontSize: rem(font.lead),
   lineHeight: leading.text,
   letterSpacing: 0,
   color: vars.ink,
   "@media": {
-    [media.phone]: { fontSize: font.text },
+    [media.phone]: { fontSize: rem(font.text) },
   },
 });
 
@@ -27,11 +27,11 @@ globalStyle(`${prose} h2, ${prose} h3`, {
 });
 
 globalStyle(`${prose} h2`, {
-  fontSize: font.h2,
+  fontSize: rem(font.h2),
 });
 
 globalStyle(`${prose} h3`, {
-  fontSize: font.h3,
+  fontSize: rem(font.h3),
 });
 
 globalStyle(`${prose} :is(h2, h3) + *`, {
@@ -59,7 +59,6 @@ globalStyle(`${prose} code`, {
   borderRadius: radius.sm,
   background: vars.n3,
   font: `500 0.84em ${vars.fontMono}`,
-  whiteSpace: "nowrap",
 });
 
 globalStyle(`${prose} li`, {
@@ -111,7 +110,7 @@ globalStyle(`${prose} figure img, ${prose} figure video`, {
 
 globalStyle(`${prose} figcaption`, {
   marginTop: 10,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   lineHeight: leading.snug,
   color: vars.muted,
 });
@@ -147,6 +146,7 @@ export const warning = style({
 
 export const label = style({
   display: "inline-block",
+  maxWidth: "100%",
   marginBottom: 8,
   padding: "4px 11px",
   border: `2px solid ${wall}`,
@@ -154,10 +154,10 @@ export const label = style({
   background: face,
   color: on,
   fontFamily: vars.fontDisplay,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   letterSpacing: tracking.title,
 });
 
 globalStyle(`${callout} p`, {
-  fontSize: font.text,
+  fontSize: rem(font.text),
 });

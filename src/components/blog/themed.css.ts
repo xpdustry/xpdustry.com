@@ -1,5 +1,5 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { font, radius } from "#app/styles/scale";
+import { font, radius, rem } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 export const accent = createVar();
@@ -27,7 +27,7 @@ export const pill = style({
   borderRadius: radius.pill,
   background: tint,
   color: vars.onGround,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   textDecoration: "none",
   selectors: {
     "&:has(> img:first-child, > svg:first-child)": { paddingLeft: 8 },

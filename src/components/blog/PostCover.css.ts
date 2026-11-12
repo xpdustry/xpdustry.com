@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, tracking } from "#app/styles/scale";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 import { ground, logo as themedLogo } from "./themed.css";
 
@@ -32,12 +32,21 @@ export const logo = style([
   },
 ]);
 
+/**
+ * The back link and the topic share a line while they fit, and the title always starts a line of
+ * its own: the zero-height break before it takes a whole line.
+ */
 export const crumbs = style({
-  display: "grid",
-  gridTemplateColumns: "max-content minmax(0, 1fr)",
-  gap: "0 8px",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "8px",
   alignSelf: "stretch",
-  alignItems: "start",
+  alignItems: "flex-start",
+  "::before": {
+    content: '""',
+    order: 1,
+    flexBasis: "100%",
+  },
 });
 
 export const back = style({
@@ -53,22 +62,24 @@ export const heading = style({
 });
 
 export const title = style({
-  gridColumn: "1 / -1",
+  order: 2,
+  flexBasis: "100%",
+  minWidth: 0,
   maxWidth: "17ch",
-  marginTop: 18,
-  fontSize: font.display,
+  marginTop: 2,
+  fontSize: rem(font.display),
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   textWrap: "balance",
   "@media": {
-    [media.phone]: { fontSize: font.h2 },
+    [media.phone]: { fontSize: rem(font.h2) },
   },
 });
 
 export const description = style({
   maxWidth: "52ch",
   marginTop: 16,
-  fontSize: font.lead,
+  fontSize: rem(font.lead),
   color: vars.muted,
 });
 

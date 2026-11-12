@@ -1,5 +1,5 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { font, tracking } from "#app/styles/scale";
+import { font, rem, tracking } from "#app/styles/scale";
 
 /** The logo's width. */
 export const mark = createVar();
@@ -7,7 +7,7 @@ export const mark = createVar();
 export const name = createVar();
 
 export const brand = style({
-  vars: { [mark]: "40px", [name]: `${font.h3}px` },
+  vars: { [mark]: "40px", [name]: `${rem(font.h3)}` },
   display: "flex",
   alignItems: "center",
   gap: 10,

@@ -1,5 +1,5 @@
 import { createVar, globalStyle, styleVariants } from "@vanilla-extract/css";
-import { font, radius } from "#app/styles/scale";
+import { font, radius, rem } from "#app/styles/scale";
 import { accented, pill } from "./themed.css";
 
 export const face = createVar();
@@ -14,7 +14,7 @@ export const tone = styleVariants({
     borderRadius: radius.sm,
     background: face,
     color: ink,
-    fontSize: font.caption,
+    fontSize: rem(font.caption),
   },
   cover: [pill, accented],
 });

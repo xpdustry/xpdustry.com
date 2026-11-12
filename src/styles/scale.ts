@@ -1,3 +1,10 @@
+/**
+ * A design size in px, written in rem so it follows the font size the reader set in their
+ * browser. Every font size goes through it: text in px ignores that setting.
+ */
+export const rem = (px: number) => `${px / 16}rem`;
+
+/** Font sizes in px at the browser's default 16px. Pass them through `rem`. */
 export const font = {
   caption: 13,
   small: 14.5,

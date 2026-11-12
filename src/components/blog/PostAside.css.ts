@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, radius, tracking } from "#app/styles/scale";
+import { font, radius, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 export const aside = style({
@@ -19,7 +19,8 @@ export const panel = style({
 });
 
 export const label = style({
-  fontSize: font.h4,
+  minWidth: 0,
+  fontSize: rem(font.h4),
   letterSpacing: tracking.title,
 });
 
@@ -38,12 +39,13 @@ globalStyle(`${release} code`, {
   padding: "6px 9px",
   borderRadius: radius.sm,
   background: vars.n3,
-  font: `500 ${font.caption}px ${vars.fontMono}`,
-  whiteSpace: "nowrap",
+  font: `500 ${rem(font.caption)} ${vars.fontMono}`,
 });
 
 globalStyle(`${release} > a`, {
+  maxWidth: "100%",
   marginLeft: "auto",
+  overflowWrap: "anywhere",
 });
 
 export const share = style({

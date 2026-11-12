@@ -1,5 +1,6 @@
 import { globalStyle } from "@vanilla-extract/css";
 import { media } from "./media";
+import { font, rem } from "./scale";
 import { vars } from "./theme.css";
 
 globalStyle(":root", {
@@ -25,8 +26,9 @@ globalStyle("body", {
   background: vars.page,
   color: vars.ink,
   fontFamily: vars.fontDisplay,
-  fontSize: 17,
+  fontSize: rem(font.text),
   lineHeight: 1.55,
+  overflowWrap: "break-word",
   letterSpacing: "0.02em",
   fontSynthesisWeight: "none",
   WebkitFontSmoothing: "antialiased",

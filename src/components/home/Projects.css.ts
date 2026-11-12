@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, radius, tracking } from "#app/styles/scale";
+import { font, leading, radius, rem, tracking } from "#app/styles/scale";
 import { cards, figures } from "./shared";
 import { vars } from "#app/styles/theme.css";
 
@@ -22,14 +22,19 @@ export const featured = style({
   padding: 24,
   color: vars.onGround,
   "@media": {
-    [media.phone]: { height: 300 },
+    [media.phone]: { minHeight: 300 },
   },
 });
 
 export const top = style({
   display: "flex",
+  flexWrap: "wrap",
   alignItems: "center",
   gap: 10,
+});
+
+globalStyle(`${top} h3`, {
+  minWidth: 0,
 });
 
 globalStyle(`${top} img`, {
@@ -37,7 +42,7 @@ globalStyle(`${top} img`, {
 });
 
 globalStyle(`${featured} h3`, {
-  fontSize: font.h2,
+  fontSize: rem(font.h2),
   letterSpacing: tracking.display,
 });
 
@@ -49,13 +54,21 @@ globalStyle(`${featured} ${version}`, {
 globalStyle(`${featured} p`, {
   maxWidth: "40ch",
   marginTop: 8,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   lineHeight: leading.snug,
 });
 
-export const screenshot = style({
+/** Holds the screenshot without giving it height, so the card is as tall as its text needs. */
+export const stage = style({
+  position: "relative",
   flex: "none",
-  alignSelf: "flex-start",
+  height: 0,
+});
+
+export const screenshot = style({
+  position: "absolute",
+  top: 0,
+  left: 0,
   width: "calc(100% + 44px)",
   maxWidth: "none",
   marginTop: 19,
@@ -76,13 +89,13 @@ const small = style({
 });
 
 globalStyle(`${small} h3`, {
-  fontSize: font.h3,
+  fontSize: rem(font.h3),
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
 });
 
 globalStyle(`${small} p`, {
-  fontSize: font.small,
+  fontSize: rem(font.small),
   lineHeight: leading.snug,
 });
 

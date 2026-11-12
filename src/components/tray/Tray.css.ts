@@ -1,6 +1,6 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { media, upTo } from "#app/styles/media";
-import { font, leading, radius, tracking } from "#app/styles/scale";
+import { media, narrowerThan, upTo } from "#app/styles/media";
+import { font, leading, radius, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const tabWidth = createVar();
@@ -8,36 +8,37 @@ const trayR = createVar();
 
 const trayWidth = createVar();
 
-const cramped = "(width < 273px)";
+/** Measured on the whole tray: 273px of content and the padding around it. */
+const cramped = narrowerThan(301);
 
 const narrow = upTo(700);
 const tiny = upTo(360);
 
 const slantHalf = "31.5px";
 
+/** The tab sits in the flow above the body, so a tab that grows with its text pushes the body down. */
 export const tray = style({
   vars: {
-    [tabWidth]: "484px",
+    [tabWidth]: rem(484),
     [trayR]: `calc(${vars.r} + ${vars.gap})`,
-    [trayWidth]: `calc(100cqw + 2 * ${vars.gap})`,
+    [trayWidth]: "100cqw",
   },
   position: "relative",
   isolation: "isolate",
   containerType: "inline-size",
-  marginTop: `calc(71px + ${vars.group})`,
-  padding: vars.gap,
-  scrollMarginTop: 70,
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  marginTop: `calc(1px + ${vars.group})`,
   "@media": {
-    [narrow]: { vars: { [tabWidth]: "331px" } },
-    [media.phone]: { vars: { [tabWidth]: "293px" } },
-    [media.small]: { vars: { [tabWidth]: "245px" } },
-    [tiny]: { vars: { [tabWidth]: "232px" } },
+    [narrow]: { vars: { [tabWidth]: rem(331) } },
+    [media.phone]: { vars: { [tabWidth]: rem(293) } },
+    [media.small]: { vars: { [tabWidth]: rem(245) } },
+    [tiny]: { vars: { [tabWidth]: rem(232) } },
   },
 });
 
 export const body = style({
-  position: "absolute",
-  inset: 0,
+  gridArea: "2 / 1",
   zIndex: -1,
   border: `2px solid ${vars.outline}`,
   borderRadius: `0 clamp(0px, ${trayWidth} - ${tabWidth} - ${slantHalf}, ${trayR}) ${trayR} ${trayR}`,
@@ -48,15 +49,15 @@ export const body = style({
 });
 
 export const tab = style({
-  position: "absolute",
-  bottom: "calc(100% - 2px)",
-  left: 0,
+  gridArea: "1 / 1",
+  position: "relative",
   display: "flex",
   alignItems: "center",
   gap: 14,
   width: tabWidth,
   maxWidth: "100%",
-  height: 72,
+  minHeight: 72,
+  marginBottom: -2,
   padding: "11px 44px 3px 14px",
   borderRadius: `${vars.r} ${vars.r} 0 0`,
   "::before": {
@@ -94,6 +95,7 @@ export const slant = style({
   top: 0,
   left: `calc(100% - ${slantHalf})`,
   zIndex: -1,
+  height: "100%",
   overflow: "visible",
   pointerEvents: "none",
   "@container": {
@@ -109,6 +111,7 @@ export const line = style({
   fill: "none",
   stroke: vars.outline,
   strokeWidth: 2,
+  vectorEffect: "non-scaling-stroke",
 });
 
 export const icon = style({
@@ -141,24 +144,27 @@ export const titles = style({
 });
 
 globalStyle(`${titles} h2`, {
-  fontSize: font.h3,
+  fontSize: rem(font.h3),
   lineHeight: leading.tight,
   letterSpacing: tracking.heading,
-  whiteSpace: "nowrap",
   "@media": {
-    [media.phone]: { fontSize: font.h4 },
+    [media.phone]: { fontSize: rem(font.h4) },
   },
 });
 
 export const subtitle = style({
-  overflow: "hidden",
-  fontSize: font.caption,
+  fontSize: rem(font.caption),
   color: vars.muted,
-  whiteSpace: "nowrap",
-  textOverflow: "ellipsis",
   "@media": {
     [narrow]: { display: "none" },
   },
+});
+
+/** What the tray holds, and the container its cards measure. */
+export const content = style({
+  gridArea: "2 / 1",
+  containerType: "inline-size",
+  padding: vars.gap,
 });
 
 export const action = style({

@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, radius, tracking } from "#app/styles/scale";
+import { font, leading, radius, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 import { ground, logo as themedLogo } from "./themed.css";
 
@@ -31,6 +31,7 @@ export const text = style({
 
 export const tags = style({
   display: "flex",
+  flexWrap: "wrap",
   gap: 8,
   alignSelf: "flex-start",
   marginBottom: "auto",
@@ -38,12 +39,12 @@ export const tags = style({
 
 globalStyle(`${lead} h2`, {
   marginTop: 28,
-  fontSize: font.display,
+  fontSize: rem(font.display),
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   textWrap: "balance",
   "@media": {
-    [media.phone]: { fontSize: font.h2 },
+    [media.phone]: { fontSize: rem(font.h2) },
   },
 });
 
@@ -55,10 +56,11 @@ globalStyle(`${lead} p`, {
 
 export const byline = style({
   display: "flex",
+  flexWrap: "wrap",
   alignItems: "center",
   gap: 9,
   marginTop: 20,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   color: vars.muted,
 });
 

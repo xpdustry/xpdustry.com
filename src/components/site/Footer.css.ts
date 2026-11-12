@@ -2,7 +2,7 @@ import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { onDeep } from "#app/components/site/deep";
 import { RIDGE } from "#app/data/textures";
 import { media, upTo } from "#app/styles/media";
-import { font, leading, tracking } from "#app/styles/scale";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { mark, name } from "#app/components/site/Brand.css";
 import { vars } from "#app/styles/theme.css";
 
@@ -33,7 +33,7 @@ export const inner = style({
   selectors: {
     [`${footer} &`]: {
       display: "grid",
-      gridTemplateColumns: "1fr auto",
+      gridTemplateColumns: "minmax(0, 1fr) auto",
       gridTemplateAreas: '"brand top" "copy links"',
       alignItems: "center",
       gap: "30px 32px",
@@ -60,9 +60,10 @@ export const inner = style({
 export const brand = style({
   selectors: {
     [`${footer} &`]: {
-      vars: { [mark]: "52px", [name]: `${font.h1}px` },
+      vars: { [mark]: "52px", [name]: `${rem(font.h1)}` },
       gridArea: "brand",
       justifySelf: "start",
+      maxWidth: "100%",
       gap: 14,
       lineHeight: leading.tight,
     },
@@ -70,18 +71,19 @@ export const brand = style({
   "@media": {
     [media.phone]: {
       selectors: {
-        [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${font.h2}px` } },
+        [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${rem(font.h2)}` } },
       },
     },
     [media.small]: {
       selectors: {
-        [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${font.h3}px` }, gap: 10 },
+        [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${rem(font.h3)}` }, gap: 10 },
       },
     },
   },
 });
 
 globalStyle(`${footer} ${brand} span`, {
+  minWidth: 0,
   letterSpacing: tracking.display,
 });
 
@@ -110,7 +112,6 @@ globalStyle(`${links} a:hover`, {
 
 export const copyright = style({
   gridArea: "copy",
-  whiteSpace: "nowrap",
   color: vars.deepInk,
 });
 

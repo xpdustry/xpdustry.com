@@ -1,6 +1,6 @@
 import { createVar, fallbackVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading } from "#app/styles/scale";
+import { font, leading, rem } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 import { artLogo, artTop } from "./PostArt.css";
 
@@ -82,27 +82,27 @@ export const chip = style({
 });
 
 export const title = style({
-  fontSize: font.h4,
+  fontSize: rem(font.h4),
   lineHeight: leading.heading,
   textWrap: "balance",
 });
 
 export const byline = style({
   marginTop: 8,
-  fontSize: font.caption,
+  fontSize: rem(font.caption),
   color: vars.muted,
 });
 
 globalStyle(`${variant.big} ${title}`, {
   maxWidth: "20ch",
-  fontSize: font.h2,
+  fontSize: rem(font.h2),
   "@media": {
-    [media.phone]: { fontSize: font.h3 },
+    [media.phone]: { fontSize: rem(font.h3) },
   },
 });
 
 globalStyle(`${variant.small} ${title}`, {
-  fontSize: font.lead,
+  fontSize: rem(font.lead),
 });
 
 globalStyle(`${variant.small} ${byline}`, {
@@ -110,13 +110,13 @@ globalStyle(`${variant.small} ${byline}`, {
 });
 
 globalStyle(`${variant.listing} ${title}`, {
-  fontSize: font.h3,
+  fontSize: rem(font.h3),
 });
 
 export const description = style({
   maxWidth: "48ch",
   marginTop: 8,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   lineHeight: leading.snug,
   color: vars.muted,
 });

@@ -1,6 +1,6 @@
 import { createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/styles/media";
-import { font, leading, tracking } from "#app/styles/scale";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const size = createVar();
@@ -21,14 +21,14 @@ const MARK_GAP_ALLOWANCE_PX = 26;
 
 export const brand = style({
   vars: {
-    [size]: `min(${fallbackVar(sizeMax, "96px")}, calc((100cqi - ${MARK_GAP_ALLOWANCE_PX}px) / ${(NAME_WIDTH_EM + MARK_WIDTH_EM).toFixed(2)}))`,
+    [size]: `min(${fallbackVar(sizeMax, rem(96))}, calc((100cqi - ${MARK_GAP_ALLOWANCE_PX}px) / ${(NAME_WIDTH_EM + MARK_WIDTH_EM).toFixed(2)}))`,
   },
   display: "flex",
   alignItems: "center",
   gap: 18,
   "@media": {
-    [media.tablet]: { vars: { [sizeMax]: "72px" } },
-    [media.phone]: { vars: { [sizeMax]: "52px" }, gap: 12 },
+    [media.tablet]: { vars: { [sizeMax]: rem(72) } },
+    [media.phone]: { vars: { [sizeMax]: rem(52) }, gap: 12 },
   },
 });
 
@@ -39,6 +39,7 @@ export const mark = style({
 });
 
 globalStyle(`${brand} h1`, {
+  minWidth: 0,
   fontSize: size,
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
@@ -49,7 +50,7 @@ globalStyle(`${brand} h1`, {
 globalStyle(`${hero} p`, {
   maxWidth: "38ch",
   marginTop: 22,
-  fontSize: font.lead,
+  fontSize: rem(font.lead),
   lineHeight: leading.text,
   color: vars.t12,
   opacity: 0.85,

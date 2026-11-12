@@ -45,7 +45,14 @@ export function Tray({ id, icon: Icon, title, subtitle, action, children }: Tray
     <section id={id} className={`${styles.tray} reveal`}>
       <span className={styles.body} aria-hidden="true" />
       <header className={styles.tab}>
-        <svg className={styles.slant} width={SLANT.width} height={SLANT.height} aria-hidden="true">
+        <svg
+          className={styles.slant}
+          width={SLANT.width}
+          height={SLANT.height}
+          viewBox={`0 0 ${SLANT.width} ${SLANT.height}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
           <path className={styles.face} d={SLANT_FACE} />
           <path className={styles.line} d={SLANT_LINE} />
         </svg>
@@ -58,7 +65,7 @@ export function Tray({ id, icon: Icon, title, subtitle, action, children }: Tray
         </span>
         {action && <TabAction action={action} />}
       </header>
-      {children}
+      <div className={styles.content}>{children}</div>
     </section>
   );
 }

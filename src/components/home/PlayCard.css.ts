@@ -1,12 +1,9 @@
-import { createContainer, style } from "@vanilla-extract/css";
-import { font, leading, tracking } from "#app/styles/scale";
+import { globalStyle, style } from "@vanilla-extract/css";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { figures } from "./shared";
 import { vars } from "#app/styles/theme.css";
 
-const card = createContainer();
-
 export const play = style({
-  containerName: card,
   containerType: "inline-size",
   display: "flex",
   flexDirection: "column",
@@ -15,7 +12,7 @@ export const play = style({
 });
 
 export const label = style({
-  fontSize: font.small,
+  fontSize: rem(font.small),
   color: vars.a11,
 });
 
@@ -24,13 +21,10 @@ export const failed = style({});
 
 export const address = style({
   marginTop: "auto",
-  font: `500 clamp(16px, calc(100cqi / 11.8), 30px) / ${leading.heading} ${vars.fontMono}`,
+  font: `500 clamp(${rem(16)}, calc(100cqi / 11.8), ${rem(30)}) / ${leading.heading} ${vars.fontMono}`,
   letterSpacing: tracking.heading,
   color: vars.ink,
-  whiteSpace: "nowrap",
-  "@container": {
-    [`${card} (max-width: 180px)`]: { whiteSpace: "normal" },
-  },
+  overflowWrap: "anywhere",
   selectors: {
     // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
@@ -45,7 +39,7 @@ export const address = style({
 
 export const how = style({
   marginTop: 6,
-  fontSize: font.caption,
+  fontSize: rem(font.caption),
   color: vars.a11,
   textWrap: "balance",
 });
@@ -56,6 +50,10 @@ export const online = style({
   paddingTop: 12,
   font: figures(),
   color: vars.ink,
+});
+
+globalStyle(`${play} ${online}`, {
+  whiteSpace: "normal",
 });
 
 export const hint = style({

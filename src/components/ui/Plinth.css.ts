@@ -1,5 +1,5 @@
 import { createVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
-import { font, radius } from "#app/styles/scale";
+import { font, radius, rem } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const depth = createVar();
@@ -73,7 +73,7 @@ export const face = style({
   border: `2px solid ${wall}`,
   borderRadius: "inherit",
   background: `${faceColor} linear-gradient(rgb(255 255 255 / 0.26) 0 45%, transparent 45%)`,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   transform: `translateY(calc(${depth} * -1))`,
   transition: `transform 0.19s ${vars.easeOut}, background-color 0.13s`,
   selectors: {

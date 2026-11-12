@@ -103,13 +103,15 @@ function Featured({ project, card, release }: CardProps<"featured">) {
         <Version tag={release} />
       </span>
       <p style={{ color: card.muted }}>{m(project.summary)}</p>
-      <img
-        className={styles.screenshot}
-        src={card.screenshot}
-        alt=""
-        loading="lazy"
-        decoding="async"
-      />
+      <span className={styles.stage}>
+        <img
+          className={styles.screenshot}
+          src={card.screenshot}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
     </Tile>
   );
 }

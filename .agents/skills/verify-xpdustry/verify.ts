@@ -4,7 +4,7 @@
  *   verify.ts launch [--live]   build, serve on a free port, wait until pages render
  *   verify.ts doctor            is the running instance ours, healthy and built from this source?
  *   verify.ts run [label]       run JavaScript from stdin against the instance (see SKILL.md)
- *   verify.ts audit [locale…]   look for text that wraps, truncates or collides
+ *   verify.ts audit [locale…]   look for text that wraps, truncates, collides or is clipped
  *   verify.ts seo [--accept]    check every sitemap page for search regressions against the baseline
  *   verify.ts stop              stop the instance this checkout launched
  */
@@ -355,10 +355,10 @@ const localised = (locale: string, path: string) => {
   return path === "/" ? prefix || "/" : prefix + path;
 };
 
+/** Design checks for the default text size: wrapping, alignment and collisions. */
 function layoutIssues(): string[] {
   const found = new Set<string>();
   const width = document.documentElement.clientWidth;
-  if (document.documentElement.scrollWidth > width + 1) found.add("page scrolls sideways");
   for (const link of document.querySelectorAll("header nav > a")) {
     const lines = new Set<number>();
     const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
@@ -409,6 +409,160 @@ function layoutIssues(): string[] {
   return [...found];
 }
 
+/**
+ * Text a reader cannot see in full, under any text setting: the page scrolls sideways, or a
+ * container with hidden overflow cuts text off. Each finding names where it is: the site header,
+ * the main content or the footer.
+ */
+function overflowIssues(): string[] {
+  const found = new Set<string>();
+  const root = document.documentElement;
+  const width = root.clientWidth;
+  const region = (element: Element) =>
+    element.closest("main") ? "main" : element.closest("footer") ? "footer" : "header";
+  const label = (element: Element) =>
+    (element.textContent ?? "").trim().replaceAll(/\s+/g, " ").slice(0, 40);
+  const clipper = (element: Element) =>
+    /hidden|clip/.test(getComputedStyle(element).overflowX + getComputedStyle(element).overflowY);
+
+  if (root.scrollWidth > width + 1) {
+    const unclipped = [...document.querySelectorAll("body *")].filter((element) => {
+      if (element.getBoundingClientRect().right <= width + 1) return false;
+      for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+        if (clipper(parent) && parent.getBoundingClientRect().right <= width + 1) return false;
+      }
+      return true;
+    });
+    const widest = unclipped.sort(
+      (one, other) => other.getBoundingClientRect().right - one.getBoundingClientRect().right,
+    )[0];
+    const from = widest
+      ? `, ${region(widest)}: ${label(widest) || widest.tagName.toLowerCase()}`
+      : "";
+    found.add(`page scrolls sideways by ${root.scrollWidth - width}px${from}`);
+  }
+
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const node = walker.currentNode;
+    const parent = node.parentElement;
+    if (!parent || !node.textContent?.trim() || parent.closest(".sr-only, script, style")) continue;
+    if (getComputedStyle(parent).visibility === "hidden") continue;
+    let shown = true;
+    for (let element: Element | null = parent; element && shown; element = element.parentElement) {
+      shown = getComputedStyle(element).opacity !== "0";
+    }
+    if (!shown) continue;
+    const text = document.createRange();
+    text.selectNodeContents(node);
+    const lines = [...text.getClientRects()].filter((box) => box.width > 1 && box.height > 1);
+    for (let element: Element | null = parent; element && element !== document.body;) {
+      const style = getComputedStyle(element);
+      const [clipsX, clipsY] = [style.overflowX, style.overflowY].map((axis) =>
+        /hidden|clip/.test(axis),
+      );
+      // A box of a pixel or two is the visually hidden pattern, not a clipped label.
+      if ((clipsX || clipsY) && element.clientWidth > 2 && element.clientHeight > 2) {
+        const box = element.getBoundingClientRect();
+        const left = box.left + element.clientLeft;
+        const top = box.top + element.clientTop;
+        const [right, bottom] = [left + element.clientWidth, top + element.clientHeight];
+        const cut = lines.some(
+          (line) =>
+            (clipsX && (line.left < left - 2 || line.right > right + 2)) ||
+            (clipsY && (line.top < top - 2 || line.bottom > bottom + 2)),
+        );
+        if (cut) {
+          found.add(`text clipped, ${region(parent)}: ${label(parent)}`);
+          break;
+        }
+      }
+      element = element.parentElement;
+    }
+  }
+  return [...found];
+}
+
+/** Remembers each text's font size, for `fixedText` to compare with after the setting changes. */
+function rememberFontSizes() {
+  const sizes = new Map<Element, number>();
+  for (const element of document.querySelectorAll("body *")) {
+    sizes.set(element, Number.parseFloat(getComputedStyle(element).fontSize));
+  }
+  (window as unknown as { fontSizes: Map<Element, number> }).fontSizes = sizes;
+}
+
+/** Text under 24px that kept its size when the browser's font size doubled: a px font size. */
+function fixedText(): string[] {
+  const sizes = (window as unknown as { fontSizes: Map<Element, number> }).fontSizes;
+  const found = new Set<string>();
+  for (const [element, before] of sizes) {
+    const hasText = [...element.childNodes].some(
+      (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+    );
+    if (!hasText || before >= 24 || !element.isConnected || element.closest(".sr-only")) continue;
+    const after = Number.parseFloat(getComputedStyle(element).fontSize);
+    // A size of zero is how a label is folded away, so it has nothing to scale.
+    if (before === 0 || after === 0) continue;
+    if (after < before * 1.01) {
+      const where = element.closest("main")
+        ? "main"
+        : element.closest("footer")
+          ? "footer"
+          : "header";
+      found.add(
+        `text ignores the font size setting, ${where}: ${(element.textContent ?? "").trim().slice(0, 40)}`,
+      );
+    }
+  }
+  return [...found];
+}
+
+/** WCAG 1.4.12: the spacing a reader may impose without losing content. */
+const TEXT_SPACING =
+  "* { line-height: 1.5 !important; letter-spacing: 0.12em !important; " +
+  "word-spacing: 0.16em !important } p { margin-bottom: 2em !important }";
+
+const nextFrame = (page: Page) =>
+  page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+  );
+
+/**
+ * The page under each text setting a reader may choose, with what it got wrong. The page is
+ * loaded once; every setting is applied and undone in place.
+ */
+async function textSettingIssues(page: Page): Promise<[string, string[]][]> {
+  const results: [string, string[]][] = [
+    ["", [...(await page.evaluate(layoutIssues)), ...(await page.evaluate(overflowIssues))]],
+  ];
+
+  // The browser's own font size setting, doubled. Breakpoints in rem follow it.
+  const browser = await page.context().newCDPSession(page);
+  await page.evaluate(rememberFontSizes);
+  await browser.send("Page.setFontSizes", { fontSizes: { standard: 32, fixed: 26 } });
+  await nextFrame(page);
+  results.push([
+    "text 200%",
+    [...(await page.evaluate(overflowIssues)), ...(await page.evaluate(fixedText))],
+  ]);
+  await browser.send("Page.setFontSizes", { fontSizes: { standard: 16, fixed: 13 } });
+  await browser.detach();
+
+  for (const [name, css] of [
+    // Text doubled while every breakpoint stays put: the worst case of a text-only zoom.
+    ["text zoom 200%", ":root { font-size: 200% }"],
+    ["text spacing", TEXT_SPACING],
+  ]) {
+    const sheet = await page.addStyleTag({ content: css });
+    await nextFrame(page);
+    results.push([name!, await page.evaluate(overflowIssues)]);
+    await sheet.evaluate((element) => element.remove());
+  }
+  await nextFrame(page);
+  return results;
+}
+
 async function audit(locales: string[]) {
   const { base } = healthyInstance();
   const issues: string[] = [];
@@ -423,8 +577,9 @@ async function audit(locales: string[]) {
         for (const path of PAGES) {
           const url = localised(locale, path);
           await settle(page, base + url);
-          for (const issue of await page.evaluate(layoutIssues)) {
-            issues.push(`${width}px ${url}: ${issue}`);
+          for (const [setting, found] of await textSettingIssues(page)) {
+            const where = setting ? `${width}px ${url}, ${setting}` : `${width}px ${url}`;
+            for (const issue of found) issues.push(`${where}: ${issue}`);
           }
         }
         await context.close();
@@ -435,7 +590,8 @@ async function audit(locales: string[]) {
   const renders = locales.length * WIDTHS.length * PAGES.length;
   report("audit", [
     ...issues,
-    `audit: ${issues.length} issue(s) across ${renders} page renders (${locales.join(", ")})`,
+    `audit: ${issues.length} issue(s) across ${renders} page renders, ` +
+      `each under 4 text settings (${locales.join(", ")})`,
   ]);
   if (issues.length > 0) process.exitCode = 1;
 }

@@ -1,12 +1,12 @@
 import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
-import { media } from "#app/styles/media";
-import { font, leading, tracking } from "#app/styles/scale";
+import { media, narrowerThan } from "#app/styles/media";
+import { font, leading, rem, tracking } from "#app/styles/scale";
 import { figures } from "./shared";
 import { vars } from "#app/styles/theme.css";
 
-const narrow = "(width < 660px)";
-const phone = "(width < 440px)";
-const narrowest = "(width < 270px)";
+const narrow = narrowerThan(660);
+const phone = narrowerThan(440);
+const narrowest = narrowerThan(270);
 
 const bandWidth = createVar();
 const headHeight = createVar();
@@ -22,7 +22,7 @@ export const modes = style({
 });
 
 export const mode = style({
-  vars: { [bandWidth]: "clamp(342px, 32cqi, 372px)" },
+  vars: { [bandWidth]: `clamp(${rem(342)}, 32cqi, ${rem(372)})` },
   display: "grid",
   gridTemplateColumns: `${bandWidth} minmax(0, 1fr)`,
   alignItems: "center",
@@ -57,9 +57,9 @@ export const tinted = style({
   background: tint,
   "@container": {
     [narrow]: {
-      inset: "0 0 auto",
+      gridArea: "1 / 1 / 2 / 2",
+      inset: "0 0 22px",
       width: "auto",
-      height: `calc(${headHeight} - 22px)`,
     },
   },
 });
@@ -113,8 +113,7 @@ export const band = style({
   "@container": {
     [narrow]: {
       gridTemplateColumns: "84px minmax(0, 1fr) auto",
-      height: headHeight,
-      minHeight: 0,
+      minHeight: headHeight,
     },
     [phone]: {
       gridTemplateColumns: "64px minmax(0, 1fr) auto",
@@ -163,23 +162,24 @@ export const id = style({
   minWidth: 0,
   padding: "12px 0",
   "@container": {
-    [narrow]: { gap: 6, padding: 0 },
+    [narrow]: { gap: 6, padding: "4px 0" },
   },
 });
 
 export const name = style({
-  fontSize: font.h3,
+  overflowWrap: "anywhere",
+  fontSize: rem(font.h3),
   lineHeight: leading.heading,
   letterSpacing: tracking.title,
-  whiteSpace: "nowrap",
   "@container": {
-    [phone]: { fontSize: font.h4, whiteSpace: "normal" },
-    [narrowest]: { fontSize: font.text },
+    [phone]: { fontSize: rem(font.h4) },
+    [narrowest]: { fontSize: rem(font.text) },
   },
 });
 
 export const line = style({
   display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
   overflow: "hidden",
   margin: "-3px 0",
   padding: "3px 0",
@@ -197,6 +197,12 @@ export const count = style({
   letterSpacing: 0,
 });
 
+globalStyle(`${line} > ${count}`, {
+  maxWidth: "100%",
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
+});
+
 export const empty = style({
   selectors: {
     [`${count}&`]: {
@@ -211,12 +217,16 @@ export const empty = style({
 
 export const said = style({
   overflow: "hidden",
-  fontSize: font.caption,
+  fontSize: rem(font.caption),
   lineHeight: leading.tight,
   whiteSpace: "nowrap",
   translate: "0 110%",
   opacity: 0,
   selectors: {
+    [`${copied} &`]: {
+      lineHeight: leading.snug,
+      whiteSpace: "normal",
+    },
     // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
       position: "relative",
@@ -299,7 +309,7 @@ export const tick = style({
 export const about = style({
   maxWidth: "calc(40ch + 60px)",
   padding: "14px 22px 14px 38px",
-  fontSize: font.small,
+  fontSize: rem(font.small),
   lineHeight: leading.snug,
   color: vars.muted,
   textWrap: "balance",

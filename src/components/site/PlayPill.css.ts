@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { upTo } from "#app/styles/media";
-import { font, leading } from "#app/styles/scale";
+import { font, leading, rem } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const narrow = upTo(780);
@@ -20,7 +20,7 @@ globalStyle(`${pill} svg`, {
 });
 
 export const count = style({
-  font: `500 ${font.caption}px / ${leading.tight} ${vars.fontMono}`,
+  font: `500 ${rem(font.caption)} / ${leading.tight} ${vars.fontMono}`,
   letterSpacing: 0,
 });
 

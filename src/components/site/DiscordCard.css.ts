@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { font, leading } from "#app/styles/scale";
+import { font, leading, rem } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 const BLURPLE = "#5b6bd7";
@@ -33,11 +33,11 @@ export const go = style({
 
 export const title = style({
   display: "block",
-  fontSize: font.h3,
+  fontSize: rem(font.h3),
   fontWeight: "inherit",
   lineHeight: leading.tight,
   selectors: {
-    [`${compact} &`]: { fontSize: font.h4 },
+    [`${compact} &`]: { fontSize: rem(font.h4) },
   },
 });
 
@@ -45,7 +45,7 @@ export const say = style({
   display: "block",
   maxWidth: "30ch",
   marginTop: 6,
-  fontSize: font.small,
+  fontSize: rem(font.small),
   lineHeight: leading.snug,
   opacity: 0.95,
 });
@@ -53,6 +53,6 @@ export const say = style({
 export const counts = style({
   display: "block",
   marginTop: 10,
-  fontSize: font.caption,
+  fontSize: rem(font.caption),
   opacity: 0.9,
 });

@@ -7,7 +7,7 @@ import {
   popoverShut,
 } from "#app/components/site/popover";
 import { media } from "#app/styles/media";
-import { font, leading, radius } from "#app/styles/scale";
+import { font, leading, radius, rem } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
 export const wrapper = style({
@@ -16,7 +16,7 @@ export const wrapper = style({
 });
 
 const code = {
-  font: `500 ${font.caption}px / ${leading.tight} ${vars.fontMono}`,
+  font: `500 ${rem(font.caption)} / ${leading.tight} ${vars.fontMono}`,
   textTransform: "uppercase",
 } as const;
 
@@ -82,7 +82,7 @@ export const option = style({
   border: 0,
   borderRadius: radius.sm,
   background: "none",
-  fontSize: font.small,
+  fontSize: rem(font.small),
   textAlign: "start",
   cursor: "pointer",
   selectors: {
