@@ -6,6 +6,7 @@ import type {
   ReactNode,
   Ref
 } from "react";
+import type { CopyState } from "./copy/useCopy";
 import * as styles from "./Plinth.css";
 
 export interface PlinthStyle {
@@ -14,23 +15,26 @@ export interface PlinthStyle {
   size?: "md" | "sm";
   /** A square button around a single icon; give it an `aria-label`. */
   icon?: boolean;
-  /** Teal and still, as after a copy. */
-  done?: boolean;
-  /** Red and still, as after a copy the browser refused. */
-  failed?: boolean;
   className?: string;
 }
 
-function plinthClass({ tone = "teal", size = "md", icon, done, failed, className }: PlinthStyle) {
-  return [
-    styles.plinth,
-    tone !== "teal" && styles.tone[tone],
-    size === "sm" && styles.sm,
-    icon && styles.icon,
-    done && styles.done,
-    failed && styles.failed,
-    className
-  ]
+const TONE = { teal: undefined, amber: styles.tone.amber, ink: styles.tone.ink };
+const SIZE = { md: undefined, sm: styles.sm };
+/** Teal and still once a copy landed, red and still when the browser refused it. */
+const COPY: Record<CopyState, string | undefined> = {
+  idle: undefined,
+  copied: styles.done,
+  failed: styles.failed
+};
+
+function plinthClass({
+  tone = "teal",
+  size = "md",
+  icon,
+  copy = "idle",
+  className
+}: PlinthStyle & { copy?: CopyState }) {
+  return [styles.plinth, TONE[tone], SIZE[size], icon && styles.icon, COPY[copy], className]
     .filter(Boolean)
     .join(" ");
 }
@@ -43,17 +47,9 @@ type AnchorProps = AnchorHTMLAttributes<HTMLAnchorElement> &
   PlinthStyle & { ref?: Ref<HTMLAnchorElement> };
 
 /** A plinth leaving the site. */
-export function PlinthAnchor({
-  tone,
-  size,
-  icon,
-  done,
-  className,
-  children,
-  ...props
-}: AnchorProps) {
+export function PlinthAnchor({ tone, size, icon, className, children, ...props }: AnchorProps) {
   return (
-    <a className={plinthClass({ tone, size, icon, done, className })} {...props}>
+    <a className={plinthClass({ tone, size, icon, className })} {...props}>
       <Face>{children}</Face>
     </a>
   );
@@ -84,25 +80,24 @@ export function PlinthSectionLink({ hash, ...props }: SectionLinkProps) {
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
-  PlinthStyle & { ref?: Ref<HTMLButtonElement> };
+  PlinthStyle & {
+    ref?: Ref<HTMLButtonElement>;
+    /** How the copy the button made went. */
+    copy?: CopyState;
+  };
 
 export function PlinthButton({
   tone,
   size,
   icon,
-  done,
-  failed,
+  copy,
   className,
   children,
   type = "button",
   ...props
 }: ButtonProps) {
   return (
-    <button
-      type={type}
-      className={plinthClass({ tone, size, icon, done, failed, className })}
-      {...props}
-    >
+    <button type={type} className={plinthClass({ tone, size, icon, copy, className })} {...props}>
       <Face>{children}</Face>
     </button>
   );

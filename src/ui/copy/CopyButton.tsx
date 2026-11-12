@@ -22,27 +22,27 @@ export function CopyButton({ text, label, children, tone = "ink", className }: C
   const gt = useGT();
   const { state, copy } = useCopy(text);
   const drawn = typeof children === "function";
-  const face = drawn
-    ? children(state)
-    : state === "copied"
-      ? gt("Copied")
-      : state === "failed"
-        ? gt("Could not copy")
-        : children;
   return (
     <>
       <PlinthButton
         tone={tone}
         size="sm"
-        done={state === "copied"}
-        failed={state === "failed"}
+        copy={state}
         className={className}
         onClick={copy}
         {...(drawn && { "aria-label": label, title: gt("Copy address") })}
       >
-        {face}
+        {drawn ? children(state) : <Said state={state}>{children}</Said>}
       </PlinthButton>
       <CopyStatus state={state} text={text} />
     </>
   );
+}
+
+/** The button's text, or what became of the copy once it was pressed. */
+function Said({ state, children }: { state: CopyState; children: ReactNode }) {
+  const gt = useGT();
+  if (state === "copied") return gt("Copied");
+  if (state === "failed") return gt("Could not copy");
+  return children;
 }
