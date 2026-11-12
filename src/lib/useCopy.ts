@@ -9,7 +9,7 @@ const COPIED_MS = 1800;
  * Puts `text` on the clipboard and resolves to whether it got there. A browser without the
  * clipboard API, as on a page served over plain http, cannot copy: the address is shown instead.
  */
-export async function writeClipboard(text: string): Promise<boolean> {
+async function writeClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
     return true;

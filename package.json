@@ -23,7 +23,8 @@
     "test:unit": "vitest run --project unit",
     "test:artifact": "pnpm build && vitest run --project artifact",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
+    "deadcode": "fallow dead-code",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm deadcode && pnpm test"
   },
   "dependencies": {
     "@takumi-rs/core": "2.17.1",
@@ -52,6 +53,7 @@
     "@vanilla-extract/dynamic": "^2.1.5",
     "@vanilla-extract/vite-plugin": "^5.2.6",
     "@vitejs/plugin-react": "^6.1.2",
+    "fallow": "^3.42.0",
     "fast-png": "^8.0.0",
     "gt": "^2.27.3",
     "ignore": "^7.0.14",

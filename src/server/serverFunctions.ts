@@ -9,7 +9,7 @@ const hasPath = (value: unknown): value is { url: string } =>
   typeof value === "function" && typeof (value as { url?: unknown }).url === "string";
 
 /** The path of every server function the app defines, which live in `*.functions.ts` files. */
-export const SERVER_FUNCTION_PATHS: ReadonlySet<string> = new Set(
+const SERVER_FUNCTION_PATHS: ReadonlySet<string> = new Set(
   Object.values(modules)
     .flatMap((exports) => Object.values(exports))
     .filter(hasPath)

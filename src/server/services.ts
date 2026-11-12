@@ -8,7 +8,7 @@ import { pollingSnapshot, queryServers } from "#app/server/mindustry/status";
 import { createNodeMindustryProbe } from "#app/server/mindustry/transport";
 import { Poller, type PollerHealth } from "#app/server/poller";
 
-export interface ServicesHealth {
+interface ServicesHealth {
   status: "ok";
   uptimeSeconds: number;
   servers: PollerHealth;
@@ -18,7 +18,7 @@ export interface ServicesHealth {
 
 const WAITING = pollingSnapshot(servers);
 
-export class Services {
+class Services {
   readonly #probe = createNodeMindustryProbe();
   readonly #startedAt = Date.now();
   readonly status = new Poller<ServerSnapshot>({

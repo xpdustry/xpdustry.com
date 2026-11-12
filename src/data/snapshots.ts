@@ -16,8 +16,6 @@ export interface ServerInfo {
 export type ServerSnapshotItem = ServerDefinition &
   ({ status: "polling" } | { status: "online"; info: ServerInfo } | { status: "offline" });
 
-export type OnlineServerSnapshotItem = Extract<ServerSnapshotItem, { status: "online" }>;
-
 export interface ServerSnapshot {
   servers: ServerSnapshotItem[];
 }

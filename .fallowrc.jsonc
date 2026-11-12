@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/fallow/schema.json",
+  // The build-time renderers and the verification helper are run by hand or by pnpm scripts.
+  "entry": ["src/start.ts", "scripts/*.ts", ".agents/skills/verify-xpdustry/verify.ts"],
+  "ignorePatterns": ["!.agents/**", "src/routeTree.gen.ts"],
+  "rules": {
+    // Style modules name their classes for what they style, so `card` or `title` recur by design.
+    "duplicate-exports": "off",
+    // The site is bundled, so what the browser needs is a build dependency.
+    "dev-dependencies-in-production": "off"
+  }
+}

@@ -15,7 +15,7 @@ export const wrapper = style({
   display: "flex"
 });
 
-const code = {
+const codeText = {
   font: `500 ${rem(font.caption)} / ${leading.tight} ${vars.fontMono}`,
   textTransform: "uppercase"
 } as const;
@@ -27,7 +27,7 @@ export const button = style({
 });
 
 globalStyle(`${button} > span`, {
-  ...code,
+  ...codeText,
   display: "grid",
   placeItems: "center",
   width: 40,
@@ -94,13 +94,11 @@ export const option = style({
   }
 });
 
-export const codeLabel = style({
-  ...code,
+export const code = style({
+  ...codeText,
   minWidth: "2ch",
   color: vars.deepInk
 });
-
-export { codeLabel as code };
 
 export const tick = style({
   width: 16,
