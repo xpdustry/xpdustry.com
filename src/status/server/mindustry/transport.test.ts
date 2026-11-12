@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
-import { createNodeMindustryProbe, type EndpointExchange, type SrvRecord } from "./transport";
+import type { SrvRecord } from "./srv";
+import { createNodeMindustryProbe, type EndpointExchange } from "./transport";
 
 const friendly = "hub.md.xpdustry.com";
 
@@ -257,5 +258,185 @@ describe("createNodeMindustryProbe", () => {
 
     await expect(result).rejects.toThrow("endpoint exchange ECONNREFUSED");
     await expect(result).rejects.not.toThrow("private-target.example");
+  });
+
+  test("moves on to the next target when one stays silent past its own timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      const signals: AbortSignal[] = [];
+      const probe = createNodeMindustryProbe({
+        resolveSrv: async () => [record("silent.example", 0), record("backup.example", 1)],
+        exchange: exchange(async (endpoint, _packet, activeSignal) => {
+          signals.push(activeSignal);
+          if (endpoint.hostname === "silent.example") return new Promise<Uint8Array>(() => {});
+          return packet("Backup");
+        }),
+        endpointTimeoutMs: 100,
+        timeoutMs: 1_000
+      });
+      const result = probe.query(friendly, signal());
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      await expect(result).resolves.toMatchObject({ name: "Backup" });
+      expect(signals[0]?.aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test("reports a timeout when the targets are still silent at the total deadline", async () => {
+    vi.useFakeTimers();
+    try {
+      let endpointSignal: AbortSignal | undefined;
+      const probe = createNodeMindustryProbe({
+        resolveSrv: async () => [record("silent.example", 0)],
+        exchange: exchange((_endpoint, _packet, activeSignal) => {
+          endpointSignal = activeSignal;
+          return new Promise<Uint8Array>(() => {});
+        }),
+        endpointTimeoutMs: 1_000,
+        timeoutMs: 200
+      });
+      const result = probe.query(friendly, signal());
+      const rejected = expect(result).rejects.toThrow("status query timed out");
+
+      await vi.advanceTimersByTimeAsync(200);
+
+      await rejected;
+      expect(endpointSignal?.aborted).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test.each([
+    ["a truncated packet", Uint8Array.from([1, 2, 3])],
+    ["an empty packet", new Uint8Array()]
+  ])("reports a malformed reply for %s", async (_label, reply) => {
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => [record("odd.example", 0)],
+      exchange: exchange(async () => reply)
+    });
+
+    await expect(probe.query(friendly, signal())).rejects.toThrow(
+      "status query failed: malformed reply"
+    );
+  });
+
+  test.each([
+    ["an empty target", record("", 0)],
+    ["the root target", record(".", 0)],
+    ["port 0", record("srv.example", 0, 0, 0)],
+    ["a port above 65535", record("srv.example", 0, 0, 65_536)],
+    ["a fractional port", record("srv.example", 0, 0, 6567.5)],
+    ["a negative priority", record("srv.example", -1)],
+    ["a priority above 65535", record("srv.example", 65_536)],
+    ["a fractional priority", record("srv.example", 0.5)],
+    ["a negative weight", record("srv.example", 0, -1)],
+    ["a weight above 65535", record("srv.example", 0, 65_536)],
+    ["a fractional weight", record("srv.example", 0, 1.5)]
+  ])("refuses an SRV record with %s", async (_label, refused) => {
+    const query = vi.fn(async () => packet());
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => [refused],
+      exchange: exchange(query)
+    });
+
+    await expect(probe.query(friendly, signal())).rejects.toThrow(
+      "status query failed: no usable SRV endpoints"
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  test("accepts SRV records at the edges of every range", async () => {
+    const query = vi.fn(async () => packet());
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => [
+        record("low.example", 0, 0, 1),
+        record("high.example", 65_535, 65_535, 65_535)
+      ],
+      exchange: exchange(query)
+    });
+
+    await probe.query(friendly, signal());
+
+    expect(query).toHaveBeenCalledWith(
+      { hostname: "low.example", port: 1 },
+      expect.any(Uint8Array),
+      expect.any(AbortSignal)
+    );
+  });
+
+  test("keeps the usable records of an answer that also holds refused ones", async () => {
+    const attempts: string[] = [];
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => [
+        record(".", 0),
+        record("good.example", 5, 0, 70_000),
+        record("good.example", 5)
+      ],
+      exchange: exchange(async (endpoint) => {
+        attempts.push(`${endpoint.hostname}:${endpoint.port}`);
+        return packet();
+      })
+    });
+
+    await probe.query(friendly, signal());
+
+    expect(attempts).toEqual(["good.example:6567"]);
+  });
+
+  test("falls back to the friendly host when the SRV name does not exist", async () => {
+    const query = vi.fn(async () => packet());
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => {
+        throw Object.assign(new Error("not found"), { code: "ENOTFOUND" });
+      },
+      exchange: exchange(query)
+    });
+
+    await probe.query(friendly, signal());
+
+    expect(query).toHaveBeenCalledWith(
+      { hostname: friendly, port: 6567 },
+      expect.any(Uint8Array),
+      expect.any(AbortSignal)
+    );
+  });
+
+  test.each([
+    ["names a DNS failure by its code", { code: "ESERVFAIL" }, "SRV lookup ESERVFAIL"],
+    [
+      "hides a code that is not a plain identifier",
+      { code: "server said no" },
+      "SRV lookup failed"
+    ],
+    ["reports a failure without a code", {}, "SRV lookup failed"]
+  ])("%s and never queries the friendly host", async (_label, fields, detail) => {
+    const query = vi.fn(async () => packet());
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => {
+        throw Object.assign(new Error("lookup failed"), fields);
+      },
+      exchange: exchange(query)
+    });
+
+    await expect(probe.query(friendly, signal())).rejects.toThrow(
+      `Mindustry status query failed: ${detail}`
+    );
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  test("does nothing for a caller that already gave up", async () => {
+    const resolveSrv = vi.fn(async () => []);
+    const query = vi.fn(async () => packet());
+    const probe = createNodeMindustryProbe({ resolveSrv, exchange: exchange(query) });
+
+    await expect(probe.query(friendly, AbortSignal.abort())).rejects.toMatchObject({
+      name: "AbortError"
+    });
+    expect(resolveSrv).not.toHaveBeenCalled();
+    expect(query).not.toHaveBeenCalled();
   });
 });
