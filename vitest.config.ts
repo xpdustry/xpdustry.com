@@ -17,7 +17,7 @@ export default defineConfig({
         test: {
           name: "unit",
           environment: "node",
-          include: ["src/**/*.test.{ts,tsx}", "vite/**/*.test.{ts,tsx}"],
+          include: ["src/**/*.test.{ts,tsx}", "vite/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
           exclude: ["src/server/integration.test.ts"],
           css: { include: [/.+/] },
         },

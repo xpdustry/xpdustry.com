@@ -290,6 +290,17 @@ test("the production file server preserves every public URL from the previous si
     const slash = await fetch(`${origin}/blog/?q=a%20b`, { redirect: "manual" });
     expect(slash.status).toBe(308);
     expect(slash.headers.get("location")).toBe("/blog?q=a%20b");
+
+    for (const [accepted, coding] of [
+      ["gzip;q=0", null],
+      ["identity", null],
+      ["br;q=0.5, gzip", "gzip"],
+    ]) {
+      const page = await fetch(`${origin}/`, { headers: { "accept-encoding": accepted! } });
+      expect(page.headers.get("content-encoding"), accepted!).toBe(coding);
+      expect(page.headers.get("vary"), accepted!).toMatch(/accept-encoding/i);
+      expect(await page.text()).toContain("<title>Xpdustry");
+    }
   } finally {
     await stop();
   }
