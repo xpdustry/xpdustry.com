@@ -29,9 +29,9 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm deadcode && pnpm health && pnpm architecture && pnpm test"
   },
   "dependencies": {
-    "@takumi-rs/core": "2.17.1",
-    "@takumi-rs/helpers": "2.17.1",
-    "@tanstack/markdown": "1.0.0",
+    "@takumi-rs/core": "2.20.0",
+    "@takumi-rs/helpers": "2.20.0",
+    "@tanstack/markdown": "1.2.0",
     "@tanstack/react-router": "^1.170.46",
     "@tanstack/react-start": "^1.169.4",
     "gt-react": "^11.4.20",
@@ -59,7 +59,7 @@
     "fast-png": "^8.0.0",
     "gt": "^2.27.3",
     "ignore": "^7.0.14",
-    "oxfmt": "^0.67.0",
+    "oxfmt": "^0.78.0",
     "oxlint": "^1.78.0",
     "oxlint-tsgolint": "^7.0.2006",
     "playwright": "^1.65.0",
@@ -77,5 +77,5 @@
   "engines": {
     "node": ">=24"
   },
-  "packageManager": "pnpm@12.3.4"
+  "packageManager": "pnpm@12.18.0"
 }
