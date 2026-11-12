@@ -1,7 +1,8 @@
-import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
+import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { media, narrowerThan } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
+import { pop } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = narrowerThan(660);
@@ -127,12 +128,6 @@ export const band = style({
 
 globalStyle(`${mode} > button:disabled`, {
   cursor: "default"
-});
-
-const pop = keyframes({
-  "0%": { scale: "0.9" },
-  "45%": { scale: "1.12" },
-  "100%": { scale: "1" }
 });
 
 export const icon = style({

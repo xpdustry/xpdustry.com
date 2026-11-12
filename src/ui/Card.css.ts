@@ -57,7 +57,8 @@ export const hint = style([
   }
 ]);
 
-const pop = keyframes({
+/** A chip, or an icon, bouncing as a copy lands. */
+export const pop = keyframes({
   "0%": { scale: "0.9" },
   "45%": { scale: "1.12" },
   "100%": { scale: "1" }
