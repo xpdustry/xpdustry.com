@@ -3,19 +3,15 @@ import logo from "#app/assets/logo.svg";
 import { Patches } from "#app/components/ui/Patches";
 import { authors } from "#app/content/authors";
 import type { Post } from "#app/content/registry";
-import { seeded } from "#app/data/textures";
 import { topic } from "#app/data/topics";
 import { formatDate } from "#app/lib/format";
+import { seeded } from "#app/lib/textures";
 import { themed } from "./themed";
 import { TopicChip } from "./TopicChip";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./LeadPost.css";
 import * as themedStyles from "./themed.css";
 
-/**
- * The newest post, across the whole blog page, in its topic's colours with its hero beside it, or
- * where it has none, its project's logo.
- */
 export function LeadPost({ post, className }: { post: Post; className?: string }) {
   const { title, description, author, publishedAt, hero } = post.frontmatter;
   const theme = topic(post.frontmatter.topic);

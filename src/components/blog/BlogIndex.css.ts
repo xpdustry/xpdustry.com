@@ -41,7 +41,6 @@ export const ask = style({
   },
 });
 
-/** Across the whole grid. */
 export const wide = style({
   gridColumn: "1 / -1",
 });

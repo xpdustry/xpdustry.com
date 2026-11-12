@@ -40,7 +40,6 @@ export const crumbs = style({
   alignItems: "start",
 });
 
-/** The caret sits closer to its word than an icon does. */
 export const back = style({
   gap: 4,
 });
@@ -49,7 +48,6 @@ export const topic = style({
   justifySelf: "start",
 });
 
-/** The `h1` around the topic and the title when the page's title carries both. */
 export const heading = style({
   display: "contents",
 });

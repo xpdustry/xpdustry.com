@@ -1,10 +1,8 @@
 import { createVar, style } from "@vanilla-extract/css";
 import { vars } from "#app/styles/theme.css";
 
-/** The light's colour; its halo is the same, faint. */
 const light = createVar();
 
-/** A count with a status light: green while the servers answer, grey when they do not. */
 export const online = style({
   vars: { [light]: vars.online },
   display: "inline-flex",

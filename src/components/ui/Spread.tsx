@@ -1,5 +1,5 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import type { SpreadStage, SpreadTiles } from "#app/data/textures";
+import type { SpreadStage, SpreadTiles } from "#app/lib/textures";
 import * as styles from "./Spread.css";
 
 const TILES = import.meta.glob<string>("/src/assets/spread/*.webp", {

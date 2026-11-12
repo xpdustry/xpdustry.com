@@ -1,7 +1,3 @@
-// Blog posts are parsed at build time: a post module exports its validated frontmatter and the
-// Markdown AST, which `PostBody` renders as React elements. Nothing is parsed in the browser,
-// and no HTML string is ever injected.
-
 import type {
   BlockNode,
   ComponentNode,
@@ -40,7 +36,6 @@ const ImageAttributesSchema = v.strictObject({
 });
 const VideoAttributesSchema = v.strictObject({
   src: blogMediaPathSchema([".mp4"]),
-  /** An AV1 WebM of the same video, offered first: much smaller, where the browser plays it. */
   webm: v.optional(blogMediaPathSchema([".webm"])),
   poster: blogMediaPathSchema(IMAGE_EXTENSIONS),
   width: DimensionSchema,
@@ -103,10 +98,6 @@ function parseFrontmatter(file: string, source: string | undefined): unknown {
   }
 }
 
-/**
- * `<!-- ::post-image ... -->` and `<!-- ::start:post-video ... -->` comments, validated here so a
- * broken post fails the build. The renderer receives them as elements with string properties.
- */
 function mediaExtension(): MarkdownExtension {
   return {
     name: "xpdustry:post-media",
@@ -136,7 +127,6 @@ function mediaExtension(): MarkdownExtension {
   };
 }
 
-/** `> [!NOTE] Title` callouts become `md-callout` elements, so the design owns their markup. */
 function calloutElementExtension(): MarkdownExtension {
   const convert = (nodes: BlockNode[]): BlockNode[] =>
     nodes.map((node): BlockNode => {

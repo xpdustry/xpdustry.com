@@ -1,12 +1,8 @@
 import { useEffect } from "react";
 
-/** How far, in px, from a card's edge the pointer starts to light it. */
 const REACH = 220;
+const DARK = "0.000";
 
-/**
- * Lights the edge of every `.spot` card the pointer comes near, brightest at the closest point.
- * Cards out of reach are left alone: every write restyles the card and repaints its glow.
- */
 export function useSpotlight(): void {
   useEffect(() => {
     if (matchMedia("(pointer: coarse)").matches) return;
@@ -15,6 +11,9 @@ export function useSpotlight(): void {
     let x = 0;
     let y = 0;
 
+    const staysDark = (card: Element, glow: string) =>
+      glow === DARK && (lit.get(card) ?? DARK) === DARK;
+
     const update = () => {
       frame = 0;
       for (const card of document.querySelectorAll<HTMLElement>(".spot")) {
@@ -22,7 +21,7 @@ export function useSpotlight(): void {
         const dx = Math.max(rect.left - x, 0, x - rect.right);
         const dy = Math.max(rect.top - y, 0, y - rect.bottom);
         const glow = Math.max(0, 1 - Math.hypot(dx, dy) / REACH).toFixed(3);
-        if (glow === "0.000" && (lit.get(card) ?? "0.000") === glow) continue;
+        if (staysDark(card, glow)) continue;
         lit.set(card, glow);
         card.style.setProperty("--spot-x", `${x - rect.left}px`);
         card.style.setProperty("--spot-y", `${y - rect.top}px`);

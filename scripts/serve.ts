@@ -1,6 +1,3 @@
-// Serves the production build: the files in dist/client, then everything else through the app.
-// Listens on PORT (3000 by default) and drains open requests on SIGINT and SIGTERM.
-
 import { Readable } from "node:stream";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 import { fileURLToPath } from "node:url";
@@ -14,8 +11,6 @@ const app: { default: { fetch: (request: Request) => Promise<Response> } } = awa
   new URL("../dist/server/server.js", import.meta.url).href
 );
 
-// Vite fingerprints everything under /assets, so it never changes; the rest (icons, post media,
-// robots.txt) may, so it is kept for an hour.
 const assets = staticMiddleware({ dir: client, maxAge: 31_536_000, immutable: true });
 const files = staticMiddleware({ dir: client, maxAge: 3600 });
 const fromDisk: ServerMiddleware = (request, next) =>
@@ -23,8 +18,6 @@ const fromDisk: ServerMiddleware = (request, next) =>
     ? assets(request, next)
     : files(request, next);
 
-// The files are compressed by `staticMiddleware`; the app's pages here, as they stream, each chunk
-// flushed so the browser can start on the head while the rest renders.
 const COMPRESSIBLE = /^(text\/|application\/(json|javascript|xml))/;
 const compressors = {
   br: () =>

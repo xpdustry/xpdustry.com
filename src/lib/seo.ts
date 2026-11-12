@@ -8,11 +8,9 @@ export interface PageImage {
   alt: string;
 }
 
-/** Social cards are rendered by `routes/og/$.ts` at this size. */
 export const CARD_SIZE = { width: 1200, height: 630 } as const;
 
-/** The shared card, for every page without one of its own. */
-export const SITE_CARD: PageImage = {
+const SITE_CARD: PageImage = {
   url: "/og/home.png",
   alt: `${SITE.name} - ${SITE.positioning}`,
 };

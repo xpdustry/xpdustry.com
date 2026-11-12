@@ -3,7 +3,6 @@ import { media } from "#app/styles/media";
 import { font, leading, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
-/** The name's font size, and the most it may grow to. */
 const size = createVar();
 const sizeMax = createVar();
 
@@ -16,11 +15,13 @@ export const hero = style({
   background: vars.t3,
 });
 
-// Off the scale: the name is fitted to the card. "Xpdustry" is ~4.45em wide and the mark ~1.08em,
-// plus the gap, so it grows with the card up to a cap that shrinks with the page.
+const NAME_WIDTH_EM = 4.45;
+const MARK_WIDTH_EM = 1.083;
+const MARK_GAP_ALLOWANCE_PX = 26;
+
 export const brand = style({
   vars: {
-    [size]: `min(${fallbackVar(sizeMax, "96px")}, calc((100cqi - 26px) / 5.53))`,
+    [size]: `min(${fallbackVar(sizeMax, "96px")}, calc((100cqi - ${MARK_GAP_ALLOWANCE_PX}px) / ${(NAME_WIDTH_EM + MARK_WIDTH_EM).toFixed(2)}))`,
   },
   display: "flex",
   alignItems: "center",
@@ -33,7 +34,7 @@ export const brand = style({
 
 export const mark = style({
   selectors: {
-    [`${hero} &`]: { width: `calc(${size} * 1.083)` },
+    [`${hero} &`]: { width: `calc(${size} * ${MARK_WIDTH_EM})` },
   },
 });
 

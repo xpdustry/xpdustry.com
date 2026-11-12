@@ -8,7 +8,6 @@ import { SITE } from "#app/data/site";
 import { seo } from "#app/lib/seo";
 import { homeStructuredData } from "#app/lib/structuredData";
 
-/** How often an open home page catches up with the servers, as often as they are polled. */
 const REFRESH_MS = 30_000;
 
 const root = getRouteApi(rootRouteId);

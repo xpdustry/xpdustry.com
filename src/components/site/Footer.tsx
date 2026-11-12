@@ -1,7 +1,7 @@
 import { Brand } from "#app/components/site/Brand";
-import { ArrowUp } from "#app/lib/icons";
 import { PlinthAnchor } from "#app/components/ui/Plinth";
 import { SITE } from "#app/data/site";
+import { ArrowUp } from "#app/lib/icons";
 import * as styles from "./Footer.css";
 
 export function Footer() {

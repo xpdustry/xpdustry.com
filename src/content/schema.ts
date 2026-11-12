@@ -25,7 +25,7 @@ const ReleaseIdSchema = v.pipe(
   v.regex(/^[\w.-]+\/[\w.-]+@\S+$/, "must be owner/repo@tag"),
 );
 
-export const BlogFrontmatterSchema = v.strictObject(
+const BlogFrontmatterSchema = v.strictObject(
   {
     title: NonBlankStringSchema,
     description: NonBlankStringSchema,
@@ -34,7 +34,6 @@ export const BlogFrontmatterSchema = v.strictObject(
     author: v.picklist(authorNames, "must be a known author"),
     topic: NonBlankStringSchema,
     topicVersion: v.optional(NonBlankStringSchema),
-    /** The image behind the post on cards. Posts without one get a game screenshot. */
     hero: v.optional(blogMediaPathSchema(IMAGE_EXTENSIONS)),
     releases: v.optional(
       v.pipe(

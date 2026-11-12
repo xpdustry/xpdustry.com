@@ -6,12 +6,8 @@ import { font, leading, tracking } from "#app/styles/scale";
 import { mark, name } from "#app/components/site/Brand.css";
 import { vars } from "#app/styles/theme.css";
 
-/** Where the links drop under the brand. */
 const narrow = upTo(900);
-/** Where the brand shrinks once more. */
-const small = upTo(430);
 
-/** How tall the ridge stands over the footer: as rendered, and scaled down on a phone. */
 const ridgeHeight = createVar();
 
 export const footer = style({
@@ -25,7 +21,6 @@ export const footer = style({
   },
 });
 
-/** The deep teal's top edge, a ridge of colonies; `pnpm textures` renders it from `RIDGE`. */
 export const ridge = style({
   position: "absolute",
   inset: "auto 0 calc(100% - 1px)",
@@ -38,7 +33,6 @@ export const inner = style({
   selectors: {
     [`${footer} &`]: {
       display: "grid",
-      // the brand and the way back up, then the small print and the links on one line under them
       gridTemplateColumns: "1fr auto",
       gridTemplateAreas: '"brand top" "copy links"',
       alignItems: "center",
@@ -79,7 +73,7 @@ export const brand = style({
         [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${font.h2}px` } },
       },
     },
-    [small]: {
+    [media.small]: {
       selectors: {
         [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${font.h3}px` }, gap: 10 },
       },
@@ -104,6 +98,7 @@ export const links = style({
 
 globalStyle(`${links} a`, {
   color: "inherit",
+  overflowWrap: "anywhere",
   textDecoration: "underline 2px transparent",
   textUnderlineOffset: 5,
   transition: "text-decoration-color 0.13s",

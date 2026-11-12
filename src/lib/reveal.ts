@@ -2,18 +2,12 @@ import far from "#app/assets/backdrop-far.webp";
 import near from "#app/assets/backdrop-near.webp";
 import crown from "#app/assets/crown.webp";
 import ridge from "#app/assets/ridge.webp";
+import { inlineScript } from "#app/lib/inlineScript";
 
-/** The page's frame, for the head to preload. */
 export const FRAME_IMAGES = [crown, ridge];
-/** The frame and backdrop tiles, for the head to preload. */
 export const REVEAL_IMAGES = [...FRAME_IMAGES, far, near];
 
-/**
- * A progressive enhancement: content paints immediately, without waiting for images or fonts.
- * Only position animates, so a missing API, stalled callback or exception cannot hide the page.
- * Keep this function self-contained: the head inlines it before hydration.
- */
-export function reveal(): void {
+function reveal(): void {
   const show = () => {
     try {
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -28,9 +22,7 @@ export function reveal(): void {
           fill: "backwards",
         });
       }
-    } catch {
-      // Motion is optional; the page is already visible.
-    }
+    } catch {}
   };
 
   if (document.readyState === "loading") {
@@ -40,4 +32,4 @@ export function reveal(): void {
   }
 }
 
-export const REVEAL = `(${reveal.toString()})()`;
+export const REVEAL = inlineScript(reveal);

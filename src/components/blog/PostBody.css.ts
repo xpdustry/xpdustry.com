@@ -3,7 +3,6 @@ import { media } from "#app/styles/media";
 import { font, leading, radius, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
-/** A post's text, styled by tag: the Markdown renders plain elements. */
 export const prose = style({
   maxWidth: "66ch",
   fontFamily: vars.fontText,
@@ -117,16 +116,13 @@ globalStyle(`${prose} figcaption`, {
   color: vars.muted,
 });
 
-/** A callout's pale ground, in its label's hue. */
 const tealWash = "#dcf4f1";
 const amberWash = "#fff2d9";
 
-// the label's colours, which each kind of callout sets
 const wall = createVar();
 const face = createVar();
 const on = createVar();
 
-/** A note, the default for every kind but `warning`. */
 export const callout = style({
   vars: {
     [wall]: vars.wall,

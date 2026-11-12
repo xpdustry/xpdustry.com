@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { readCard } from "#app/server/og/cards";
 
-// Discord and Twitter fetch a card once per unfurl and cache it on their side, so the header
-// mostly serves browsers and the odd proxy.
 export const Route = createFileRoute("/og/$")({
   server: {
     handlers: {

@@ -1,5 +1,3 @@
-// Pinned locale and time zone, so the server and the browser render the same dates.
-
 const LONG = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "long",

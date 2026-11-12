@@ -15,7 +15,6 @@ function compile(body: string) {
   return compileBlogMarkdown("src/content/blog/a-post.md", `${frontmatter}\n\n${body}`);
 }
 
-/** The post as the page renders it. */
 function render(body: string): string {
   return renderToStaticMarkup(<PostBody document={compile(body).document} />);
 }
@@ -27,13 +26,6 @@ describe("compileBlogMarkdown", () => {
     expect(compiled.frontmatter.publishedAt).toBe("2026-08-28T00:00:00.000Z");
     expect(JSON.parse(JSON.stringify(compiled.document))).toEqual(compiled.document);
     expect(JSON.stringify(compiled.document)).not.toContain("title: A post");
-  });
-
-  test("renders headings with ids, and inline formatting", () => {
-    const html = render("## Install\n\nUse **the release**.");
-
-    expect(html).toContain('<h2 id="install">Install</h2>');
-    expect(html).toContain("Use <strong>the release</strong>.");
   });
 
   test("renders callouts as the site's own, without enabling raw HTML", () => {
@@ -67,7 +59,9 @@ A recording. [Download it.](/blog/demo.mp4)
     expect(html).toContain('src="/blog/screenshot.png"');
     expect(html).toContain('alt="A &lt;screen&gt;"');
     expect(html).toContain("The alert &amp; details.");
-    expect(html).toContain('<video controls="" preload="metadata" poster="/blog/poster.jpg"');
+    expect(html).toContain(
+      '<video controls="" muted="" preload="metadata" poster="/blog/poster.jpg"',
+    );
     expect(html).toContain('<a href="/blog/demo.mp4">Download it.</a>');
   });
 

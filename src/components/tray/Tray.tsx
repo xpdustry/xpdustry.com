@@ -1,7 +1,7 @@
 import type { LinkComponentProps } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ArrowRight, ArrowUpRight, type Icon } from "#app/lib/icons";
 import { PlinthAnchor, PlinthLink } from "#app/components/ui/Plinth";
+import { ArrowRight, ArrowUpRight, type Icon } from "#app/lib/icons";
 import * as styles from "./Tray.css";
 
 type TrayAction = { label: string } & (
@@ -20,24 +20,19 @@ interface TrayProps {
   children: ReactNode;
 }
 
-// The tab's right side slants down to the tray's top, its bends softened: a fixed piece, as
-// the tab is always as tall. In px.
 const RISE = 70;
 const RUN = 35;
 const BEND = 14;
 const SLANT = { width: RUN + 2 * BEND, height: RISE + 2 };
 
-/**
- * The slant's outline, inset by `inset` px (half the stroke, for the line). Rounded, as engines
- * print floats differently and the server's path must match the browser's.
- */
+const toHundredths = (value: number) => Math.round(value * 100) / 100;
+
 function slantPath(inset: number): string {
   const length = Math.hypot(RUN, RISE);
   const [u, v] = [(RUN / length) * BEND, (RISE / length) * BEND];
   const [x0, x1, i] = [BEND, BEND + RUN, inset];
-  const n = (value: number) => Math.round(value * 100) / 100;
   return (
-    `M0 ${i}Q${x0} ${i} ${n(x0 + u)} ${n(i + v)}L${n(x1 - u)} ${n(RISE + i - v)}` +
+    `M0 ${i}Q${x0} ${i} ${toHundredths(x0 + u)} ${toHundredths(i + v)}L${toHundredths(x1 - u)} ${toHundredths(RISE + i - v)}` +
     `Q${x1} ${RISE + i} ${SLANT.width} ${RISE + i}`
   );
 }
@@ -45,10 +40,6 @@ function slantPath(inset: number): string {
 const SLANT_LINE = slantPath(1);
 const SLANT_FACE = `${slantPath(0)}V${SLANT.height}H0Z`;
 
-/**
- * A folder of cards: a tray with a tab on its top-left, drawn in CSS around the tab's fixed
- * width, so it is whole before any script runs.
- */
 export function Tray({ id, icon: Icon, title, subtitle, action, children }: TrayProps) {
   return (
     <section id={id} className={`${styles.tray} reveal`}>

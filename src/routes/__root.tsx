@@ -1,7 +1,6 @@
 import text from "@fontsource-variable/momo-trust-sans/files/momo-trust-sans-latin-wght-normal.woff2?url";
 import mono from "@fontsource/dm-mono/files/dm-mono-latin-500-normal.woff2?url";
 import display from "@fontsource/momo-trust-display/files/momo-trust-display-latin-400-normal.woff2?url";
-/// <reference types="vite/client" />
 import {
   HeadContent,
   Scripts,
@@ -25,13 +24,11 @@ import "@fontsource/dm-mono/500.css";
 import "#app/styles/global.css";
 
 export const Route = createRootRoute({
-  // every page's header counts the players; the home page shows the rest
   loader: () => getLiveData(),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      // the deep teal the top of the page frays out of
       { name: "theme-color", content: CROWN.settings.color },
     ],
     links: [
@@ -39,7 +36,6 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
-      // the faces the first screen sets, fetched before the stylesheet asks for them
       ...[display, text, mono].map((href) => ({
         rel: "preload",
         href,
@@ -47,7 +43,6 @@ export const Route = createRootRoute({
         type: "font/woff2",
         crossOrigin: "anonymous" as const,
       })),
-      // the page shows once its crown and ridge are in, and its backdrop fades in once it is
       ...REVEAL_IMAGES.map((href) => ({
         rel: "preload",
         href,
@@ -60,17 +55,18 @@ export const Route = createRootRoute({
   shellComponent: Document,
 });
 
-function Document({ children }: { children: ReactNode }) {
-  useSpotlight();
-  // smooth scrolling from here on: before, it would glide the restored scroll of a reload
+function useSmoothScrollOnceHydrated() {
   useEffect(() => {
     document.documentElement.dataset.hydrated = "";
   }, []);
-  // the shell also wraps the page while the loader is pending or failed
+}
+
+function Document({ children }: { children: ReactNode }) {
+  useSpotlight();
+  useSmoothScrollOnceHydrated();
   const live = useMatch({ from: rootRouteId, select: (match) => match.loaderData });
 
   return (
-    // the reveal marks the root until the backdrop is in
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />

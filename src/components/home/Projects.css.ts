@@ -4,7 +4,6 @@ import { font, leading, radius, tracking } from "#app/styles/scale";
 import { cards, figures } from "./shared";
 import { vars } from "#app/styles/theme.css";
 
-/** A pane of white over a project's own colour. */
 const glass = "rgb(255 255 255 / 0.12)";
 
 export const projects = cards(104);
@@ -15,16 +14,14 @@ export const version = style({
   font: figures(),
 });
 
-/** The featured project: wide and dark, with a screenshot of it at work rising out of the bottom. */
 export const featured = style({
   gridColumn: "span 6",
   gridRow: "span 4",
   display: "flex",
   flexDirection: "column",
   padding: 24,
-  color: "#fff",
+  color: vars.onGround,
   "@media": {
-    // the screenshot only peeks in
     [media.phone]: { height: 300 },
   },
 });
@@ -56,7 +53,6 @@ globalStyle(`${featured} p`, {
   lineHeight: leading.snug,
 });
 
-/** In the flow, under the summary however many lines that runs to; the card cuts it off. */
 export const screenshot = style({
   flex: "none",
   alignSelf: "flex-start",
@@ -72,7 +68,6 @@ export const screenshot = style({
   },
 });
 
-/** A small card: a project in a Mindustry item's colours, or the one pointing at all the rest. */
 const small = style({
   gridColumn: "span 3",
   gridRow: "span 2",
@@ -91,7 +86,6 @@ globalStyle(`${small} p`, {
   lineHeight: leading.snug,
 });
 
-/** The others, each with an icon of what it does. */
 export const item = style([
   small,
   {
@@ -100,7 +94,6 @@ export const item = style([
   },
 ]);
 
-// between tablet and desktop the first item spans the row, the rest pair up
 globalStyle(`${item}:nth-child(1 of ${item})`, {
   "@media": {
     [media.tablet]: { gridColumn: "span 6" },

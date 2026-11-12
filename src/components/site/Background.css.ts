@@ -2,14 +2,9 @@ import { keyframes, style } from "@vanilla-extract/css";
 import { BACKDROP, CROWN } from "#app/data/textures";
 import { media } from "#app/styles/media";
 
-// `pnpm textures` renders the tiles from `BACKDROP`, and the crown from `CROWN`
-
-/** A backdrop tile's size, in px: each layer drifts by one, over and over. */
 export const TILE = BACKDROP.far.repeat;
-/** Scroll per tile of drift, in tiles: the far layer moves at a sixth of the page's speed, the near at a third. */
 export const FAR = 6;
 export const NEAR = 3;
-/** How many tiles a scroll-driven layer drifts before it stops, past any page's length. */
 const LOOPS = 40;
 
 const drift = keyframes({
@@ -34,8 +29,6 @@ export const background = style({
     "&::after": {
       backgroundImage: 'url("../../assets/backdrop-near.webp")',
     },
-    // without scroll-driven animations, `Background` sets the drift from a scroll listener, in
-    // `--far` and `--near`
     "&[data-drift]::before, &[data-drift]::after": {
       bottom: -TILE,
       willChange: "transform",
@@ -47,7 +40,6 @@ export const background = style({
       transform: "translateY(var(--near, 0))",
     },
   },
-  // the parallax, on the compositor
   "@media": {
     [media.motion]: {
       "@supports": {
@@ -72,7 +64,6 @@ export const background = style({
   },
 });
 
-/** Scrolls with the page, unlike the backdrop under it. */
 export const crown = style({
   position: "absolute",
   inset: "0 0 auto",

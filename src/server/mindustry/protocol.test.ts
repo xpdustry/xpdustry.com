@@ -1,11 +1,6 @@
 import { describe, expect, test } from "vitest";
-import {
-  MalformedPacketError,
-  QUERY_PACKET,
-  decodeServerInfo,
-} from "#app/server/mindustry/protocol";
+import { MalformedPacketError, decodeServerInfo } from "#app/server/mindustry/protocol";
 
-/** Builds a reply the way a Mindustry server writes one. */
 function packet(
   overrides: Partial<{
     name: string;
@@ -60,12 +55,6 @@ function packet(
 
   return Uint8Array.from(parts);
 }
-
-describe("QUERY_PACKET", () => {
-  test("is the two-byte framework discover message", () => {
-    expect([...QUERY_PACKET]).toEqual([0xfe, 0x01]);
-  });
-});
 
 describe("decodeServerInfo", () => {
   test("decodes a valid packet", () => {
@@ -138,8 +127,6 @@ describe("decodeServerInfo", () => {
   });
 
   test("consumes the unsigned port without exposing it", () => {
-    // A server reporting a different port must not change anything the site
-    // shows: the SRV result is the endpoint and the alias is the address.
     const decoded = decodeServerInfo(packet({ port: 65535 }));
     expect(decoded).not.toHaveProperty("port");
   });

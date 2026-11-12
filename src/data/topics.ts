@@ -7,7 +7,6 @@ export interface Topic extends ProjectTheme {
   website?: string;
 }
 
-/** Topics that are not a project wear the site's own deep teal. */
 const DEFAULT_THEME: ProjectTheme = {
   ground: "#083230",
   patches: PATCHES.siteCover,

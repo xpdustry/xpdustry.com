@@ -4,7 +4,6 @@ import { DiscordCard } from "#app/components/site/DiscordCard";
 import { playerCount, type LiveData } from "#app/data/live";
 import * as styles from "./Cover.css";
 
-/** The top of the home page: who we are, where to play, where to talk. */
 export function Cover({ live }: { live: LiveData }) {
   return (
     <div className={styles.cover}>

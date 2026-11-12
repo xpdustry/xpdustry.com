@@ -4,7 +4,6 @@ import type { ComponentProps, ReactNode } from "react";
 import { POST_ELEMENTS } from "#app/content/elements";
 import * as styles from "./PostBody.css";
 
-// The custom elements `vite/markdown.ts` emits, with the string properties it validated.
 interface CalloutProps {
   kind: string;
   title: string;
@@ -48,8 +47,7 @@ function PostVideo({
 }: MediaProps & { poster: string; webm?: string }) {
   return (
     <figure>
-      {/* oxlint-disable-next-line jsx-a11y/media-has-caption -- silent screen recordings, described by their fallback */}
-      <video controls preload="metadata" poster={poster} width={width} height={height}>
+      <video controls muted preload="metadata" poster={poster} width={width} height={height}>
         {webm && <source src={webm} type='video/webm; codecs="av01.0.08M.10"' />}
         <source src={src} type="video/mp4" />
         {children}
@@ -59,7 +57,6 @@ function PostVideo({
   );
 }
 
-/** Links off the site open in a new tab; the site's own stay in this one. */
 function Anchor({ children, ...props }: ComponentProps<"a">) {
   const external = /^https?:\/\//.test(props.href ?? "");
   return (
@@ -76,7 +73,6 @@ const components = {
   [POST_ELEMENTS.video]: PostVideo,
 } satisfies MarkdownComponents;
 
-/** A post's body, from the AST its Markdown was compiled into at build time. */
 export function PostBody({ document }: { document: MarkdownDocument }) {
   return (
     <div className={styles.prose}>

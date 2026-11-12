@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Check, Copy } from "#app/lib/icons";
 import { PlinthButton, type PlinthStyle } from "#app/components/ui/Plinth";
+import { Check, Copy } from "#app/lib/icons";
 
 const SHOWN_MS = 1400;
 
@@ -30,7 +30,6 @@ export function CopyButton({ text, label, children, tone = "ink", className }: C
     timer.current = setTimeout(() => setCopied(false), SHOWN_MS);
   };
 
-  // a text button names itself and says "Copied"; the others turn teal and need `label`
   const named = typeof children !== "function" && Boolean(children);
   const face =
     typeof children === "function" ? (

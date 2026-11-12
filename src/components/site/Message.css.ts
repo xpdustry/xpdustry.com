@@ -39,14 +39,12 @@ export const body = style({
   lineHeight: leading.snug,
 });
 
-// a row of buttons
 globalStyle(`${body} > div`, {
   display: "flex",
   flexWrap: "wrap",
   gap: 10,
 });
 
-// the way on
 globalStyle(`${body} > :last-child`, {
   marginTop: 18,
 });

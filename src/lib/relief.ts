@@ -2,7 +2,7 @@ import framesUrl from "#app/assets/logo-frames.webp";
 
 let loading: Promise<HTMLImageElement> | undefined;
 
-/** The relief logo's frames (`FRAMES` in `logo.ts`), decoded. */
+/** The relief logo's frames (`LOGO_FRAME_SHEET` in `logo.ts`), decoded. */
 export function loadLogoFrames(): Promise<HTMLImageElement> {
   loading ??= (async () => {
     const sheet = new Image();

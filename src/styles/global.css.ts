@@ -8,7 +8,6 @@ globalStyle(":root", {
   scrollPaddingTop: 16,
 });
 
-// only once hydrated, so the router's restoring a reload's scroll before then lands at once
 globalStyle(":root[data-hydrated]", {
   "@media": {
     [media.motion]: { scrollBehavior: "smooth" },
@@ -59,14 +58,12 @@ globalStyle("img, svg, video, canvas", {
   maxWidth: "100%",
 });
 
-// zero specificity: a component's own radius or offset always wins
 globalStyle(":where(:focus-visible)", {
   outline: `3px solid ${vars.focus}`,
   outlineOffset: 3,
   borderRadius: 4,
 });
 
-// the page column; the footer reuses it with its own padding
 globalStyle(".wrap", {
   width: "min(1180px, 100% - 2 * clamp(20px, 5vw, 56px))",
   marginInline: "auto",
@@ -82,7 +79,6 @@ globalStyle(".sr-only", {
   whiteSpace: "nowrap",
 });
 
-// hidden until a keyboard user tabs onto it
 globalStyle(".skip-link", {
   position: "absolute",
   top: 12,
@@ -99,7 +95,6 @@ globalStyle(".skip-link:focus-visible", {
   translate: "none",
 });
 
-// A card that glows along its edge as the pointer comes near (see useSpotlight).
 globalStyle(":where(.spot)::after", {
   content: '""',
   position: "absolute",

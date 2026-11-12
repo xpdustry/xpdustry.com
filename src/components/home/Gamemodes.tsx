@@ -1,13 +1,13 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from "react";
 import { Tray } from "#app/components/tray/Tray";
-import { Check, Copy, GameController } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import { PlayerCount } from "#app/components/ui/PlayerCount";
 import { Spread, spreadFrom } from "#app/components/ui/Spread";
 import { gamemodes, type Gamemode } from "#app/data/gamemodes";
 import { findServer, playerCount } from "#app/data/live";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/data/snapshots";
+import { Check, Copy, GameController } from "#app/lib/icons";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Gamemodes.css";
 
@@ -17,23 +17,16 @@ const FRINGES = import.meta.glob<string>("/src/assets/fringe/*.webp", {
   import: "default",
 });
 
-/** How long a card says its address was copied, or shows the address when it could not be. */
 const COPIED_MS = 1800;
 const FAILED_MS = 6000;
 
-/** One mode to a row, at every width: a press anywhere on it copies its server's address. */
 export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
   return (
     <Tray
       id="gamemodes"
       icon={GameController}
       title="Gamemodes"
-      subtitle={
-        <>
-          Chaotic Neutral Mindustry servers ·{" "}
-          <PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />
-        </>
-      }
+      subtitle={<PlayerCount count={playerCount(snapshot.servers)} className={styles.total} />}
     >
       <ul className={styles.modes}>
         {gamemodes.map((mode) => (
@@ -44,7 +37,6 @@ export function Gamemodes({ snapshot }: { snapshot: ServerSnapshot }) {
   );
 }
 
-/** The last copy from a card: whether it landed, and where the click that asked for it did. */
 interface Copied extends ReturnType<typeof spreadFrom> {
   ok: boolean;
 }
@@ -54,7 +46,6 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
   const hostname = server?.hostname ?? "";
   const [copied, setCopied] = useState<Copied>();
   const [shown, setShown] = useState(false);
-  // the long message, unless the header is too narrow for it
   const [brief, setBrief] = useState(false);
   const said = useRef<HTMLSpanElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -66,8 +57,6 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
   }, [shown, copied]);
 
   const copy = async (event: MouseEvent<HTMLButtonElement>) => {
-    // the reticulate spreads over the whole card, from the press; a keyboard press has no place
-    // of its own, and spreads from the copy mark
     const box = event.currentTarget.closest("li")!.getBoundingClientRect();
     const mark = event.currentTarget.lastElementChild!.getBoundingClientRect();
     const [x, y] = event.detail
@@ -97,7 +86,6 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
       className={`${card.card} ${styles.mode} ${landed ? styles.copied : ""} ${failed ? styles.failed : ""}`}
       style={assignInlineVars({ [styles.tint]: mode.edge.side.color })}
     >
-      {/* the mode's colour, ending in a frayed edge instead of a line */}
       <span className={styles.tinted} aria-hidden="true">
         <span className={`${styles.edge} ${styles.side}`}>
           <Patches patches={mode.edge.side} className={styles.patches} />
@@ -111,7 +99,6 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
       </span>
       <Spread tiles={mode.spread} on={landed} origin={copied?.origin} reach={copied?.reach} />
       <h3 className={styles.head}>
-        {/* the whole card answers to it */}
         <button
           type="button"
           className={styles.band}
@@ -127,7 +114,6 @@ function Mode({ mode, server }: { mode: Gamemode; server?: ServerSnapshotItem })
                 count={count}
                 className={`${styles.count} ${empty ? styles.empty : ""}`}
               />
-              {/* said aloud by the output below */}
               <span ref={said} className={styles.said} aria-hidden="true">
                 {copied?.ok === false
                   ? hostname

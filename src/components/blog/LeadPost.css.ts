@@ -4,7 +4,6 @@ import { font, leading, radius, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 import { ground, logo as themedLogo } from "./themed.css";
 
-/** The card's padding, which the hero runs out through to its edges. */
 const pad = { block: 42, inline: 46 };
 const padPhone = { block: 28, inline: 24 };
 
@@ -30,7 +29,6 @@ export const text = style({
   minWidth: 0,
 });
 
-/** "Latest", then the topic. */
 export const tags = style({
   display: "flex",
   gap: 8,
@@ -64,7 +62,6 @@ export const byline = style({
   color: vars.muted,
 });
 
-/** The hero, run out under the card's bottom right corner, through its padding and border. */
 export const shot = style({
   position: "relative",
   overflow: "hidden",
@@ -96,7 +93,6 @@ globalStyle(`${lead}:hover ${shot} img`, {
   scale: "1.03",
 });
 
-/** Where the post has no hero, its project's logo. */
 export const logo = style([
   themedLogo,
   {

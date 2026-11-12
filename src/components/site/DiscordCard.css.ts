@@ -2,7 +2,6 @@ import { globalStyle, style } from "@vanilla-extract/css";
 import { font, leading, radius } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
-/** Discord's own colour, so the card reads as the way there. */
 const BLURPLE = "#5b6bd7";
 
 export const discord = style({
@@ -11,10 +10,9 @@ export const discord = style({
   justifyContent: "space-between",
   padding: "20px 22px",
   background: BLURPLE,
-  color: "#fff",
+  color: vars.onGround,
 });
 
-/** The sidebar size. */
 export const compact = style({
   gap: 18,
 });

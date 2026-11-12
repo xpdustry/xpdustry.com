@@ -1,5 +1,4 @@
 # syntax=docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
-# https://depot.dev/docs/container-builds/optimal-dockerfiles/node-pnpm-dockerfile
 
 FROM docker.io/library/node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e AS base
 ENV PNPM_HOME="/pnpm"

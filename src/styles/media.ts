@@ -1,15 +1,9 @@
-/**
- * The page's media queries, for `@media` in styles and `matchMedia` in components, so both sides
- * always agree on where a layout turns.
- */
 export const media = {
-  /** One column. */
+  small: "(max-width: 430px)",
   phone: "(max-width: 640px)",
-  /** The twelve-column grids fold to six. */
   tablet: "(max-width: 1100px)",
   motion: "(prefers-reduced-motion: no-preference)",
   still: "(prefers-reduced-motion: reduce)",
-  /** No hover, a finger for a pointer. */
   coarse: "(pointer: coarse)",
 } as const;
 

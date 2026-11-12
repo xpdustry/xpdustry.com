@@ -1,5 +1,3 @@
-// Public files from the previous site that now have a different URL. The other public URLs
-// (including the MP4 and icons) still exist and need no redirect.
 const convertedBlogImages = [
   "nohorny-admin-overview-dark",
   "nohorny-admin-requests-dark",
@@ -17,7 +15,6 @@ export const LEGACY_MEDIA_REDIRECTS: ReadonlyMap<string, string> = new Map([
   ["/og.png", "/og/home.png"],
 ]);
 
-/** Shared by the app entry and the static-file server, before either handles the request. */
 export function requestRedirect(request: Request): Response | undefined {
   const url = new URL(request.url);
   const media = LEGACY_MEDIA_REDIRECTS.get(url.pathname);
@@ -25,8 +22,7 @@ export function requestRedirect(request: Request): Response | undefined {
     return new Response(null, { status: 301, headers: { location: media + url.search } });
   }
 
-  // The router normalizes these to slashless URLs with a default 307. Canonical page URLs
-  // are permanent; handle them before routing and preserve the original query encoding.
+  // TanStack Router would answer these with its default 307; canonical URLs are permanent.
   if (/^\/blog(?:\/[^/]+)?\/$/.test(url.pathname)) {
     return new Response(null, {
       status: 308,

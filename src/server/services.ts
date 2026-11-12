@@ -1,31 +1,30 @@
-// The background work behind the live parts of the site: Mindustry server status every 30 s,
-// Discord counts every 5 min and GitHub every hour. Pages read the latest results and never wait.
-
 import type { DiscordCounts, LiveData } from "#app/data/live";
+import { servers } from "#app/data/servers";
 import { SITE } from "#app/data/site";
 import type { ServerSnapshot } from "#app/data/snapshots";
 import { fetchDiscordCounts } from "#app/server/discord";
 import { fetchGitHubStats, type GitHubStats } from "#app/server/github";
-import { StatusService } from "#app/server/mindustry/status";
-import type { PollHealth } from "#app/server/mindustry/status";
+import { pollingSnapshot, queryServers } from "#app/server/mindustry/status";
 import { createNodeMindustryProbe } from "#app/server/mindustry/transport";
 import { Poller, type PollerHealth } from "#app/server/poller";
 
 export interface ServicesHealth {
   status: "ok";
   uptimeSeconds: number;
-  servers: PollHealth;
+  servers: PollerHealth;
   discord: PollerHealth;
   github: PollerHealth;
 }
 
+const WAITING = pollingSnapshot(servers);
+
 export class Services {
   readonly #probe = createNodeMindustryProbe();
   readonly #startedAt = Date.now();
-  readonly status = new StatusService({
-    probe: this.#probe,
-    onError: (error) =>
-      console.warn(`[servers] refresh failed: ${error instanceof Error ? error.message : error}`),
+  readonly status = new Poller<ServerSnapshot>({
+    name: "servers",
+    intervalMs: 30_000,
+    load: (signal) => queryServers(this.#probe, servers, signal),
   });
   readonly discord = new Poller<DiscordCounts>({
     name: "discord",
@@ -52,12 +51,12 @@ export class Services {
   }
 
   get servers(): ServerSnapshot {
-    return this.status.snapshot;
+    return this.status.value ?? WAITING;
   }
 
   get live(): LiveData {
     return {
-      servers: this.status.snapshot,
+      servers: this.servers,
       discord: this.discord.value,
       releases: this.github.value?.releases ?? {},
     };
@@ -74,8 +73,6 @@ export class Services {
   }
 }
 
-// One instance per process, kept on globalThis so a hot reload of this module in development
-// reuses the running services instead of starting a second set of pollers.
 const KEY = Symbol.for("xpdustry.services");
 const registry = globalThis as typeof globalThis & { [KEY]?: Services };
 

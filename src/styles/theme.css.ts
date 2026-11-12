@@ -1,13 +1,8 @@
 import { createGlobalTheme, createGlobalThemeContract, globalStyle } from "@vanilla-extract/css";
 import { media } from "./media";
 
-/**
- * The site's design tokens, as custom properties on `:root`. Their names are kept readable
- * (`--outline`, `--gap`), since components also set and read them from inline styles.
- */
 export const vars = createGlobalThemeContract(
   {
-    // neutrals, teal and amber ramps
     n1: "n1",
     n2: "n2",
     n3: "n3",
@@ -22,7 +17,6 @@ export const vars = createGlobalThemeContract(
     a9: "a9",
     a11: "a11",
 
-    // roles
     page: "page",
     tile: "tile",
     ink: "ink",
@@ -37,20 +31,15 @@ export const vars = createGlobalThemeContract(
     /** As `r g b`, for `rgb(var(--glow) / alpha)`. */
     glow: "glow",
     focus: "focus",
-    /** Text on the teal and amber faces of a plinth or a callout. */
     onTeal: "on-teal",
     onAmber: "on-amber",
-    /** Text on the page itself and on the deep teal of the header and footer. */
+    onGround: "on-ground",
     onDeep: "on-deep",
-    /** The edge of a control that sits on the deep teal. */
     deepWall: "deep-wall",
-    /** Behind a screenshot or a video, while it loads and where it does not reach. */
     stage: "stage",
 
-    // shape
     r: "r",
     gap: "gap",
-    /** The space between the page's groups: header, cover, each tray and the footer. */
     group: "group",
 
     fontDisplay: "font-display",
@@ -58,7 +47,6 @@ export const vars = createGlobalThemeContract(
     fontMono: "font-mono",
     easeOut: "ease-out",
     easeSpring: "ease-spring",
-    /** A patch of labyrinth growing under the pointer: steady, then settling. */
     easeGrow: "ease-grow",
   },
   (name) => name ?? "",
@@ -94,6 +82,7 @@ createGlobalTheme(":root", vars, {
   focus: "#007f79",
   onTeal: "#08201e",
   onAmber: "#2b1a00",
+  onGround: "#fff",
   onDeep: "#eaf7f5",
   deepWall: "#4f8e89",
   stage: "#0e1514",

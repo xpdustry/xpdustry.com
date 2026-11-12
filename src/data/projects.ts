@@ -1,39 +1,30 @@
 import clajIcon from "#app/assets/brand/claj.png";
 import nohornyIcon from "#app/assets/brand/nohorny.svg";
-import { Package, PlugsConnected, Toolbox, type Icon } from "#app/lib/icons";
 import { PATCHES } from "#app/data/patches";
-import type { Patches } from "#app/data/textures";
+import { Package, PlugsConnected, Toolbox, type Icon } from "#app/lib/icons";
+import type { Patches } from "#app/lib/textures";
 
 export type ProjectSlug = "nohorny" | "claj" | "toxopid" | "distributor";
 
-/** How a project's posts are dressed: their topic chip, and the cover of the post page. */
 export interface ProjectTheme {
-  /** The cover's ground and its patches. */
   ground: string;
   patches: Patches;
-  /** Secondary text on the cover. */
   muted: string;
-  /** The topic chip on light cards. */
   chip: { background: string; color: string };
-  /** The topic chip on the cover. */
   accent: string;
 }
 
-/** The featured project gets the wide card, with a screenshot of it at work. */
 interface FeaturedCard {
   kind: "featured";
   ground: string;
-  /** The patches in its corners. */
   patches: Patches;
   muted: string;
   screenshot: string;
 }
 
-/** The others are small cards in a Mindustry item's colours, with an icon of what they do. */
 interface ItemCard {
   kind: "item";
   ground: string;
-  /** The patches in its corners. */
   patches: Patches;
   symbol: Icon;
 }
@@ -120,7 +111,6 @@ export function repositoryUrl(project: Project): string {
   return `https://github.com/${project.repository}`;
 }
 
-/** Posts are filed under a topic, which is a project's name when they are about one. */
 export function projectForTopic(topic: string): Project | undefined {
   return projects.find((project) => project.name.toLowerCase() === topic.toLowerCase());
 }

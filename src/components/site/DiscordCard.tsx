@@ -1,15 +1,14 @@
 import type { ReactNode } from "react";
-import { ArrowUpRight, Discord } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import type { DiscordCounts } from "#app/data/live";
 import { PATCHES } from "#app/data/patches";
 import { SITE } from "#app/data/site";
+import { ArrowUpRight, Discord } from "#app/lib/icons";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./DiscordCard.css";
 
 const number = new Intl.NumberFormat("en-US");
 
-/** The way into the Discord: the same card on every page, saying what that page sends you there for. */
 export function DiscordCard({
   title,
   children,

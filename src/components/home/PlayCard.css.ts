@@ -21,7 +21,6 @@ export const label = style({
 
 export const address = style({
   marginTop: "auto",
-  // off the scale: fitted to the card, so the address holds one line for as long as it can
   font: `500 clamp(16px, calc(100cqi / 11.8), 30px) / ${leading.heading} ${vars.fontMono}`,
   letterSpacing: tracking.heading,
   color: vars.ink,

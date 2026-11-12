@@ -7,7 +7,6 @@ type IconProps = Omit<SVGProps<SVGSVGElement>, "children">;
 
 export type Icon = (props: IconProps) => JSX.Element;
 
-/** A one-path icon, drawn in the text colour. */
 function icon(viewBox: string, path: string): Icon {
   return function PathIcon(props: IconProps) {
     return (
@@ -18,12 +17,9 @@ function icon(viewBox: string, path: string): Icon {
   };
 }
 
-/** An icon from `@phosphor-icons/core`'s `assets/bold`, by its one path. */
 const phosphor = (path: string) => icon("0 0 256 256", path);
-/** A brand mark from Simple Icons, by its one path. */
 const mark = (path: string) => icon("0 0 24 24", path);
 
-// The site's own controls
 export const ArrowRight = phosphor(
   "M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z",
 );
@@ -49,7 +45,6 @@ export const Copy = phosphor(
   "M216,28H88A12,12,0,0,0,76,40V76H40A12,12,0,0,0,28,88V216a12,12,0,0,0,12,12H168a12,12,0,0,0,12-12V180h36a12,12,0,0,0,12-12V40A12,12,0,0,0,216,28ZM156,204H52V100H156Zm48-48H180V88a12,12,0,0,0-12-12H100V52H204Z",
 );
 
-// What the trays, gamemodes and projects stand for
 export const GameController = phosphor(
   "M176,116H152a12,12,0,0,1,0-24h24a12,12,0,0,1,0,24ZM104,92h-4V88a12,12,0,0,0-24,0v4H72a12,12,0,0,0,0,24h4v4a12,12,0,0,0,24,0v-4h4a12,12,0,0,0,0-24ZM244.76,202.94a40,40,0,0,1-61,5.35,7,7,0,0,1-.53-.56L144.67,164H111.33L72.81,207.73c-.17.19-.35.38-.53.56A40,40,0,0,1,4.62,173.05a1.18,1.18,0,0,1,0-.2L21,88.79A63.88,63.88,0,0,1,83.88,36H172a64.08,64.08,0,0,1,62.93,52.48,1.8,1.8,0,0,1,0,.19l16.36,84.17a1.77,1.77,0,0,1,0,.2A39.74,39.74,0,0,1,244.76,202.94ZM172,140a40,40,0,0,0,0-80H83.89A39.9,39.9,0,0,0,44.62,93.06a1.55,1.55,0,0,0,0,.21l-16.34,84a16,16,0,0,0,13,18.44,16.07,16.07,0,0,0,13.86-4.21L96.9,144.07a12,12,0,0,1,9-4.07Zm55.76,37.31-7-35.95a63.84,63.84,0,0,1-44.27,22.46l24.41,27.72a16,16,0,0,0,26.85-14.23Z",
 );

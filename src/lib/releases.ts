@@ -1,4 +1,5 @@
 import { projects } from "#app/data/projects";
+import { SITE } from "#app/data/site";
 
 export interface ParsedReleaseId {
   repository: string;
@@ -13,7 +14,7 @@ export function parseReleaseId(id: string): ParsedReleaseId | undefined {
 
 export function releaseUrl(id: string): string {
   const parsed = parseReleaseId(id);
-  if (!parsed) return "https://github.com/xpdustry";
+  if (!parsed) return SITE.github;
   return `https://github.com/${parsed.repository
     .split("/")
     .map(encodeURIComponent)

@@ -67,7 +67,6 @@ export class Poller<T> {
   async #tick(signal: AbortSignal): Promise<void> {
     await this.refresh(signal);
     if (signal.aborted) return;
-    // Unreferenced: a pending refresh never holds the process open once the server has closed.
     this.#timer = setTimeout(() => void this.#tick(signal), this.#options.intervalMs);
     this.#timer.unref();
   }

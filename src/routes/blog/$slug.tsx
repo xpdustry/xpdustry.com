@@ -4,9 +4,10 @@ import { PostBody } from "#app/components/blog/PostBody";
 import { PostCover } from "#app/components/blog/PostCover";
 import { PostTile } from "#app/components/blog/PostTile";
 import { Tray } from "#app/components/tray/Tray";
-import { Newspaper } from "#app/lib/icons";
 import { authors } from "#app/content/authors";
 import { nearbyPosts, postsBySlug } from "#app/content/registry";
+import { BLOG_TAGLINE } from "#app/data/site";
+import { Newspaper } from "#app/lib/icons";
 import { postCard, postTitle, seo } from "#app/lib/seo";
 import { postStructuredData } from "#app/lib/structuredData";
 import * as styles from "#app/components/blog/PostPage.css";
@@ -60,7 +61,7 @@ function PostPage() {
           id="more"
           icon={Newspaper}
           title="More posts"
-          subtitle="Release notes and updates from the team"
+          subtitle={BLOG_TAGLINE}
           action={{ to: "/blog", label: "All posts" }}
         >
           <div className={styles.more}>

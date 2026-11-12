@@ -8,7 +8,6 @@ import { parseReleaseId, releaseLabel, releaseUrl } from "#app/lib/releases";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./PostAside.css";
 
-/** Beside a post: the releases it covers, a link to share, and where to ask about it. */
 export function PostAside({ post, className }: { post: Post; className?: string }) {
   const { releases = [], topic, author } = post.frontmatter;
   const project = projectForTopic(topic);
@@ -19,7 +18,6 @@ export function PostAside({ post, className }: { post: Post; className?: string 
           <p className={styles.label}>This post covers</p>
           {releases.map((id) => {
             const release = parseReleaseId(id);
-            // the tag alone when the release belongs to the post's own project
             const label =
               release && release.repository === project?.repository
                 ? release.tag

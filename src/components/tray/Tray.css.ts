@@ -3,25 +3,16 @@ import { media, upTo } from "#app/styles/media";
 import { font, leading, radius, tracking } from "#app/styles/scale";
 import { vars } from "#app/styles/theme.css";
 
-/** The widest tab's width, which every tab takes so their buttons line up. */
 const tabWidth = createVar();
-/** Round the cards inside it, at a gap's distance. */
 const trayR = createVar();
 
-/** The tray's width; a container's own size is its content box's. */
 const trayWidth = createVar();
 
-/** The narrowest tab that has a shelf, plus a slant and a shelf, less the tray's padding. */
 const cramped = "(width < 273px)";
 
-/** The titles' widths step down with the type, so the tab keeps a shelf beside it. */
 const narrow = upTo(700);
-/** No room left for the icon. */
-const small = upTo(430);
-/** The smallest phones: the tab shrinks around the titles once more. */
 const tiny = upTo(360);
 
-// the slant is centred on the tab's right edge
 const slantHalf = "31.5px";
 
 export const tray = style({
@@ -33,20 +24,17 @@ export const tray = style({
   position: "relative",
   isolation: "isolate",
   containerType: "inline-size",
-  // the tab stands in the margin
   marginTop: `calc(71px + ${vars.group})`,
   padding: vars.gap,
-  // a link to the tray lands on its tab
   scrollMarginTop: 70,
   "@media": {
     [narrow]: { vars: { [tabWidth]: "331px" } },
     [media.phone]: { vars: { [tabWidth]: "293px" } },
-    [small]: { vars: { [tabWidth]: "245px" } },
+    [media.small]: { vars: { [tabWidth]: "245px" } },
     [tiny]: { vars: { [tabWidth]: "232px" } },
   },
 });
 
-/** The tray, its top-right corner tightening when the shelf beside the tab is short. */
 export const body = style({
   position: "absolute",
   inset: 0,
@@ -71,7 +59,6 @@ export const tab = style({
   height: 72,
   padding: "11px 44px 3px 14px",
   borderRadius: `${vars.r} ${vars.r} 0 0`,
-  // the tab up to its slant, over the tray's top edge
   "::before": {
     content: '""',
     position: "absolute",
@@ -83,9 +70,7 @@ export const tab = style({
     background: vars.tray,
   },
   "@container": {
-    // too little shelf beside the tab reads as a glitch: the tab runs into the tray's side instead
     [cramped]: {
-      // with no slant to keep clear of, the tab is the tray's whole top and its button its corner's
       width: "100%",
       paddingRight: 14,
       selectors: {
@@ -100,7 +85,7 @@ export const tab = style({
   },
   "@media": {
     [media.phone]: { gap: 10, paddingLeft: 10 },
-    [small]: { paddingLeft: 16 },
+    [media.small]: { paddingLeft: 16 },
   },
 });
 
@@ -137,7 +122,7 @@ export const icon = style({
   background: vars.tile,
   "@media": {
     [media.phone]: { width: 40, height: 40 },
-    [small]: { display: "none" },
+    [media.small]: { display: "none" },
   },
 });
 
@@ -176,7 +161,6 @@ export const subtitle = style({
   },
 });
 
-/** The tab's button, which the whole tab answers to. */
 export const action = style({
   selectors: {
     [`${tab} > &`]: {

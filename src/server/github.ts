@@ -1,7 +1,5 @@
-// What the site shows from GitHub: each project's latest release, and the stars on the social card.
-//
-// Unauthenticated GitHub allows sixty calls an hour per address; one refresh costs one call for
-// the organisation's repositories plus one per project, and runs hourly.
+// GitHub allows unauthenticated clients sixty calls an hour per address: one refresh costs one
+// call for the organisation plus one per project, so it runs hourly.
 
 import { projects, type ProjectSlug } from "#app/data/projects";
 
@@ -38,7 +36,6 @@ export async function fetchGitHubStats(
 
   const [repositories, releases] = await Promise.all([
     get<Repository[]>(`/orgs/${GITHUB_ORG}/repos?per_page=100&type=public`),
-    // A project without a release, or one GitHub fails to answer for, just shows no version.
     Promise.allSettled(
       projects.map((project) => get<Release[]>(`/repos/${project.repository}/releases?per_page=1`)),
     ),

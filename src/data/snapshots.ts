@@ -1,69 +1,23 @@
-import * as v from "valibot";
-import { servers, type ServerDefinition } from "#app/data/servers";
-import { NonBlankStringSchema } from "#app/lib/schema";
+import type { ServerDefinition } from "#app/data/servers";
 
-const ServerIdentityEntries = {
-  slug: NonBlankStringSchema,
-  label: NonBlankStringSchema,
-  hostname: NonBlankStringSchema,
-};
+/** What a server answers a status query with, its Mindustry markup stripped. */
+export interface ServerInfo {
+  name: string;
+  description: string;
+  map: string;
+  mode: string;
+  players: number;
+  playerLimit: number;
+  wave: number;
+  version: number;
+  versionType: string;
+}
 
-export const ServerInfoSchema = v.strictObject({
-  name: v.string(),
-  description: v.string(),
-  map: v.string(),
-  mode: v.string(),
-  players: v.pipe(v.number(), v.integer(), v.minValue(0)),
-  playerLimit: v.pipe(v.number(), v.integer(), v.minValue(0)),
-  wave: v.pipe(v.number(), v.integer(), v.minValue(0)),
-  version: v.pipe(v.number(), v.integer()),
-  versionType: v.string(),
-});
+export type ServerSnapshotItem = ServerDefinition &
+  ({ status: "polling" } | { status: "online"; info: ServerInfo } | { status: "offline" });
 
-const PollingServerSchema = v.strictObject({
-  ...ServerIdentityEntries,
-  status: v.literal("polling"),
-});
-
-const OnlineServerSchema = v.strictObject({
-  ...ServerIdentityEntries,
-  status: v.literal("online"),
-  info: ServerInfoSchema,
-});
-
-const OfflineServerSchema = v.strictObject({
-  ...ServerIdentityEntries,
-  status: v.literal("offline"),
-});
-
-export const ServerSnapshotItemSchema = v.variant("status", [
-  PollingServerSchema,
-  OnlineServerSchema,
-  OfflineServerSchema,
-]);
-
-export const ServerSnapshotSchema = v.strictObject({
-  servers: v.array(ServerSnapshotItemSchema),
-});
-
-export type ServerInfo = v.InferOutput<typeof ServerInfoSchema>;
-export type ServerSnapshotItem = v.InferOutput<typeof ServerSnapshotItemSchema>;
 export type OnlineServerSnapshotItem = Extract<ServerSnapshotItem, { status: "online" }>;
-export type ServerStatus = ServerSnapshotItem["status"];
-export type ServerSnapshot = v.InferOutput<typeof ServerSnapshotSchema>;
 
-export function createServerSnapshot(
-  definitions: readonly ServerDefinition[],
-  status: Exclude<ServerStatus, "online">,
-): ServerSnapshot {
-  return {
-    servers: definitions.map((server) => ({ ...server, status })),
-  };
+export interface ServerSnapshot {
+  servers: ServerSnapshotItem[];
 }
-
-export function parseServerSnapshot(input: unknown): ServerSnapshot {
-  return v.parse(ServerSnapshotSchema, input);
-}
-
-export const POLLING_SERVER_SNAPSHOT = createServerSnapshot(servers, "polling");
-export const OFFLINE_SERVER_SNAPSHOT = createServerSnapshot(servers, "offline");

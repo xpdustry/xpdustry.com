@@ -1,7 +1,4 @@
-// The reticulate texture's maths. No DOM here: it runs in Node, for `pnpm textures` and the test
-// that checks what it rendered.
-
-import type { TextureSettings } from "#app/data/textures";
+import type { TextureSettings } from "../src/lib/textures.ts";
 
 /** The labyrinth tile, as alpha in 0..1, `size` px square. */
 export interface Labyrinth {
@@ -18,16 +15,15 @@ export function toLabyrinth(pixels: ArrayLike<number>, channels: number, size: n
   return { data, size };
 }
 
-export type Rgba = readonly [number, number, number, number];
+type Rgba = readonly [number, number, number, number];
 
-export function parseHex(color: string): Rgba {
+function parseHex(color: string): Rgba {
   const hex = color.replace("#", "");
   const [r, g, b] = [0, 2, 4].map((at) => Number.parseInt(hex.slice(at, at + 2), 16));
   return [r!, g!, b!, hex.length > 6 ? Number.parseInt(hex.slice(6, 8), 16) : 255];
 }
 
-/** Smooth value noise in 0..1, tileable when `period` is set. */
-export function makeNoise(seed = 1, period = 0) {
+function makeNoise(seed = 1, period = 0) {
   const hash = (x: number, y: number) => {
     let h = (x * 374761393 + y * 668265263 + seed * 144665) | 0;
     h = (h ^ (h >>> 13)) * 1274126177;
@@ -65,13 +61,12 @@ export function makeNoise(seed = 1, period = 0) {
   };
 }
 
-export const smoothstep = (edge0: number, edge1: number, x: number) => {
+const smoothstep = (edge0: number, edge1: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
   return t * t * (3 - 2 * t);
 };
 
-/** The defaults every texture starts from. */
-export function resolve(settings: TextureSettings) {
+function resolve(settings: TextureSettings) {
   return {
     tile: 300,
     hard: 2,
@@ -86,7 +81,6 @@ export function resolve(settings: TextureSettings) {
   } satisfies TextureSettings & Record<string, unknown>;
 }
 
-/** `blobs` laid side by side every `span` widths, a span past either edge so none is cut off. */
 function spread(blobs: NonNullable<TextureSettings["blobs"]>, span: number) {
   const spread: (typeof blobs)[number][] = [];
   for (let k = -1; k * span < 1 + span; k++) {
@@ -95,7 +89,6 @@ function spread(blobs: NonNullable<TextureSettings["blobs"]>, span: number) {
   return spread;
 }
 
-/** The labyrinth resampled to `tile` px once per tile size, so whole-pixel lookups are one read. */
 const tables = new Map<number, Float32Array>();
 function labyrinthTable(labyrinth: Labyrinth, tile: number): Float32Array {
   let table = tables.get(tile);
@@ -143,27 +136,28 @@ export function renderTexture(
   const aspect = w / h;
   const blobs = s.span ? spread(s.blobs, s.span / aspect) : s.blobs;
   const noise = s.noise ? makeNoise(s.noise.seed ?? 7, s.repeat ? s.noise.scale : 0) : undefined;
-  // a ramp's edge stays straight unless it asks for warp, which makes it lumpy
   const warped = blobs.length > 0 || (s.ramp && s.warp > 0);
 
-  // the warp's frame: by default the render's height, the lumps scaling with it
-  const kx = s.lumps ? w / s.lumps : aspect;
-  const ky = s.lumps ? h / s.lumps : 1;
-  // seamless, the warp comes round again after a whole number of lumps across
-  const across = s.seamless ? Math.max(1, Math.round(2.1 * kx)) : 2.1 * kx;
+  const lumpsAcross = s.lumps ? w / s.lumps : aspect;
+  const lumpsDown = s.lumps ? h / s.lumps : 1;
+  const across = s.seamless ? Math.max(1, Math.round(2.1 * lumpsAcross)) : 2.1 * lumpsAcross;
   const warpX = makeNoise(s.seed, s.seamless ? across : 0);
   const warpY = makeNoise(s.seed + 1, s.seamless ? across : 0);
   const field = (u: number, v: number) => {
     let b = 0;
-    // domain warp, so outlines are lumpy instead of round
     const wu = warped
-      ? u + (s.warp * 0.5 * (warpX(u * across, v * 2.1 * ky, 3) - 0.5)) / (s.lumps ? kx : 1)
+      ? u +
+        (s.warp * 0.5 * (warpX(u * across, v * 2.1 * lumpsDown, 3) - 0.5)) /
+          (s.lumps ? lumpsAcross : 1)
       : u;
-    const wv = warped ? v + (s.warp * 0.5 * (warpY(u * across, v * 2.1 * ky, 3) - 0.5)) / ky : v;
+    const wv = warped
+      ? v + (s.warp * 0.5 * (warpY(u * across, v * 2.1 * lumpsDown, 3) - 0.5)) / lumpsDown
+      : v;
     for (const [bx, by, br, bw] of blobs) {
       const d = Math.hypot((wu - bx) * aspect, wv - by) / br;
       b += bw * Math.exp(-(d ** s.hard));
     }
+    if (s.level) b += s.level;
     if (s.ramp) b += Math.min(1, Math.max(0, (wv - s.ramp[0]) / (s.ramp[1] - s.ramp[0])));
     if (noise && s.noise) {
       const n = noise(u * s.noise.scale * aspect, v * s.noise.scale);
@@ -172,25 +166,23 @@ export function renderTexture(
     return b;
   };
 
-  // the field is smooth, so it is evaluated on a coarse grid and interpolated; only the
-  // labyrinth is sampled per pixel
-  const S = 4;
-  const gw = Math.ceil(w / S) + 1;
-  const gh = Math.ceil(h / S) + 1;
+  const GRID_STEP = 4;
+  const gw = Math.ceil(w / GRID_STEP) + 1;
+  const gh = Math.ceil(h / GRID_STEP) + 1;
   const grid = new Float32Array(gw * gh);
   for (let j = 0; j < gh; j++) {
-    for (let i = 0; i < gw; i++) grid[j * gw + i] = field((i * S) / w, (j * S) / h);
+    for (let i = 0; i < gw; i++) grid[j * gw + i] = field((i * GRID_STEP) / w, (j * GRID_STEP) / h);
   }
 
   const tile = Math.round(s.tile);
   const table = labyrinthTable(labyrinth, tile);
   for (let y = 0; y < h; y++) {
-    const gy = y / S;
+    const gy = y / GRID_STEP;
     const j0 = gy | 0;
     const fy = gy - j0;
     const row = (y % tile) * tile;
     for (let x = 0; x < w; x++) {
-      const gx = x / S;
+      const gx = x / GRID_STEP;
       const i0 = gx | 0;
       const fx = gx - i0;
       const g0 = j0 * gw + i0;
@@ -203,13 +195,14 @@ export function renderTexture(
       if (a <= 0) continue;
 
       const k = (y * w + x) * 4;
-      // the labyrinth keeps running inside a solid core, in the inner tone
-      const m = inner ? smoothstep(0.42, 0.58, r) * Math.min(1, Math.max(0, (b - 0.62) / 0.25)) : 0;
+      const innerMix = inner
+        ? smoothstep(0.42, 0.58, r) * Math.min(1, Math.max(0, (b - 0.62) / 0.25))
+        : 0;
       const to = inner ?? color;
-      pixels[k] = color[0] + (to[0] - color[0]) * m;
-      pixels[k + 1] = color[1] + (to[1] - color[1]) * m;
-      pixels[k + 2] = color[2] + (to[2] - color[2]) * m;
-      pixels[k + 3] = (color[3] + (to[3] - color[3]) * m) * a;
+      pixels[k] = color[0] + (to[0] - color[0]) * innerMix;
+      pixels[k + 1] = color[1] + (to[1] - color[1]) * innerMix;
+      pixels[k + 2] = color[2] + (to[2] - color[2]) * innerMix;
+      pixels[k + 3] = (color[3] + (to[3] - color[3]) * innerMix) * a;
     }
   }
   return { pixels, width: w, height: h };

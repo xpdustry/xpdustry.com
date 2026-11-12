@@ -2,10 +2,8 @@ import { style } from "@vanilla-extract/css";
 import { media, upTo } from "#app/styles/media";
 import { vars } from "#app/styles/theme.css";
 
-/** Where three tiles side by side no longer leave their titles a line of their own. */
 const threeUp = upTo(900);
 
-/** The cover across the top, then the body with the aside beside it, which drops below it on tablets. */
 export const post = style({
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr) 320px",
@@ -38,7 +36,6 @@ export const aside = style({
   },
 });
 
-/** A `card`. */
 export const body = style({
   alignSelf: "start",
   gridColumn: 1,

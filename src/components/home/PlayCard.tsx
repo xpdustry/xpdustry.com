@@ -7,9 +7,7 @@ import { HUB } from "#app/data/servers";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./PlayCard.css";
 
-/** The hub's address, to paste into the game, and how many are playing across the servers. */
 export function PlayCard({ players, className }: { players: Count; className?: string }) {
-  // a narrow card may wrap the address, but only before the site's own domain
   const labels = HUB.hostname.split(".");
   return (
     <section id="servers" className={`${card.card} spot ${styles.play} ${className ?? ""}`}>

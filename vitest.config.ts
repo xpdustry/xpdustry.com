@@ -10,10 +10,6 @@ export default defineConfig({
     conditions: [...defaultServerConditions],
   },
   plugins: [blogMarkdownPlugin(), vanillaExtractPlugin({ identifiers: "debug" })],
-  css: {
-    // readable class names, so tests can assert on them
-    modules: { generateScopedName: "[local]" },
-  },
   test: {
     projects: [
       {

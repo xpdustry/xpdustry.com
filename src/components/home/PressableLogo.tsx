@@ -5,13 +5,8 @@ import { loadLogoFrames } from "#app/lib/relief";
 import { media } from "#app/styles/media";
 import * as styles from "./PressableLogo.css";
 
-const ease = (t: number) => 1 - (1 - t) ** 4; // close to the plinths' cubic-bezier(.22,1,.36,1)
+const ease = (t: number) => 1 - (1 - t) ** 4;
 
-/**
- * The logo as a plinth: it rises under the pointer, presses flat, and pops back up, drawn from the
- * relief logo's pre-rendered frames. A toy for the pointer alone: pressing it does nothing, so it
- * is no button, and hidden from assistive tech beside the name it stands next to.
- */
 export function PressableLogo({ className }: { className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
 
@@ -83,7 +78,6 @@ export function PressableLogo({ className }: { className?: string }) {
 
   return (
     <span ref={ref} className={`${styles.mark} ${className ?? ""}`} aria-hidden="true">
-      {/* at rest, until the frames are ready */}
       <img src={relief} alt="" width={320} height={320} draggable={false} fetchPriority="high" />
     </span>
   );

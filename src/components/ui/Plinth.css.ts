@@ -9,7 +9,6 @@ const onColor = createVar();
 /** The wall's colour, and the face's edge. Exported for a plinth on the deep teal to retune. */
 export const wall = createVar();
 
-// a face lifted under the pointer, a step lighter than its resting colour
 const TEAL_HOVER = "#62d4cd";
 const AMBER_HOVER = "#ffe0a8";
 
@@ -29,7 +28,6 @@ const palette = (colors: Palette) => ({
 
 const teal: Palette = { face: vars.t9, hover: TEAL_HOVER, wall: vars.wall, on: vars.onTeal };
 
-/** A button standing on its own wall: the face rises on hover and presses flat into the wall. */
 export const plinth = style({
   vars: { [depth]: "4px", ...palette(teal) },
   position: "relative",
@@ -45,7 +43,6 @@ export const plinth = style({
   cursor: "pointer",
 });
 
-/** Teal, the default, needs no class. */
 export const tone = styleVariants({
   amber: {
     vars: palette({ face: vars.a9, hover: AMBER_HOVER, wall: vars.amberWall, on: vars.onAmber }),
@@ -53,17 +50,14 @@ export const tone = styleVariants({
   ink: { vars: palette({ face: vars.tile, hover: vars.n3, wall: vars.outline, on: vars.ink }) },
 });
 
-/** Teal and still, as after a copy: there is nothing more to press for. */
 export const done = style({});
 
-// and so is a link to the current page (not to a section of it)
 globalStyle(`${plinth}[aria-current]:not([href*="#"]), ${done}`, {
   vars: palette({ ...teal, hover: teal.face }),
 });
 
 export const sm = style({});
 
-/** A square around a single icon. */
 export const icon = style({});
 
 export const face = style({

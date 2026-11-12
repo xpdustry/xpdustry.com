@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Tray } from "#app/components/tray/Tray";
-import { GitHub, PuzzlePiece } from "#app/lib/icons";
 import { Patches } from "#app/components/ui/Patches";
 import type { LiveData } from "#app/data/live";
 import { PATCHES } from "#app/data/patches";
 import { projects, repositoryUrl, type Project } from "#app/data/projects";
 import { SITE } from "#app/data/site";
-import type { Patches as PatchSet } from "#app/data/textures";
 import { versionOf } from "#app/lib/format";
+import { GitHub, PuzzlePiece } from "#app/lib/icons";
+import type { Patches as PatchSet } from "#app/lib/textures";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Projects.css";
 
@@ -51,7 +51,6 @@ export function Projects({ releases }: { releases: LiveData["releases"] }) {
   );
 }
 
-/** A linked card, on its own ground when it has one, with its patches. */
 function Tile({
   href,
   ground,

@@ -1,9 +1,3 @@
-// Social cards, rendered on demand by takumi and kept for an hour.
-//
-// `routes/og/$.ts` serves them, and `lib/seo.ts` points the pages at them. Each path renders once
-// per hour per process: post and blog cards only change on deploy, and the home card follows the
-// GitHub star count, which refreshes on the same schedule.
-
 import dmMono from "@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2?inline";
 import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-400-normal.woff2?inline";
 import { Renderer } from "@takumi-rs/core";
@@ -24,7 +18,6 @@ const FONTS = [
   { name: "DM Mono", data: bytes(dmMono), weight: 400 },
 ];
 
-// Topic icons as data URIs, keyed by the URL the rest of the site knows them by.
 const iconData = import.meta.glob<string>("/src/assets/brand/*", {
   query: "?inline",
   import: "default",
@@ -61,7 +54,6 @@ function bytes(dataUri: string): Buffer {
   return Buffer.from(dataUri.slice(dataUri.indexOf(",") + 1), "base64");
 }
 
-// One renderer per process: it owns the parsed fonts.
 function getRenderer(): Promise<Renderer> {
   renderer ??= (async () => {
     const instance = new Renderer();
@@ -71,8 +63,7 @@ function getRenderer(): Promise<Renderer> {
   return renderer;
 }
 
-/** The card for a path such as `home.png` or `blog/<slug>.png`, if a page owns one. */
-export function cardFor(path: string): ReactElement | undefined {
+function cardFor(path: string): ReactElement | undefined {
   if (path === "home.png") {
     const stars = services().github.value?.stars;
     return <HomeCard stats={{ projects: projects.length, servers: servers.length, stars }} />;
@@ -84,7 +75,7 @@ export function cardFor(path: string): ReactElement | undefined {
   return post && <PostCard post={post} />;
 }
 
-export async function renderCard(card: ReactElement): Promise<Png> {
+async function renderCard(card: ReactElement): Promise<Png> {
   const { node, css } = await fromJsx(card);
   const png = await (await getRenderer()).render(node, { ...CARD_SIZE, format: "png", css });
   return new Uint8Array(png);

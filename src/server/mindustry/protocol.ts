@@ -10,7 +10,7 @@ const GAMEMODES = ["survival", "sandbox", "attack", "pvp", "editor"] as const;
 
 const MAX_PLAYERS = 1_000_000;
 
-export const RawServerInfoSchema = v.object({
+const RawServerInfoSchema = v.object({
   name: v.string(),
   description: v.string(),
   map: v.string(),
@@ -39,7 +39,7 @@ export const RawServerInfoSchema = v.object({
   port: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(65535)),
 });
 
-export type RawServerInfo = v.InferOutput<typeof RawServerInfoSchema>;
+type RawServerInfo = v.InferOutput<typeof RawServerInfoSchema>;
 
 export class MalformedPacketError extends Error {
   constructor(message: string, options?: ErrorOptions) {

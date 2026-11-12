@@ -4,7 +4,6 @@ import { PATCHES } from "#app/data/patches";
 import * as card from "#app/components/ui/Card.css";
 import * as styles from "./Message.css";
 
-/** A page that is only a message, such as a 404: a status code, what happened, a way on. */
 export function Message({
   code,
   title,

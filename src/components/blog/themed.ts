@@ -4,7 +4,6 @@ import type { Topic } from "#app/data/topics";
 import { vars } from "#app/styles/theme.css";
 import { accent, accentInk } from "./themed.css";
 
-/** The inline style that dresses a card in its topic's colours: its ground, muted text and accent. */
 export function themed(theme: Topic): CSSProperties {
   return {
     background: theme.ground,

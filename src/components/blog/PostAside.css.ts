@@ -14,7 +14,6 @@ export const aside = style({
   },
 });
 
-/** A `card`, padded. */
 export const panel = style({
   padding: 22,
 });

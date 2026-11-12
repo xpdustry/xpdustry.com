@@ -12,7 +12,6 @@ export const hero = style({
   },
 });
 
-/** The play and Discord cards, stacked beside the hero. */
 export const side = style({
   gridColumn: "span 5",
   gridRow: "span 2",

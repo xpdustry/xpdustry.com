@@ -7,9 +7,9 @@ import {
 } from "#app/server/mindustry/protocol";
 import type { MindustryStatusProbe } from "#app/server/mindustry/status";
 
-export const DEFAULT_MINDUSTRY_PORT = 6567;
-export const QUERY_TIMEOUT_MS = 5_000;
-export const ENDPOINT_TIMEOUT_MS = 1_500;
+const DEFAULT_MINDUSTRY_PORT = 6567;
+const QUERY_TIMEOUT_MS = 5_000;
+const ENDPOINT_TIMEOUT_MS = 1_500;
 
 const MAX_REPLY_BYTES = 4096;
 

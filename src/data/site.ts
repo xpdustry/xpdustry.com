@@ -14,5 +14,6 @@ export const SITE = {
 } as const;
 
 export const BLOG_TITLE = "Xpdustry blog: Mindustry plugin news, guides and release notes";
+export const BLOG_TAGLINE = "Release notes, guides and articles";
 export const BLOG_DESCRIPTION =
   "Release notes, guides and articles about Xpdustry Mindustry mods and plugins.";

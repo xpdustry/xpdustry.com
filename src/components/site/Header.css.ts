@@ -1,21 +1,13 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { onDeep } from "#app/components/site/deep";
-import { upTo } from "#app/styles/media";
+import { media, upTo } from "#app/styles/media";
 import { radius } from "#app/styles/scale";
 import { tone, wall } from "#app/components/ui/Plinth.css";
 import { vars } from "#app/styles/theme.css";
 
-/**
- * Narrower, the pages wait in a panel under the menu button: the brand, the pages, the play pill
- * and the GitHub button need about 1230px in a row.
- */
 const folded = upTo(1240);
-/** No room left for the GitHub button. */
 const narrow = upTo(520);
-/** A phone: the mark stands for the name. */
-const small = upTo(430);
 
-/** The room under the header, which the open panel reaches into. */
 const below = `calc(${vars.group} * 0.55)`;
 
 export const header = style({
@@ -31,22 +23,19 @@ export const header = style({
   },
 });
 
-// on the deep teal, a white plinth's wall in the page's outline colour would vanish
 globalStyle(`${header} ${tone.ink}`, {
   vars: { [wall]: vars.deepWall },
 });
 
-// an icon never gives up its room to the text beside it
 globalStyle(`${header} svg`, {
   flex: "none",
 });
 
 export const brand = style({});
 
-// the brand's name still names the link
 globalStyle(`${brand} span`, {
   "@media": {
-    [small]: {
+    [media.small]: {
       position: "absolute",
       width: 1,
       height: 1,
@@ -103,13 +92,11 @@ export const play = style({
   },
 });
 
-// as tall as the nav beside it
 globalStyle(`${header} ${play} > span`, {
   gap: 10,
   padding: "10px 13px 10px 14px",
 });
 
-/** The icon buttons at the end, which keep closer company than the header's groups do. */
 const end = style({
   selectors: {
     [`${header} &`]: { marginLeft: -12 },

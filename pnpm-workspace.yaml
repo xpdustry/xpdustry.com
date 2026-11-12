@@ -1,6 +1,5 @@
 allowBuilds:
   esbuild: true
-  cypress: false
 minimumReleaseAgeExclude:
   - "@tanstack/react-router@1.170.46"
   - "@tanstack/react-start-client@1.168.44"

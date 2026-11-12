@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Brand } from "#app/components/site/Brand";
 import { PlayPill } from "#app/components/site/PlayPill";
-import { GitHub, List, X } from "#app/lib/icons";
 import {
   PlinthAnchor,
   PlinthButton,
@@ -10,12 +9,9 @@ import {
 } from "#app/components/ui/Plinth";
 import type { PlayerCount } from "#app/data/live";
 import { SITE } from "#app/data/site";
+import { GitHub, List, X } from "#app/lib/icons";
 import * as styles from "./Header.css";
 
-/**
- * Wide, the pages in a row beside the brand; narrower, behind a menu button, in a panel that
- * shuts on a link, on Escape and on a press anywhere else.
- */
 export function Header({ players }: { players: PlayerCount }) {
   const [open, setOpen] = useState(false);
   const header = useRef<HTMLElement>(null);
@@ -28,7 +24,6 @@ export function Header({ players }: { players: PlayerCount }) {
     const shut = (event: KeyboardEvent | PointerEvent) => {
       if (event instanceof KeyboardEvent) {
         if (event.key !== "Escape") return;
-        // focus does not stay behind on a link that is no longer there
         if (inside(document.activeElement)) toggle.current?.focus();
       } else if (inside(event.target)) return;
       setOpen(false);
@@ -45,7 +40,6 @@ export function Header({ players }: { players: PlayerCount }) {
   return (
     <header ref={header} className={`${styles.header} reveal`}>
       <Brand className={styles.brand} />
-      {/* before the pages, so Tab goes from it into them; it sits last by `order` */}
       <PlinthButton
         ref={toggle}
         tone="ink"

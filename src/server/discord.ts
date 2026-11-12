@@ -1,7 +1,6 @@
 import * as v from "valibot";
 import type { DiscordCounts } from "#app/data/live";
 
-// The invite endpoint is public and answers with approximate counts, which is all the card shows.
 const InviteSchema = v.object({
   approximate_member_count: v.pipe(v.number(), v.integer(), v.minValue(0)),
   approximate_presence_count: v.pipe(v.number(), v.integer(), v.minValue(0)),

@@ -1,8 +1,3 @@
-// The social card frame, in the site's colours: identifier, mark, hairline, stats and accent bar.
-//
-// React elements handed to takumi, which lays them out with the subset of CSS it shares with
-// browsers: flexbox, absolute positioning, blend modes and masks; no grid or pseudo-elements.
-
 import type { CSSProperties, ReactNode } from "react";
 import logo from "#app/assets/logo.svg?raw";
 import texture from "#app/assets/reticulate.png?inline";
@@ -37,7 +32,7 @@ const color = {
 } as const;
 
 const host = SITE.origin.replace("https://", "");
-export const LOGO = `data:image/svg+xml;base64,${Buffer.from(logo.replace(/<\?xml[^>]*\?>/, "")).toString("base64")}`;
+const LOGO = `data:image/svg+xml;base64,${Buffer.from(logo.replace(/<\?xml[^>]*\?>/, "")).toString("base64")}`;
 
 function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; children: ReactNode }) {
   return (
@@ -55,7 +50,6 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
         fontFamily: "Momo Trust Display",
       }}
     >
-      {/* the labyrinth builds into the quadrant the mark occupies, leaving the type clean */}
       <div
         style={{
           position: "absolute",
@@ -75,7 +69,6 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 760 }}>{children}</div>
-        {/* contained, so a mark that is not square (NoHorny's) keeps its shape */}
         <img
           src={mark}
           alt=""
@@ -109,7 +102,6 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-/** `xpdustry.com/` light, then the section, as GitHub sets `owner/repo`. */
 function Identifier({ path }: { path: string }) {
   return (
     <div style={{ fontSize: 64, lineHeight: 1.05, letterSpacing: "-.02em" }}>
@@ -129,7 +121,6 @@ function Description({ children }: { children: ReactNode }) {
   return <div style={style}>{children}</div>;
 }
 
-/** Real post titles run from twelve to ninety characters, so the scale follows the length. */
 function titleSize(title: string): number {
   if (title.length <= 22) return 66;
   if (title.length <= 52) return 56;

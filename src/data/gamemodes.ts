@@ -1,6 +1,6 @@
-import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/lib/icons";
 import { EDGES, SPREADS } from "#app/data/patches";
-import type { Fringe, Patches, SpreadTiles } from "#app/data/textures";
+import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/lib/icons";
+import type { Fringe, Patches, SpreadTiles } from "#app/lib/textures";
 
 export interface Gamemode {
   /** The `servers` entry that runs it. */
@@ -8,12 +8,7 @@ export interface Gamemode {
   name: string;
   description: string;
   icon: Icon;
-  /**
-   * Its colour, as the frayed edges its header ends in: patches down its side, or a fringe along
-   * its foot where the header lies across the card.
-   */
   edge: { side: Patches; below: Fringe };
-  /** Its reticulate, which spreads over the card when its address is copied. */
   spread: SpreadTiles;
 }
 

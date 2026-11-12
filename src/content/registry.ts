@@ -1,11 +1,7 @@
-// Every post's frontmatter is loaded eagerly, so listings need no I/O and the build validates them
-// all. A post's body is only loaded by the page that shows it.
-
 import type { MarkdownDocument } from "@tanstack/markdown";
 import { ContentError } from "#app/content/errors";
 import type { BlogFrontmatter } from "#app/content/schema";
 
-/** What `vite/markdown.ts` compiles a post into. */
 export interface PostModule {
   frontmatter: BlogFrontmatter;
   document: MarkdownDocument;
