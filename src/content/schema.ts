@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { authorNames } from "#app/content/authors";
-import { NonBlankStringSchema } from "#app/lib/schema";
+import { ContentError } from "#app/content/errors";
+import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "#app/lib/schema";
 
 const IsoCalendarDateSchema = v.pipe(
   v.string(),
@@ -32,7 +33,8 @@ export const BlogFrontmatterSchema = v.strictObject(
     updatedAt: v.optional(BlogFrontmatterDateSchema),
     author: v.picklist(authorNames, "must be a known author"),
     topic: NonBlankStringSchema,
-    hero: v.optional(NonBlankStringSchema),
+    /** The image behind the post on cards. Posts without one get a game screenshot. */
+    hero: v.optional(blogMediaPathSchema(IMAGE_EXTENSIONS)),
     releases: v.optional(
       v.pipe(
         v.array(ReleaseIdSchema),
@@ -44,13 +46,6 @@ export const BlogFrontmatterSchema = v.strictObject(
 );
 
 export type BlogFrontmatter = v.InferOutput<typeof BlogFrontmatterSchema>;
-
-export class ContentError extends Error {
-  constructor(file: string, message: string, options?: ErrorOptions) {
-    super(`${file}: ${message}`, options);
-    this.name = "ContentError";
-  }
-}
 
 export function parseBlogFrontmatter(file: string, value: unknown): BlogFrontmatter {
   const result = v.safeParse(BlogFrontmatterSchema, value);

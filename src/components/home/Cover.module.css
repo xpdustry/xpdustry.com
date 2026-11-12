@@ -1,0 +1,44 @@
+.cover {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: 92px;
+  gap: var(--gap);
+}
+
+.hero {
+  grid-column: span 7;
+  grid-row: span 4;
+}
+
+.play,
+.discord {
+  grid-column: span 5;
+  grid-row: span 2;
+}
+
+@media (max-width: 1100px) {
+  .cover {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .hero {
+    grid-column: span 6;
+  }
+
+  .play,
+  .discord {
+    grid-column: span 3;
+  }
+}
+
+@media (max-width: 640px) {
+  .cover {
+    grid-auto-rows: auto;
+  }
+
+  .cover > * {
+    grid-column: span 6;
+    grid-row: auto;
+    min-height: 180px;
+  }
+}

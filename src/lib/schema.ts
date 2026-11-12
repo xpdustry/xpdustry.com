@@ -5,7 +5,18 @@ export const NonBlankStringSchema = v.pipe(
   v.regex(/\S/u, "must be a non-empty string"),
 );
 
-export const LenientBooleanSchema = v.pipe(
-  v.optional(v.string(), "0"),
-  v.parseBoolean({ truthy: ["1"], falsy: ["0", ""] }, "must be 0 or 1 when set"),
-);
+export const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"] as const;
+
+/** A file under `public/blog/`, addressed from the site root, with one of the given extensions. */
+export function blogMediaPathSchema(extensions: readonly string[]) {
+  return v.pipe(
+    v.string(),
+    v.check(
+      (value) =>
+        /^\/blog\/[a-z0-9][a-z0-9._/-]*$/i.test(value) &&
+        !value.split("/").includes("..") &&
+        extensions.some((extension) => value.toLowerCase().endsWith(extension)),
+      "must be a repository-owned blog media path",
+    ),
+  );
+}

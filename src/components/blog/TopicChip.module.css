@@ -1,0 +1,14 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px 4px 5px;
+  border-radius: 8px;
+  background: var(--chip);
+  color: var(--chip-ink);
+  font-size: 12.5px;
+}
+
+.chip img {
+  width: 16px;
+}

@@ -2,7 +2,7 @@
 
 ## Lucide icons
 
-The stroke icons in `src/components/system/Icons.tsx` are adapted from Lucide.
+The stroke icons in `src/components/ui/Icons.tsx` are adapted from Lucide.
 
 ISC License
 

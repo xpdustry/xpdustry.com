@@ -1,6 +1,6 @@
 {
   "name": "xpdustry-website",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "The xpdustry website",
   "license": "MIT",
@@ -9,48 +9,44 @@
     "#app/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "vite build",
-    "start": "node --env-file-if-exists=.env --env-file-if-exists=.env.local dist/server/node.js",
-    "pattern": "node --experimental-strip-types vite/reticulate-gen.ts",
+    "start": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/serve.ts",
+    "pattern": "node scripts/reticulate-gen.ts",
     "format": "oxfmt .",
     "format:check": "oxfmt . --check",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix --fix-suggestions",
     "test": "pnpm test:unit && pnpm test:artifact",
-    "test:unit": "vitest run --project server",
-    "test:artifact": "pnpm build && vitest run --project artifact --project hydration",
+    "test:unit": "vitest run --project unit",
+    "test:artifact": "pnpm build && vitest run --project artifact",
     "typecheck": "tsc --noEmit",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test"
   },
   "dependencies": {
-    "@solidjs/meta": "1.0.0-next.2",
-    "@solidjs/router": "2.0.0-next.23",
-    "@solidjs/web": "2.0.0-rc.7",
-    "@takumi-rs/core": "2.14.0",
-    "@takumi-rs/helpers": "2.14.0",
-    "@vanilla-extract/css": "^1.21.2",
-    "@vanilla-extract/recipes": "^0.5.7",
-    "filesystem-routing": "0.3.0",
-    "lucide": "1.47.0",
-    "simple-icons": "^16.28.0",
-    "solid-js": "2.0.0-rc.7",
-    "valibot": "^1.4.2"
+    "@takumi-rs/core": "2.17.1",
+    "@takumi-rs/helpers": "2.17.1",
+    "@tanstack/markdown": "1.0.0",
+    "@tanstack/react-router": "^1.170.46",
+    "@tanstack/react-start": "^1.169.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "srvx": "^1.0.6",
+    "valibot": "^1.5.0"
   },
   "devDependencies": {
-    "@fontsource-variable/archivo": "^5.3.0",
-    "@fontsource/martian-mono": "^5.3.0",
-    "@tanstack/markdown": "0.0.13",
+    "@fontsource-variable/momo-trust-sans": "^5.3.0",
+    "@fontsource/dm-mono": "^5.3.0",
+    "@fontsource/momo-trust-display": "^5.3.0",
     "@types/node": "^24.0.0",
-    "@vanilla-extract/vite-plugin": "^5.2.6",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "fast-png": "^8.0.0",
-    "jsdom": "^30.0.1",
     "oxfmt": "^0.67.0",
     "oxlint": "^1.78.0",
-    "sitemap": "^9.0.1",
     "typescript": "^7.0.2",
-    "vite": "^8.2.1",
-    "vite-plugin-solid": "3.0.0-next.27",
+    "vite": "^8.3.5",
     "vitest": "^5.0.0",
     "yaml": "2.9.0"
   },
@@ -60,7 +56,7 @@
     "last 2 Safari versions"
   ],
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "packageManager": "pnpm@12.3.4"
 }

@@ -1,0 +1,200 @@
+@import "@fontsource/momo-trust-display/400.css";
+@import "@fontsource-variable/momo-trust-sans/wght.css";
+@import "@fontsource/dm-mono/400.css";
+@import "@fontsource/dm-mono/500.css";
+
+:root {
+  color-scheme: light;
+
+  /* neutrals, teal and amber ramps */
+  --n1: #f7fdfd;
+  --n2: #eef8f7;
+  --n3: #e4f1f0;
+  --n6: #c2d5d3;
+  --n10: #587270;
+  --n11: #395654;
+  --n12: #0e2625;
+  --t3: #c6f6f2;
+  --t9: #41c1ba;
+  --t12: #003331;
+  --a3: #fde6c1;
+  --a9: #ffd37f;
+  --a11: #795700;
+
+  /* roles */
+  --page: #135854;
+  --tile: var(--n1);
+  --ink: var(--n12);
+  --muted: var(--n11);
+  --outline: #0f3b38;
+  --wall: #1f8f88;
+  --amber-wall: #a67618;
+  --deep: #083230;
+  --deep-ink: #a2c2bf;
+  --tray: #b8dfda;
+  --online: #3ba55d;
+  --glow: 65 193 186;
+  --focus: #007f79;
+
+  /* shape */
+  --r: 26px;
+  --gap: 14px;
+  /* the space between the page's groups: header, cover, each tray and the footer */
+  --group: 56px;
+
+  --font-display: "Momo Trust Display", system-ui, sans-serif;
+  --font-text: "Momo Trust Sans Variable", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 16px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --group: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    scroll-behavior: smooth;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: inherit;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* zero specificity: a component's own radius or offset always wins */
+:where(:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* the page column; the footer reuses it with its own padding */
+.wrap {
+  width: min(1180px, 100% - 2 * clamp(20px, 5vw, 56px));
+  margin-inline: auto;
+  padding: var(--gap);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* hidden until a keyboard user tabs onto it */
+.skip-link {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--tile);
+  color: var(--ink);
+  translate: 0 -200%;
+}
+
+.skip-link:focus-visible {
+  translate: none;
+}
+
+/* Mindustry sprites are pixel art: scale them up without smoothing */
+.sprite {
+  image-rendering: pixelated;
+}
+
+/* A card that glows along its edge as the pointer comes near (see useSpotlight). */
+:where(.spot)::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 5;
+  padding: 2px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot, 0);
+  background: radial-gradient(
+    220px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgb(var(--glow)),
+    transparent 70%
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

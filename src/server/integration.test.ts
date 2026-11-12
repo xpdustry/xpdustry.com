@@ -1,40 +1,42 @@
+// Runs against the production build: `pnpm test:artifact` builds first.
+
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, test } from "vitest";
 
-const handlerPath = fileURLToPath(new URL("../../dist/server/index.js", import.meta.url));
+const entryPath = fileURLToPath(new URL("../../dist/server/server.js", import.meta.url));
 const clientRoot = fileURLToPath(new URL("../../dist/client/", import.meta.url));
-let handleRequest: (request: Request) => Promise<Response>;
+let fetchApp: (request: Request) => Promise<Response>;
 
 process.env.XPD_DISABLE_STATUS = "1";
 
 async function get(path: string): Promise<Response> {
-  return handleRequest(new Request(`https://xpdustry.com${path}`));
+  return fetchApp(new Request(`https://xpdustry.com${path}`));
 }
 
 beforeAll(async () => {
-  ({ handleRequest } = await import(handlerPath));
+  const entry = (await import(entryPath)) as {
+    default: { fetch: (request: Request) => Promise<Response> };
+  };
+  fetchApp = (request) => entry.default.fetch(request);
 });
 
 describe("built pages", () => {
   test("publishes crawler metadata", async () => {
-    const [robots, sitemap] = await Promise.all([
-      readFile(`${clientRoot}robots.txt`, "utf8"),
-      readFile(`${clientRoot}sitemap.xml`, "utf8"),
-    ]);
+    const robots = await readFile(`${clientRoot}robots.txt`, "utf8");
+    const sitemap = await (await get("/sitemap.xml")).text();
 
     expect(robots).toContain("Allow: /");
     expect(robots).toContain("Sitemap: https://xpdustry.com/sitemap.xml");
     expect(sitemap).toContain("<loc>https://xpdustry.com/</loc>");
     expect(sitemap).toContain("<loc>https://xpdustry.com/blog</loc>");
     expect(sitemap).toContain("<loc>https://xpdustry.com/blog/nohorny-4-beta-8</loc>");
-    expect(sitemap).not.toContain("styleguide");
   });
 
   test.each([
-    ["/", "Pretty cool Mindustry tools."],
-    ["/blog", "Release notes"],
-    ["/blog/nohorny-4-beta-8", "Discord alerts are now blurred"],
+    ["/", "Since 2019 we’ve made open source mods and plugins for"],
+    ["/blog", "Release notes and updates from the team."],
+    ["/blog/nohorny-4-beta-8", "Discord alerts now arrive blurred"],
   ])("%s renders its primary content", async (path, content) => {
     const response = await get(path);
     expect(response.status).toBe(200);
@@ -44,25 +46,30 @@ describe("built pages", () => {
     expect((html.match(/<h1[\s>]/g) ?? []).length).toBe(1);
   });
 
-  test("unknown routes retain their requested canonical URL", async () => {
-    const response = await get("/no-such-page");
-    expect(response.status).toBe(404);
-
-    const html = await response.text();
-    expect(html).toContain("this page does not exist");
-    expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/no-such-page"');
+  test("a post renders its body on the server", async () => {
+    const html = await (await get("/blog/nohorny-4-beta-8")).text();
+    expect(html).toContain("Breaking change");
+    expect(html).toMatch(/<img src="\/blog\/nohorny-discord-alert\.png"/);
   });
 
-  test("the development style guide is absent from production", async () => {
-    expect((await get("/styleguide")).status).toBe(404);
-  });
+  test.each(["/no-such-page", "/blog/no-such-post"])(
+    "%s is a 404 that keeps its requested canonical URL",
+    async (path) => {
+      const response = await get(path);
+      expect(response.status).toBe(404);
+
+      const html = await response.text();
+      expect(html).toContain("this page does not exist");
+      expect(html).toContain(`<link rel="canonical" href="https://xpdustry.com${path}"`);
+    },
+  );
 
   test("route metadata replaces rather than duplicates document metadata", async () => {
     const html = await (await get("/blog")).text();
     const titles = [...html.matchAll(/<title[^>]*>([^<]*)<\/title>/g)].map((match) => match[1]);
 
     expect(titles).toEqual(["Blog - Xpdustry"]);
-    expect(html).toContain('<meta name="description"');
+    expect(html.match(/<meta name="description"/g)).toHaveLength(1);
     expect(html).toContain('<link rel="canonical" href="https://xpdustry.com/blog"');
   });
 });
@@ -87,10 +94,8 @@ describe("built API", () => {
     expect(body).not.toMatch(/"resolvedHost"|"resolvedPort"/);
 
     const snapshot = JSON.parse(body);
-    const aliases = snapshot.servers.map((server: { hostname: string }) => server.hostname);
-    expect(aliases.length).toBeGreaterThan(0);
-    const baseline = await (await get("/api/servers")).json();
-    expect(snapshot).toEqual(baseline);
+    expect(snapshot.servers.length).toBeGreaterThan(0);
+    expect(snapshot).toEqual(await (await get("/api/servers")).json());
     expect(
       snapshot.servers.every((server: { status: string }) => server.status === "polling"),
     ).toBe(true);
@@ -105,8 +110,6 @@ describe("built social cards", () => {
         html,
       )?.[1];
       expect(card, path).toMatch(/^\/og\/.+\.png$/);
-      // The home card reaches for GitHub, which the artifact suite must not depend on.
-      if (path === "/") continue;
 
       const response = await get(card!);
       expect(response.status).toBe(200);

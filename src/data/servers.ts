@@ -4,6 +4,7 @@ export interface ServerDefinition {
   hostname: string;
 }
 
+/** Every server the status service polls. */
 export const servers: readonly ServerDefinition[] = [
   { slug: "hub", label: "Hub", hostname: "hub.md.xpdustry.com" },
   { slug: "survival", label: "Survival", hostname: "survival.md.xpdustry.com" },
@@ -13,3 +14,6 @@ export const servers: readonly ServerDefinition[] = [
   { slug: "tower", label: "Tower Defense", hostname: "tower.md.xpdustry.com" },
   { slug: "event", label: "Event", hostname: "event.md.xpdustry.com" },
 ];
+
+/** The server new players are pointed at. */
+export const HUB = servers[0]!;

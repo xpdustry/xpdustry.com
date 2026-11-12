@@ -6,6 +6,7 @@ description: >-
 publishedAt: 2026-10-07
 author: phinner
 topic: NoHorny
+hero: /blog/nohorny-site-hero-dark.png
 releases:
   - xpdustry/nohorny@v4.0.0-beta.9
   - xpdustry/nohorny@v4.0.0-beta.10
@@ -31,7 +32,7 @@ But **MOST IMPORTANTLY**, I finally added a decent frontend for NoHorny:
 
 - [With an official website](https://nohorny.xpdustry.com).
 
-- Details page for individual requests, linked in the logs and in the discord reports. Can be used as proofs for your ban system and also for sharing. 
+- Details page for individual requests, linked in the logs and in the discord reports. Can be used as proofs for your ban system and also for sharing.
 
 - And the long awaited admin panel. Besides the request list, filter and search, you have access to very useful stats.
 

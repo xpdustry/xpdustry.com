@@ -1,52 +1,45 @@
-// Eager loading validates every post during the build.
+// Every post's frontmatter is loaded eagerly, so listings need no I/O and the build validates them
+// all. A post's body is only loaded by the page that shows it.
 
-import { ContentError, type BlogFrontmatter } from "#app/content/schema";
+import type { MarkdownDocument } from "@tanstack/markdown";
+import { ContentError } from "#app/content/errors";
+import type { BlogFrontmatter } from "#app/content/schema";
 
-export interface MarkdownModule {
+/** What `vite/markdown.ts` compiles a post into. */
+export interface PostModule {
   frontmatter: BlogFrontmatter;
-  html: string;
+  document: MarkdownDocument;
 }
 
-export interface BlogPost {
+export interface Post {
   slug: string;
   frontmatter: BlogFrontmatter;
-  html: string;
+  /** The post's body, in its own chunk. */
+  load: () => Promise<MarkdownDocument>;
 }
 
-const blogModules = import.meta.glob<MarkdownModule>("./blog/*.md", {
+const frontmatters = import.meta.glob<BlogFrontmatter>("./blog/*.md", {
+  import: "frontmatter",
   eager: true,
 });
+const documents = import.meta.glob<MarkdownDocument>("./blog/*.md", { import: "document" });
 
-export const posts: readonly BlogPost[] = buildPosts();
-export const postsBySlug: ReadonlyMap<string, BlogPost> = new Map(
+/** Newest first. */
+export const posts: readonly Post[] = buildPosts();
+export const postsBySlug: ReadonlyMap<string, Post> = new Map(
   posts.map((post) => [post.slug, post]),
 );
 
 assertReleasesAreClaimedOnce();
 
-function buildPosts(): BlogPost[] {
-  const seen = new Set<string>();
-  const built: BlogPost[] = [];
-
-  for (const [file, module] of Object.entries(blogModules)) {
-    const slug = fileSlug(file);
-    if (seen.has(slug)) throw new ContentError(file, `duplicate post slug ${slug}`);
-    seen.add(slug);
-
-    built.push({
-      slug,
-      frontmatter: module.frontmatter,
-      html: module.html,
-    });
-  }
-
-  return built.sort(
-    (a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt),
-  );
-}
-
-function fileSlug(file: string): string {
-  return file.replace(/^.*\//, "").replace(/\.md$/, "");
+function buildPosts(): Post[] {
+  return Object.entries(frontmatters)
+    .map(([file, frontmatter]) => ({
+      slug: file.replace(/^.*\//, "").replace(/\.md$/, ""),
+      frontmatter,
+      load: documents[file]!,
+    }))
+    .sort((a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt));
 }
 
 function assertReleasesAreClaimedOnce(): void {
@@ -60,4 +53,16 @@ function assertReleasesAreClaimedOnce(): void {
       claimedBy.set(id, post.slug);
     }
   }
+}
+
+/** The `count` posts published closest to `slug`, newer ones winning ties, newest first. */
+export function nearbyPosts(slug: string, count = 3): Post[] {
+  const index = posts.findIndex((post) => post.slug === slug);
+  return posts
+    .map((post, at) => ({ post, at, distance: Math.abs(at - index) }))
+    .filter((entry) => entry.at !== index)
+    .sort((a, b) => a.distance - b.distance || a.at - b.at)
+    .slice(0, count)
+    .sort((a, b) => a.at - b.at)
+    .map((entry) => entry.post);
 }

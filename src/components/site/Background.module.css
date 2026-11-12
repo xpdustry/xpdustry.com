@@ -1,0 +1,33 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+/* the parallax: one 900 px tile per 2700 px of scroll, forty times over before it stops */
+@media (prefers-reduced-motion: no-preference) {
+  .background {
+    height: calc(100vh + 900px);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .background {
+      animation: drift auto linear 40 both;
+      animation-timeline: scroll(root);
+      animation-range: 0 108000px;
+    }
+  }
+}
+
+@keyframes drift {
+  to {
+    transform: translateY(-900px);
+  }
+}
+
+.pattern {
+  z-index: 0;
+}

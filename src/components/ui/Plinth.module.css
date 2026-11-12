@@ -1,0 +1,97 @@
+/* A button standing on its own wall: the face rises on hover and presses flat into the wall. */
+.plinth {
+  --plinth-depth: 4px;
+  --plinth-face: var(--t9);
+  --plinth-hover: #62d4cd;
+  --plinth-wall: var(--wall);
+  --plinth-on: #08201e;
+  position: relative;
+  display: inline-flex;
+  margin-top: var(--plinth-depth);
+  padding: 0;
+  border: 2px solid var(--plinth-wall);
+  border-radius: 13px;
+  background: var(--plinth-wall);
+  color: var(--plinth-on);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.face {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: -2px;
+  padding: 9px 16px;
+  border: 2px solid var(--plinth-wall);
+  border-radius: inherit;
+  background: var(--plinth-face) linear-gradient(rgb(255 255 255 / 0.26) 0 45%, transparent 45%);
+  font-size: 15px;
+  transform: translateY(calc(var(--plinth-depth) * -1));
+  transition:
+    transform 0.19s var(--ease-out),
+    background-color 0.13s;
+}
+
+.plinth:hover > .face {
+  transform: translateY(calc(var(--plinth-depth) * -1 - 2px));
+  background-color: var(--plinth-hover);
+}
+
+.plinth:active > .face {
+  transform: none;
+  transition-duration: 0.06s;
+}
+
+.plinth svg {
+  width: 18px;
+  height: 18px;
+}
+
+.amber {
+  --plinth-face: var(--a9);
+  --plinth-hover: #ffe0a8;
+  --plinth-wall: var(--amber-wall);
+  --plinth-on: #2b1a00;
+}
+
+.ink {
+  --plinth-face: var(--tile);
+  --plinth-hover: var(--n3);
+  --plinth-wall: var(--outline);
+  --plinth-on: var(--ink);
+}
+
+/* pressed in: the current page (not a section of it), or a copy that just landed */
+.plinth[aria-current]:not([href*="#"]),
+.done {
+  --plinth-face: var(--t9);
+  --plinth-hover: var(--t9);
+  --plinth-wall: var(--wall);
+  --plinth-on: #08201e;
+}
+
+.plinth[aria-current]:not([href*="#"]) > .face {
+  transform: none;
+  background-image: none;
+  box-shadow: inset 0 3px 0 rgb(0 0 0 / 0.14);
+}
+
+.sm > .face {
+  padding: 7px 13px;
+  font-size: 14px;
+}
+
+.icon > .face {
+  padding: 8px;
+}
+
+.icon.amber > .face {
+  padding: 10px;
+}
+
+.icon.amber svg {
+  width: 20px;
+  height: 20px;
+}

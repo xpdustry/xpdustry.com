@@ -1,0 +1,49 @@
+.message {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 34px 38px;
+  background: var(--t3);
+  color: var(--t12);
+}
+
+.code {
+  font: 500 15px var(--font-mono);
+  opacity: 0.8;
+}
+
+.message h1 {
+  margin-top: 10px;
+  max-width: 16ch;
+  font-size: 64px;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.body {
+  margin-top: 14px;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.body > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.body > :last-child {
+  margin-top: 18px;
+}
+
+@media (max-width: 640px) {
+  .message {
+    padding: 28px 24px;
+  }
+
+  .message h1 {
+    font-size: 42px;
+  }
+}

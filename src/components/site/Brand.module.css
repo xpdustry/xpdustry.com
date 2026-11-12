@@ -1,0 +1,19 @@
+.brand {
+  --mark: 40px;
+  --name: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand img {
+  width: var(--mark);
+  height: auto;
+}
+
+.brand span {
+  font-size: var(--name);
+  letter-spacing: -0.02em;
+}

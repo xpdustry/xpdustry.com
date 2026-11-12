@@ -1,0 +1,22 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { readCard } from "#app/server/og/cards";
+
+// Discord and Twitter fetch a card once per unfurl and cache it on their side, so the header
+// mostly serves browsers and the odd proxy.
+export const Route = createFileRoute("/og/$")({
+  server: {
+    handlers: {
+      GET: async ({ params }) => {
+        const png = await readCard(params._splat ?? "");
+        if (!png) return new Response("Not Found", { status: 404 });
+        return new Response(png, {
+          headers: {
+            "content-type": "image/png",
+            "content-length": String(png.byteLength),
+            "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+          },
+        });
+      },
+    },
+  },
+});

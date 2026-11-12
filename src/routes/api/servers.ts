@@ -1,10 +1,14 @@
-import { readServerSnapshot } from "#app/server/runtime";
+import { createFileRoute } from "@tanstack/react-router";
+import { services } from "#app/server/services";
 
-// Never accept query-supplied endpoints; that would turn this route into a UDP relay.
-export function GET(): Response {
-  return Response.json(readServerSnapshot(), {
-    headers: {
-      "cache-control": "public, max-age=15, stale-while-revalidate=30",
+// Never accept request-supplied endpoints; that would turn this route into a UDP relay.
+export const Route = createFileRoute("/api/servers")({
+  server: {
+    handlers: {
+      GET: () =>
+        Response.json(services().servers, {
+          headers: { "cache-control": "public, max-age=15, stale-while-revalidate=30" },
+        }),
     },
-  });
-}
+  },
+});

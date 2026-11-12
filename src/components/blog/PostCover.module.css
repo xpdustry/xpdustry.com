@@ -1,0 +1,133 @@
+.cover {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 300px;
+  padding: 40px 44px 34px;
+  border: 2px solid var(--outline);
+  border-radius: var(--r);
+  color: #fff;
+}
+
+.logo {
+  position: absolute;
+  top: 50%;
+  right: 56px;
+  width: 132px;
+  translate: 0 -50%;
+  filter: drop-shadow(0 8px 0 rgb(0 0 0 / 0.28));
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-self: flex-start;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 13px 6px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.18);
+  color: #fff;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.back:hover {
+  background: rgb(255 255 255 / 0.28);
+}
+
+.back svg {
+  width: 16px;
+  height: 16px;
+}
+
+.topic {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.topic img {
+  width: 20px;
+}
+
+.cover h1 {
+  max-width: 17ch;
+  margin-top: 18px;
+  font-size: 56px;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.description {
+  max-width: 52ch;
+  margin-top: 16px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.byline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.byline > * {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+  font-size: 14.5px;
+  text-decoration: none;
+}
+
+.byline > a {
+  padding-left: 5px;
+}
+
+.byline > a:hover {
+  background: rgb(255 255 255 / 0.18);
+}
+
+.byline img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+@media (max-width: 1100px) {
+  .logo {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .cover {
+    padding: 28px 24px;
+  }
+
+  .cover h1 {
+    font-size: 38px;
+  }
+}

@@ -6,6 +6,7 @@ description: >-
 publishedAt: 2026-07-20
 author: phinner
 topic: NoHorny
+hero: /blog/nohorny-admin-overview-dark.png
 releases:
   - xpdustry/nohorny@v4.0.0-beta.8
 ---

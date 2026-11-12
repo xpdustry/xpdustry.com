@@ -1,20 +1,29 @@
-import type { ComponentNode, MarkdownExtension, RenderOptions } from "@tanstack/markdown";
+// Blog posts are parsed at build time: a post module exports its validated frontmatter and the
+// Markdown AST, which `PostBody` renders as React elements. Nothing is parsed in the browser,
+// and no HTML string is ever injected.
+
+import type {
+  BlockNode,
+  ComponentNode,
+  MarkdownDocument,
+  MarkdownExtension,
+  ParseOptions,
+} from "@tanstack/markdown";
 import { calloutsExtension } from "@tanstack/markdown/extensions/callouts";
 import {
   parseCommentComponentBlock,
   parseComponentComment,
 } from "@tanstack/markdown/extensions/comment-components";
-import { renderHtml } from "@tanstack/markdown/html";
 import { parseMarkdown } from "@tanstack/markdown/parser";
 import * as v from "valibot";
 import type { Plugin } from "vite";
 import { parse as parseYaml } from "yaml";
-import { type MarkdownModule } from "#app/content/registry.ts";
-import { ContentError, parseBlogFrontmatter } from "#app/content/schema.ts";
-import { NonBlankStringSchema } from "#app/lib/schema.ts";
+import { POST_ELEMENTS } from "#app/content/elements.ts";
+import { ContentError } from "#app/content/errors.ts";
+import type { PostModule } from "#app/content/registry.ts";
+import { parseBlogFrontmatter } from "#app/content/schema.ts";
+import { IMAGE_EXTENSIONS, NonBlankStringSchema, blogMediaPathSchema } from "#app/lib/schema.ts";
 
-const MEDIA_NAMES = new Set(["post-image", "post-video"]);
-const extensions: MarkdownExtension[] = [calloutsExtension(), mediaMarkdownExtension()];
 const DimensionSchema = v.pipe(
   v.string(),
   v.toNumber("must be a number"),
@@ -23,41 +32,39 @@ const DimensionSchema = v.pipe(
   v.maxValue(10_000, "must be at most 10000"),
 );
 const ImageAttributesSchema = v.strictObject({
-  src: createMediaPathSchema([".png", ".jpg", ".jpeg", ".webp"]),
+  src: blogMediaPathSchema(IMAGE_EXTENSIONS),
   alt: NonBlankStringSchema,
   width: DimensionSchema,
   height: DimensionSchema,
   caption: v.optional(v.string()),
 });
 const VideoAttributesSchema = v.strictObject({
-  src: createMediaPathSchema([".mp4"]),
-  poster: createMediaPathSchema([".png", ".jpg", ".jpeg", ".webp"]),
+  src: blogMediaPathSchema([".mp4"]),
+  poster: blogMediaPathSchema(IMAGE_EXTENSIONS),
   width: DimensionSchema,
   height: DimensionSchema,
   caption: v.optional(v.string()),
 });
-const markdownOptions: RenderOptions = {
-  allowHtml: false,
-  extensions,
-  headingAnchors: {
-    content: "#",
-    className: "anchor",
-    ariaHidden: true,
-    tabIndex: -1,
-  },
-};
 
-export function compileBlogMarkdown(file: string, source: string): MarkdownModule {
-  const document = parseMarkdown(source, markdownOptions);
+const MEDIA = {
+  "post-image": { tagName: POST_ELEMENTS.image, schema: ImageAttributesSchema, body: false },
+  "post-video": { tagName: POST_ELEMENTS.video, schema: VideoAttributesSchema, body: true },
+} as const;
+
+const extensions: MarkdownExtension[] = [
+  calloutsExtension(),
+  mediaExtension(),
+  calloutElementExtension(),
+];
+const parseOptions: ParseOptions = { extensions, frontmatter: true, headingIds: true };
+
+export function compileBlogMarkdown(file: string, source: string): PostModule {
+  const { frontmatter, ...document } = parseMarkdown(source, parseOptions);
 
   return {
-    frontmatter: parseBlogFrontmatter(file, parseFrontmatter(file, document.frontmatter)),
-    html: openExternalLinksInNewTabs(renderHtml(document, markdownOptions)),
+    frontmatter: parseBlogFrontmatter(file, parseFrontmatter(file, frontmatter)),
+    document: document satisfies MarkdownDocument,
   };
-}
-
-function openExternalLinksInNewTabs(html: string): string {
-  return html.replaceAll(/<a href="https?:\/\/[^"]+"/g, '$& target="_blank" rel="noreferrer"');
 }
 
 export function blogMarkdownPlugin(): Plugin {
@@ -73,7 +80,7 @@ export function blogMarkdownPlugin(): Plugin {
         return {
           code: [
             `export const frontmatter = ${serialize(compiled.frontmatter)};`,
-            `export const html = ${serialize(compiled.html)};`,
+            `export const document = ${serialize(compiled.document)};`,
           ].join("\n"),
           map: null,
         };
@@ -92,91 +99,65 @@ function parseFrontmatter(file: string, source: string | undefined): unknown {
   }
 }
 
-function mediaMarkdownExtension(): MarkdownExtension {
+/**
+ * `<!-- ::post-image ... -->` and `<!-- ::start:post-video ... -->` comments, validated here so a
+ * broken post fails the build. The renderer receives them as elements with string properties.
+ */
+function mediaExtension(): MarkdownExtension {
   return {
     name: "xpdustry:post-media",
     parseBlock(context) {
       const comment = parseComponentComment(context.lines[context.index] ?? "");
-      if (!comment || !MEDIA_NAMES.has(comment.name)) return;
-      return parseCommentComponentBlock(context);
-    },
-    renderHtml(node, context) {
-      if (node.type !== "component") return;
-      if (node.name === "post-image") return renderImage(node);
-      if (node.name === "post-video") {
-        return renderVideo(node, node.children.map(context.renderBlock).join("\n"));
+      if (!comment || !Object.hasOwn(MEDIA, comment.name)) return;
+
+      const node = parseCommentComponentBlock(context);
+      if (!node) return;
+      const media = MEDIA[node.name as keyof typeof MEDIA];
+      if (media.body && node.children.length === 0) {
+        throw new Error(`${node.name} requires fallback content`);
       }
+      if (!media.body && node.children.length > 0) {
+        throw new Error(`${node.name} cannot have body content`);
+      }
+
+      const result = v.safeParse(media.schema, node.attributes);
+      if (!result.success) throw new Error(`${node.name}: ${v.summarize(result.issues)}`);
+      const properties = Object.fromEntries(
+        Object.entries(result.output).flatMap(([key, value]) =>
+          value === undefined ? [] : [[key, String(value)]],
+        ),
+      );
+      return { ...node, tagName: media.tagName, properties };
     },
   };
 }
 
-function renderImage(node: ComponentNode): string {
-  if (node.children.length > 0) throw new Error("post-image cannot have body content");
+/** `> [!NOTE] Title` callouts become `md-callout` elements, so the design owns their markup. */
+function calloutElementExtension(): MarkdownExtension {
+  const convert = (nodes: BlockNode[]): BlockNode[] =>
+    nodes.map((node): BlockNode => {
+      if (node.type === "callout") {
+        return {
+          type: "component",
+          name: "callout",
+          tagName: POST_ELEMENTS.callout,
+          attributes: {},
+          properties: { kind: node.kind, title: node.title },
+          children: convert(node.children),
+        } satisfies ComponentNode;
+      }
+      if (node.type === "blockquote" || node.type === "component") {
+        return { ...node, children: convert(node.children) };
+      }
+      return node;
+    });
 
-  const { src, alt, width, height, caption } = parseMediaAttributes(node, ImageAttributesSchema);
-
-  return [
-    '<figure class="media post-media">',
-    '<span class="post-media__frame">',
-    `<img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" width="${width}" height="${height}" loading="lazy" decoding="async">`,
-    "</span>",
-    caption ? `<figcaption class="post-media__caption">${escapeText(caption)}</figcaption>` : "",
-    "</figure>",
-  ].join("");
-}
-
-function renderVideo(node: ComponentNode, fallback: string): string {
-  if (node.children.length === 0) throw new Error("post-video requires fallback content");
-
-  const { src, poster, width, height, caption } = parseMediaAttributes(node, VideoAttributesSchema);
-
-  return [
-    '<figure class="media post-media">',
-    '<span class="post-media__frame">',
-    `<video controls preload="metadata" poster="${escapeAttribute(poster)}" width="${width}" height="${height}">`,
-    `<source src="${escapeAttribute(src)}" type="video/mp4">`,
-    fallback,
-    "</video>",
-    "</span>",
-    caption ? `<figcaption class="post-media__caption">${escapeText(caption)}</figcaption>` : "",
-    "</figure>",
-  ].join("");
-}
-
-function createMediaPathSchema(extensions: readonly string[]) {
-  return v.pipe(
-    v.string(),
-    v.check(
-      (value) => isMediaPath(value, extensions),
-      "must be a repository-owned blog media path",
-    ),
-  );
-}
-
-function isMediaPath(value: string, extensions: readonly string[]): boolean {
-  const lower = value.toLowerCase();
-  return (
-    /^\/blog\/[a-z0-9][a-z0-9._/-]*$/i.test(value) &&
-    !value.split("/").includes("..") &&
-    extensions.some((extension) => lower.endsWith(extension))
-  );
-}
-
-function parseMediaAttributes<TSchema extends v.GenericSchema>(
-  node: ComponentNode,
-  schema: TSchema,
-): v.InferOutput<TSchema> {
-  const result = v.safeParse(schema, node.attributes);
-  if (result.success) return result.output;
-  throw new Error(`${node.name}: ${v.summarize(result.issues)}`);
-}
-
-function escapeAttribute(value: string): string {
-  return escapeText(value).replaceAll('"', "&quot;");
-}
-
-function escapeText(value: string): string {
-  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  return {
+    name: "xpdustry:callout-elements",
+    transformDocument(document) {
+      return { ...document, children: convert(document.children) };
+    },
+  };
 }
 
 function serialize(value: unknown): string {

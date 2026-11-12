@@ -1,46 +1,46 @@
 // Social cards, rendered on demand by takumi and kept for an hour.
 //
-// The cards are served from `/og/*` by `src/routes/og/[...card].ts`, and the
-// pages point at them through `PageMeta`. Each path is rendered once per hour
-// per process; the post and blog cards only change on deploy anyway, and the
-// home card follows the GitHub counts, which refresh on the same schedule.
+// `routes/og/$.ts` serves them, and `lib/seo.ts` points the pages at them. Each path renders once
+// per hour per process: post and blog cards only change on deploy, and the home card follows the
+// GitHub star count, which refreshes on the same schedule.
 
-import archivo from "@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2?inline";
-import martian from "@fontsource/martian-mono/files/martian-mono-latin-400-normal.woff2?inline";
-import martianBold from "@fontsource/martian-mono/files/martian-mono-latin-700-normal.woff2?inline";
-import { NoHydration, renderToString, type JSX } from "@solidjs/web";
+import dmMono from "@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2?inline";
+import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-400-normal.woff2?inline";
 import { Renderer } from "@takumi-rs/core";
-import { fromHtml } from "@takumi-rs/helpers/html";
+import { fromJsx } from "@takumi-rs/helpers/jsx";
+import type { ReactElement } from "react";
 import { posts } from "#app/content/registry";
-import {
-  BlogCard,
-  CARD_HEIGHT,
-  CARD_WIDTH,
-  HomeCard,
-  PostCard,
-  type CardPost,
-} from "#app/server/og/Card";
-import { readRepositoryStats } from "#app/server/og/github";
+import { projects } from "#app/data/projects";
+import { servers } from "#app/data/servers";
+import { topic } from "#app/data/topics";
+import { CARD_SIZE } from "#app/lib/seo";
+import { BlogCard, HomeCard, PostCard, type CardPost } from "#app/server/og/Card";
+import { services } from "#app/server/services";
 
 const MAX_AGE_MS = 60 * 60 * 1000;
 
-// Registered without a weight so the Archivo variable axis stays live.
 const FONTS = [
-  { name: "Archivo", data: bytes(archivo) },
-  { name: "Martian", data: bytes(martian), weight: 400 },
-  { name: "Martian", data: bytes(martianBold), weight: 700 },
+  { name: "Momo Trust Display", data: bytes(momo), weight: 400 },
+  { name: "DM Mono", data: bytes(dmMono), weight: 400 },
 ];
 
-type Png = Uint8Array<ArrayBuffer>;
+// Topic icons as data URIs, keyed by the URL the rest of the site knows them by.
+const iconData = import.meta.glob<string>("/src/assets/brand/*", {
+  query: "?inline",
+  import: "default",
+  eager: true,
+});
+const iconUrls = import.meta.glob<string>("/src/assets/brand/*", {
+  query: "?url",
+  import: "default",
+  eager: true,
+});
+const inlineIcons = new Map(Object.entries(iconUrls).map(([file, url]) => [url, iconData[file]!]));
 
-interface Entry {
-  png: Png;
-  renderedAt: number;
+function inlineIcon(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  return url.startsWith("data:") ? url : inlineIcons.get(url);
 }
-
-const cache = new Map<string, Entry>();
-const inflight = new Map<string, Promise<Png | undefined>>();
-let renderer: Promise<Renderer> | undefined;
 
 const cardPosts: readonly CardPost[] = posts.map((post) => ({
   slug: post.slug,
@@ -48,13 +48,20 @@ const cardPosts: readonly CardPost[] = posts.map((post) => ({
   author: post.frontmatter.author,
   topic: post.frontmatter.topic,
   publishedAt: post.frontmatter.publishedAt,
+  icon: inlineIcon(topic(post.frontmatter.topic).icon),
 }));
+
+type Png = Uint8Array<ArrayBuffer>;
+
+const cache = new Map<string, { png: Png; renderedAt: number }>();
+const inflight = new Map<string, Promise<Png | undefined>>();
+let renderer: Promise<Renderer> | undefined;
 
 function bytes(dataUri: string): Buffer {
   return Buffer.from(dataUri.slice(dataUri.indexOf(",") + 1), "base64");
 }
 
-// One renderer per process: it owns the parsed fonts and the decoded logo.
+// One renderer per process: it owns the parsed fonts.
 function getRenderer(): Promise<Renderer> {
   renderer ??= (async () => {
     const instance = new Renderer();
@@ -64,55 +71,40 @@ function getRenderer(): Promise<Renderer> {
   return renderer;
 }
 
-/** The component for a card path such as `home.png` or `blog/<slug>.png`, if there is one. */
-async function view(card: string): Promise<(() => JSX.Element) | undefined> {
-  if (card === "home.png") {
-    const github = await readRepositoryStats();
-    return () => <HomeCard github={github} />;
+/** The card for a path such as `home.png` or `blog/<slug>.png`, if a page owns one. */
+export function cardFor(path: string): ReactElement | undefined {
+  if (path === "home.png") {
+    const stars = services().github.value?.stars;
+    return <HomeCard stats={{ projects: projects.length, servers: servers.length, stars }} />;
   }
-  if (card === "blog.png") return () => <BlogCard posts={cardPosts} />;
+  if (path === "blog.png") return <BlogCard posts={cardPosts} />;
 
-  const slug = /^blog\/([^/]+)\.png$/.exec(card)?.[1];
+  const slug = /^blog\/([^/]+)\.png$/.exec(path)?.[1];
   const post = cardPosts.find((entry) => entry.slug === slug);
-  return post && (() => <PostCard post={post} />);
+  return post && <PostCard post={post} />;
 }
 
-/**
- * Server-rendered as plain markup. The development build still emits hydration
- * comments around dynamic text, and takumi's parser drops the text with them.
- */
-export function toHtml(card: () => JSX.Element): string {
-  return renderToString(() => <NoHydration>{card()}</NoHydration>, { noScripts: true }).replaceAll(
-    /<!--[\s\S]*?-->/g,
-    "",
-  );
-}
-
-export async function renderCard(card: () => JSX.Element): Promise<Png> {
-  const { node, css } = fromHtml(toHtml(card));
-  return (await getRenderer()).render(node, {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    format: "png",
-    css,
-  });
+export async function renderCard(card: ReactElement): Promise<Png> {
+  const { node, css } = await fromJsx(card);
+  const png = await (await getRenderer()).render(node, { ...CARD_SIZE, format: "png", css });
+  return new Uint8Array(png);
 }
 
 /** The PNG for a card path, or `undefined` when no page owns it. */
-export async function readCard(card: string): Promise<Png | undefined> {
-  const cached = cache.get(card);
+export async function readCard(path: string): Promise<Png | undefined> {
+  const cached = cache.get(path);
   if (cached && Date.now() - cached.renderedAt < MAX_AGE_MS) return cached.png;
 
-  const pending = inflight.get(card);
+  const pending = inflight.get(path);
   if (pending) return pending;
 
   const task = (async () => {
-    const component = await view(card);
-    if (component === undefined) return undefined;
-    const png = await renderCard(component);
-    cache.set(card, { png, renderedAt: Date.now() });
+    const card = cardFor(path);
+    if (!card) return undefined;
+    const png = await renderCard(card);
+    cache.set(path, { png, renderedAt: Date.now() });
     return png;
-  })().finally(() => inflight.delete(card));
-  inflight.set(card, task);
+  })().finally(() => inflight.delete(path));
+  inflight.set(path, task);
   return task;
 }

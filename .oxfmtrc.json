@@ -1,6 +1,5 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["dist/**", "node_modules/**", "src/config/solid-env.d.ts"],
-  "sortImports": { "newlinesBetween": false },
-  "sortTailwindcss": { "stylesheet": "src/styles/app.css" }
+  "ignorePatterns": ["dist/**", "node_modules/**", "src/routeTree.gen.ts"],
+  "sortImports": { "newlinesBetween": false }
 }

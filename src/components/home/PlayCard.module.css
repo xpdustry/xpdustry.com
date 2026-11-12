@@ -1,0 +1,53 @@
+.play {
+  container: play / inline-size;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px;
+  background: var(--a3);
+}
+
+.label {
+  font-size: 15px;
+  line-height: inherit;
+  color: var(--a11);
+}
+
+.address {
+  margin-top: auto;
+  font: 500 clamp(16px, calc(100cqi / 11.8), 30px) / 1.15 var(--font-mono);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+  user-select: all;
+}
+
+.how {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: var(--a11);
+  text-wrap: balance;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+  white-space: nowrap;
+}
+
+.online {
+  font: 500 12px var(--font-mono);
+  color: var(--ink);
+}
+
+.play .copy {
+  margin-left: auto;
+}
+
+@container play (max-width: 180px) {
+  .address {
+    white-space: normal;
+  }
+}

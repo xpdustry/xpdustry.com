@@ -30,6 +30,7 @@ RUN groupadd --gid 1001 appgroup && \
 
 COPY --from=prod-deps --chown=appuser:appgroup /app/node_modules ./node_modules
 COPY --from=build --chown=appuser:appgroup /app/dist ./dist
+COPY --from=build --chown=appuser:appgroup /app/scripts/serve.ts ./scripts/serve.ts
 COPY --from=build --chown=appuser:appgroup /app/package.json ./package.json
 
 ENV NODE_ENV=production \
@@ -39,4 +40,4 @@ ENV NODE_ENV=production \
 USER appuser:appgroup
 EXPOSE 3000
 
-CMD ["node", "dist/server/node.js"]
+CMD ["node", "scripts/serve.ts"]
