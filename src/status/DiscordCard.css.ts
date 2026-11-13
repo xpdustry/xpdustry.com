@@ -36,6 +36,7 @@ export const title = style({
   fontSize: rem(font.h3),
   fontWeight: "inherit",
   lineHeight: leading.tight,
+  textWrap: "balance",
   selectors: {
     [`${compact} &`]: { fontSize: rem(font.h4) }
   }

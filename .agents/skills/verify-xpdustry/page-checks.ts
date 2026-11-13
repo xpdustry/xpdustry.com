@@ -72,6 +72,17 @@ function wrappedNavItems(): string[] {
   return [...new Set(links.map((link) => `nav item wraps: ${link.textContent.trim()}`))];
 }
 
+/** The navigation, laid out in the header rather than folded into the menu, on more than one row. */
+function wrappedNav(): string[] {
+  const nav = document.querySelector("header nav");
+  if (!nav || getComputedStyle(nav).position !== "static") return [];
+  const links = [...nav.querySelectorAll(":scope > a")].filter(
+    (link) => link.getBoundingClientRect().width > 0
+  );
+  const rows = new Set(links.map((link) => Math.round(link.getBoundingClientRect().top)));
+  return rows.size > 1 ? [`navigation runs over ${rows.size} rows`] : [];
+}
+
 /** A header control left far from the next one, instead of grouped with the others on the right. */
 function strandedHeaderControls(): string[] {
   const controls = [...document.querySelectorAll("body > div > header > :is(button, a, div)")]
@@ -132,6 +143,7 @@ function textOffScreen(): string[] {
 /** Design checks for the default text size: wrapping, alignment and collisions. */
 export const LAYOUT_CHECKS = [
   wrappedNavItems,
+  wrappedNav,
   strandedHeaderControls,
   crowdedSectionHeaders,
   textOffScreen

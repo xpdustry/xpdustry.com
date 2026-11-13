@@ -2,13 +2,14 @@ import { globalStyle, style } from "@vanilla-extract/css";
 import { upTo } from "#app/ui/styles/media";
 import { font, leading, rem } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
+import { folded } from "./Header.css";
 
 const narrow = upTo(780);
 /**
  * Beside the header's unfolded navigation, where "Checking" in French leaves no room for the links:
  * the light alone says the count is not there yet.
  */
-const besideNavigation = "not all and (max-width: 77.5em)";
+const besideNavigation = `not all and ${folded}`;
 
 export const pill = style({
   whiteSpace: "nowrap"
