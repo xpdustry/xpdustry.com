@@ -90,13 +90,7 @@ function Profile({ id, member }: { id: string; member: Person }) {
     backgroundImage: banner && `url(${banner})`
   } satisfies CSSProperties;
   return (
-    <div
-      id={id}
-      popover="auto"
-      role="dialog"
-      aria-labelledby={`${id}-name`}
-      className={styles.profile}
-    >
+    <dialog id={id} popover="auto" aria-labelledby={`${id}-name`} className={styles.profile}>
       <div className={styles.banner} style={top} />
       <button
         type="button"
@@ -114,7 +108,7 @@ function Profile({ id, member }: { id: string; member: Person }) {
       <Tags tags={member.tags} />
       <About member={member} />
       <Links member={member} />
-    </div>
+    </dialog>
   );
 }
 

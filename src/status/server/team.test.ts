@@ -45,17 +45,20 @@ function face(url: URL): Response {
   return new Response(Buffer.from(encode({ width: 2, height: 1, channels: 4, data })));
 }
 
+/** Where a fetch was sent. */
+const urlOf = (input: RequestInfo | URL) => new URL(input instanceof Request ? input.url : input);
+
 /** The API paths asked of a Discord, in order. */
 const asked = (fetchImpl: typeof fetch) =>
   vi
     .mocked(fetchImpl)
-    .mock.calls.map(([input]) => new URL(String(input)))
+    .mock.calls.map(([input]) => urlOf(input))
     .filter((url) => url.host === "discord.com")
     .map((url) => url.pathname.replace("/api/v10", ""));
 
 function discord(answer?: (path: string) => Response | undefined): typeof fetch {
   return vi.fn(async (input: RequestInfo | URL) => {
-    const url = new URL(input instanceof Request ? input.url : input);
+    const url = urlOf(input);
     if (url.host === "cdn.discordapp.com") return face(url);
     const path = url.pathname.replace("/api/v10", "");
     const special = answer?.(path);
