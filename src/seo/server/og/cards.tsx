@@ -1,3 +1,5 @@
+import golosText from "@fontsource-variable/golos-text/files/golos-text-cyrillic-wght-normal.woff2?inline";
+import momoSans from "@fontsource-variable/momo-trust-sans/files/momo-trust-sans-latin-wght-normal.woff2?inline";
 import dmMono from "@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2?inline";
 import golosBold from "@fontsource/golos-text/files/golos-text-cyrillic-700-normal.woff2?inline";
 import plexMono from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-cyrillic-400-normal.woff2?inline";
@@ -21,7 +23,10 @@ const FONTS = [
   { name: FACE.display, data: bytes(momo), weight: DISPLAY_WEIGHT },
   { name: FACE.mono, data: bytes(dmMono), weight: 400 },
   { name: FACE.cyrillicDisplay, data: bytes(golosBold), weight: DISPLAY_WEIGHT },
-  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 }
+  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 },
+  // Variable faces go in without a weight, so the whole axis stays live.
+  { name: FACE.text, data: bytes(momoSans) },
+  { name: FACE.cyrillicText, data: bytes(golosText) }
 ];
 
 const iconData = import.meta.glob<string>("/src/brand/icons/*", {
@@ -43,13 +48,15 @@ function inlineIcon(url: string | undefined): string | undefined {
 
 function cardPost(original: Post, locale: string): CardPost {
   const post = translated(original, locale);
+  const { icon, ground, muted, accent, chip } = topic(post.frontmatter.topic);
   return {
     slug: post.slug,
     title: postTitle(post.frontmatter),
     author: post.frontmatter.author,
     topic: post.frontmatter.topic,
     publishedAt: post.frontmatter.publishedAt,
-    icon: inlineIcon(topic(post.frontmatter.topic).icon)
+    icon: inlineIcon(icon),
+    theme: { ground, muted, accent, chip }
   };
 }
 
