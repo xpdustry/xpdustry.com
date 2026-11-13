@@ -7,6 +7,7 @@ import type {
   Ref
 } from "react";
 import type { CopyState } from "./copy/useCopy";
+import { outbound } from "./outbound";
 import * as styles from "./Plinth.css";
 
 export interface PlinthStyle {
@@ -46,10 +47,14 @@ function Face({ children }: { children: ReactNode }) {
 type AnchorProps = AnchorHTMLAttributes<HTMLAnchorElement> &
   PlinthStyle & { ref?: Ref<HTMLAnchorElement> };
 
-/** A plinth leaving the site. */
+/** A plinth to an address: one that leaves the site opens in a new tab. */
 export function PlinthAnchor({ tone, size, icon, className, children, ...props }: AnchorProps) {
   return (
-    <a className={plinthClass({ tone, size, icon, className })} {...props}>
+    <a
+      className={plinthClass({ tone, size, icon, className })}
+      {...outbound(props.href)}
+      {...props}
+    >
       <Face>{children}</Face>
     </a>
   );

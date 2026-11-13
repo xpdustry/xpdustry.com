@@ -86,6 +86,27 @@ describe("built pages", () => {
     expect(html).toMatch(/<img src="\/blog\/nohorny-discord-alert\.webp"/);
   });
 
+  test.each(["/", "/fr", "/blog", "/blog/nohorny-4-beta-8", "/no-such-page"])(
+    "%s opens the links that leave the site, and only those, in a new tab",
+    async (path) => {
+      const anchors = (await (await get(path)).text()).match(/<a\s[^>]*>/g) ?? [];
+      const leaving = anchors.filter((anchor) => /\shref="https?:\/\//.test(anchor));
+      expect(leaving.length).toBeGreaterThan(0);
+      for (const anchor of leaving) {
+        expect(anchor).toContain('target="_blank"');
+        // Which of the two is `outbound`'s to say: Xpdustry's own sites learn where the visitor
+        // came from, any other site does not.
+        expect(anchor).toMatch(/\srel="(noopener|noreferrer)"/);
+        if (/\shref="https:\/\/maven\.xpdustry\.com"/.test(anchor)) {
+          expect(anchor).toContain('rel="noopener"');
+        }
+      }
+      for (const anchor of anchors.filter((anchor) => !leaving.includes(anchor))) {
+        expect(anchor).not.toContain("target=");
+      }
+    }
+  );
+
   test.each(["/no-such-page", "/blog/no-such-post"])(
     "%s is a 404 excluded from indexing",
     async (path) => {

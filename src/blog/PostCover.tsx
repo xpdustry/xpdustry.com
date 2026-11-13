@@ -4,6 +4,7 @@ import { formatDate } from "#app/i18n/format";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";
+import { outbound } from "#app/ui/outbound";
 import { authors } from "./content/authors";
 import type { Post } from "./content/registry";
 import { postTitle } from "./titles";
@@ -63,7 +64,7 @@ function Byline({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
   const profile = authors[author];
   return (
     <div className={styles.byline}>
-      <a className={pill} href={profile.url} target="_blank" rel="noreferrer">
+      <a className={pill} href={profile.url} {...outbound(profile.url)}>
         <img className={avatar} src={profile.avatar} alt="" />
         {author}
       </a>
