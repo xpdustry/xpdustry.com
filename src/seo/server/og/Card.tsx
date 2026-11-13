@@ -1,7 +1,9 @@
 import { msg } from "gt-tanstack-start";
 import type { CSSProperties, ReactNode } from "react";
 import { BLOG_DESCRIPTION } from "#app/blog/titles";
+import { SITE_THEME } from "#app/blog/topics";
 import logo from "#app/brand/logo.svg?raw";
+import type { ProjectTheme } from "#app/brand/projects";
 import { SITE } from "#app/brand/site";
 import { formatNumber, formatShortDate } from "#app/i18n/format";
 import { withLocale } from "#app/i18n/localePath";
@@ -17,7 +19,11 @@ export interface CardPost {
   publishedAt: string;
   /** The topic's icon as a data URI, when it has one. */
   icon?: string;
+  /** The topic's colours: a project's own, or the site's. */
+  theme: CardTheme;
 }
+
+export type CardTheme = Pick<ProjectTheme, "ground" | "muted" | "accent" | "chip">;
 
 export interface HomeStats {
   projects: number;
@@ -26,14 +32,48 @@ export interface HomeStats {
   stars?: number;
 }
 
-const color = {
-  ground: "#135854",
-  accent: "#41c1ba",
-  ink: "#eaf7f5",
-  muted: "#a9d4cf",
-  faint: "#78aaa5",
-  hair: "rgba(255,255,255,.14)"
-} as const;
+interface Palette {
+  ground: string;
+  ink: string;
+  muted: string;
+  faint: string;
+  hair: string;
+  bar: string;
+}
+
+/**
+ * A card's colours, drawn from a dark theme ground. The ink leans white toward the theme's accent,
+ * the description lifts the theme's muted text toward the ink and the small labels sink it a little
+ * into the ground. The texture lightens the ground under the type's far edge, so the text is set
+ * brighter than the flat ground needs; `palette.test.ts` measures it against the texture.
+ */
+export function cardPalette(theme: CardTheme): Palette {
+  const ink = mix("#ffffff", theme.accent, 0.4);
+  return {
+    ground: theme.ground,
+    ink,
+    muted: mix(theme.muted, ink, 0.3),
+    faint: mix(theme.muted, theme.ground, 0.1),
+    hair: "rgba(255,255,255,.12)",
+    bar: theme.chip.background
+  };
+}
+
+/** Mixes two opaque `#rrggbb` colours, the only form the themes use. */
+function mix(from: string, to: string, amount: number): string {
+  const channels = (hex: string) => {
+    if (!/^#[\da-f]{6}$/i.test(hex)) throw new Error(`Card colours must be #rrggbb, not ${hex}`);
+    return [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16));
+  };
+  const target = channels(to);
+  return `#${channels(from)
+    .map((value, i) => Math.round(value + (target[i]! - value) * amount))
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("")}`;
+}
+
+/** The site's cards keep the brand teal for their bar, where a project's take its chip colour. */
+const SITE_PALETTE: Palette = { ...cardPalette(SITE_THEME), bar: "#41c1ba" };
 
 export interface CardLanguage {
   locale: string;
@@ -52,12 +92,20 @@ const LABEL = {
 };
 
 const DISPLAY = `${FACE.display}, ${FACE.cyrillicDisplay}`;
+const TEXT = `${FACE.text}, ${FACE.cyrillicText}`;
 const MONO = `${FACE.mono}, ${FACE.cyrillicMono}`;
 
 const host = SITE.origin.replace("https://", "");
 const LOGO = `data:image/svg+xml;base64,${Buffer.from(logo.replace(/<\?xml[^>]*\?>/, "")).toString("base64")}`;
 
-function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; children: ReactNode }) {
+interface FrameProps {
+  palette: Palette;
+  mark: string;
+  stats: ReactNode;
+  children: ReactNode;
+}
+
+function Frame({ palette, mark, stats, children }: FrameProps) {
   return (
     <div
       style={{
@@ -68,20 +116,12 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
         display: "flex",
         flexDirection: "column",
         padding: "72px 80px 66px",
-        background: color.ground,
-        color: color.ink,
+        background: palette.ground,
+        color: palette.ink,
         fontFamily: DISPLAY
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          opacity: 0.12,
-          background: `url(${texture}) 0 0 / 300px 300px`,
-          maskImage: "linear-gradient(115deg, transparent 22%, #000 78%)"
-        }}
-      />
+      <Texture />
       <div
         style={{
           position: "relative",
@@ -100,7 +140,9 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
           style={{ flex: "none", objectFit: "contain" }}
         />
       </div>
-      <div style={{ position: "relative", marginTop: "auto", height: 2, background: color.hair }} />
+      <div
+        style={{ position: "relative", marginTop: "auto", height: 2, background: palette.hair }}
+      />
       <div style={{ position: "relative", display: "flex", gap: 56, marginTop: 30 }}>{stats}</div>
       <div
         style={{
@@ -109,18 +151,44 @@ function Frame({ mark, stats, children }: { mark: string; stats: ReactNode; chil
           right: 0,
           bottom: 0,
           height: 12,
-          background: color.accent
+          background: palette.bar
         }}
       />
     </div>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+/** The reticulate pattern, soft-lit and building toward the mark, away from the type. */
+export function Texture() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        opacity: 0.45,
+        mixBlendMode: "soft-light",
+        background: `url(${texture}) center / 620px 620px`,
+        maskImage: "linear-gradient(115deg, transparent 26%, #000 82%)"
+      }}
+    />
+  );
+}
+
+function Stat({ palette, value, label }: { palette: Palette; value: string; label: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
       <div style={{ fontSize: 30 }}>{value}</div>
-      <div style={{ fontSize: 18, letterSpacing: ".04em", color: color.faint }}>{label}</div>
+      <div
+        style={{
+          fontFamily: TEXT,
+          fontWeight: 500,
+          fontSize: 19,
+          letterSpacing: ".04em",
+          color: palette.faint
+        }}
+      >
+        {label}
+      </div>
     </div>
   );
 }
@@ -128,7 +196,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 function Identifier({ path }: { path: string }) {
   return (
     <div style={{ fontSize: 64, lineHeight: 1.05, letterSpacing: "-.02em" }}>
-      <span style={{ color: color.faint }}>{host}/</span>
+      <span style={{ color: SITE_PALETTE.faint }}>{host}/</span>
       {path}
     </div>
   );
@@ -137,9 +205,11 @@ function Identifier({ path }: { path: string }) {
 function Description({ children }: { children: ReactNode }) {
   const style: CSSProperties = {
     marginTop: 26,
+    fontFamily: TEXT,
+    fontWeight: 500,
     fontSize: 34,
     lineHeight: 1.35,
-    color: color.muted
+    color: SITE_PALETTE.muted
   };
   return <div style={style}>{children}</div>;
 }
@@ -154,14 +224,27 @@ function titleSize(title: string): number {
 export function HomeCard({ stats, locale, m }: { stats: HomeStats } & CardLanguage) {
   return (
     <Frame
+      palette={SITE_PALETTE}
       mark={LOGO}
       stats={
         <>
-          <Stat value={formatNumber(stats.projects, locale)} label={m(LABEL.projects)} />
+          <Stat
+            palette={SITE_PALETTE}
+            value={formatNumber(stats.projects, locale)}
+            label={m(LABEL.projects)}
+          />
           {stats.stars !== undefined && (
-            <Stat value={formatNumber(stats.stars, locale)} label={m(LABEL.stars)} />
+            <Stat
+              palette={SITE_PALETTE}
+              value={formatNumber(stats.stars, locale)}
+              label={m(LABEL.stars)}
+            />
           )}
-          <Stat value={formatNumber(stats.servers, locale)} label={m(LABEL.servers)} />
+          <Stat
+            palette={SITE_PALETTE}
+            value={formatNumber(stats.servers, locale)}
+            label={m(LABEL.servers)}
+          />
         </>
       }
     >
@@ -176,12 +259,17 @@ export function BlogCard({ posts, locale, m }: { posts: readonly CardPost[] } & 
   const latest = posts[0];
   return (
     <Frame
+      palette={SITE_PALETTE}
       mark={LOGO}
       stats={
         <>
-          <Stat value={String(posts.length)} label={m(LABEL.posts)} />
+          <Stat palette={SITE_PALETTE} value={String(posts.length)} label={m(LABEL.posts)} />
           {latest && (
-            <Stat value={formatShortDate(latest.publishedAt, locale)} label={m(LABEL.latest)} />
+            <Stat
+              palette={SITE_PALETTE}
+              value={formatShortDate(latest.publishedAt, locale)}
+              label={m(LABEL.latest)}
+            />
           )}
         </>
       }
@@ -193,20 +281,26 @@ export function BlogCard({ posts, locale, m }: { posts: readonly CardPost[] } & 
 }
 
 export function PostCard({ post, locale, m }: { post: CardPost } & CardLanguage) {
+  const palette = cardPalette(post.theme);
   return (
     <Frame
+      palette={palette}
       mark={post.icon ?? LOGO}
       stats={
         <>
-          <Stat value={post.author} label={m(LABEL.author)} />
-          <Stat value={formatShortDate(post.publishedAt, locale)} label={m(LABEL.published)} />
-          <Stat value={post.topic} label={m(LABEL.topic)} />
+          <Stat palette={palette} value={post.author} label={m(LABEL.author)} />
+          <Stat
+            palette={palette}
+            value={formatShortDate(post.publishedAt, locale)}
+            label={m(LABEL.published)}
+          />
+          <Stat palette={palette} value={post.topic} label={m(LABEL.topic)} />
         </>
       }
     >
-      <div style={{ marginBottom: 22, fontFamily: MONO, fontSize: 26, color: color.faint }}>
+      <div style={{ marginBottom: 22, fontFamily: MONO, fontSize: 26, color: palette.faint }}>
         {host}
-        {withLocale("/blog", locale)}/<span style={{ color: color.ink }}>{post.slug}</span>
+        {withLocale("/blog", locale)}/<span style={{ color: palette.ink }}>{post.slug}</span>
       </div>
       <div style={{ fontSize: titleSize(post.title), lineHeight: 1.08, letterSpacing: "-.02em" }}>
         {post.title}

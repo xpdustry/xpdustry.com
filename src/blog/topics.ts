@@ -7,7 +7,8 @@ export interface Topic extends ProjectTheme {
   website?: string;
 }
 
-const DEFAULT_THEME: ProjectTheme = {
+/** The site's own theme, worn by posts outside any project and by the site's social cards. */
+export const SITE_THEME: ProjectTheme = {
   ground: "#083230",
   patches: PATCHES.siteCover,
   muted: "#a2c2bf",
@@ -21,6 +22,6 @@ export function topic(name: string): Topic {
     name,
     icon: project?.icon,
     website: project?.website,
-    ...(project?.theme ?? DEFAULT_THEME)
+    ...(project?.theme ?? SITE_THEME)
   };
 }
