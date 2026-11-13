@@ -54,6 +54,13 @@ function contextOptions(
 
 /** What a script sees as its globals; SKILL.md documents each one. */
 function scriptHelpers({ base, browser, evidence, transcript }: Session) {
+  const print = (...values: unknown[]) => {
+    const line = values
+      .map((value) => (typeof value === "string" ? value : JSON.stringify(value)))
+      .join(" ");
+    console.log(line);
+    transcript.push(line);
+  };
   return {
     base,
     browser,
@@ -82,12 +89,11 @@ function scriptHelpers({ base, browser, evidence, transcript }: Session) {
     save(name: string, content: string | Uint8Array) {
       writeFileSync(join(evidence, name), content);
     },
-    print(...values: unknown[]) {
-      const line = values
-        .map((value) => (typeof value === "string" ? value : JSON.stringify(value)))
-        .join(" ");
-      console.log(line);
-      transcript.push(line);
+    print,
+    /** Print the check as `ok` or `FAIL` with what was seen, and end the run on a `FAIL`. */
+    expect(ok: unknown, what: string, seen?: unknown) {
+      print(ok ? "ok  " : "FAIL", what, ...(seen === undefined ? [] : [seen]));
+      if (!ok) throw new Error(what);
     }
   };
 }
@@ -127,8 +133,9 @@ export async function run(label: string, engine: Engine) {
   await withBrowser(async (browser) => {
     const session: Session = { base, browser, evidence, transcript: [] };
     const helpers = scriptHelpers(session);
-    const drive = new AsyncFunction(`{ ${Object.keys(helpers).join(", ")} }`, code);
     try {
+      // Inside the `try`, so a script that does not parse still leaves its evidence.
+      const drive = new AsyncFunction(`{ ${Object.keys(helpers).join(", ")} }`, code);
       await drive(helpers);
     } catch (error) {
       await recordFailure(error, session);

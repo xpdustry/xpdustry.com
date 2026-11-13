@@ -21,8 +21,11 @@ globalStyle("*, *::before, *::after", {
   boxSizing: "border-box"
 });
 
+/** A column at least a screen tall, so a short page still ends on its footer, not on the backdrop. */
 globalStyle("body", {
   position: "relative",
+  display: "flex",
+  flexDirection: "column",
   margin: 0,
   minHeight: "100vh",
   color: vars.ink,
@@ -72,6 +75,11 @@ globalStyle(".wrap", {
   width: "min(1180px, 100% - 2 * clamp(20px, 5vw, 56px))",
   marginInline: "auto",
   padding: vars.gap
+});
+
+/** The page's own content takes up whatever height the screen has left over it. */
+globalStyle("body > .wrap", {
+  flexGrow: 1
 });
 
 globalStyle(".sr-only", {

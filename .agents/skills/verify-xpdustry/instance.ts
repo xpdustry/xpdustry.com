@@ -53,14 +53,18 @@ function filesOf(input: string): string[] {
   return readdirSync(root, { recursive: true, encoding: "utf8" }).map((name) => join(input, name));
 }
 
-/** Changes whenever a file the build reads is added, removed or rewritten. */
+/**
+ * Changes whenever a file the build reads is added, removed or rewritten. It reads contents, not
+ * sizes and times, which a same-length edit, a checkout or a copy that keeps times would slip past.
+ */
 function sourceFingerprint(): string {
   const digest = createHash("sha256");
   const inputs = [...BUILD_INPUTS, ...readdirSync(REPO).filter((name) => BUILD_CONFIG.test(name))];
   for (const input of inputs.sort((a, b) => a.localeCompare(b))) {
     for (const file of filesOf(input).sort()) {
-      const { size, mtimeMs } = statSync(join(REPO, file));
-      digest.update(`${file}\0${size}\0${mtimeMs}\n`);
+      const path = join(REPO, file);
+      if (!statSync(path).isFile()) continue;
+      digest.update(`${file}\0`).update(readFileSync(path)).update("\n");
     }
   }
   return digest.digest("hex").slice(0, 16);
@@ -70,8 +74,8 @@ function readInstance(): Instance | undefined {
   return existsSync(STATE) ? (JSON.parse(readFileSync(STATE, "utf8")) as Instance) : undefined;
 }
 
-/** The recorded pid is still the server this checkout started. */
-function isOurs({ pid }: Instance): boolean {
+/** The process is a `scripts/serve.ts` running from this checkout, so it serves its `dist/`. */
+function servesThisCheckout(pid: number): boolean {
   try {
     const command = readFileSync(`/proc/${pid}/cmdline`, "utf8");
     return command.includes("scripts/serve.ts") && readlinkSync(`/proc/${pid}/cwd`) === REPO;
@@ -79,6 +83,9 @@ function isOurs({ pid }: Instance): boolean {
     return false;
   }
 }
+
+/** The recorded pid is still the server this checkout started. */
+const isOurs = ({ pid }: Instance) => servesThisCheckout(pid);
 
 /** The running instance, refusing one that is gone or was built from older source. */
 export function healthyInstance(): Instance {
@@ -180,6 +187,17 @@ function refuseIfRunning() {
   if (running && isOurs(running)) {
     fail(`already running at ${running.base} (pid ${running.pid}); run \`stop\` first`);
   }
+  // `pnpm start`, or a preview of it, serves the same `dist/`: the build would swap its files
+  // under it, and it would answer with 500s and missing assets until restarted.
+  const others = readdirSync("/proc").filter(
+    (name) => /^\d+$/.test(name) && servesThisCheckout(+name)
+  );
+  if (others.length > 0) {
+    fail(
+      `another server of this checkout's dist/ is running (pid ${others.join(", ")}), and the ` +
+        "build would replace its files under it; stop it, launch, then start it again"
+    );
+  }
 }
 
 export async function launch(live: boolean) {
@@ -228,8 +246,22 @@ export async function doctor() {
 /** Asks the server's process group to exit, and kills it after five seconds. */
 async function terminate(instance: Instance) {
   process.kill(-instance.pid, "SIGTERM");
-  for (let attempt = 0; attempt < 50 && isOurs(instance); attempt++) await sleep(100);
-  if (isOurs(instance)) process.kill(-instance.pid, "SIGKILL");
+  for (let attempt = 0; attempt < 50 && groupAlive(instance.pid); attempt++) await sleep(100);
+  if (groupAlive(instance.pid)) process.kill(-instance.pid, "SIGKILL");
+}
+
+/**
+ * Whether any process of the group is left: the server can exit and leave a child behind that
+ * ignored the signal. Signal 0 only checks the group exists. The group is the server's own,
+ * created by `launch`, so its id is not reused while one of its processes lives.
+ */
+function groupAlive(pid: number): boolean {
+  try {
+    process.kill(-pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function stop() {

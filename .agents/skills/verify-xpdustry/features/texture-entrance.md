@@ -26,10 +26,6 @@ Preconditions: default launch, `doctor` passes. Run it in both browsers: `$V run
 
 ```sh
 $V run entrance <<'EOF'
-const expect = (ok, what, seen) => {
-  print(ok ? "ok  " : "FAIL", what, seen ?? "");
-  if (!ok) throw new Error(what);
-};
 // A texture is stuck while it is invisible, still masked by the threads, or held by an entrance.
 const stuck = (page) =>
   page.evaluate(() =>
