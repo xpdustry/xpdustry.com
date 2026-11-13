@@ -6,8 +6,10 @@ import { Cover } from "#app/landing/Cover";
 import { Gamemodes } from "#app/landing/Gamemodes";
 import { News } from "#app/landing/News";
 import { Projects } from "#app/landing/Projects";
+import { Team } from "#app/landing/Team";
 import { seo, siteCard } from "#app/seo/meta";
 import { homeStructuredData } from "#app/seo/structuredData";
+import { getTeam } from "#app/status/team.functions";
 
 const REFRESH_MS = 30_000;
 
@@ -27,11 +29,13 @@ export const Route = createFileRoute("/")({
       jsonLd: homeStructuredData(locale)
     });
   },
+  loader: async () => ({ team: await getTeam() }),
   component: Home
 });
 
 function Home() {
   const { live } = root.useLoaderData();
+  const { team } = Route.useLoaderData();
   const router = useRouter();
 
   useEffect(() => {
@@ -47,6 +51,7 @@ function Home() {
       <Gamemodes snapshot={live.servers} />
       <News />
       <Projects releases={live.releases} />
+      <Team team={team} />
     </main>
   );
 }

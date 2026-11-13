@@ -64,7 +64,7 @@ export function PlinthAnchor({ tone, size, icon, className, children, ...props }
 export const PlinthLink = createLink(PlinthAnchor);
 
 type SectionLinkProps = Omit<ComponentProps<typeof PlinthLink>, "to" | "hash" | "resetScroll"> & {
-  hash: "projects" | "gamemodes";
+  hash: "projects" | "gamemodes" | "team";
 };
 
 /**

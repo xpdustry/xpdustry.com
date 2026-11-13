@@ -1,4 +1,5 @@
 import { SITE } from "#app/brand/site";
+import { knownTeam, type Teammate } from "#app/brand/team";
 import type { DiscordCounts, LiveData } from "../live";
 import { servers } from "../servers";
 import type { ServerSnapshot } from "../snapshots";
@@ -7,6 +8,7 @@ import { fetchGitHubStats, type GitHubStats } from "./github";
 import { pollingSnapshot, queryServers } from "./mindustry/status";
 import { createNodeMindustryProbe } from "./mindustry/transport";
 import { Poller, type PollerHealth } from "./poller";
+import { fetchTeam, teamConfig } from "./team";
 
 interface ServicesHealth {
   status: "ok";
@@ -14,9 +16,12 @@ interface ServicesHealth {
   servers: PollerHealth;
   discord: PollerHealth;
   github: PollerHealth;
+  team: PollerHealth;
 }
 
 const WAITING = pollingSnapshot(servers);
+
+const TEAM = teamConfig(process.env);
 
 class Services {
   readonly #probe = createNodeMindustryProbe();
@@ -36,17 +41,26 @@ class Services {
     intervalMs: 60 * 60_000,
     load: (signal) => fetchGitHubStats(signal)
   });
+  readonly #team = new Poller<Teammate[]>({
+    name: "team",
+    intervalMs: 30 * 60_000,
+    // A thousand members a call, then two per teammate, each of which Discord may have wait.
+    timeoutMs: 5 * 60_000,
+    load: (signal) => (TEAM ? fetchTeam(TEAM, signal) : Promise.resolve(knownTeam))
+  });
 
   start(): void {
     this.status.start();
     this.discord.start();
     this.github.start();
+    this.#team.start();
   }
 
   stop(): void {
     this.status.stop();
     this.discord.stop();
     this.github.stop();
+    this.#team.stop();
     this.#probe.closeAll();
   }
 
@@ -62,13 +76,19 @@ class Services {
     };
   }
 
+  /** Whoever holds a team role on Discord, or `team.json`'s team until Discord answers. */
+  get team(): Teammate[] {
+    return this.#team.value ?? knownTeam;
+  }
+
   get health(): ServicesHealth {
     return {
       status: "ok",
       uptimeSeconds: Math.round((Date.now() - this.#startedAt) / 1000),
       servers: this.status.health,
       discord: this.discord.health,
-      github: this.github.health
+      github: this.github.health,
+      team: this.#team.health
     };
   }
 }
