@@ -6,7 +6,7 @@ The maintained list of what a visitor can do on the site and how to prove each p
 
 - `$V launch` printed `ready:` and `$V doctor` exits 0.
 - [Live status](live-status.md) needs `$V launch --live`; every other feature uses the default launch.
-- Each script starts from `newPage()`: a visitor with no cookies whose browser language is English unless the script says otherwise.
+- Each script starts from `newPage()`: a visitor with no cookies, with reduced motion, whose browser language is English unless the script says otherwise.
 
 ## Driving conventions
 
@@ -30,6 +30,7 @@ Each file has an H1, one paragraph on what the visitor gets, then `Sub-features`
 
 - [Languages](languages.md): first-visit language, the switcher, prefixed URLs, the remembered choice.
 - [Copy a server address](copy-server-address.md): the gamemode cards, the play card, and the header pill on other pages.
+- [Texture entrance](texture-entrance.md): how the first screen's crown, backdrop and card blobs come in, and what a visitor without the entrance gets.
 - [Blog](blog.md): the index, a post with its media and callouts, translated posts, missing posts.
 - [Search and social metadata](search-metadata.md): titles, canonical and alternate links, structured data, sitemap, social cards.
 - [Live status](live-status.md): player counts, Discord and GitHub figures, the health endpoint.

@@ -17,7 +17,7 @@ Shell state does not carry between tool calls, so start every command with that 
 
 `verify.ts` only dispatches; each command lives in a module beside it: `instance.ts` (`launch`, `doctor`, `stop`), `run.ts`, `audit.ts`, `seo.ts`. The checks `audit` runs inside the page are in `page-checks.ts`. Playwright sends each one to the browser as source text, so a check can use only what `installHelpers` puts on `window`, never an import.
 
-Run `pnpm install` first: the helper uses the repo's own `playwright` dev dependency. A machine that has never run it also needs the browser once: `pnpm exec playwright install chromium`. The helper says which of the two is missing.
+Run `pnpm install` first: the helper uses the repo's own `playwright` dev dependency. A machine that has never run it also needs each browser once, and again after a Playwright upgrade: `pnpm exec playwright install chromium firefox`. Playwright never downloads one on its own; the helper says what is missing and the command that installs it.
 
 ## Launch
 
@@ -57,19 +57,27 @@ EOF
 
 The script gets:
 
-| Name                                                       | What it is                                                                                                                                                                               |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `newPage({ width = 1280, height = 800, language = "en" })` | A fresh visitor (no cookies) as a Playwright `Page`. `language` is the browser language. Clipboard access is granted and motion is reduced.                                              |
-| `go(page, path)`                                           | Navigate to a site path and wait for the network and fonts to settle.                                                                                                                    |
-| `get(path, headers)`                                       | Plain HTTP GET that does not follow redirects: `{ status, headers, body }`, with lower-case header names and `body` as a `Buffer`. Use it for redirects, feeds, images and status codes. |
-| `snap(page, name)`                                         | Save `name.png` and `name.aria.txt` (URL, title and ARIA tree) to the evidence folder.                                                                                                   |
-| `save(name, content)`                                      | Save a string or bytes as evidence.                                                                                                                                                      |
-| `print(...)`                                               | Like `console.log`, also written to `output.txt` in the evidence folder.                                                                                                                 |
-| `base`, `browser`, `evidence`                              | The instance URL, the Playwright browser and the evidence folder.                                                                                                                        |
+| Name                                                                                                       | What it is                                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `newPage({ width = 1280, height = 800, language = "en", motion = false, scripts = true, record = false })` | A fresh visitor (no cookies) as a Playwright `Page`. `language` is the browser language. Clipboard access is granted. Motion is reduced unless `motion` is true: pass it to see an animation. `scripts: false` gives the page as the server sent it, in Chromium only. `record: true` keeps a video of the visit in the evidence folder. |
+| `go(page, path)`                                                                                           | Navigate to a site path and wait for the network and fonts to settle.                                                                                                                                                                                                                                                                    |
+| `get(path, headers)`                                                                                       | Plain HTTP GET that does not follow redirects: `{ status, headers, body }`, with lower-case header names and `body` as a `Buffer`. Use it for redirects, feeds, images and status codes.                                                                                                                                                 |
+| `snap(page, name)`                                                                                         | Save `name.png` and `name.aria.txt` (URL, title and ARIA tree) to the evidence folder.                                                                                                                                                                                                                                                   |
+| `save(name, content)`                                                                                      | Save a string or bytes as evidence.                                                                                                                                                                                                                                                                                                      |
+| `print(...)`                                                                                               | Like `console.log`, also written to `output.txt` in the evidence folder.                                                                                                                                                                                                                                                                 |
+| `base`, `browser`, `evidence`                                                                              | The instance URL, the Playwright browser and the evidence folder.                                                                                                                                                                                                                                                                        |
 
-When a script throws, the helper prints the failing line of your script, saves `failure-*.png` of every open page, and exits 1.
+When a script throws, the helper prints the failing line of your script (the outermost one, so a check that throws from your own helper names its caller), saves `failure-*.png` of every open page, and exits 1. Pages of a context you opened yourself with `browser.newContext` are included, and every context is closed when the run ends.
 
 Find elements by role and accessible name (`page.getByRole("button", { name: "Language: English" })`), never by generated class names: they change on every build. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`. Names are translated: `src/_gt/*.json` are keyed by a hash, so find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. Below 520px the navigation links and the language button are not in the accessibility tree until the `Menu` button is pressed; wait for the `h1` or the `Menu` button, and expect the menu to close after a language is chosen. Client-side navigation changes the URL before the new page paints, so wait for something on the new page (`await page.getByRole("heading", { level: 1, name: "…" }).waitFor()`), not only for the URL.
+
+`run` drives Chromium. To repeat a script in Firefox, pass the browser after the label:
+
+```sh
+$V run languages --browser firefox < script.js
+```
+
+`audit` and `seo` always use Chromium.
 
 Each [feature file](features/README.md) has the exact script for its journeys. Read the index first.
 

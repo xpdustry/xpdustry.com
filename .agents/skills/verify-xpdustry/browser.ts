@@ -1,16 +1,36 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import type { Browser, Page } from "playwright";
+import type { Browser, LaunchOptions, Page } from "playwright";
 import { HOME, fail } from "./instance.ts";
 
-export async function withBrowser<T>(use: (browser: Browser) => Promise<T>): Promise<T> {
-  const { chromium } = await import("playwright").catch(() =>
+/**
+ * The browsers a run can drive. Firefox has no clipboard permission to grant, so it gets the
+ * preference that lets a page read and write the clipboard without a prompt.
+ */
+const ENGINES = {
+  chromium: {},
+  firefox: { firefoxUserPrefs: { "dom.events.testing.asyncClipboard": true } }
+} satisfies Record<string, LaunchOptions>;
+
+export type Engine = keyof typeof ENGINES;
+
+export function engine(name: string): Engine {
+  if (name in ENGINES) return name as Engine;
+  return fail(`unknown browser "${name}"; use ${Object.keys(ENGINES).join(" or ")}`);
+}
+
+/** Playwright never downloads a browser on its own: a missing one fails with how to install it. */
+export async function withBrowser<T>(
+  use: (browser: Browser) => Promise<T>,
+  name: Engine = "chromium"
+): Promise<T> {
+  const playwright = await import("playwright").catch(() =>
     fail("Playwright is not installed; run `pnpm install`")
   );
-  const browser = await chromium
-    .launch()
+  const browser = await playwright[name]
+    .launch(ENGINES[name])
     .catch((error: Error) =>
-      fail(`${error.message.split("\n")[0]}\nrun \`pnpm exec playwright install chromium\``)
+      fail(`${error.message.split("\n")[0]}\nrun \`pnpm exec playwright install ${name}\``)
     );
   try {
     return await use(browser);

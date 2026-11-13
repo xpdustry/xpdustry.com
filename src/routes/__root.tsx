@@ -8,6 +8,7 @@ import {
 import { getLocale, getTranslationsSnapshot, GTProvider, T } from "gt-tanstack-start";
 import { useEffect, type ReactNode } from "react";
 import { Background } from "#app/shell/Background";
+import { ENTER } from "#app/shell/enter";
 import { Footer } from "#app/shell/Footer";
 import { Header } from "#app/shell/Header";
 import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/shell/reveal";
@@ -58,8 +59,8 @@ export const Route = createRootRoute({
 });
 
 /**
- * The colour a browser shows before the stylesheet arrives, in place of white. The stylesheet's own
- * `:root` rule outranks `:where()` and clears it, so the body's background reaches the canvas.
+ * The colour a browser shows before the stylesheet arrives, in place of white. It is the same deep
+ * green the stylesheet's own `:root` rule gives the canvas.
  */
 const UNSTYLED_CANVAS = `:where(html){background:${CROWN.settings.color}}`;
 
@@ -89,6 +90,7 @@ function Document({ children }: { children: ReactNode }) {
         <style>{UNSTYLED_CANVAS}</style>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: REVEAL }} />
+        <script dangerouslySetInnerHTML={{ __html: ENTER }} />
       </head>
       <body>
         <GTProvider locale={locale} translations={translations}>

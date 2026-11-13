@@ -1,6 +1,7 @@
 import type { MarkdownDocument } from "@tanstack/markdown";
 import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
 import type { ComponentProps, ReactNode } from "react";
+import { outbound } from "#app/ui/outbound";
 import { POST_ELEMENTS } from "./content/elements";
 import * as styles from "./PostBody.css";
 
@@ -66,9 +67,8 @@ function PostVideo({
 }
 
 function Anchor({ children, ...props }: ComponentProps<"a">) {
-  const external = /^https?:\/\//.test(props.href ?? "");
   return (
-    <a {...props} {...(external && { target: "_blank", rel: "noreferrer" })}>
+    <a {...props} {...outbound(props.href)}>
       {children}
     </a>
   );

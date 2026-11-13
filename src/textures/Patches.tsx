@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { texture } from "./enter";
 import { blobSprite, type Patches as PatchesData } from "./texture";
 import * as styles from "./Patches.css";
 
@@ -16,16 +17,22 @@ const SPRITES = import.meta.glob<string>("/src/textures/assets/patches/*.webp", 
  * A card whose sprites are the largest thing on the first screen passes `priority`: they load at
  * once and ahead of other images, instead of when layout finds them near the viewport. Its grown
  * sprites still wait. Elsewhere it only takes bandwidth from the fonts the first screen needs.
+ *
+ * On the first screen, the blobs grow in as the page loads. Patches that shape their parent
+ * instead of decorating it, such as a frayed edge, pass `still` and paint with it.
  */
 export function Patches({
   patches,
   className,
-  priority = false
+  priority = false,
+  still = false
 }: {
   patches: PatchesData;
   className?: string;
   priority?: boolean;
+  still?: boolean;
 }) {
+  const mark = (grown: boolean) => (still ? {} : texture(grown ? "grown" : "grow", patches.tile));
   return (
     <span className={`${styles.patches} ${className ?? ""}`} aria-hidden="true">
       {patches.blobs.map(([x, y, radius, turn = 0], at) => {
@@ -36,12 +43,18 @@ export function Patches({
         };
         return (
           <span key={at}>
-            <Sprite sprite={blobSprite(patches, radius)} style={style} priority={priority} />
+            <Sprite
+              sprite={blobSprite(patches, radius)}
+              style={style}
+              priority={priority}
+              {...mark(false)}
+            />
             {patches.grow && (
               <Sprite
                 sprite={blobSprite(patches, radius, true)}
                 style={style}
-                className={styles.grown}
+                grown
+                {...mark(true)}
               />
             )}
           </span>
@@ -54,25 +67,28 @@ export function Patches({
 function Sprite({
   sprite,
   style,
-  className,
-  priority = false
+  priority = false,
+  grown = false,
+  ...marker
 }: {
   sprite: ReturnType<typeof blobSprite>;
   style: CSSProperties;
-  className?: string;
   priority?: boolean;
-}) {
+  grown?: boolean;
+} & Partial<ReturnType<typeof texture>>) {
+  const fetching = priority
+    ? { fetchPriority: "high" as const }
+    : { loading: "lazy" as const, decoding: "async" as const };
   return (
     <img
-      className={className}
+      className={grown ? styles.grown : undefined}
       src={SPRITES[`/src/textures/assets/patches/${sprite.name}.webp`]}
       width={sprite.size}
       height={sprite.size}
       alt=""
-      loading={priority ? undefined : "lazy"}
-      decoding={priority ? undefined : "async"}
-      fetchPriority={priority ? "high" : undefined}
+      {...fetching}
       style={style}
+      {...marker}
     />
   );
 }

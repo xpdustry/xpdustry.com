@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { FRINGES, PATCHES, SPREADS } from "../src/textures/cards.ts";
-import { BACKDROP, CROWN, FADE, RIDGE } from "../src/textures/page.ts";
+import { BACKDROP, CROWN, FADE, RIDGE, THREADS } from "../src/textures/page.ts";
 import { blobSprites, type TextureSettings } from "../src/textures/texture.ts";
 import { renderTexture, toLabyrinth } from "./reticulate-render.ts";
 
@@ -26,6 +26,7 @@ export const TEXTURES: readonly Prerendered[] = [
   { file: "crown.webp", ...CROWN },
   { file: "ridge.webp", ...RIDGE },
   { file: "fade.webp", settings: FADE },
+  { file: "threads.webp", settings: THREADS },
   ...unique(
     Object.values(PATCHES).flatMap((patches) =>
       blobSprites(patches).map(({ name, size, settings }) => ({

@@ -8,6 +8,7 @@ import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import type { Patches as PatchSet } from "#app/textures/texture";
 import { GitHub, PuzzlePiece } from "#app/ui/icons";
+import { outbound } from "#app/ui/outbound";
 import { Tray } from "#app/ui/Tray";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./Projects.css";
@@ -71,7 +72,12 @@ function Tile({
   children: ReactNode;
 }) {
   return (
-    <a href={href} className={`${card.card} ${className}`} style={{ background: ground }}>
+    <a
+      href={href}
+      {...outbound(href)}
+      className={`${card.card} ${className}`}
+      style={{ background: ground }}
+    >
       <Patches patches={patches} />
       {children}
     </a>

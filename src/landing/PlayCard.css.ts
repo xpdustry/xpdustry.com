@@ -44,12 +44,17 @@ export const how = style({
   textWrap: "balance"
 });
 
-export const online = style({
+/** At the card's foot: the player count, which "Copied" takes the place of after a press. */
+export const foot = style({
   alignSelf: "start",
   marginTop: "auto",
-  paddingTop: 12,
+  paddingTop: 12
+});
+
+export const online = style({
   font: figures(),
-  color: vars.ink
+  color: vars.ink,
+  overflowWrap: "anywhere"
 });
 
 globalStyle(`${play} ${online}`, {

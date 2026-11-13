@@ -23,13 +23,7 @@ export function PostAside({ post, className }: { post: Post; className?: string 
           {releases.map((id) => (
             <div key={id} className={styles.release}>
               <code>{releaseLabel(id, project?.repository)}</code>
-              <PlinthAnchor
-                tone="ink"
-                size="sm"
-                href={releaseUrl(id)}
-                target="_blank"
-                rel="noreferrer"
-              >
+              <PlinthAnchor tone="ink" size="sm" href={releaseUrl(id)}>
                 <T>Changelog</T>
               </PlinthAnchor>
             </div>

@@ -5,6 +5,7 @@ import { formatNumber } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
 import { ArrowUpRight, Discord } from "#app/ui/icons";
+import { outbound } from "#app/ui/outbound";
 import type { DiscordCounts } from "./live";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./DiscordCard.css";
@@ -33,6 +34,7 @@ export function DiscordCard({
   return (
     <a
       href={SITE.discord}
+      {...outbound(SITE.discord)}
       className={`${card.card} ${styles.discord} ${size.className} ${className}`}
     >
       <Patches patches={size.patches} />
