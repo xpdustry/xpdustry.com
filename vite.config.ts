@@ -11,6 +11,11 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true
   },
+  // The footer's copyright year, the same on the server and in the browser, so it never mismatches
+  // when the server outlives a new year.
+  define: {
+    "import.meta.env.BUILD_YEAR": JSON.stringify(new Date().getUTCFullYear())
+  },
   plugins: [
     blogMarkdownPlugin(),
     vanillaExtractPlugin(),

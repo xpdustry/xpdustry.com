@@ -25,7 +25,7 @@ export function Footer() {
           </a>
           <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         </nav>
-        <small className={styles.copyright}>© {new Date().getUTCFullYear()} Xpdustry</small>
+        <small className={styles.copyright}>© {import.meta.env.BUILD_YEAR} Xpdustry</small>
         <PlinthAnchor className={styles.top} href="#top" aria-label={gt("Back to top")}>
           <ArrowUp />
           <span className={styles.say}>
