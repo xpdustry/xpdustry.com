@@ -31,6 +31,7 @@ Each file has an H1, one paragraph on what the visitor gets, then `Sub-features`
 - [Languages](languages.md): first-visit language, the switcher, prefixed URLs, the remembered choice.
 - [Copy a server address](copy-server-address.md): the gamemode cards, the play card and the spread a press starts on them, and the header pill on other pages.
 - [Texture entrance](texture-entrance.md): how the first screen's crown, backdrop and card blobs come in, and what a visitor without the entrance gets.
+- [Team](team.md): the grid of teammates with their tags, and the profile a tile opens.
 - [Blog](blog.md): the index, a post with its media and callouts, translated posts, missing posts.
 - [Search and social metadata](search-metadata.md): titles, canonical and alternate links, structured data, sitemap, social cards.
 - [Live status](live-status.md): player counts, Discord and GitHub figures, the health endpoint.

@@ -7,7 +7,8 @@ test.each([
   "http://example.com",
   "https://xpdustry.com.evil.example",
   "https://github.com/phinner-fans",
-  "https://evil.example/github.com/xpdustry"
+  "https://evil.example/github.com/xpdustry",
+  "https://notzetamap.fr"
 ])("%s opens in a new tab without a referrer", (href) => {
   expect(outbound(href)).toEqual({ target: "_blank", rel: "noreferrer" });
 });
@@ -19,7 +20,9 @@ test.each([
   "https://github.com/xpdustry",
   "https://github.com/xpdustry/nohorny/releases/tag/v4.0.0",
   "https://GitHub.com/ZetaMap",
-  "https://github.com/phinner?tab=repositories"
+  "https://github.com/phinner?tab=repositories",
+  "https://zetamap.fr/",
+  "https://phinner.dev"
 ])("%s is ours: it opens in a new tab and learns where the visitor came from", (href) => {
   expect(outbound(href)).toEqual({ target: "_blank", rel: "noopener" });
 });

@@ -69,6 +69,9 @@ function MainNav({ id }: { id: string }) {
       <PlinthSectionLink tone="ink" hash="gamemodes">
         <T>Gamemodes</T>
       </PlinthSectionLink>
+      <PlinthSectionLink tone="ink" hash="team">
+        <T>Team</T>
+      </PlinthSectionLink>
       <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }}>
         <T>Blog</T>
       </PlinthLink>

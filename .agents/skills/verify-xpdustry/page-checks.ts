@@ -167,11 +167,13 @@ function sidewaysScroll(): string[] {
 function clippedText(): string[] {
   const { region, label, clips, textBoxes, transparent } = window.verify;
 
-  /** Text meant to be read: not empty, visually hidden on purpose, or transparent. */
+  /** Text meant to be read: not empty, hidden (as in a closed `<details>`), visually hidden on
+   * purpose, or transparent. */
   const shown = (node: Node, parent: Element) =>
     Boolean(node.textContent?.trim()) &&
-    !parent.closest(".sr-only, script, style") &&
-    getComputedStyle(parent).visibility !== "hidden" &&
+    // `data-truncated` marks a line cut short on purpose, whose whole text is a press away.
+    !parent.closest(".sr-only, [data-truncated], script, style") &&
+    parent.checkVisibility({ visibilityProperty: true }) &&
     !transparent(parent);
 
   const lineBoxes = (node: Node) =>
@@ -221,8 +223,35 @@ function clippedText(): string[] {
   return [...found];
 }
 
+/**
+ * A popover, as a teammate's profile is, that leaves the screen once open: what is past the edge
+ * cannot be scrolled to. Each one whose button shows is opened as the button would, with it in
+ * view, measured and closed again.
+ */
+function popoversOffScreen(): string[] {
+  const { clientWidth: width, clientHeight: height } = document.documentElement;
+  const outside = (box: DOMRect) =>
+    box.left < -1 || box.top < -1 || box.right > width + 1 || box.bottom > height + 1;
+  const leaves = (popover: HTMLElement) => {
+    const button = document.querySelector(`[popovertarget="${popover.id}"]`);
+    // Without a button on show, as the menu's above a phone's width, nobody can open it.
+    if (!button?.checkVisibility({ visibilityProperty: true })) return false;
+    button.scrollIntoView({ block: "center", behavior: "instant" });
+    popover.showPopover();
+    const box = popover.getBoundingClientRect();
+    popover.hidePopover();
+    return outside(box);
+  };
+  const popovers = [...document.querySelectorAll<HTMLElement>("[popover]")].filter(leaves);
+  return [
+    ...new Set(
+      popovers.map((popover) => `popover leaves the screen: ${window.verify.label(popover)}`)
+    )
+  ];
+}
+
 /** Text a reader cannot see in full, under any text setting. */
-export const OVERFLOW_CHECKS = [sidewaysScroll, clippedText];
+export const OVERFLOW_CHECKS = [sidewaysScroll, clippedText, popoversOffScreen];
 
 /** Remembers each element's font size, for `fixedText` to compare with after the setting changes. */
 export function rememberFontSizes() {

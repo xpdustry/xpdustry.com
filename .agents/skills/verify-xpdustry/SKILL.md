@@ -1,6 +1,6 @@
 ---
 name: verify-xpdustry
-description: "Drive a production build of the Xpdustry website (xpdustry.com: TanStack Start, served by scripts/serve.ts) in a real browser and over HTTP, and capture proof that a page, a language, the blog, the copy-address buttons, search metadata or live server status works. Use before shipping, after changing UI, routes, translations or SEO, and whenever `pnpm check` passing is not enough evidence."
+description: "Drive a production build of the Xpdustry website (xpdustry.com: TanStack Start, served by scripts/serve.ts) in a real browser and over HTTP, and capture proof that a page, a language, the blog, the copy-address buttons, the team and its profiles, search metadata or live server status works. Use before shipping, after changing UI, routes, translations or SEO, and whenever `pnpm check` passing is not enough evidence."
 ---
 
 # Verify Xpdustry
@@ -71,7 +71,7 @@ The script gets:
 
 When a script throws, the helper prints the failing line of your script (the outermost one, so a check that throws from your own helper names its caller), saves `failure-*.png` of every open page, and exits 1. Pages of a context you opened yourself with `browser.newContext` are included, and every context is closed when the run ends.
 
-Find elements by role and accessible name (`page.getByRole("button", { name: "Language: English" })`), never by generated class names: they change on every build. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`. Names are translated: `src/_gt/*.json` are keyed by a hash, so find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. Below 520px the navigation links and the language button are not in the accessibility tree until the `Menu` button is pressed; wait for the `h1` or the `Menu` button, and expect the menu to close after a language is chosen. Client-side navigation changes the URL before the new page paints, so wait for something on the new page (`await page.getByRole("heading", { level: 1, name: "…" }).waitFor()`), not only for the URL.
+Find elements by role and accessible name (`page.getByRole("button", { name: "Language: English" })`), never by generated class names: they change on every build. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`, `#team`. Names are translated: `src/_gt/*.json` are keyed by a hash, so find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. Below 520px the navigation links and the language button are not in the accessibility tree until the `Menu` button is pressed; wait for the `h1` or the `Menu` button, and expect the menu to close after a language is chosen. Client-side navigation changes the URL before the new page paints, so wait for something on the new page (`await page.getByRole("heading", { level: 1, name: "…" }).waitFor()`), not only for the URL.
 
 `run` drives Chromium. To repeat a script in Firefox, pass the browser after the label:
 
@@ -100,6 +100,7 @@ $V audit fr               # one language
 The design checks, at the default size only: a navigation item that wraps, a header control left adrift from the group on the right, a section title that runs under its button, a truncated section subtitle, text that leaves the screen. Under every setting:
 
 - `page scrolls sideways by Npx, <region>: <text>` names the widest element that is not inside a clipping box, and whether it is in the header, `main` or the footer.
+- `popover leaves the screen: <text>` is a popover, as a teammate's profile is, that reaches past an edge of the screen once open, where nothing can scroll to it. Each one whose button is on show is opened with that button in view, measured and closed.
 - `text clipped, <region>: <text>` is text cut off by a box with hidden overflow: a fixed height, `nowrap`, an ellipsis, a word too long for its column. Text that is visually hidden on purpose (`.sr-only`, transparent, a 1px box) is skipped.
 - `text ignores the font size setting, <region>: <text>` is text under 24px that kept its size when the browser's font size doubled: a font size in px. Font sizes go through `rem()` from `src/ui/styles/scale.ts`, breakpoints through `media` and `upTo` from `src/ui/styles/media.ts`, container queries through `narrowerThan`.
 

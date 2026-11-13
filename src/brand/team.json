@@ -1,0 +1,51 @@
+{
+  "330298929331699713": {
+    "name": "phinner",
+    "tags": ["developer"],
+    "about": {
+      "en": "Owns Chaotic Neutral, and administers and develops Xpdustry.",
+      "fr": "Possède Chaotic Neutral, administre et développe Xpdustry.",
+      "ru": "Владеет Chaotic Neutral, администрирует и разрабатывает Xpdustry."
+    },
+    "avatar": "/phinner.svg",
+    "github": "https://github.com/phinner",
+    "website": "https://phinner.dev"
+  },
+  "534031087094071307": {
+    "name": "ZetaMap",
+    "rank": "owner",
+    "tags": ["developer"],
+    "about": {
+      "en": "Co-owns Chaotic Neutral and develops for Xpdustry.",
+      "fr": "Copropriétaire de Chaotic Neutral, développe pour Xpdustry.",
+      "ru": "Совладелец Chaotic Neutral, разрабатывает для Xpdustry."
+    },
+    "avatar": "/zetamap.webp",
+    "github": "https://github.com/ZetaMap",
+    "website": "https://zetamap.fr"
+  },
+  "665507436513329153": {
+    "name": "Maxou",
+    "tags": ["developer"],
+    "github": "https://github.com/rogue11778"
+  },
+  "817453221428985908": {
+    "name": ".json",
+    "avatar": "/json01.webp",
+    "github": "https://github.com/JasonP01"
+  },
+  "423249514162552834": {
+    "name": "Oreo"
+  },
+  "558316597912010784": {
+    "name": "TEST",
+    "github": "https://github.com/TG-TG-TG-TG-TG-TG"
+  },
+  "923967967388110908": {
+    "name": "EchoVespy",
+    "github": "https://github.com/EchoVespy"
+  },
+  "146844378911080448": {
+    "github": "https://github.com/Thundermagnet"
+  }
+}
