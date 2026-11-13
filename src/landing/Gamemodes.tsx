@@ -1,17 +1,19 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
-import { useId, useRef, useState, type MouseEvent, type Ref } from "react";
+import { useId, useRef, type Ref } from "react";
 import { findServer, playerCount } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/status/snapshots";
 import { Patches } from "#app/textures/Patches";
-import { Spread, spreadFromPress, type SpreadStart } from "#app/textures/Spread";
+import { Spread } from "#app/textures/Spread";
 import { CopyCard } from "#app/ui/copy/CopyCard";
-import { useCopy, type CopyState } from "#app/ui/copy/useCopy";
+import { Roll } from "#app/ui/copy/Roll";
+import type { CopyState } from "#app/ui/copy/useCopy";
 import { Hostname } from "#app/ui/Hostname";
 import { Check, Copy, GameController, X } from "#app/ui/icons";
 import { Tray } from "#app/ui/Tray";
 import { gamemodes, type Gamemode } from "./modes";
+import { useCopyPress } from "./useCopyPress";
 import { useSeen } from "./useSeen";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./Gamemodes.css";
@@ -21,6 +23,13 @@ const FRINGES = import.meta.glob<string>("/src/textures/assets/fringe/*.webp", {
   query: "?url",
   import: "default"
 });
+
+/** The chip for how the copy went: the tick once it landed, an alarm when it failed. */
+const CHIPS: Record<CopyState, string> = {
+  idle: "",
+  copied: card.ticked,
+  failed: card.failed
+};
 
 const STATES: Record<CopyState, string> = {
   idle: "",
@@ -66,7 +75,7 @@ function Mode({
   const gt = useGT();
   const m = useMessages();
   const hostname = server?.hostname ?? "";
-  const { state, spread, chip, press } = useModePress(hostname);
+  const { state, spread, chip, press } = useCopyPress(hostname);
   const ids = useId();
   const Icon = mode.icon;
   return (
@@ -94,36 +103,23 @@ function Mode({
           <h3 id={`${ids}name`} className={styles.name}>
             {m(mode.name)}
           </h3>
-          <span id={`${ids}line`} className={styles.line}>
+          <Roll
+            id={`${ids}line`}
+            rolled={state !== "idle"}
+            said={<Said failed={state === "failed"} hostname={hostname} />}
+            saidClassName={styles.said}
+          >
             <Players server={server} />
-            <Said failed={state === "failed"} hostname={hostname} />
-          </span>
+          </Roll>
           <span id={`${ids}action`} hidden>
             <T>. Copy the server address</T>
           </span>
         </div>
-        <Chip ref={chip} failed={state === "failed"} />
+        <Chip ref={chip} state={state} />
       </div>
       <p className={styles.about}>{m(mode.description)}</p>
     </CopyCard>
   );
-}
-
-/**
- * A press on a mode's card: it copies the address and starts a spread where it landed, or from
- * the chip for a key press.
- */
-function useModePress(hostname: string) {
-  const { state, copy } = useCopy(hostname);
-  const [spread, setSpread] = useState<SpreadStart>();
-  const chip = useRef<HTMLSpanElement>(null);
-
-  const press = (event: MouseEvent<HTMLButtonElement>) => {
-    const box = event.currentTarget.parentElement!.getBoundingClientRect();
-    setSpread(spreadFromPress(event, box, chip.current!.getBoundingClientRect()));
-    void copy();
-  };
-  return { state, spread, chip, press };
 }
 
 /** The mode's colour down the band, its patches past the band's side or its fringe below it. */
@@ -132,7 +128,7 @@ function Tint({ edge }: { edge: Gamemode["edge"] }) {
   return (
     <span className={styles.tinted} aria-hidden="true">
       <span className={`${styles.edge} ${styles.side}`}>
-        <Patches patches={edge.side} className={styles.patches} />
+        <Patches patches={edge.side} className={styles.patches} still />
       </span>
       <span
         className={`${styles.edge} ${styles.below}`}
@@ -154,23 +150,20 @@ function Players({ server }: { server?: ServerSnapshotItem }) {
  */
 function Said({ failed, hostname }: { failed: boolean; hostname: string }) {
   const gt = useGT();
-  return (
-    <span className={styles.said} aria-hidden="true">
-      {failed ? <Hostname name={hostname} /> : gt("Copied")}
-    </span>
-  );
+  return failed ? <Hostname name={hostname} /> : gt("Copied");
 }
 
 /** The copy chip, which turns into a tick once the copy landed, or a cross when it failed. */
-function Chip({ ref, failed }: { ref: Ref<HTMLSpanElement>; failed: boolean }) {
+function Chip({ ref, state }: { ref: Ref<HTMLSpanElement>; state: CopyState }) {
+  const failed = state === "failed";
   return (
     <span
       ref={ref}
-      className={`${card.chip} ${styles.mark} ${failed ? card.failed : ""}`}
+      className={`${card.chip} ${card.swap} ${styles.mark} ${CHIPS[state]}`}
       aria-hidden="true"
     >
-      {failed ? <X /> : <Copy className={styles.glyph} />}
-      <Check className={styles.tick} />
+      {failed ? <X /> : <Copy className={`${card.glyph} ${styles.glyph}`} />}
+      <Check className={card.tick} />
     </span>
   );
 }

@@ -1,8 +1,9 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
-import { media, narrowerThan } from "#app/ui/styles/media";
+import { narrowerThan } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
 import { pop } from "#app/ui/Card.css";
+import { line } from "#app/ui/copy/Roll.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = narrowerThan(660);
@@ -172,20 +173,6 @@ export const name = style({
   }
 });
 
-export const line = style({
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr)",
-  overflow: "hidden",
-  // Room for the letters' ascenders and tails, which grow with the text.
-  margin: "-0.25em 0",
-  padding: "0.25em 0"
-});
-
-globalStyle(`${line} > *`, {
-  gridArea: "1 / 1",
-  transition: `translate 0.32s ${vars.easeOut}, opacity 0.2s`
-});
-
 export const count = style({
   justifySelf: "start",
   paddingLeft: 3,
@@ -211,13 +198,8 @@ export const empty = style({
   }
 });
 
+/** When the copy failed, the address to select takes the count's place instead of "Copied". */
 export const said = style({
-  overflow: "hidden",
-  fontSize: rem(font.caption),
-  lineHeight: leading.tight,
-  whiteSpace: "nowrap",
-  translate: "0 110%",
-  opacity: 0,
   selectors: {
     // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
@@ -230,23 +212,7 @@ export const said = style({
       userSelect: "all",
       cursor: "text"
     }
-  },
-  "@media": {
-    [media.still]: { translate: "none" }
   }
-});
-
-globalStyle(`:is(${copied}, ${failed}) ${count}`, {
-  translate: "0 -110%",
-  opacity: 0,
-  "@media": {
-    [media.still]: { translate: "none" }
-  }
-});
-
-globalStyle(`:is(${copied}, ${failed}) ${said}`, {
-  translate: "0",
-  opacity: 1
 });
 
 export const mark = style({
@@ -254,47 +220,12 @@ export const mark = style({
   margin: "-8px -8px -8px 2px"
 });
 
-globalStyle(`${mark} svg`, {
-  gridArea: "1 / 1",
-  width: 18,
-  height: 18,
-  transition: `scale 0.28s ${vars.easeOut}, rotate 0.28s ${vars.easeOut}, opacity 0.16s`
-});
-
 export const glyph = style({
   opacity: 0.75,
   selectors: {
-    [`${mode}:hover &`]: {
+    [`${mode}:hover:not(${copied}) &`]: {
       opacity: 1
-    },
-    [`${mode}${copied} &`]: {
-      scale: "0.4",
-      opacity: 0
     }
-  },
-  "@media": {
-    [media.still]: {
-      selectors: {
-        [`${mode}${copied} &`]: { scale: "1", rotate: "none" }
-      }
-    }
-  }
-});
-
-export const tick = style({
-  scale: "0.4",
-  rotate: "-30deg",
-  opacity: 0,
-  selectors: {
-    [`${copied} &`]: {
-      scale: "1",
-      rotate: "0deg",
-      opacity: 1,
-      transitionTimingFunction: vars.easeSpring
-    }
-  },
-  "@media": {
-    [media.still]: { scale: "1", rotate: "none" }
   }
 });
 

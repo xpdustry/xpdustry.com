@@ -4,6 +4,7 @@ const LIGHT_TEAL = ["#86d8cf", "#a6e7e0"] as const;
 const DEEP_TEAL = ["#104643", "#0c3c39"] as const;
 const BLURPLE = ["#4652b5", "#4f5cc3"] as const;
 const PLUM = ["#4d2238", "#3b1b2c"] as const;
+const GOLD = ["#f7d08c", "#fbdfab"] as const;
 const AMBER = ["#efcd95", "#f4dab0"] as const;
 const BLUE = ["#b9c6fb", "#cad4fc"] as const;
 const RED = ["#f7b0ae", "#f9c3c1"] as const;
@@ -47,7 +48,7 @@ export const PATCHES = {
     [0.02, 1, 69]
   ]),
   play: growing(
-    patches("#f7d08c", "#fbdfab", [
+    patches(...GOLD, [
       [0.97, 0.05, 81],
       [0.66, 1, 31]
     ])
@@ -100,6 +101,7 @@ export const PATCHES = {
 };
 
 export const SPREADS = {
+  play: spreadTiles(...GOLD),
   survival: spreadTiles(...AMBER),
   pvp: spreadTiles(...BLUE),
   attack: spreadTiles(...RED),

@@ -70,17 +70,6 @@ const shake = keyframes({
   "40%, 80%": { translate: "3px" }
 });
 
-/** A chip after its copy landed. Doubled up to win over the colours of a card's own chip. */
-export const copied = style({
-  selectors: {
-    [`${chip}&`]: {
-      background: vars.t9,
-      color: vars.onTeal,
-      "@media": { [media.motion]: { animation: `${pop} 0.5s ${vars.easeOut}` } }
-    }
-  }
-});
-
 /** A chip after the browser refused the copy. */
 export const failed = style({
   selectors: {
@@ -89,5 +78,47 @@ export const failed = style({
       color: vars.onAlarm,
       "@media": { [media.motion]: { animation: `${shake} 0.4s ${vars.easeOut}` } }
     }
+  }
+});
+
+/**
+ * A copy chip's two icons, laid over each other: the copy glyph, which turns into the tick once
+ * the copy landed (`ticked`). The chip keeps its own colours.
+ */
+export const swap = style({});
+export const ticked = style({});
+
+globalStyle(`${swap} svg`, {
+  gridArea: "1 / 1",
+  transition: `scale 0.28s ${vars.easeOut}, rotate 0.28s ${vars.easeOut}, opacity 0.16s`
+});
+
+export const glyph = style({
+  selectors: {
+    [`${ticked} &`]: { scale: "0.4", opacity: 0 }
+  },
+  "@media": {
+    [media.still]: {
+      selectors: {
+        [`${ticked} &`]: { scale: "1", rotate: "none" }
+      }
+    }
+  }
+});
+
+export const tick = style({
+  scale: "0.4",
+  rotate: "-30deg",
+  opacity: 0,
+  selectors: {
+    [`${ticked} &`]: {
+      scale: "1",
+      rotate: "0deg",
+      opacity: 1,
+      transitionTimingFunction: vars.easeSpring
+    }
+  },
+  "@media": {
+    [media.still]: { scale: "1", rotate: "none" }
   }
 });

@@ -1,3 +1,4 @@
+import { texture } from "#app/textures/enter";
 import { media } from "#app/ui/styles/media";
 import { inPage, inlineScript } from "./inlineScript";
 import * as styles from "./Background.css";
@@ -41,10 +42,10 @@ export function Background() {
   return (
     <>
       <div className={styles.clip} aria-hidden="true">
-        <div className={styles.background} suppressHydrationWarning />
+        <div className={styles.background} {...texture("backdrop")} suppressHydrationWarning />
       </div>
       <script dangerouslySetInnerHTML={{ __html: DRIFT }} />
-      <div className={styles.crown} data-crown="" aria-hidden="true" />
+      <div className={styles.crown} data-crown="" aria-hidden="true" {...texture("drop")} />
     </>
   );
 }

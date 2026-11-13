@@ -64,3 +64,9 @@ export const RIDGE = strip(
 );
 
 export const FADE = spreadTiles("#f7fdfd", "#eef7f6").solid.settings;
+
+/**
+ * Thin labyrinth threads, one seamless tile. Only its alpha counts: patches grow in through it as
+ * a mask, threads first, before they fuse.
+ */
+export const THREADS = spreadTiles("#000000", "#000000").thin.settings;
