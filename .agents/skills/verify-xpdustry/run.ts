@@ -133,8 +133,9 @@ export async function run(label: string, engine: Engine) {
   await withBrowser(async (browser) => {
     const session: Session = { base, browser, evidence, transcript: [] };
     const helpers = scriptHelpers(session);
-    const drive = new AsyncFunction(`{ ${Object.keys(helpers).join(", ")} }`, code);
     try {
+      // Inside the `try`, so a script that does not parse still leaves its evidence.
+      const drive = new AsyncFunction(`{ ${Object.keys(helpers).join(", ")} }`, code);
       await drive(helpers);
     } catch (error) {
       await recordFailure(error, session);

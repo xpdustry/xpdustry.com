@@ -27,30 +27,34 @@ Preconditions: default launch, `doctor` passes.
 ```sh
 $V run copy-address <<'EOF'
 const clipboard = (page) => page.evaluate(() => navigator.clipboard.readText());
+const copied = (page, text) => page.waitForFunction((text) => navigator.clipboard.readText().then((t) => t === text), text);
 const page = await newPage({ width: 1280 });
 await go(page, "/");
 const modes = page.locator("#gamemodes");
 await modes.getByRole("button", { name: "Survival" }).click();
-await page.waitForFunction(() => navigator.clipboard.readText().then((t) => t === "survival.md.xpdustry.com"));
-print("copy-mode:", await clipboard(page));
-print("copy-confirm:", await modes.locator("output").first().innerText());
+await copied(page, "survival.md.xpdustry.com");
+expect((await clipboard(page)) === "survival.md.xpdustry.com", "copy-mode", await clipboard(page));
+const confirm = await modes.locator("output").first().innerText();
+expect(confirm === "Copied survival.md.xpdustry.com. Paste it in Play, Join game, Add server.", "copy-confirm", confirm);
 await snap(page, "1-survival-copied");
 
 await page.locator("#servers").click({ position: { x: 24, y: 24 } }); // a corner of the card, away from its button
-await page.waitForFunction(() => navigator.clipboard.readText().then((t) => t === "hub.md.xpdustry.com"));
-print("copy-hub:", await clipboard(page));
+await copied(page, "hub.md.xpdustry.com");
+expect((await clipboard(page)) === "hub.md.xpdustry.com", "copy-hub", await clipboard(page));
 await snap(page, "2-hub-copied");
-print("no pill on the landing page:", await page.getByRole("banner").getByRole("button", { name: /^Copy/ }).count()); // 0
+const pills = await page.getByRole("banner").getByRole("button", { name: /^Copy/ }).count();
+expect(pills === 0, "no pill on the landing page", pills);
 
 await go(page, "/blog");
+await page.evaluate(() => navigator.clipboard.writeText("")); // the hub's address is still there from the play card
 await page.getByRole("banner").getByRole("button", { name: "Copy hub.md.xpdustry.com" }).click();
-await page.waitForFunction(() => navigator.clipboard.readText().then((t) => t === "hub.md.xpdustry.com"));
-print("copy-pill:", await clipboard(page));
+await copied(page, "hub.md.xpdustry.com");
+expect((await clipboard(page)) === "hub.md.xpdustry.com", "copy-pill", await clipboard(page));
 await snap(page, "3-pill-copied");
 EOF
 ```
 
-- **Expected.** `copy-mode` prints `survival.md.xpdustry.com`; `copy-confirm` prints `Copied survival.md.xpdustry.com. Paste it in Play, Join game, Add server.`; the first screenshot shows a tick on the Survival card.
+- **Expected.** Five lines, each starting with `ok`; a failed check throws and names itself. The first screenshot shows a tick on the Survival card, the last one on the header pill.
   Variants:
 
 - **Other languages.** Use `await go(page, "/fr")` and the French mode name (`Survie`). The announced path must match the game's own menu: `Jouer, Rejoindre une partie, Ajouter un serveur` and `Играть, Сетевая игра, Добавить сервер`.
@@ -150,9 +154,11 @@ EOF
     over[0].size
   );
   expect(grows(under), "copy-respread lets the covered one keep growing", sizes(under).join(" "));
+  const fade = under.map((frame) => frame.opacity);
   expect(
-    under.length > 0 && over.at(-1).opacity === 1,
-    "copy-respread fades the covered one out beneath"
+    fade.every((opacity, i) => i === 0 || opacity <= fade[i - 1]) && fade.at(-1) < 0.3,
+    "copy-respread fades the covered one out beneath",
+    fade.join(" ")
   );
 
   // copy-respread, fading: once "Copied" is over the spread fades; a press then grows a new one,

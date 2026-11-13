@@ -11,7 +11,7 @@ The maintained list of what a visitor can do on the site and how to prove each p
 ## Driving conventions
 
 - Run each script with `$V run <label>` exactly as written; the label names the evidence folder.
-- Each file has one main script that covers its sub-features. Bullets under `Variants` are further runs worth doing when you touched that area; adapt the main script for them and say which you ran.
+- Each file has one main script for the sub-features a plain visit reaches. Bullets under `Variants` cover the rest (another width, a refused clipboard, motion) and are worth running when you touched that area; adapt the main script for them, or run the script a bullet gives, and say which you ran.
 - English pages have no prefix; French and Russian live under `/fr` and `/ru`. A recipe that names `/blog` means `/fr/blog` when you verify French.
 - Accessible names are translated. The English names in these files become the strings in `src/_gt/fr.json` and `src/_gt/ru.json` for the other languages.
 - Nothing here writes data: there is nothing to restore between journeys.
