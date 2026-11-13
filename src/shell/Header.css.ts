@@ -15,10 +15,10 @@ import { vars } from "#app/ui/styles/theme.css";
 /*
  * In em, which media queries take from the browser's text size rather than the page's: text
  * enlarged on its own, as Firefox's text-only zoom does, folds the header sooner. At the usual 16px
- * these are 1240px and 520px.
+ * these are 1300px and 520px.
  */
-/** Where the navigation folds into the menu. */
-export const folded = "(max-width: 77.5em)";
+/** Where the navigation folds into the menu: below it, the header is short of its full width. */
+export const folded = "(max-width: 81.25em)";
 /** Where the language button and GitHub fold into the menu too. */
 export const narrow = "(max-width: 32.5em)";
 
@@ -84,8 +84,8 @@ export const nav = style({
   display: "flex",
   flex: "1 1 0",
   flexWrap: "wrap",
-  gap: 8,
-  marginLeft: 12,
+  gap: 6,
+  marginLeft: 4,
   padding: 0,
   border: 0,
   background: "none",
@@ -123,8 +123,12 @@ export const nav = style({
   }
 });
 
+/*
+ * Narrow enough that the six links, the address pill with a live count, the language button and
+ * GitHub share one row in every language.
+ */
 globalStyle(`${nav} > a > span`, {
-  padding: "7px 14px",
+  padding: "7px 11px",
   "@media": {
     [folded]: { flex: 1, padding: "10px 14px" }
   }
