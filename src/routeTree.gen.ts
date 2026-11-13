@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HealthzRouteImport } from './routes/healthz'
+import { Route as LogoDotsvgRouteImport } from './routes/logo[.]svg'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiServersRouteImport } from './routes/api/servers'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const HealthzRoute = HealthzRouteImport.update({
   id: '/healthz',
   path: '/healthz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoDotsvgRoute = LogoDotsvgRouteImport.update({
+  id: '/logo.svg',
+  path: '/logo.svg',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -56,6 +62,7 @@ const OgSplatRoute = OgSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/healthz': typeof HealthzRoute
+  '/logo.svg': typeof LogoDotsvgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/servers': typeof ApiServersRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/healthz': typeof HealthzRoute
+  '/logo.svg': typeof LogoDotsvgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/servers': typeof ApiServersRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -75,6 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/healthz': typeof HealthzRoute
+  '/logo.svg': typeof LogoDotsvgRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/servers': typeof ApiServersRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/healthz'
+    | '/logo.svg'
     | '/sitemap.xml'
     | '/api/servers'
     | '/blog/$slug'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/healthz'
+    | '/logo.svg'
     | '/sitemap.xml'
     | '/api/servers'
     | '/blog/$slug'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/healthz'
+    | '/logo.svg'
     | '/sitemap.xml'
     | '/api/servers'
     | '/blog/$slug'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HealthzRoute: typeof HealthzRoute
+  LogoDotsvgRoute: typeof LogoDotsvgRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiServersRoute: typeof ApiServersRoute
   BlogSlugRoute: typeof BlogSlugRoute
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/healthz'
       fullPath: '/healthz'
       preLoaderRoute: typeof HealthzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logo.svg': {
+      id: '/logo.svg'
+      path: '/logo.svg'
+      fullPath: '/logo.svg'
+      preLoaderRoute: typeof LogoDotsvgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HealthzRoute: HealthzRoute,
+  LogoDotsvgRoute: LogoDotsvgRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiServersRoute: ApiServersRoute,
   BlogSlugRoute: BlogSlugRoute,
