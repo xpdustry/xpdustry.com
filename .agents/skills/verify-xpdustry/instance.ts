@@ -70,8 +70,8 @@ function readInstance(): Instance | undefined {
   return existsSync(STATE) ? (JSON.parse(readFileSync(STATE, "utf8")) as Instance) : undefined;
 }
 
-/** The recorded pid is still the server this checkout started. */
-function isOurs({ pid }: Instance): boolean {
+/** The process is a `scripts/serve.ts` running from this checkout, so it serves its `dist/`. */
+function servesThisCheckout(pid: number): boolean {
   try {
     const command = readFileSync(`/proc/${pid}/cmdline`, "utf8");
     return command.includes("scripts/serve.ts") && readlinkSync(`/proc/${pid}/cwd`) === REPO;
@@ -79,6 +79,9 @@ function isOurs({ pid }: Instance): boolean {
     return false;
   }
 }
+
+/** The recorded pid is still the server this checkout started. */
+const isOurs = ({ pid }: Instance) => servesThisCheckout(pid);
 
 /** The running instance, refusing one that is gone or was built from older source. */
 export function healthyInstance(): Instance {
@@ -179,6 +182,17 @@ function refuseIfRunning() {
   const running = readInstance();
   if (running && isOurs(running)) {
     fail(`already running at ${running.base} (pid ${running.pid}); run \`stop\` first`);
+  }
+  // `pnpm start`, or a preview of it, serves the same `dist/`: the build would swap its files
+  // under it, and it would answer with 500s and missing assets until restarted.
+  const others = readdirSync("/proc").filter(
+    (name) => /^\d+$/.test(name) && servesThisCheckout(+name)
+  );
+  if (others.length > 0) {
+    fail(
+      `another server of this checkout's dist/ is running (pid ${others.join(", ")}), and the ` +
+        "build would replace its files under it; stop it, launch, then start it again"
+    );
   }
 }
 

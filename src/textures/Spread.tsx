@@ -57,6 +57,7 @@ export function Spread({
         className={`${styles.spread} ${growing ? styles.on : ""} ${current ? "" : styles.gone}`}
         style={place(tiles, play.from)}
         aria-hidden="true"
+        data-spread={current ? "current" : "covered"}
       >
         <i />
       </span>
