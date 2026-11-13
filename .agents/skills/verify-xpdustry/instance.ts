@@ -53,14 +53,18 @@ function filesOf(input: string): string[] {
   return readdirSync(root, { recursive: true, encoding: "utf8" }).map((name) => join(input, name));
 }
 
-/** Changes whenever a file the build reads is added, removed or rewritten. */
+/**
+ * Changes whenever a file the build reads is added, removed or rewritten. It reads contents, not
+ * sizes and times, which a same-length edit, a checkout or a copy that keeps times would slip past.
+ */
 function sourceFingerprint(): string {
   const digest = createHash("sha256");
   const inputs = [...BUILD_INPUTS, ...readdirSync(REPO).filter((name) => BUILD_CONFIG.test(name))];
   for (const input of inputs.sort((a, b) => a.localeCompare(b))) {
     for (const file of filesOf(input).sort()) {
-      const { size, mtimeMs } = statSync(join(REPO, file));
-      digest.update(`${file}\0${size}\0${mtimeMs}\n`);
+      const path = join(REPO, file);
+      if (!statSync(path).isFile()) continue;
+      digest.update(`${file}\0`).update(readFileSync(path)).update("\n");
     }
   }
   return digest.digest("hex").slice(0, 16);
@@ -242,8 +246,22 @@ export async function doctor() {
 /** Asks the server's process group to exit, and kills it after five seconds. */
 async function terminate(instance: Instance) {
   process.kill(-instance.pid, "SIGTERM");
-  for (let attempt = 0; attempt < 50 && isOurs(instance); attempt++) await sleep(100);
-  if (isOurs(instance)) process.kill(-instance.pid, "SIGKILL");
+  for (let attempt = 0; attempt < 50 && groupAlive(instance.pid); attempt++) await sleep(100);
+  if (groupAlive(instance.pid)) process.kill(-instance.pid, "SIGKILL");
+}
+
+/**
+ * Whether any process of the group is left: the server can exit and leave a child behind that
+ * ignored the signal. Signal 0 only checks the group exists. The group is the server's own,
+ * created by `launch`, so its id is not reused while one of its processes lives.
+ */
+function groupAlive(pid: number): boolean {
+  try {
+    process.kill(-pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function stop() {
