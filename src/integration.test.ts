@@ -74,6 +74,15 @@ describe("built pages", () => {
     expect(sitemap).toContain("<loc>https://xpdustry.com/blog/nohorny-4-beta-8</loc>");
   });
 
+  test("serves the logo at a stable URL", async () => {
+    const response = await get("/logo.svg");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/svg+xml");
+    expect(await response.text()).toBe(
+      await readFile(new URL("brand/logo.svg", import.meta.url), "utf8")
+    );
+  });
+
   test.each(["/", "/blog", "/blog/nohorny-4-beta-8"])("%s has one heading", async (path) => {
     const response = await get(path);
     expect(response.status).toBe(200);
