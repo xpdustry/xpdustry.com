@@ -1,4 +1,11 @@
-import { createGlobalVar, createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
+import {
+  createGlobalVar,
+  createVar,
+  fallbackVar,
+  globalStyle,
+  keyframes,
+  style
+} from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -19,14 +26,25 @@ const spreadVar = createGlobalVar(SPREAD, {
 
 const at = createVar();
 
+/** Out from nothing to the spread's resting reach, so every play starts over from the press. */
+const grow = keyframes({ from: { vars: { [spreadVar]: "0px" } } });
+
+/**
+ * At rest it already reaches past the farthest corner, so it fades out whole once `on` is over,
+ * and `on` only has to play `grow`: an animation starts over each time it is applied, where a
+ * transition would carry on from wherever the last one left off and only fade the colour back in.
+ */
 export const spread = style({
-  vars: { [at]: `circle at ${fallbackVar(x, "50%")} ${fallbackVar(y, "50%")}` },
+  vars: {
+    [at]: `circle at ${fallbackVar(x, "50%")} ${fallbackVar(y, "50%")}`,
+    [spreadVar]: `calc(${fallbackVar(reach, "700px")} + 120px)`
+  },
   position: "absolute",
   inset: 0,
   zIndex: -2,
   opacity: 0,
   pointerEvents: "none",
-  transition: `opacity 0.55s ${vars.easeOut}, ${SPREAD} 0s 0.55s`
+  transition: `opacity 0.55s ${vars.easeOut}`
 });
 
 globalStyle(`${spread} > i, ${spread}::before, ${spread}::after`, {
@@ -51,16 +69,23 @@ globalStyle(
 globalStyle(`${spread}::after`, layer("thin", `calc(${spreadVar} - 10px)`, spreadVar));
 
 export const on = style({
-  vars: { [spreadVar]: `calc(${fallbackVar(reach, "700px")} + 120px)` },
   opacity: 1,
-  transition: `${SPREAD} 0.9s ${vars.easeGrow}, opacity 0.1s`
+  transition: "opacity 0.1s",
+  animation: `${grow} 0.9s ${vars.easeGrow}`
+});
+
+/** A play a newer one covers: it keeps `on`'s growth going, if it had it, as it fades out. */
+export const gone = style({
+  opacity: 0,
+  transition: `opacity 0.55s ${vars.easeOut}`
 });
 
 globalStyle(`${spread}, ${on}`, {
   "@media": {
     [media.still]: {
       vars: { [spreadVar]: "4000px" },
-      transition: "opacity 0.15s"
+      transition: "opacity 0.15s",
+      animation: "none"
     }
   }
 });
