@@ -27,31 +27,33 @@ export function Header({ players }: { players: PlayerCount }) {
   useShutPopovers(header, FOLDS);
 
   return (
-    <header ref={header} className={`${styles.header} reveal`}>
-      <Brand className={styles.brand} />
-      <PlinthButton
-        tone="ink"
-        icon
-        className={styles.toggle}
-        aria-label={gt("Menu")}
-        popoverTarget={menu}
-      >
-        <List className={styles.whenShut} />
-        <X className={styles.whenOpen} />
-      </PlinthButton>
-      <MainNav id={menu} />
-      {!onLanding && <PlayPill players={players} className={styles.play} />}
-      <LocaleSwitch className={styles.language} />
-      <PlinthAnchor
-        tone="ink"
-        icon
-        className={styles.github}
-        href={SITE.github}
-        aria-label="GitHub"
-      >
-        <GitHub />
-      </PlinthAnchor>
-    </header>
+    <div className={styles.frame}>
+      <header ref={header} className={`${styles.header} reveal`}>
+        <Brand className={styles.brand} />
+        <PlinthButton
+          tone="ink"
+          icon
+          className={styles.toggle}
+          aria-label={gt("Menu")}
+          popoverTarget={menu}
+        >
+          <List className={styles.whenShut} />
+          <X className={styles.whenOpen} />
+        </PlinthButton>
+        <MainNav id={menu} />
+        {!onLanding && <PlayPill players={players} className={styles.play} />}
+        <LocaleSwitch className={styles.language} />
+        <PlinthAnchor
+          tone="ink"
+          icon
+          className={styles.github}
+          href={SITE.github}
+          aria-label="GitHub"
+        >
+          <GitHub />
+        </PlinthAnchor>
+      </header>
+    </div>
   );
 }
 

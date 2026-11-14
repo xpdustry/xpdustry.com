@@ -14,6 +14,7 @@ The site is served in English, French and Russian. A first visit follows the bro
 
 - Open the site with a browser set to French or Russian.
 - Choose the language button in the header (it shows a globe, the full native language name, and a chevron), then a language from the list.
+- Below 1400px the main navigation moves into `Menu`, while the language button stays in the header.
 - Below 520px the button is gone: open `Menu` and pick the language at the bottom of the panel.
 - Type a prefixed URL such as `/ru/blog`.
 
@@ -76,6 +77,7 @@ EOF
 
 ## Gotchas
 
+- The header has its own wider frame. Check the navigation at 1400px and 1401px, including resizing with a menu open: it must close when the navigation becomes inline. Tab padding stays the same on home and interior pages.
 - `get("/")` with no `accept-language` header is treated as English by the server.
 - The first-visit redirect already sets the `generaltranslation.locale` cookie, before the visitor chooses anything.
 - The languages are links to the same page under each prefix, and the menu and the list are `popover`s the browser opens itself, so both work with scripts off (`browser.newContext({ javaScriptEnabled: false })`). Without scripts, choosing English from `/fr/...` lands back on `/fr/...`: the server sends an unprefixed path to the language in the cookie, which the French page set.
