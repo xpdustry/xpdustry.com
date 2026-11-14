@@ -15,7 +15,7 @@ export function PlayPill({ players, className }: { players: Count; className?: s
   const label =
     players.state === "online"
       ? gt("Copy {address}, {players} playing", { address: HUB.hostname, players: players.players })
-      : gt("Copy {address}", { address: HUB.hostname });
+      : `${gt("Copy {address}", { address: HUB.hostname })}, ${players.state === "polling" ? gt("Checking") : gt("Offline")}`;
   return (
     <CopyButton
       tone="amber"
@@ -35,8 +35,8 @@ function Face({ players, state }: { players: Count; state: CopyState }) {
     <>
       <PlayerCount
         count={players}
-        bare
-        className={`${styles.count} ${players.state === "online" ? "" : styles.waiting} ${state === "failed" ? styles.aside : ""}`}
+        compact
+        className={`${styles.count} ${state === "failed" ? styles.aside : ""}`}
       />
       <Address failed={state === "failed"} />
       <Icon />

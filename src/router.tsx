@@ -4,8 +4,7 @@ import { followAddressLocale } from "#app/i18n/addressLocale";
 import loadTranslations from "#app/i18n/loadTranslations";
 import { withLocale, withoutLocale } from "#app/i18n/localePath";
 import { routeTree } from "#app/routeTree.gen";
-import { ErrorPage } from "#app/shell/ErrorPage";
-import { NotFound } from "#app/shell/NotFound";
+import { RouteError, RouteNotFound } from "#app/shell/RouteError";
 import gtConfig from "../gt.config.json";
 
 initializeGT({ ...gtConfig, loadTranslations });
@@ -29,8 +28,8 @@ export function getRouter() {
     scrollRestoration: restoreScrollOnlyInBrowser,
     scrollRestorationBehavior: "instant",
     defaultPreload: "intent",
-    defaultErrorComponent: ErrorPage,
-    defaultNotFoundComponent: NotFound
+    defaultErrorComponent: RouteError,
+    defaultNotFoundComponent: RouteNotFound
   });
 }
 

@@ -1,18 +1,20 @@
 import { useGT, useLocale } from "gt-tanstack-start";
 import { formatNumber } from "#app/i18n/format";
+import { Spinner, X } from "#app/ui/icons";
 import type { PlayerCount as Count } from "./live";
 import { Online } from "./Online";
+import * as styles from "./PlayerCount.css";
 
 /** "31 online" with a green light, or a grey one while the servers are being checked or are down. */
 export function PlayerCount({
   count,
   className,
-  bare = false
+  compact = false
 }: {
   count: Count;
   className?: string;
-  /** The number alone, without "online" after it. */
-  bare?: boolean;
+  /** The number alone when online, a status icon otherwise. */
+  compact?: boolean;
 }) {
   const gt = useGT();
   const locale = useLocale();
@@ -20,16 +22,38 @@ export function PlayerCount({
     return (
       <Online className={className}>
         <span>
-          {bare
+          {compact
             ? formatNumber(count.players, locale)
             : gt("{players} online", { players: formatNumber(count.players, locale) })}
         </span>
       </Online>
     );
   }
+  return <UnavailableCount count={count} compact={compact} className={className} />;
+}
+
+function UnavailableCount({
+  count,
+  compact,
+  className
+}: {
+  count: Exclude<Count, { state: "online" }>;
+  compact: boolean;
+  className: string | undefined;
+}) {
+  const gt = useGT();
+  const status = count.state === "polling" ? gt("Checking") : gt("Offline");
+  if (compact) {
+    return (
+      <span className={[styles.status, className].filter(Boolean).join(" ")} title={status}>
+        <span className="sr-only">{status}</span>
+        {count.state === "polling" ? <Spinner className={styles.spinner} /> : <X />}
+      </span>
+    );
+  }
   return (
     <Online offline className={className}>
-      {count.state === "polling" ? gt("Checking") : gt("Offline")}
+      {status}
     </Online>
   );
 }

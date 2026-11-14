@@ -1,4 +1,5 @@
 import { T, useGT } from "gt-tanstack-start";
+import { useEffect, useState } from "react";
 import { Brand } from "#app/brand/Brand";
 import { SITE } from "#app/brand/site";
 import { ArrowUp } from "#app/ui/icons";
@@ -8,6 +9,7 @@ import * as styles from "./Footer.css";
 
 export function Footer() {
   const gt = useGT();
+  const scrollable = usePageOverflows();
   return (
     <footer className={`${styles.footer} reveal`}>
       <div className={styles.ridge} aria-hidden="true" />
@@ -23,7 +25,14 @@ export function Footer() {
           <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         </nav>
         <small className={styles.copyright}>© {import.meta.env.BUILD_YEAR} Xpdustry</small>
-        <PlinthAnchor className={styles.top} href="#top" aria-label={gt("Back to top")}>
+        <PlinthAnchor
+          className={styles.top}
+          href="#top"
+          aria-label={gt("Back to top")}
+          aria-hidden={!scrollable}
+          tabIndex={scrollable ? undefined : -1}
+          style={{ visibility: scrollable ? "visible" : "hidden" }}
+        >
           <ArrowUp />
           <span className={styles.say}>
             <T>Back to top</T>
@@ -32,4 +41,23 @@ export function Footer() {
       </div>
     </footer>
   );
+}
+
+function usePageOverflows() {
+  const [scrollable, setScrollable] = useState(false);
+  useEffect(() => {
+    // Entrance transforms briefly enlarge scrollHeight without making the page itself taller.
+    const measure = () =>
+      setScrollable(document.body.offsetHeight > document.documentElement.clientHeight);
+    const observer = new ResizeObserver(measure);
+    observer.observe(document.documentElement);
+    observer.observe(document.body);
+    window.addEventListener("resize", measure);
+    measure();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+  return scrollable;
 }

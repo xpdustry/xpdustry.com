@@ -1,29 +1,30 @@
-import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
-import { T, useGT } from "gt-tanstack-start";
-import { PlinthButton, PlinthLink } from "#app/ui/Plinth";
-import { Message } from "./Message";
+import type { ReactNode } from "react";
+import { SITE } from "#app/brand/site";
+import * as styles from "./ErrorPage.css";
 
-export function ErrorPage({ reset }: ErrorComponentProps) {
-  const router = useRouter();
-  const gt = useGT();
+export function ErrorPage({
+  code,
+  message,
+  details,
+  actions
+}: {
+  code: number;
+  message: string;
+  details: ReactNode;
+  actions: ReactNode;
+}) {
   return (
-    <Message code="500" title={gt("Something broke on our side")}>
-      <p>
-        <T>Try again in a moment. If it keeps happening, tell us on Discord.</T>
-      </p>
-      <div>
-        <PlinthButton
-          onClick={() => {
-            reset();
-            void router.invalidate();
-          }}
-        >
-          <T>Try again</T>
-        </PlinthButton>
-        <PlinthLink tone="ink" to="/">
-          <T>Home</T>
-        </PlinthLink>
-      </div>
-    </Message>
+    <>
+      <title>{`${code} - ${message} - ${SITE.name}`}</title>
+      <meta name="robots" content="noindex" />
+      <main id="main" className={`${styles.message} reveal`}>
+        <p className={styles.code}>{code}</p>
+        <h1 className={styles.title}>{message}</h1>
+        <div className={styles.body}>
+          <p>{details}</p>
+          <div className={styles.actions}>{actions}</div>
+        </div>
+      </main>
+    </>
   );
 }
