@@ -5,7 +5,7 @@ import { Brand } from "#app/brand/Brand";
 import { SITE } from "#app/brand/site";
 import type { PlayerCount } from "#app/status/live";
 import { GitHub, List, X } from "#app/ui/icons";
-import { PlinthAnchor, PlinthButton, PlinthLink, PlinthSectionLink } from "#app/ui/Plinth";
+import { PlinthAnchor, PlinthButton, PlinthLink } from "#app/ui/Plinth";
 import { LocaleList, LocaleSwitch } from "./LocaleSwitch";
 import { PlayPill } from "./PlayPill";
 import { moving, useShutPopovers } from "./usePopovers";
@@ -27,33 +27,31 @@ export function Header({ players }: { players: PlayerCount }) {
   useShutPopovers(header, FOLDS);
 
   return (
-    <div className={styles.frame}>
-      <header ref={header} className={`${styles.header} reveal`}>
-        <Brand className={styles.brand} />
-        <PlinthButton
-          tone="ink"
-          icon
-          className={styles.toggle}
-          aria-label={gt("Menu")}
-          popoverTarget={menu}
-        >
-          <List className={styles.whenShut} />
-          <X className={styles.whenOpen} />
-        </PlinthButton>
-        <MainNav id={menu} />
-        {!onLanding && <PlayPill players={players} className={styles.play} />}
-        <LocaleSwitch className={styles.language} />
-        <PlinthAnchor
-          tone="ink"
-          icon
-          className={styles.github}
-          href={SITE.github}
-          aria-label="GitHub"
-        >
-          <GitHub />
-        </PlinthAnchor>
-      </header>
-    </div>
+    <header ref={header} className={`${styles.header} reveal`}>
+      <Brand className={styles.brand} />
+      <PlinthButton
+        tone="ink"
+        icon
+        className={styles.toggle}
+        aria-label={gt("Menu")}
+        popoverTarget={menu}
+      >
+        <List className={styles.whenShut} />
+        <X className={styles.whenOpen} />
+      </PlinthButton>
+      <MainNav id={menu} />
+      {!onLanding && <PlayPill players={players} className={styles.play} />}
+      <LocaleSwitch className={styles.language} />
+      <PlinthAnchor
+        tone="ink"
+        icon
+        className={styles.github}
+        href={SITE.github}
+        aria-label="GitHub"
+      >
+        <GitHub />
+      </PlinthAnchor>
+    </header>
   );
 }
 
@@ -65,21 +63,9 @@ function MainNav({ id }: { id: string }) {
       <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }}>
         <T>Home</T>
       </PlinthLink>
-      <PlinthSectionLink tone="ink" hash="projects">
-        <T>Projects</T>
-      </PlinthSectionLink>
-      <PlinthSectionLink tone="ink" hash="gamemodes">
-        <T>Gamemodes</T>
-      </PlinthSectionLink>
-      <PlinthSectionLink tone="ink" hash="team">
-        <T>Team</T>
-      </PlinthSectionLink>
       <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }}>
         <T>Blog</T>
       </PlinthLink>
-      <PlinthAnchor tone="ink" href={SITE.maven}>
-        Maven
-      </PlinthAnchor>
       <LocaleList className={styles.languages} />
     </nav>
   );

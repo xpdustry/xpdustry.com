@@ -106,9 +106,6 @@ describe("built pages", () => {
         // Which of the two is `outbound`'s to say: Xpdustry's own sites learn where the visitor
         // came from, any other site does not.
         expect(anchor).toMatch(/\srel="(noopener|noreferrer)"/);
-        if (/\shref="https:\/\/maven\.xpdustry\.com"/.test(anchor)) {
-          expect(anchor).toContain('rel="noopener"');
-        }
       }
       for (const anchor of anchors.filter((anchor) => !leaving.includes(anchor))) {
         expect(anchor).not.toContain("target=");

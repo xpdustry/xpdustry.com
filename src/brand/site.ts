@@ -11,7 +11,6 @@ export const SITE = {
   discord: "https://discord.xpdustry.com",
   /** The invite behind `discord`, which Discord's API answers with member counts. */
   discordInvite: "chaotic-neutral-519293558599974912",
-  maven: "https://maven.xpdustry.com",
   email: "contact@xpdustry.com",
   origin: "https://xpdustry.com"
 };

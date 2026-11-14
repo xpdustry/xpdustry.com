@@ -96,8 +96,10 @@ function Document({ children }: { children: ReactNode }) {
         <GTProvider locale={locale} translations={translations}>
           <SkipLink />
           <Background />
-          <Header players={players} />
-          <div className="wrap">{children}</div>
+          <div className="wrap">
+            <Header players={players} />
+            {children}
+          </div>
           <Footer />
         </GTProvider>
         <RouteAnnouncer />
