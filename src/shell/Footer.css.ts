@@ -8,7 +8,7 @@ import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = upTo(900);
 
-const ridgeHeight = createVar();
+export const ridgeHeight = createVar();
 
 export const footer = style({
   ...onDeep,
