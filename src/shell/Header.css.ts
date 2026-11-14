@@ -1,5 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
+import { rem } from "#app/ui/styles/scale";
 import { onDeep } from "./onDeep";
 import {
   hangUnder,
@@ -15,10 +16,10 @@ import { vars } from "#app/ui/styles/theme.css";
 /*
  * In em, which media queries take from the browser's text size rather than the page's: text
  * enlarged on its own, as Firefox's text-only zoom does, folds the header sooner. At the usual 16px
- * these are 1300px and 520px.
+ * these are 1400px and 520px.
  */
 /** Where the navigation folds into the menu: below it, the header is short of its full width. */
-export const folded = "(max-width: 81.25em)";
+export const folded = "(max-width: 87.5em)";
 /** Where the language button and GitHub fold into the menu too. */
 export const narrow = "(max-width: 32.5em)";
 
@@ -26,6 +27,12 @@ const ANCHOR = "--site-menu";
 const BRAND = "--site-brand";
 
 const below = `calc(${vars.group} * 0.55)`;
+
+export const frame = style({
+  width: `min(${rem(1344)}, 100% - 2 * clamp(20px, 5vw, 56px))`,
+  marginInline: "auto",
+  padding: `${vars.gap} ${vars.gap} 0`
+});
 
 export const header = style({
   ...onDeep,
@@ -35,7 +42,7 @@ export const header = style({
   flexWrap: "wrap",
   justifyContent: "flex-end",
   alignItems: "center",
-  gap: "10px 14px",
+  gap: "10px 22px",
   padding: `6px 6px ${below}`,
   "@media": {
     [narrow]: { columnGap: 10 }
@@ -84,7 +91,7 @@ export const nav = style({
   display: "flex",
   flex: "1 1 0",
   flexWrap: "wrap",
-  gap: 4,
+  gap: 6,
   marginLeft: 4,
   padding: 0,
   border: 0,
@@ -123,12 +130,8 @@ export const nav = style({
   }
 });
 
-/*
- * Narrow enough that the six links, the address pill with a live count, the language button and
- * GitHub share one row in every language.
- */
 globalStyle(`${nav} > a > span`, {
-  padding: "7px 5px",
+  padding: "7px 11px",
   "@media": {
     [folded]: { flex: 1, padding: "10px 14px" }
   }
@@ -136,7 +139,7 @@ globalStyle(`${nav} > a > span`, {
 
 const end = style({
   selectors: {
-    [`${header} &`]: { marginLeft: -8 }
+    [`${header} &`]: { marginLeft: -12 }
   }
 });
 
@@ -158,7 +161,7 @@ globalStyle(`${header} ${play} > span`, {
 export const language = style({
   selectors: {
     [`${header} &`]: { marginLeft: "auto" },
-    [`${header} ${play} ~ &`]: { marginLeft: -8 }
+    [`${header} ${play} ~ &`]: { marginLeft: -12 }
   },
   "@media": {
     [narrow]: { display: "none" }
