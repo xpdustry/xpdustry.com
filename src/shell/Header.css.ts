@@ -35,7 +35,7 @@ export const header = style({
   flexWrap: "wrap",
   justifyContent: "flex-end",
   alignItems: "center",
-  gap: "10px 14px",
+  gap: "10px 22px",
   padding: `6px 6px ${below}`,
   "@media": {
     [narrow]: { columnGap: 10 }
@@ -84,7 +84,7 @@ export const nav = style({
   display: "flex",
   flex: "1 1 0",
   flexWrap: "wrap",
-  gap: 4,
+  gap: 6,
   marginLeft: 4,
   padding: 0,
   border: 0,
@@ -123,12 +123,8 @@ export const nav = style({
   }
 });
 
-/*
- * Narrow enough that the six links, the address pill with a live count, the language button and
- * GitHub share one row in every language.
- */
 globalStyle(`${nav} > a > span`, {
-  padding: "7px 5px",
+  padding: "7px 11px",
   "@media": {
     [folded]: { flex: 1, padding: "10px 14px" }
   }
@@ -136,7 +132,7 @@ globalStyle(`${nav} > a > span`, {
 
 const end = style({
   selectors: {
-    [`${header} &`]: { marginLeft: -8 }
+    [`${header} &`]: { marginLeft: -12 }
   }
 });
 
@@ -148,6 +144,25 @@ export const play = style({
   selectors: {
     [`${header} &`]: { marginLeft: "auto" }
   }
+});
+
+const withPlay = `${header}:has(${play})`;
+const unfolded = `not all and ${folded}`;
+
+globalStyle(withPlay, {
+  "@media": { [unfolded]: { columnGap: 14 } }
+});
+
+globalStyle(`${withPlay} ${nav}`, {
+  "@media": { [unfolded]: { gap: 4 } }
+});
+
+globalStyle(`${withPlay} ${nav} > a > span`, {
+  "@media": { [unfolded]: { paddingInline: 5 } }
+});
+
+globalStyle(`${withPlay} ${end}`, {
+  "@media": { [unfolded]: { marginLeft: -8 } }
 });
 
 globalStyle(`${header} ${play} > span`, {
