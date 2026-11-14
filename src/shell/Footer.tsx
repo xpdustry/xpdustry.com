@@ -20,9 +20,6 @@ export function Footer() {
           <a href={SITE.discord} {...outbound(SITE.discord)}>
             Discord
           </a>
-          <a href={SITE.maven} {...outbound(SITE.maven)}>
-            Maven
-          </a>
           <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         </nav>
         <small className={styles.copyright}>© {import.meta.env.BUILD_YEAR} Xpdustry</small>
