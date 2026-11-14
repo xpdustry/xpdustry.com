@@ -16,11 +16,6 @@ export const wrapper = style({
   display: "flex"
 });
 
-const codeText = {
-  font: `500 ${rem(font.caption)} / ${leading.tight} ${vars.fontMono}`,
-  textTransform: "uppercase"
-} as const;
-
 const ANCHOR = "--locale-switch";
 
 export const button = style({
@@ -28,12 +23,19 @@ export const button = style({
 });
 
 globalStyle(`${button} > span`, {
-  ...codeText,
-  display: "grid",
-  placeItems: "center",
-  width: 40,
-  height: 40,
-  padding: 0
+  gap: 9,
+  minHeight: 40,
+  padding: "7px 12px",
+  fontFamily: vars.fontText,
+  fontSize: rem(font.small),
+  fontWeight: 500,
+  lineHeight: leading.snug
+});
+
+globalStyle(`${button} > span > svg:last-child`, {
+  width: 14,
+  height: 14,
+  color: vars.muted
 });
 
 export const list = style({
@@ -83,12 +85,6 @@ export const option = style({
   "@media": {
     [media.coarse]: { paddingBlock: 11 }
   }
-});
-
-export const code = style({
-  ...codeText,
-  minWidth: "2ch",
-  color: vars.deepInk
 });
 
 export const tick = style({

@@ -35,7 +35,7 @@ export const header = style({
   flexWrap: "wrap",
   justifyContent: "flex-end",
   alignItems: "center",
-  gap: "10px 22px",
+  gap: "10px 14px",
   padding: `6px 6px ${below}`,
   "@media": {
     [narrow]: { columnGap: 10 }
@@ -84,7 +84,7 @@ export const nav = style({
   display: "flex",
   flex: "1 1 0",
   flexWrap: "wrap",
-  gap: 6,
+  gap: 4,
   marginLeft: 4,
   padding: 0,
   border: 0,
@@ -128,7 +128,7 @@ export const nav = style({
  * GitHub share one row in every language.
  */
 globalStyle(`${nav} > a > span`, {
-  padding: "7px 11px",
+  padding: "7px 5px",
   "@media": {
     [folded]: { flex: 1, padding: "10px 14px" }
   }
@@ -136,7 +136,7 @@ globalStyle(`${nav} > a > span`, {
 
 const end = style({
   selectors: {
-    [`${header} &`]: { marginLeft: -12 }
+    [`${header} &`]: { marginLeft: -8 }
   }
 });
 
@@ -158,7 +158,7 @@ globalStyle(`${header} ${play} > span`, {
 export const language = style({
   selectors: {
     [`${header} &`]: { marginLeft: "auto" },
-    [`${header} ${play} ~ &`]: { marginLeft: -12 }
+    [`${header} ${play} ~ &`]: { marginLeft: -8 }
   },
   "@media": {
     [narrow]: { display: "none" }

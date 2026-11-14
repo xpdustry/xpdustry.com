@@ -3,7 +3,7 @@ import { useGT, useLocale, useSetLocale } from "gt-tanstack-start";
 import { useId, type MouseEvent } from "react";
 import { withLocale } from "#app/i18n/localePath";
 import { LOCALES, localeInfo } from "#app/i18n/locales";
-import { Check } from "#app/ui/icons";
+import { CaretDown, Check, Globe } from "#app/ui/icons";
 import { PlinthButton } from "#app/ui/Plinth";
 import { moving } from "./usePopovers";
 import * as styles from "./LocaleSwitch.css";
@@ -22,7 +22,11 @@ export function LocaleSwitch({ className }: { className?: string }) {
         aria-label={gt("Language: {language}", { language: localeInfo(locale).name })}
         popoverTarget={list}
       >
-        {locale}
+        <Globe />
+        <span lang={locale} translate="no">
+          {localeInfo(locale).name}
+        </span>
+        <CaretDown />
       </PlinthButton>
       <LocaleList id={list} popover className={styles.panel} />
     </div>
@@ -103,8 +107,7 @@ function LocaleOption({
         if (!current) choose(locale);
       }}
     >
-      <span className={styles.code}>{locale}</span>
-      {localeInfo(locale).name}
+      <span translate="no">{localeInfo(locale).name}</span>
       {current && <Check className={styles.tick} />}
     </a>
   );
