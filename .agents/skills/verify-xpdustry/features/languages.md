@@ -13,7 +13,7 @@ The site is served in English, French and Russian. A first visit follows the bro
 ## How to get to it (user POV)
 
 - Open the site with a browser set to French or Russian.
-- Choose the language button in the header (it shows `EN`, `FR` or `RU`), then a language from the list.
+- Choose the language button in the header (it shows a globe, the full native language name, and a chevron), then a language from the list.
 - Below 520px the button is gone: open `Menu` and pick the language at the bottom of the panel.
 - Type a prefixed URL such as `/ru/blog`.
 
@@ -27,7 +27,7 @@ const russian = await get("/", { "accept-language": "ru-RU,ru;q=0.9" });
 print("lang-first-visit ru:", russian.status, russian.headers.location); // 307 /ru
 print("lang-first-visit en:", (await get("/", { "accept-language": "en-US" })).status); // 200
 
-const page = await newPage({ width: 1280 });
+const page = await newPage({ width: 1440 });
 await go(page, "/");
 await page.getByRole("button", { name: "Language: English" }).click();
 await snap(page, "1-list-open");
@@ -66,7 +66,7 @@ await page.waitForURL("**/fr");
 await page.waitForFunction(() => document.documentElement.lang === "fr");
 await page.getByRole("button", { name: "Menu" }).click();
 const nav = page.getByRole("navigation", { name: "Navigation principale" });
-print("lang-switch:", page.url(), await nav.getByRole("link").allInnerTexts()); // …/fr [Accueil, Projets, Modes, Blog, Maven, en English, fr Français, ru Русский]
+print("lang-switch:", page.url(), await nav.getByRole("link").allInnerTexts()); // …/fr [Accueil, Projets, Modes, Équipe, Blog, Maven, English, Français, Русский]
 await snap(page, "2-french-menu");
 EOF
 ```
