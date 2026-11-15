@@ -1,16 +1,7 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { useState } from "react";
-import type { SpreadStage, SpreadTiles } from "./texture";
+import type { SpreadPalette } from "./texture";
 import * as styles from "./Spread.css";
-
-const TILES = import.meta.glob<string>("/src/textures/assets/spread/*.webp", {
-  eager: true,
-  query: "?url",
-  import: "default"
-});
-
-const tile = (tiles: SpreadTiles | undefined, stage: SpreadStage) =>
-  tiles && `url("${TILES[`/src/textures/assets/spread/${tiles[stage].name}.webp`]}")`;
 
 /** Where a spread starts, in px from its parent's top left corner. */
 export type SpreadOrigin = readonly [x: number, y: number];
@@ -27,15 +18,15 @@ export interface SpreadStart {
  * over the farthest corner. It fades away once `on` is over. A new `from` plays it again from
  * there, over the last play, which carries on as it was as it fades away beneath.
  *
- * It stays invisible until it plays, so its `tiles` can be left out until it might: a browser
- * downloads a background even under `opacity: 0`, and a page of spreads weighs hundreds of KiB.
+ * Its palette can wait until the card is near the viewport. Every palette reuses the same three
+ * masks, so revealing another card's spread costs no additional image downloads.
  */
 export function Spread({
-  tiles,
+  palette,
   on,
   from
 }: {
-  tiles?: SpreadTiles;
+  palette?: SpreadPalette;
   on: boolean;
   from?: SpreadStart;
 }) {
@@ -54,8 +45,8 @@ export function Spread({
     return (
       <span
         key={play.id}
-        className={`${styles.spread} ${growing ? styles.on : ""} ${current ? "" : styles.gone}`}
-        style={place(tiles, play.from)}
+        className={`${styles.spread} ${palette ? styles.ready : ""} ${growing ? styles.on : ""} ${current ? "" : styles.gone}`}
+        style={place(palette, play.from)}
         aria-hidden="true"
         data-spread={current ? "current" : "covered"}
       >
@@ -75,11 +66,10 @@ interface Play {
   on?: boolean;
 }
 
-const place = (tiles: SpreadTiles | undefined, from: SpreadStart | undefined) =>
+const place = (palette: SpreadPalette | undefined, from: SpreadStart | undefined) =>
   assignInlineVars({
-    [styles.tile.thin]: tile(tiles, "thin"),
-    [styles.tile.thick]: tile(tiles, "thick"),
-    [styles.tile.solid]: tile(tiles, "solid"),
+    [styles.color]: palette?.color,
+    [styles.inner]: palette?.inner,
     ...(from && {
       [styles.x]: `${from.origin[0]}px`,
       [styles.y]: `${from.origin[1]}px`,

@@ -9,7 +9,7 @@ function texture(kind: string, top = 20) {
     pause: vi.fn(),
     play: vi.fn(),
     cancel: vi.fn(),
-    effect: { updateTiming: vi.fn() }
+    effect: { updateTiming: vi.fn(), setKeyframes: vi.fn() }
   };
   return {
     animation,
@@ -32,14 +32,14 @@ function browser({
 }: {
   loading?: boolean;
   reduced?: boolean;
-  decode?: () => Promise<void>;
+  decode?: (src: string) => Promise<void>;
   textures?: ReturnType<typeof texture>[];
 } = {}) {
   const root = { dataset: {} as Record<string, string>, animate() {} };
   const addEventListener = vi.fn();
   class Image {
     src = "";
-    decode = decode;
+    decode = () => decode(this.src);
   }
   return {
     root,
@@ -90,6 +90,22 @@ describe("inline texture entrance", () => {
     runInNewContext(ENTER, browser({ textures: [blob] }).context);
     const [frames] = blob.element.animate.mock.calls[0]!;
     expect(frames.at(-1)).toMatchObject({ maskSize: expect.stringContaining("108px 108px") });
+  });
+
+  test("a missing thread mask uses a fade as soon as the blob is ready", async () => {
+    const blob = texture("grow");
+    const { context } = browser({
+      textures: [blob],
+      decode: (src) =>
+        src.includes("threads") ? Promise.reject(new Error("missing")) : Promise.resolve()
+    });
+    runInNewContext(ENTER, context);
+    await new Promise((done) => setTimeout(done));
+    expect(blob.animation.effect.setKeyframes).toHaveBeenCalledWith([
+      { opacity: 0 },
+      { opacity: 1 }
+    ]);
+    expect(blob.animation.play).toHaveBeenCalledOnce();
   });
 
   test("starts the sequence when parsed, even after a slow document", async () => {

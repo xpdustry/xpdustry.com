@@ -19,7 +19,7 @@ for (const folder of RENDERED_FOLDERS) {
   }
 }
 for (const texture of TEXTURES) {
-  const { pixels, width, height } = render(texture);
+  const { pixels, width, height } = await render(texture);
   await webp(pixels, width, height).toFile(target(texture.file));
 }
 

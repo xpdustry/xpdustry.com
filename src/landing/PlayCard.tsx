@@ -36,7 +36,7 @@ export function PlayCard({ players, className }: { players: Count; className?: s
       }}
     >
       <Patches patches={PATCHES.play} />
-      <Spread tiles={seen ? SPREADS.play : undefined} on={state === "copied"} from={spread} />
+      <Spread palette={seen ? SPREADS.play : undefined} on={state === "copied"} from={spread} />
       <Hint ref={chip} state={state} />
       <h2 className={styles.label}>
         <T>Play with us</T>

@@ -1,4 +1,4 @@
-import { createGlobalVar, globalStyle, style } from "@vanilla-extract/css";
+import { createGlobalVar, createVar, globalStyle, style } from "@vanilla-extract/css";
 import { cover } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -10,6 +10,9 @@ const grow = createGlobalVar(GROW, {
 });
 
 export const patches = style({});
+export const color = createVar();
+export const inner = createVar();
+export const image = createVar();
 
 globalStyle(`:where(${patches})`, {
   position: "absolute",
@@ -20,10 +23,29 @@ globalStyle(`:where(${patches})`, {
   pointerEvents: "none"
 });
 
-globalStyle(`${patches} img`, {
+export const placement = style({
   position: "absolute",
-  maxWidth: "none",
-  translate: "-50% -50%"
+  translate: "-50% -50%",
+  contentVisibility: "auto"
+});
+
+export const sprite = style({ position: "absolute", inset: 0 });
+export const raster = style({ display: "block", width: "100%", height: "100%" });
+
+export const paint = style({
+  position: "absolute",
+  inset: 0,
+  background: color,
+  mask: `${image} 0 0 / 200% 100% no-repeat`,
+  selectors: {
+    "&::before": {
+      content: '""',
+      position: "absolute",
+      inset: 0,
+      background: inner,
+      mask: `${image} 100% 0 / 200% 100% no-repeat`
+    }
+  }
 });
 
 export const grown = style({

@@ -1,4 +1,4 @@
-import { fringe, growing, patches, shaped, spreadTiles, type Blob } from "./texture.ts";
+import { fringe, growing, patches, shaped, spreadPalette, type Blob } from "./texture.ts";
 
 const LIGHT_TEAL = ["#86d8cf", "#a6e7e0"] as const;
 const DEEP_TEAL = ["#104643", "#0c3c39"] as const;
@@ -101,12 +101,12 @@ export const PATCHES = {
 };
 
 export const SPREADS = {
-  play: spreadTiles(...GOLD),
-  survival: spreadTiles(...AMBER),
-  pvp: spreadTiles(...BLUE),
-  attack: spreadTiles(...RED),
-  tower: spreadTiles(...GREEN),
-  sandbox: spreadTiles(...PURPLE)
+  play: spreadPalette(...GOLD),
+  survival: spreadPalette(...AMBER),
+  pvp: spreadPalette(...BLUE),
+  attack: spreadPalette(...RED),
+  tower: spreadPalette(...GREEN),
+  sandbox: spreadPalette(...PURPLE)
 };
 
 const TILE_FRINGE = fringe("#f7fdfd", true);

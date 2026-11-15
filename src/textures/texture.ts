@@ -84,7 +84,7 @@ export function growing(patches: Patches, grow = 1.35): Patches {
 
 /**
  * The same patches with another outline, so patches that sit side by side are not copies of each
- * other. Each shape of a blob is a sprite of its own.
+ * other. Shapes share a small library of outlines, with turns providing the other variations.
  */
 export function shaped(patches: Patches, shape: number): Patches {
   return { ...patches, shape };
@@ -119,29 +119,50 @@ function generator(name: string) {
 }
 
 /**
- * The sprite of one blob: a square around it, roomy enough for its lumps and fraying, its name
- * and the settings that render it. Blobs of one size, palette and shape share a sprite.
- *
- * A growing blob's sprite and its `grown` one are the same size, so their labyrinth and lumps
- * line up exactly and the bigger one only fuses more of it.
+ * Growing patches share palette-free geometry on a 15% size ladder, with matching base/grown
+ * padding and labyrinth origins. Static artwork keeps its original silhouette as a raster.
  */
-export function blobSprite(
-  { color, inner, tile, grow, shape = 0 }: Patches,
-  radius: number,
-  grown = false
-) {
-  const size = Math.ceil(radius * (grow ?? 1) * 3.2);
-  const name = `${color.slice(1)}-${inner.slice(1)}-${tile}-${radius}${shape ? `s${shape}` : ""}`;
+export function blobSprite(patch: Patches, radius: number, grown = false) {
+  if (!patch.grow) return paintedSprite(patch, radius);
+  return maskSprite(patch, radius, grown);
+}
+
+function paintedSprite({ color, inner, tile }: Patches, radius: number) {
+  const size = Math.ceil(radius * 3.2);
   return {
-    name: grow ? `${name}x${grow}${grown ? "-grown" : ""}` : name,
+    kind: "raster" as const,
+    name: `paint-${color.slice(1)}-${inner.slice(1)}-${tile}-${radius}`,
     size,
+    displaySize: size,
+    tile,
     settings: {
       ...BASE,
       tile,
       color,
       inner,
-      ...(shape && { seed: SHAPE_SEEDS[shape - 1]! }),
-      blobs: [[0.5, 0.5, (grown && grow ? radius * grow : radius) / size, 1]]
+      blobs: [[0.5, 0.5, radius / size, 1]]
+    } satisfies TextureSettings
+  };
+}
+
+function maskSprite({ tile, grow, shape = 0 }: Patches, radius: number, grown: boolean) {
+  const rung = Math.round(24 * 1.15 ** Math.round(Math.log(radius / 24) / Math.log(1.15)));
+  const size = Math.ceil(rung * 1.35 * 3.2);
+  const outline = shape % 2;
+  const name = `shape-${tile}-${rung}-${outline}`;
+  return {
+    kind: "mask" as const,
+    name: grown && grow ? `${name}-grown-${grow}` : name,
+    size,
+    displaySize: size * (radius / rung),
+    tile: tile * (radius / rung),
+    settings: {
+      ...BASE,
+      tile,
+      color: "#000000",
+      inner: "#ffffff",
+      ...(outline && { seed: SHAPE_SEEDS[outline - 1]! }),
+      blobs: [[0.5, 0.5, (grown && grow ? rung * grow : rung) / size, 1]]
     } satisfies TextureSettings
   };
 }
@@ -157,17 +178,18 @@ export function blobSprites(patches: Patches) {
 
 export type SpreadStage = "thin" | "thick" | "solid";
 
-export function spreadTiles(color: string, inner: string) {
-  const base = { ...BASE, repeat: 240, tile: 240, warp: 0, color } as const;
-  const palette = `${color.slice(1)}-${inner.slice(1)}`;
-  return {
-    thin: { name: `${palette}-thin`, settings: { ...base, level: 0.3 } },
-    thick: { name: `${palette}-thick`, settings: { ...base, level: 0.4 } },
-    solid: { name: `${palette}-solid`, settings: { ...base, reach: 0, inner, level: 1 } }
-  } as const satisfies Record<SpreadStage, { name: string; settings: TextureSettings }>;
+export function spreadPalette(color: string, inner: string) {
+  return { color, inner };
 }
 
-export type SpreadTiles = ReturnType<typeof spreadTiles>;
+export type SpreadPalette = ReturnType<typeof spreadPalette>;
+
+const SPREAD_BASE = { ...BASE, repeat: 240, tile: 240, warp: 0, color: "#000000" };
+export const SPREAD_MASKS = {
+  thin: { ...SPREAD_BASE, level: 0.3 },
+  thick: { ...SPREAD_BASE, level: 0.4 },
+  solid: { ...SPREAD_BASE, reach: 0, inner: "#ffffff", level: 1 }
+} satisfies Record<SpreadStage, TextureSettings>;
 
 /**
  * A colour's lower edge, frayed and lumpy instead of straight (`Fringe`): one seamless strip,
@@ -179,7 +201,7 @@ const FRINGE_TILES_ACROSS = 6;
 
 export function fringe(color: string, rising = false) {
   return {
-    name: `${color.slice(1)}-${rising ? "rise" : "fringe"}`,
+    name: rising ? "rise" : "fringe",
     width: FRINGE_TILE * FRINGE_TILES_ACROSS,
     height: 64,
     settings: {

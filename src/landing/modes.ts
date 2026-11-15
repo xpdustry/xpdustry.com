@@ -1,6 +1,6 @@
 import { msg } from "gt-tanstack-start";
 import { EDGES, SPREADS } from "#app/textures/cards";
-import type { Fringe, Patches, SpreadTiles } from "#app/textures/texture";
+import type { Fringe, Patches, SpreadPalette } from "#app/textures/texture";
 import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/ui/icons";
 
 export interface Gamemode {
@@ -10,7 +10,7 @@ export interface Gamemode {
   description: string;
   icon: Icon;
   edge: { side: Patches; below: Fringe };
-  spread: SpreadTiles;
+  spread: SpreadPalette;
 }
 
 export const gamemodes: readonly Gamemode[] = [

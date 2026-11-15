@@ -11,12 +11,21 @@ export function PressableLogo({ className }: { className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    if (matchMedia(media.still).matches) return;
     const mark = ref.current!;
     const abort = new AbortController();
-    void loadLogoFrames().then((sheet) => {
-      // Without its frames the logo stays the still image it started as.
-      if (sheet && !abort.signal.aborted) animate(mark, sheet, abort.signal);
-    });
+    let requested = false;
+    const prepare = () => {
+      if (requested) return;
+      requested = true;
+      void loadLogoFrames().then((sheet) => {
+        if (abort.signal.aborted) return;
+        if (sheet) animate(mark, sheet, abort.signal);
+        else requested = false;
+      });
+    };
+    mark.addEventListener("pointerenter", prepare, { signal: abort.signal });
+    mark.addEventListener("pointerdown", prepare, { signal: abort.signal });
     return () => abort.abort();
   }, []);
 
@@ -33,13 +42,17 @@ export function PressableLogo({ className }: { className?: string }) {
  */
 function animate(mark: HTMLElement, sheet: HTMLImageElement, signal: AbortSignal) {
   const still = matchMedia(media.still).matches;
-  const size = Math.round(104 * Math.min(3, devicePixelRatio || 1));
+  const size = Math.max(
+    1,
+    Math.round(mark.getBoundingClientRect().width * Math.min(3, devicePixelRatio || 1))
+  );
   const view = document.createElement("canvas");
   view.width = view.height = size;
   const context = view.getContext("2d")!;
+  mark.dataset.animated = "";
   mark.replaceChildren(view);
 
-  const pointer: Pointer = { hover: false, held: false };
+  const pointer: Pointer = { hover: mark.matches(":hover"), held: mark.matches(":active") };
   let offset = 0;
   let from = 0;
   let to = 0;
@@ -81,4 +94,5 @@ function animate(mark: HTMLElement, sheet: HTMLImageElement, signal: AbortSignal
   on("pointerup", { held: false });
   on("pointercancel", { held: false });
   draw();
+  go();
 }

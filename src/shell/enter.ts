@@ -48,11 +48,32 @@ function enter(threads: string): void {
     maskPosition: "50% 50%, 0 0, 50% 50%",
     maskSize: `${disc} ${disc}, ${tile}px ${tile}px, ${outer} ${outer}`
   });
-  const threadsReady = (() => {
+  const images = new Map<string, Promise<boolean>>();
+  const decode = (src: string) => {
+    const loaded = images.get(src);
+    if (loaded) return loaded;
     const image = new Image();
-    image.src = threads;
-    return image.decode().catch(() => {});
-  })();
+    image.src = src;
+    const ready = image.decode().then(
+      () => true,
+      () => false
+    );
+    images.set(src, ready);
+    return ready;
+  };
+  let threaded = false;
+  void decode(threads).then((ready) => {
+    threaded = ready;
+  });
+
+  const withoutThreads = (animation: Animation, kind: string) => {
+    if (kind !== "grow" || threaded) return;
+    const effect = animation.effect;
+    if (effect && "setKeyframes" in effect && typeof effect.setKeyframes === "function") {
+      effect.setKeyframes([{ opacity: 0 }, { opacity: 1 }]);
+      effect.updateTiming({ duration: 350, easing: ease });
+    }
+  };
 
   /**
    * For each kind: its keyframes, or how to make them for a labyrinth tile; its duration; when in
@@ -94,7 +115,7 @@ function enter(threads: string): void {
   const BLOB = 70;
 
   /** Resolves once `element`'s image, or its background's, can paint, whether it loaded or not. */
-  const ready = (element: Element, pseudo?: string): Promise<unknown> => {
+  const ready = (element: HTMLElement, pseudo?: string): Promise<unknown> => {
     if (element instanceof HTMLImageElement) {
       const loaded = element.complete
         ? Promise.resolve()
@@ -104,11 +125,11 @@ function enter(threads: string): void {
           });
       return loaded.then(() => element.decode()).catch(() => {});
     }
-    const url = /url\(["']?(.*?)["']?\)/.exec(getComputedStyle(element, pseudo).backgroundImage);
+    const url =
+      element.dataset.image ??
+      /url\(["']?(.*?)["']?\)/.exec(getComputedStyle(element, pseudo).backgroundImage)?.[1];
     if (!url) return Promise.resolve();
-    const image = new Image();
-    image.src = url[1]!;
-    return image.decode().catch(() => {});
+    return decode(url);
   };
 
   const cards = new Map<Element, number>();
@@ -147,8 +168,9 @@ function enter(threads: string): void {
       waiting.add(animation);
       animation.pause();
       const painted = ready(element, pseudoElement);
-      void (kind === "grow" ? Promise.all([painted, threadsReady]) : painted).then(() => {
+      void painted.then(() => {
         if (!waiting.delete(animation)) return;
+        withoutThreads(animation, kind);
         if (!waiting.size) clearTimeout(timeout);
         const wait = start + slot + layer * 140 - performance.now();
         animation.effect!.updateTiming({ delay: Math.max(wait, trail + layer * 140) });

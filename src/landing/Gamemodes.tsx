@@ -96,7 +96,7 @@ function Mode({
       }}
     >
       <Tint edge={mode.edge} />
-      <Spread tiles={seen ? mode.spread : undefined} on={state === "copied"} from={spread} />
+      <Spread palette={seen ? mode.spread : undefined} on={state === "copied"} from={spread} />
       <div className={styles.band}>
         <Icon className={styles.icon} />
         <div className={styles.id}>
@@ -132,7 +132,7 @@ function Tint({ edge }: { edge: Gamemode["edge"] }) {
       </span>
       <span
         className={`${styles.edge} ${styles.below}`}
-        style={{ backgroundImage: `url("${fringe}")` }}
+        style={{ maskImage: `url("${fringe}")` }}
       />
     </span>
   );

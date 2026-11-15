@@ -90,12 +90,13 @@ export const below = style({
       inset: "100% 0 auto",
       display: "block",
       height: 48,
-      background: "0 0 / 486px 48px repeat-x",
+      background: tint,
+      mask: "0 0 / 486px 48px repeat-x",
       selectors: {
-        [`${mode}:nth-child(2) &`]: { backgroundPositionX: -190 },
-        [`${mode}:nth-child(3) &`]: { backgroundPositionX: -75 },
-        [`${mode}:nth-child(4) &`]: { backgroundPositionX: -330 },
-        [`${mode}:nth-child(5) &`]: { backgroundPositionX: -255 }
+        [`${mode}:nth-child(2) &`]: { maskPosition: "-190px 0" },
+        [`${mode}:nth-child(3) &`]: { maskPosition: "-75px 0" },
+        [`${mode}:nth-child(4) &`]: { maskPosition: "-330px 0" },
+        [`${mode}:nth-child(5) &`]: { maskPosition: "-255px 0" }
       }
     }
   }
