@@ -52,7 +52,7 @@ function animate(mark: HTMLElement, sheet: HTMLImageElement, signal: AbortSignal
   mark.dataset.animated = "";
   mark.replaceChildren(view);
 
-  const pointer: Pointer = { hover: mark.matches(":hover"), held: mark.matches(":active") };
+  const pointer: Pointer = { hover: false, held: false };
   let offset = 0;
   let from = 0;
   let to = 0;
@@ -94,5 +94,4 @@ function animate(mark: HTMLElement, sheet: HTMLImageElement, signal: AbortSignal
   on("pointerup", { held: false });
   on("pointercancel", { held: false });
   draw();
-  go();
 }
