@@ -16,7 +16,7 @@ import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
 import { shellData } from "#app/shell/shellData";
 import { getLiveData } from "#app/status/live.functions";
 import { CROWN } from "#app/textures/page";
-import { fontPreloads } from "#app/ui/styles/fontPreloads";
+import { preloadFonts } from "#app/ui/styles/fontPreloads";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
@@ -44,7 +44,6 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/site.webmanifest" },
-      ...fontPreloads(["display", "mono"], shellData(loaderData).locale),
       // The backdrop's layers are many times the crown's weight, so they yield to the first screen.
       ...REVEAL_IMAGES.map((href) => ({
         rel: "preload",
@@ -83,6 +82,7 @@ function Document({ children }: { children: ReactNode }) {
   const { locale, translations, players } = shellData(
     useMatch({ from: rootRouteId, select: (match) => match.loaderData })
   );
+  preloadFonts(["display", "mono"], locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
