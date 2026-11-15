@@ -2,8 +2,6 @@ import { runInNewContext } from "node:vm";
 import { describe, expect, test, vi } from "vitest";
 import { ENTER } from "./enter";
 
-class HTMLImageElement {}
-
 function texture(kind: string, top = 20) {
   const animation = {
     pause: vi.fn(),
@@ -14,7 +12,7 @@ function texture(kind: string, top = 20) {
   return {
     animation,
     element: {
-      dataset: { texture: kind },
+      dataset: { texture: kind } as Record<string, string>,
       closest: () => null,
       getBoundingClientRect: () => ({ top, bottom: top + 80 }),
       animate: vi.fn((_frames: Keyframe[], _options: KeyframeAnimationOptions) => ({
@@ -54,9 +52,8 @@ function browser({
       setTimeout: vi.fn(),
       clearTimeout: vi.fn(),
       matchMedia: () => ({ matches: !reduced }),
-      getComputedStyle: () => ({ backgroundImage: 'url("/assets/crown.webp")' }),
+      paints: (key: string) => Promise.resolve(`blob:${key}`),
       performance: { now: () => 0 },
-      HTMLImageElement,
       Image,
       innerHeight: 800
     }
@@ -72,7 +69,7 @@ describe("inline texture entrance", () => {
     expect(root.dataset).not.toHaveProperty("enter");
   });
 
-  test("plays the first screen's textures once their images decode, and leaves the rest", async () => {
+  test("plays the first screen's textures once they are painted, and leaves the rest", async () => {
     const shown = texture("backdrop");
     const below = texture("grow", 1200);
     runInNewContext(ENTER, browser({ textures: [shown, below] }).context);
@@ -84,12 +81,44 @@ describe("inline texture entrance", () => {
     expect(shown.animation.play).toHaveBeenCalledTimes(2);
   });
 
-  test("grows a blob in through threads at the scale of its own labyrinth", () => {
+  test("grows a blob in through threads at the scale of its own labyrinth", async () => {
     const blob = texture("grow");
     Object.assign(blob.element.dataset, { tile: "108" });
     runInNewContext(ENTER, browser({ textures: [blob] }).context);
-    const [frames] = blob.element.animate.mock.calls[0]!;
-    expect(frames.at(-1)).toMatchObject({ maskSize: expect.stringContaining("108px 108px") });
+    expect(blob.element.animate.mock.calls[0]![0]).toEqual([{ opacity: 0 }, { opacity: 1 }]);
+    await new Promise((done) => setTimeout(done));
+    const [frames] = blob.animation.effect.setKeyframes.mock.calls[0]!;
+    expect(frames.at(-1)).toMatchObject({
+      maskImage: expect.stringContaining('url("blob:threads")'),
+      maskSize: expect.stringContaining("108px 108px")
+    });
+  });
+
+  test("waits for each texture's own image: a sprite's by its key, the frame's by name", async () => {
+    const blob = texture("grow");
+    Object.assign(blob.element.dataset, { paint: "blob_a" });
+    const page = browser({ textures: [texture("drop"), texture("backdrop"), blob] });
+    const paints = vi.fn(page.context.paints);
+    runInNewContext(ENTER, { ...page.context, paints });
+    await new Promise((done) => setTimeout(done));
+    expect(paints.mock.calls.map(([key]) => key)).toEqual([
+      "threads",
+      "crown",
+      "backdrop-far",
+      "backdrop-near",
+      "blob_a"
+    ]);
+  });
+
+  test("a texture that cannot be painted still takes its turn, and holds nothing", async () => {
+    const shown = texture("drop");
+    const { context } = browser({ textures: [shown] });
+    runInNewContext(ENTER, { ...context, paints: () => Promise.resolve(undefined) });
+    await new Promise((done) => setTimeout(done));
+    expect(shown.animation.play).toHaveBeenCalledOnce();
+    runInNewContext(ENTER, { ...context, paints: undefined });
+    await new Promise((done) => setTimeout(done));
+    expect(shown.animation.play).toHaveBeenCalledTimes(2);
   });
 
   test("a missing thread mask uses a fade as soon as the blob is ready", async () => {
@@ -101,10 +130,10 @@ describe("inline texture entrance", () => {
     });
     runInNewContext(ENTER, context);
     await new Promise((done) => setTimeout(done));
-    expect(blob.animation.effect.setKeyframes).toHaveBeenCalledWith([
-      { opacity: 0 },
-      { opacity: 1 }
-    ]);
+    expect(blob.animation.effect.setKeyframes).not.toHaveBeenCalled();
+    expect(blob.animation.effect.updateTiming).toHaveBeenCalledWith(
+      expect.objectContaining({ duration: 350 })
+    );
     expect(blob.animation.play).toHaveBeenCalledOnce();
   });
 

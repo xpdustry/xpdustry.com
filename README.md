@@ -42,12 +42,12 @@ Code is grouped by feature under `src`. What only the server runs sits in a feat
 | `blog`     | Post components, the content loader and the posts (`posts/`) |
 | `status`   | Live server status and the pollers behind it                 |
 | `seo`      | Metadata, structured data, social cards, redirects           |
-| `textures` | Texture definitions and the rendered files                   |
+| `textures` | Texture definitions and the painter that draws them          |
 | `brand`    | Name, links, logo and projects                               |
 | `ui`       | Design tokens and shared components                          |
 | `i18n`     | Locales and formatting; translations are in `_gt`            |
 
-`scripts` holds the production server and the texture renderers (`pnpm textures`).
+`scripts` holds the production server and what makes the generated assets: the labyrinth every texture is painted from and the logo's frames (`pnpm textures`).
 
 ## Translations
 

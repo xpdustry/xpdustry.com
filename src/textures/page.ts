@@ -1,4 +1,4 @@
-import { SPREAD_MASKS, type TextureSettings } from "./texture.ts";
+import { SPREAD_MASKS, fringe, type TextureSettings } from "./texture.ts";
 
 const DEEP = "#083230";
 
@@ -70,3 +70,7 @@ export const FADE = { ...SPREAD_MASKS.solid, color: "#f7fdfd", inner: "#eef7f6" 
  * a mask, threads first, before they fuse.
  */
 export const THREADS = SPREAD_MASKS.thin;
+
+/** The frayed edge under a gamemode's band, and the one a post tile's foot rises through. */
+export const FRINGE = fringe();
+export const RISE = fringe(true);

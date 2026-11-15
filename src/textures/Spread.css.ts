@@ -7,6 +7,7 @@ import {
   style
 } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
+import { paint, type PaintName } from "./catalogue";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const color = createVar();
@@ -53,9 +54,9 @@ globalStyle(`${spread} > i, ${spread}::before, ${spread}::after`, {
   inset: 0
 });
 
-const layer = (image: string, solidTo: string, clearFrom: string) => ({
+const layer = (image: PaintName, solidTo: string, clearFrom: string) => ({
   background: color,
-  maskImage: `url("${image}"), radial-gradient(${at}, #000 ${solidTo}, transparent ${clearFrom})`,
+  maskImage: `${paint(image)}, radial-gradient(${at}, #000 ${solidTo}, transparent ${clearFrom})`,
   maskComposite: "intersect",
   maskSize: "240px, auto",
   maskRepeat: "repeat, no-repeat"
@@ -72,16 +73,13 @@ globalStyle(`${ready} > i::before`, {
   position: "absolute",
   inset: 0,
   background: inner,
-  mask: 'url("./assets/spread/core.webp") 0 0 / 240px repeat'
+  mask: `${paint("spread-core")} 0 0 / 240px repeat`
 });
 globalStyle(
   `${ready}::before`,
-  layer("./assets/spread/thick.webp", `calc(${spreadVar} - 52px)`, `calc(${spreadVar} - 38px)`)
+  layer("spread-thick", `calc(${spreadVar} - 52px)`, `calc(${spreadVar} - 38px)`)
 );
-globalStyle(
-  `${ready}::after`,
-  layer("./assets/threads.webp", `calc(${spreadVar} - 10px)`, spreadVar)
-);
+globalStyle(`${ready}::after`, layer("threads", `calc(${spreadVar} - 10px)`, spreadVar));
 
 export const on = style({
   opacity: 1,

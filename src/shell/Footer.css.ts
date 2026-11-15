@@ -1,4 +1,5 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
+import { paint } from "#app/textures/catalogue";
 import { RIDGE } from "#app/textures/page";
 import { media, upTo } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
@@ -25,7 +26,7 @@ export const ridge = style({
   position: "absolute",
   inset: "auto 0 calc(100% - 1px)",
   height: ridgeHeight,
-  background: 'url("../textures/assets/ridge.webp") 50% 100% / auto 100% repeat-x',
+  background: `${paint("ridge")} 50% 100% / auto 100% repeat-x`,
   pointerEvents: "none"
 });
 

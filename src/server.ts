@@ -2,6 +2,8 @@ import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { pathLocale, withoutLocale } from "#app/i18n/localePath";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { requestRedirect } from "#app/seo/server/redirects";
+import { PAINTER } from "#app/shell/painter";
+import { withHeadScript } from "#app/shell/server/headScript";
 import { unknownServerFunction } from "#app/shell/server/serverFunctions";
 import { startServices } from "#app/status/server/services";
 
@@ -103,6 +105,8 @@ export default createServerEntry({
   async fetch(request, opts) {
     const early = requestRedirect(request) ?? unknownServerFunction(request);
     if (early) return early;
-    return serverFor(new URL(request.url).pathname)(request, opts);
+    const response = await serverFor(new URL(request.url).pathname)(request, opts);
+    // The painter starts with the page's first bytes: see `painter.ts`.
+    return withHeadScript(response, PAINTER);
   }
 });

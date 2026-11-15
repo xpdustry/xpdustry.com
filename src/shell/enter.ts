@@ -1,15 +1,15 @@
-import threads from "#app/textures/assets/threads.webp";
 import { inlineScript } from "./inlineScript";
 
 /**
- * Brings in the first screen's textures, those marked with `texture()`, in order as their images
- * arrive: the crown and the backdrop, then each card's patches, card by card. A texture whose
- * image is late comes in when it lands, never before its turn. A stalled load releases textures
- * to paint normally. Content is never hidden: only textures wait, and only from here, in the
+ * Brings in the first screen's textures, those marked with `texture()`, in order as the painter
+ * paints them: the crown and the backdrop, then each card's patches, card by card. A texture
+ * painted late comes in when it is, never before its turn. A stalled painter releases textures
+ * to show as they are painted. Content is never hidden: only textures wait, and only from here, in the
  * head, until the page is parsed. Without motion, or without the animation API, the textures
  * paint as they load.
  */
-function enter(threads: string): void {
+function enter(): void {
+  const paints = globalThis.paints;
   const root = document.documentElement;
   try {
     if (!matchMedia("(prefers-reduced-motion: no-preference)").matches) return;
@@ -25,7 +25,7 @@ function enter(threads: string): void {
     waiting.clear();
     delete root.dataset.enter;
   };
-  // A stalled image or module must not hold the page's textures indefinitely.
+  // A stalled painter or module must not hold the page's textures indefinitely.
   const timeout = setTimeout(release, 4000);
   addEventListener("pagehide", release, { once: true });
 
@@ -40,14 +40,15 @@ function enter(threads: string): void {
    */
   const fused = "radial-gradient(closest-side, #000 82%, transparent)";
   const reach = "radial-gradient(closest-side, #000 60%, transparent)";
-  const growth = (tile: string) => (disc: string, outer: string, offset: number) => ({
-    offset,
-    maskImage: `${fused}, url("${threads}"), ${reach}`,
-    maskComposite: "add, intersect",
-    maskRepeat: "no-repeat, repeat, no-repeat",
-    maskPosition: "50% 50%, 0 0, 50% 50%",
-    maskSize: `${disc} ${disc}, ${tile}px ${tile}px, ${outer} ${outer}`
-  });
+  const growth =
+    (tile: string, threads: string) => (disc: string, outer: string, offset: number) => ({
+      offset,
+      maskImage: `${fused}, url("${threads}"), ${reach}`,
+      maskComposite: "add, intersect",
+      maskRepeat: "no-repeat, repeat, no-repeat",
+      maskPosition: "50% 50%, 0 0, 50% 50%",
+      maskSize: `${disc} ${disc}, ${tile}px ${tile}px, ${outer} ${outer}`
+    });
   const images = new Map<string, Promise<boolean>>();
   const decode = (src: string) => {
     const loaded = images.get(src);
@@ -61,25 +62,28 @@ function enter(threads: string): void {
     images.set(src, ready);
     return ready;
   };
-  let threaded = false;
-  void decode(threads).then((ready) => {
-    threaded = ready;
-  });
+  /** Resolves once a texture can show, to its image: painted and decoded, or absent. */
+  const painted = (key?: string) =>
+    Promise.resolve(key && paints ? paints(key) : undefined).then(
+      (image) => image && decode(image).then((ready) => (ready ? image : undefined))
+    );
+  /** The thin threads a blob grows in through: its keyframes name them, so it waits for them too. */
+  const threads = painted("threads");
 
-  const withoutThreads = (animation: Animation, kind: string) => {
-    if (kind !== "grow" || threaded) return;
-    const effect = animation.effect;
-    if (effect && "setKeyframes" in effect && typeof effect.setKeyframes === "function") {
-      effect.setKeyframes([{ opacity: 0 }, { opacity: 1 }]);
-      effect.updateTiming({ duration: 350, easing: ease });
-    }
+  type Frames = Keyframe[] | ((tile: string, threads: string) => Keyframe[]);
+  /** What holds a blob until it is painted, and all it plays when the threads are absent. */
+  const fade: Keyframe[] = [{ opacity: 0 }, { opacity: 1 }];
+  const grows = (animation: Animation, frames: Frames, tile?: string, threads?: string) => {
+    if (typeof frames !== "function") return;
+    const effect = animation.effect as KeyframeEffect;
+    if (threads) effect.setKeyframes(frames(tile!, threads));
+    else effect.updateTiming({ duration: 350, easing: ease });
   };
 
   /**
    * For each kind: its keyframes, or how to make them for a labyrinth tile; its duration; when in
    * the sequence it may start; its easing.
    */
-  type Frames = Keyframe[] | ((tile: string) => Keyframe[]);
   const KINDS: Record<string, [Frames, number, number, string?]> = {
     drop: [
       [
@@ -91,8 +95,8 @@ function enter(threads: string): void {
     ],
     backdrop: [[{ opacity: 0 }, { opacity: 1 }], 900, 80],
     grow: [
-      (tile) => {
-        const at = growth(tile);
+      (tile, threads) => {
+        const at = growth(tile, threads);
         return [at("0%", "0%", 0), at("0%", "90%", 0.25), at("190%", "320%", 1)];
       },
       1000,
@@ -114,22 +118,10 @@ function enter(threads: string): void {
   const CARD = 110;
   const BLOB = 70;
 
-  /** Resolves once `element`'s image, or its background's, can paint, whether it loaded or not. */
-  const ready = (element: HTMLElement, pseudo?: string): Promise<unknown> => {
-    if (element instanceof HTMLImageElement) {
-      const loaded = element.complete
-        ? Promise.resolve()
-        : new Promise((done) => {
-            element.addEventListener("load", done, { once: true });
-            element.addEventListener("error", done, { once: true });
-          });
-      return loaded.then(() => element.decode()).catch(() => {});
-    }
-    const url =
-      element.dataset.image ??
-      /url\(["']?(.*?)["']?\)/.exec(getComputedStyle(element, pseudo).backgroundImage)?.[1];
-    if (!url) return Promise.resolve();
-    return decode(url);
+  /** The textures the styles name, for the kinds that are not a sprite: one per layer. */
+  const NAMED: Record<string, string[]> = {
+    drop: ["crown"],
+    backdrop: ["backdrop-far", "backdrop-near"]
   };
 
   const cards = new Map<Element, number>();
@@ -158,8 +150,7 @@ function enter(threads: string): void {
     const [slot, trail] = turn(card, kind, at);
     const layers = kind === "backdrop" ? ["::before", "::after"] : [undefined];
     layers.forEach((pseudoElement, layer) => {
-      const keyframes = typeof frames === "function" ? frames(element.dataset.tile!) : frames;
-      const animation = element.animate(keyframes, {
+      const animation = element.animate(typeof frames === "function" ? fade : frames, {
         duration,
         easing,
         fill: "backwards",
@@ -167,10 +158,10 @@ function enter(threads: string): void {
       });
       waiting.add(animation);
       animation.pause();
-      const painted = ready(element, pseudoElement);
-      void painted.then(() => {
+      const image = painted(element.dataset.paint ?? NAMED[kind]?.[layer]);
+      void Promise.all([typeof frames === "function" && threads, image]).then(([threads]) => {
         if (!waiting.delete(animation)) return;
-        withoutThreads(animation, kind);
+        grows(animation, frames, element.dataset.tile, threads || undefined);
         if (!waiting.size) clearTimeout(timeout);
         const wait = start + slot + layer * 140 - performance.now();
         animation.effect!.updateTiming({ delay: Math.max(wait, trail + layer * 140) });
@@ -198,4 +189,4 @@ function enter(threads: string): void {
   }
 }
 
-export const ENTER = inlineScript(enter, threads);
+export const ENTER = inlineScript(enter);

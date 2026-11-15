@@ -11,7 +11,8 @@ import { Background } from "#app/shell/Background";
 import { ENTER } from "#app/shell/enter";
 import { Footer } from "#app/shell/Footer";
 import { Header } from "#app/shell/Header";
-import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/shell/reveal";
+import { PAINTER_WORKER } from "#app/shell/painter";
+import { REVEAL } from "#app/shell/reveal";
 import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
 import { shellData } from "#app/shell/shellData";
 import { getLiveData } from "#app/status/live.functions";
@@ -33,7 +34,7 @@ export const Route = createRootRoute({
     ]);
     return { live, locale, translations };
   },
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -43,15 +44,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/site.webmanifest" },
-      // The backdrop's layers are many times the crown's weight, so they yield to the first screen.
-      ...REVEAL_IMAGES.map((href) => ({
-        rel: "preload",
-        href,
-        as: "image",
-        type: "image/webp",
-        fetchPriority: FRAME_IMAGES.includes(href) ? ("high" as const) : ("low" as const)
-      }))
+      { rel: "manifest", href: "/site.webmanifest" }
     ]
   }),
   shellComponent: Document
@@ -85,7 +78,7 @@ function Document({ children }: { children: ReactNode }) {
   preloadFonts(["display", "mono"], locale);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-painter={PAINTER_WORKER} suppressHydrationWarning>
       <head>
         <style>{UNSTYLED_CANVAS}</style>
         <HeadContent />

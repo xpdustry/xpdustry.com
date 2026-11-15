@@ -18,8 +18,8 @@ export interface SpreadStart {
  * over the farthest corner. It fades away once `on` is over. A new `from` plays it again from
  * there, over the last play, which carries on as it was as it fades away beneath.
  *
- * Its palette can wait until the card is near the viewport. Every palette reuses the same three
- * masks, so revealing another card's spread costs no additional image downloads.
+ * Its palette can wait until the card is near the viewport. Every palette shows through the same
+ * three masks the painter paints once, so another card's spread costs nothing more.
  */
 export function Spread({
   palette,

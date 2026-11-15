@@ -18,12 +18,6 @@ import { useSeen } from "./useSeen";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./Gamemodes.css";
 
-const FRINGES = import.meta.glob<string>("/src/textures/assets/fringe/*.webp", {
-  eager: true,
-  query: "?url",
-  import: "default"
-});
-
 /** The chip for how the copy went: the tick once it landed, an alarm when it failed. */
 const CHIPS: Record<CopyState, string> = {
   idle: "",
@@ -82,7 +76,7 @@ function Mode({
     <CopyCard
       as="li"
       className={`${styles.mode} ${STATES[state]}`}
-      style={assignInlineVars({ [styles.tint]: mode.edge.side.color })}
+      style={assignInlineVars({ [styles.tint]: mode.edge.color })}
       text={hostname}
       state={state}
       copied={gt("Copied {address}. Paste it in Play, Join game, Add server.", {
@@ -124,16 +118,12 @@ function Mode({
 
 /** The mode's colour down the band, its patches past the band's side or its fringe below it. */
 function Tint({ edge }: { edge: Gamemode["edge"] }) {
-  const fringe = FRINGES[`/src/textures/assets/fringe/${edge.below.name}.webp`];
   return (
     <span className={styles.tinted} aria-hidden="true">
       <span className={`${styles.edge} ${styles.side}`}>
-        <Patches patches={edge.side} className={styles.patches} still />
+        <Patches patches={edge} className={styles.patches} still />
       </span>
-      <span
-        className={`${styles.edge} ${styles.below}`}
-        style={{ maskImage: `url("${fringe}")` }}
-      />
+      <span className={`${styles.edge} ${styles.below}`} />
     </span>
   );
 }

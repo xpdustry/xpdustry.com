@@ -19,7 +19,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
   const theme = topic(post.frontmatter.topic);
   return (
     <header className={`${card.card} ${styles.cover} ${className ?? ""}`} style={themed(theme)}>
-      <Patches patches={seeded(theme.patches, post.slug)} priority />
+      <Patches patches={seeded(theme.patches, post.slug)} />
       {theme.icon && <img className={styles.logo} src={theme.icon} alt="" />}
       <div className={styles.crumbs}>
         <Link to="/blog" activeOptions={{ exact: true }} className={`${pill} ${styles.back}`}>

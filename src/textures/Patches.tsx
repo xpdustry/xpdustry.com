@@ -1,126 +1,54 @@
-import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { texture } from "./enter";
 import { blobSprite, type Patches as PatchesData } from "./texture";
 import * as styles from "./Patches.css";
 
-const SPRITES = import.meta.glob<string>("/src/textures/assets/patches/*.webp", {
-  eager: true,
-  query: "?url",
-  import: "default"
-});
-
-/** Palette-free masks, reused across cards. Each file holds an outline and its inner tone. */
+/**
+ * A card's patches of labyrinth, each blob a sprite the painter paints in the visitor's browser.
+ * By default they fill their positioned parent, behind the content. Growing patches lay each
+ * blob's grown sprite over it, uncovered from the middle out while the card is hovered.
+ *
+ * On the first screen, the blobs grow in as the page loads. Patches that shape their parent
+ * instead of decorating it, such as a frayed edge, pass `still` and paint with it.
+ */
 export function Patches({
   patches,
   className,
-  priority = false,
   still = false
 }: {
   patches: PatchesData;
   className?: string;
-  priority?: boolean;
   still?: boolean;
 }) {
+  const mark = (grown: boolean) => (still ? {} : texture(grown ? "grown" : "grow", patches.tile));
   return (
-    <span
-      className={`${styles.patches} ${className ?? ""}`}
-      style={assignInlineVars({ [styles.color]: patches.color, [styles.inner]: patches.inner })}
-      aria-hidden="true"
-    >
-      {patches.blobs.map((blob, at) => (
-        <Patch key={at} patches={patches} blob={blob} priority={priority} still={still} />
-      ))}
+    <span className={`${styles.patches} ${className ?? ""}`} aria-hidden="true">
+      {patches.blobs.map(([x, y, radius, turn = 0], at) => {
+        const sprite = blobSprite(patches, radius);
+        return (
+          <span
+            key={at}
+            className={styles.placement}
+            style={{
+              left: `${x * 100}%`,
+              top: `${y * 100}%`,
+              width: sprite.size,
+              height: sprite.size,
+              transform: turn
+                ? `rotate(${(turn % 4) * 90}deg) scaleX(${turn < 4 ? 1 : -1})`
+                : undefined
+            }}
+          >
+            <span className={styles.sprite} data-paint={sprite.key} {...mark(false)} />
+            {patches.grow && (
+              <span
+                className={`${styles.sprite} ${styles.grown}`}
+                data-paint={blobSprite(patches, radius, true).key}
+                {...mark(true)}
+              />
+            )}
+          </span>
+        );
+      })}
     </span>
-  );
-}
-
-function Patch({
-  patches,
-  blob,
-  priority,
-  still
-}: {
-  patches: PatchesData;
-  blob: PatchesData["blobs"][number];
-  priority: boolean;
-  still: boolean;
-}) {
-  const [x, y, radius, originalTurn = 0] = blob;
-  const turn = (originalTurn + Math.floor((patches.shape ?? 0) / 2)) % 8;
-  const sprite = blobSprite(patches, radius);
-  return (
-    <span
-      className={styles.placement}
-      style={{
-        left: `${x * 100}%`,
-        top: `${y * 100}%`,
-        width: sprite.displaySize,
-        height: sprite.displaySize,
-        transform: `rotate(${(turn % 4) * 90}deg) scaleX(${turn < 4 ? 1 : -1})`
-      }}
-    >
-      <Sprite sprite={sprite} priority={priority} still={still} />
-      {patches.grow && (
-        <Sprite sprite={blobSprite(patches, radius, true)} stage="grown" still={still} />
-      )}
-    </span>
-  );
-}
-
-const STAGES = {
-  base: { className: styles.sprite, kind: "grow" },
-  grown: { className: `${styles.sprite} ${styles.grown}`, kind: "grown" }
-} as const;
-
-function Sprite({
-  sprite,
-  priority = false,
-  still,
-  stage = "base"
-}: {
-  sprite: ReturnType<typeof blobSprite>;
-  priority?: boolean;
-  still: boolean;
-  stage?: keyof typeof STAGES;
-}) {
-  const image = SPRITES[`/src/textures/assets/patches/${sprite.name}.webp`];
-  const appearance = STAGES[stage];
-  const marker = still ? {} : texture(appearance.kind, sprite.tile);
-  return (
-    <>
-      {priority && <link rel="preload" as="image" href={image} fetchPriority="high" />}
-      <span className={appearance.className} data-image={image} {...marker}>
-        <Paint sprite={sprite} image={image} priority={priority} />
-      </span>
-    </>
-  );
-}
-
-function Paint({
-  sprite,
-  image,
-  priority
-}: {
-  sprite: ReturnType<typeof blobSprite>;
-  image: string;
-  priority: boolean;
-}) {
-  if (sprite.kind === "raster")
-    return (
-      <img
-        className={styles.raster}
-        src={image}
-        alt=""
-        width={sprite.size}
-        height={sprite.size}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-      />
-    );
-  return (
-    <span
-      className={styles.paint}
-      style={assignInlineVars({ [styles.image]: `url("${image}")` })}
-    />
   );
 }

@@ -318,6 +318,21 @@ test("the production file server preserves every public URL from the previous si
     expect(slash.status).toBe(308);
     expect(slash.headers.get("location")).toBe("/blog?q=a%20b");
 
+    // The painter starts ahead of the stylesheets, and the worker the page names is there to fetch.
+    const home = await (await fetch(`${origin}/`)).text();
+    const painter = home.indexOf("<script>(function painter(");
+    expect(painter).toBeGreaterThan(0);
+    expect(painter).toBeLessThan(home.indexOf('rel="stylesheet"'));
+    expect(home.match(/<script>\(function painter\(/g)).toHaveLength(1);
+    const worker = /data-painter="(\/assets\/painter\.worker-[^"]+\.js)"/.exec(home)?.[1];
+    expect(worker, "the page names the painter's worker").toBeDefined();
+    const painterWorker = await fetch(`${origin}${worker}`);
+    expect(painterWorker.status).toBe(200);
+    expect(painterWorker.headers.get("content-type")).toMatch(/javascript/);
+    // The labyrinth travels inside the worker, so no page asks for it on its own.
+    expect(await painterWorker.text()).toContain("data:image/avif;base64,");
+    expect(home).not.toMatch(/labyrinth-[^"]*\.avif/);
+
     const scripts = (await readdir(`${clientRoot}assets`)).filter((file) =>
       file.endsWith(".js.br")
     );
