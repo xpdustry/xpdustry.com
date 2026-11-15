@@ -75,7 +75,15 @@ function Document({ children }: { children: ReactNode }) {
   const { locale, translations, players } = shellData(
     useMatch({ from: rootRouteId, select: (match) => match.loaderData })
   );
-  preloadFonts(["display", "mono"], locale);
+  // The header's language label is set in the text face, on every page; an article's body is too,
+  // and there it is most of the page, so it comes ahead of the monospace.
+  const reading = useMatch({ from: "/blog/$slug", shouldThrow: false }) !== undefined;
+  preloadFonts(
+    reading
+      ? { display: "high", text: "high", mono: "low" }
+      : { display: "high", mono: "low", text: "low" },
+    locale
+  );
 
   return (
     <html lang={locale} data-painter={PAINTER_WORKER} suppressHydrationWarning>

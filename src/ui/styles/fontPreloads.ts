@@ -7,19 +7,25 @@ import display from "@fontsource/momo-trust-display/files/momo-trust-display-lat
 import { preload } from "react-dom";
 
 const FILES = {
-  display: { latin: display, cyrillic: cyrillicDisplay, priority: "high" },
-  mono: { latin: mono, cyrillic: cyrillicMono, priority: "low" },
-  text: { latin: text, cyrillic: cyrillicText, priority: "high" }
+  display: { latin: display, cyrillic: cyrillicDisplay },
+  mono: { latin: mono, cyrillic: cyrillicMono },
+  text: { latin: text, cyrillic: cyrillicText }
 } as const;
+
+type Face = keyof typeof FILES;
 
 const CYRILLIC_LOCALES = new Set(["ru"]);
 
 /**
- * Queue first-screen fonts before rendering children, whose images would otherwise take the
- * first preload slots. Other faces wait until the stylesheet needs them.
+ * Queue the page's fonts before rendering children, whose images would otherwise take the first
+ * preload slots, in the order given and each at its priority. A face is asked for once, at the
+ * priority of the first to ask, so the whole page's faces are named together.
+ *
+ * Every face a first screen draws with is here, however little it draws: one left to the
+ * stylesheet is only found once the page is laid out, and its text swaps long after the rest.
  */
-export function preloadFonts(faces: readonly (keyof typeof FILES)[], locale: string) {
-  for (const name of faces) {
+export function preloadFonts(faces: Partial<Record<Face, "high" | "low">>, locale: string) {
+  for (const [name, priority] of Object.entries(faces) as [Face, "high" | "low"][]) {
     const face = FILES[name];
     const files = CYRILLIC_LOCALES.has(locale) ? [face.latin, face.cyrillic] : [face.latin];
     for (const href of files) {
@@ -27,7 +33,7 @@ export function preloadFonts(faces: readonly (keyof typeof FILES)[], locale: str
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
-        fetchPriority: face.priority
+        fetchPriority: priority
       });
     }
   }

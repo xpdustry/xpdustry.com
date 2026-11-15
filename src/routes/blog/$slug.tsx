@@ -11,7 +11,6 @@ import { postTitle } from "#app/blog/titles";
 import { postCard, seo } from "#app/seo/meta";
 import { postStructuredData } from "#app/seo/structuredData";
 import { Newspaper } from "#app/ui/icons";
-import { preloadFonts } from "#app/ui/styles/fontPreloads";
 import { Tray } from "#app/ui/Tray";
 import * as styles from "#app/blog/PostPage.css";
 import * as card from "#app/ui/Card.css";
@@ -49,7 +48,6 @@ function PostPage() {
   const { slug } = Route.useParams();
   const { document } = Route.useLoaderData();
   const locale = useLocale();
-  preloadFonts(["text"], locale);
   const post = translated(postsBySlug.get(slug)!, locale);
   const nearby = nearbyPosts(slug).map((other) => translated(other, locale));
   const gt = useGT();
