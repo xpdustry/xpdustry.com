@@ -318,6 +318,24 @@ test("the production file server preserves every public URL from the previous si
     expect(slash.status).toBe(308);
     expect(slash.headers.get("location")).toBe("/blog?q=a%20b");
 
+    const scripts = (await readdir(`${clientRoot}assets`)).filter((file) =>
+      file.endsWith(".js.br")
+    );
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const file of scripts.slice(0, 3)) {
+      const script = await fetch(`${origin}/assets/${file.slice(0, -3)}`, {
+        headers: { "accept-encoding": "gzip, br" }
+      });
+      expect(script.headers.get("content-encoding"), file).toBe("br");
+      expect(script.headers.get("content-type"), file).toMatch(/javascript/);
+      expect(script.headers.get("content-length"), file).toBe(
+        String((await stat(`${clientRoot}assets/${file}`)).size)
+      );
+      expect(await script.text(), file).toBe(
+        await readFile(`${clientRoot}assets/${file.slice(0, -3)}`, "utf8")
+      );
+    }
+
     for (const [accepted, coding] of [
       ["gzip;q=0", null],
       ["identity", null],

@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && node scripts/precompress.ts",
     "start": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/serve.ts",
     "pattern": "node scripts/reticulate-gen.ts && pnpm textures",
     "textures": "node scripts/textures.ts",
