@@ -1,20 +1,12 @@
-import { msg } from "gt-tanstack-start";
 import * as v from "valibot";
 import data from "./team.json" with { type: "json" };
 
 /** What someone does, highest first: a Discord role's, or one Discord cannot know. */
-export const TAGS = {
-  owner: msg("Owner"),
-  developer: msg("Developer"),
-  admin: msg("Admin"),
-  moderator: msg("Moderator")
-};
+export const TAGS = ["owner", "developer", "admin", "moderator"] as const;
 
-export type Tag = keyof typeof TAGS;
+export type Tag = (typeof TAGS)[number];
 
-const ORDER = Object.keys(TAGS) as Tag[];
-
-const TagSchema = v.picklist(ORDER);
+const TagSchema = v.picklist(TAGS);
 const Link = v.pipe(v.string(), v.url());
 
 /** What Discord cannot tell about someone, or what it says that we would rather not. */
@@ -66,11 +58,11 @@ export const aboutIn = ({ about }: Pick<Teammate, "about">, locale: string, fall
 
 /** Each tag once, highest first. */
 export const ranked = (tags: Iterable<Tag>): Tag[] =>
-  [...new Set(tags)].sort((one, other) => ORDER.indexOf(one) - ORDER.indexOf(other));
+  [...new Set(tags)].sort((one, other) => TAGS.indexOf(one) - TAGS.indexOf(other));
 
 /** By highest tag, then by name. */
 export const byRank = (one: Teammate, other: Teammate) =>
-  ORDER.indexOf(one.tags[0]!) - ORDER.indexOf(other.tags[0]!) ||
+  TAGS.indexOf(one.tags[0]!) - TAGS.indexOf(other.tags[0]!) ||
   one.name.localeCompare(other.name, "en", { sensitivity: "base" });
 
 /** The tags `team.json` gives someone, over `rank`, the highest Discord's roles give. */

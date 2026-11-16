@@ -2,7 +2,7 @@
 
 The first screen's textures come in as the page loads: the crown drops in, the backdrop's two layers fade in, then each card's blobs grow from threads that fuse, card by card. Only textures wait, never content, and a visitor who gets no entrance (reduced motion, an old browser, a stalled painter) sees every texture as it is painted.
 
-No texture is an image the network carries: `src/shell/painter.ts` has a worker paint each one in the browser from the one labyrinth tile, which travels inside the worker's script, `painter.worker-*.js`. The server writes the painter at the top of the head, ahead of the stylesheets. A page whose scripts are off has no textures, and nothing hidden.
+No texture is an image the network carries: `src/shell/painter.script.ts` has a worker paint each one in the browser from the one labyrinth tile, which travels inside the worker's script, `painter.worker-*.js`. The server writes the painter at the top of the head, ahead of the stylesheets. A page whose scripts are off has no textures, and nothing hidden.
 
 ## Sub-features
 
@@ -215,6 +215,6 @@ Variants:
 - `newPage` reduces motion unless it gets `motion: true`. Without it no entrance plays and the run fails at `enter-grows`.
 - `go` waits for the network to settle, which a stalled worker never lets happen, and by then most of the entrance is over. The entrance blocks use `page.reload` or `page.goto` with `waitUntil: "domcontentloaded"` instead.
 - A texture painted late delays itself only, so `enter-order` checks earliest turns, never a fixed order. The script reloads on a filled cache to keep the worker's download from hiding a turn that is too early; even so an entrance begins 25 to 100 ms after its turn, so a turn brought forward by less than that passes.
-- When you change a turn, a stagger or the way cards are counted in `src/shell/enter.ts`, change `record` in the script to match: it computes the same turns.
+- When you change a turn, a stagger or the way cards are counted in `src/shell/enter.script.ts`, change `record` in the script to match: it computes the same turns.
 - `enter-no-scripts` runs in Chromium only: Playwright cannot evaluate in a Firefox page whose scripts are off, and `newPage({ scripts: false })` refuses there.
 - The hover growth is a CSS transition on `--grow`, from `0.45` at rest to `1`. `stuck` counts only script animations as held, so a transition in flight is not a stuck texture.

@@ -1,6 +1,7 @@
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import { defaultServerConditions } from "vite";
 import { defineConfig } from "vitest/config";
+import { inlineScriptsPlugin } from "./scripts/inline-scripts.ts";
 import { blogMarkdownPlugin } from "./src/blog/content/markdown.ts";
 
 export default defineConfig({
@@ -9,7 +10,11 @@ export default defineConfig({
     // Node resolution: native packages hide behind the `browser` condition otherwise.
     conditions: [...defaultServerConditions]
   },
-  plugins: [blogMarkdownPlugin(), vanillaExtractPlugin({ identifiers: "debug" })],
+  plugins: [
+    blogMarkdownPlugin(),
+    inlineScriptsPlugin(),
+    vanillaExtractPlugin({ identifiers: "debug" })
+  ],
   test: {
     projects: [
       {

@@ -49,7 +49,7 @@ export function teamConfig(env: Record<string, string | undefined>): TeamConfig 
   const { XPD_DISCORD_TOKEN: token, XPD_DISCORD_GUILD: guild } = env;
   if (!token || !guild) return undefined;
   const roles = new Map(
-    (Object.keys(TAGS) as Tag[]).flatMap((tag) =>
+    TAGS.flatMap((tag) =>
       (env[`XPD_TEAM_ROLE_${tag.toUpperCase()}`] ?? "")
         .split(",")
         .map((role) => role.trim())

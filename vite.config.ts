@@ -2,6 +2,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { inlineScriptsPlugin } from "./scripts/inline-scripts.ts";
 import { blogMarkdownPlugin } from "./src/blog/content/markdown.ts";
 
 export default defineConfig({
@@ -18,6 +19,7 @@ export default defineConfig({
   },
   plugins: [
     blogMarkdownPlugin(),
+    inlineScriptsPlugin(),
     vanillaExtractPlugin(),
     tanstackStart({
       importProtection: {
