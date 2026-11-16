@@ -19,10 +19,19 @@ describe("withHeadScript", () => {
   test("puts the script after the viewport, ahead of the stylesheets", async () => {
     const response = withHeadScript(page(`${HEAD}<link rel="stylesheet" href="a.css"/>`), "go()");
     expect(await response.text()).toBe(
-      `${HEAD}<script>go()</script><link rel="stylesheet" href="a.css"/>`
+      `${HEAD}<script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/>`
     );
     expect(response.status).toBe(404);
     expect(response.headers.has("content-length")).toBe(false);
+  });
+
+  test("puts the script before stylesheets that come ahead of the viewport", async () => {
+    const sheets =
+      '<html><head><link rel="preload" href="a.woff2"/><link rel="stylesheet" href="a.css"/>';
+    const response = withHeadScript(page(`${sheets}<meta name="viewport" content="x"/>`), "go()");
+    expect(await response.text()).toBe(
+      '<html><head><link rel="preload" href="a.woff2"/><script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/><meta name="viewport" content="x"/>'
+    );
   });
 
   test("finds a viewport cut across chunks, and passes the rest of the page through", async () => {
@@ -31,13 +40,13 @@ describe("withHeadScript", () => {
       "go()"
     );
     expect(await response.text()).toBe(
-      `${HEAD}<script>go()</script><title>é</title></head><body>ü</body>`
+      `${HEAD}<script type="text/javascript">go()</script><title>é</title></head><body>ü</body>`
     );
   });
 
   test("places the script once", async () => {
     const text = await withHeadScript(page(HEAD, HEAD), "go()").text();
-    expect(text.split("<script>go()</script>")).toHaveLength(2);
+    expect(text.split('<script type="text/javascript">go()</script>')).toHaveLength(2);
   });
 
   test("leaves a page without a viewport as it is", async () => {

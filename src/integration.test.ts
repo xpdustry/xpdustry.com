@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { once } from "node:events";
 import { readdir, readFile, stat } from "node:fs/promises";
+import { isBuiltin } from "node:module";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, test } from "vitest";
 import { LEGACY_MEDIA_REDIRECTS } from "#app/seo/server/redirects";
@@ -320,10 +321,10 @@ test("the production file server preserves every public URL from the previous si
 
     // The painter starts ahead of the stylesheets, and the worker the page names is there to fetch.
     const home = await (await fetch(`${origin}/`)).text();
-    const painter = home.indexOf("<script>(function painter(");
+    const painter = home.indexOf('<script type="text/javascript">(function painter(');
     expect(painter).toBeGreaterThan(0);
     expect(painter).toBeLessThan(home.indexOf('rel="stylesheet"'));
-    expect(home.match(/<script>\(function painter\(/g)).toHaveLength(1);
+    expect(home.match(/<script type="text\/javascript">\(function painter\(/g)).toHaveLength(1);
     const worker = /data-painter="(\/assets\/painter\.worker-[^"]+\.js)"/.exec(home)?.[1];
     expect(worker, "the page names the painter's worker").toBeDefined();
     const painterWorker = await fetch(`${origin}${worker}`);
@@ -407,7 +408,8 @@ test("the production server only imports runtime dependencies", async () => {
       /^(?:import|export)\b(?:[^;"']*?\bfrom)?\s*["']([^"'./][^"']*)["']|\bimport\(\s*["']([^"'./][^"']*)["']\s*\)/gm
     )) {
       const specifier = (statement ?? dynamic)!;
-      if (!specifier.startsWith("node:")) {
+      // A bundled dependency may name a built-in without its prefix.
+      if (!isBuiltin(specifier)) {
         packages.add(
           specifier
             .split("/")
