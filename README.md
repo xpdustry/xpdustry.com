@@ -47,7 +47,7 @@ Code is grouped by feature under `src`. What only the server runs sits in a feat
 | `ui`       | Design tokens and shared components                          |
 | `i18n`     | Locales and formatting; translations are in `_gt`            |
 
-`scripts` holds the production server and what makes the generated assets: the labyrinth every texture is painted from and the logo's frames (`pnpm textures`).
+`scripts` holds the production server and what makes the generated assets: the labyrinth every texture is painted from and the shapes the pressable logo is drawn with (`pnpm textures`).
 
 ## Translations
 

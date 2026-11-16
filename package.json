@@ -56,6 +56,7 @@
     "@vanilla-extract/css": "^1.21.3",
     "@vanilla-extract/vite-plugin": "^5.2.6",
     "@vitejs/plugin-react": "^6.1.2",
+    "clipper2-ts": "2.0.1-19",
     "fallow": "^3.42.0",
     "gt": "^2.27.3",
     "ignore": "^7.0.14",
