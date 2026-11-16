@@ -24,7 +24,7 @@
       {
         "name": "entry",
         "patterns": [
-          "src/{router.tsx,server.ts,start.ts,integration.test.ts,forbiddenCharacters.test.ts}"
+          "src/{router.tsx,server.ts,start.ts,testServer.ts,integration.test.ts,hydration.test.ts,forbiddenCharacters.test.ts}"
         ]
       },
       // What the blog and the live status offer the other features; the rest is their own.

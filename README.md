@@ -13,6 +13,8 @@ pnpm dev      # http://localhost:3000
 pnpm check    # format, lint, types, tests and a production build
 ```
 
+The tests include a few run in Chromium, which Playwright installs once with `pnpm exec playwright install chromium`.
+
 ## Run in production
 
 ```bash

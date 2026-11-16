@@ -23,7 +23,7 @@ export default defineConfig({
           name: "unit",
           environment: "node",
           include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.ts"],
-          exclude: ["src/integration.test.ts"],
+          exclude: ["src/integration.test.ts", "src/hydration.test.ts"],
           css: { include: [/.+/] }
         }
       },
@@ -33,6 +33,14 @@ export default defineConfig({
           name: "artifact",
           environment: "node",
           include: ["src/integration.test.ts"]
+        }
+      },
+      {
+        extends: true,
+        test: {
+          name: "browser",
+          environment: "node",
+          include: ["src/hydration.test.ts"]
         }
       }
     ]

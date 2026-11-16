@@ -104,6 +104,37 @@ jobs:
           name: test-results-artifact
           path: reports/
 
+  # What only a browser shows: that a page is hydrated in place
+  browser:
+    name: "Browser Tests"
+    needs: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: "Setup Node.js And Dependencies"
+        uses: ./.github/actions/setup
+
+      - name: "Install Chromium"
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: "Build Site"
+        run: pnpm build
+
+      - name: "Run Browser Tests"
+        run: pnpm exec vitest run --project browser --reporter=default --reporter=junit --outputFile.junit=reports/browser.xml
+
+      - name: "Upload Test Results"
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results-browser
+          path: reports/
+
   # A broken image only shows once it starts
   image:
     name: "Image"
