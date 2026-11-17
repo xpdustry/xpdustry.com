@@ -30,8 +30,7 @@ export interface NodeMindustryProbeOptions {
 
 type SrvResolution = { kind: "direct-fallback" } | { kind: "authoritative"; records: SrvRecord[] };
 
-/** A failure whose message is safe to report: a category, never a resolved name. */
-class ProbeFailure extends Error {}
+class CategorisedFailure extends Error {}
 
 export function createNodeMindustryProbe(
   options: NodeMindustryProbeOptions = {}
@@ -72,12 +71,10 @@ export function createNodeMindustryProbe(
   };
 }
 
-/** An abort controller that follows `parent` and gives up by itself after `timeoutMs`. */
 interface Deadline {
   controller: AbortController;
   signal: AbortSignal;
   timedOut: () => boolean;
-  /** Stops the timer and the following, once the work is over. */
   release: () => void;
 }
 
@@ -100,7 +97,6 @@ function deadline(parent: AbortSignal, timeoutMs: number): Deadline {
   };
 }
 
-/** Where to ask: the SRV targets in their order, or the host itself when it publishes none. */
 async function findEndpoints(
   hostname: string,
   resolveSrv: (service: string) => Promise<readonly SrvRecord[]>,
@@ -112,13 +108,12 @@ async function findEndpoints(
   return orderSrvEndpoints(resolution.records, random);
 }
 
-/** Asks each endpoint in turn and decodes the first reply, until one answers or time runs out. */
 async function firstServerInfo(
   endpoints: readonly Endpoint[],
   ask: (endpoint: Endpoint) => Promise<Uint8Array>,
   signal: AbortSignal
 ): Promise<ServerInfo> {
-  if (endpoints.length === 0) throw new ProbeFailure("no usable SRV endpoints");
+  if (endpoints.length === 0) throw new CategorisedFailure("no usable SRV endpoints");
   let lastFailure = "endpoint exchange failed";
   for (const endpoint of endpoints) {
     if (signal.aborted) break;
@@ -132,16 +127,15 @@ async function firstServerInfo(
           : describeFailure("endpoint exchange", error);
     }
   }
-  throw new ProbeFailure(lastFailure);
+  throw new CategorisedFailure(lastFailure);
 }
 
-/** An abort for a caller that gave up, else a timeout or the category of what went wrong. */
 function queryError(error: unknown, caller: AbortSignal, operation: Deadline): Error {
   if (caller.aborted) return abortError();
   if (operation.timedOut()) return new Error("Mindustry status query timed out", { cause: error });
   if (operation.signal.aborted) return abortError();
   const detail =
-    error instanceof ProbeFailure ? error.message : describeFailure("SRV lookup", error);
+    error instanceof CategorisedFailure ? error.message : describeFailure("SRV lookup", error);
   return new Error(`Mindustry status query failed: ${detail}`, { cause: error });
 }
 
@@ -249,10 +243,6 @@ function createUdpExchange(): EndpointExchange {
   };
 }
 
-/**
- * Sends `packet` to `endpoint` and settles once: with the first reply, an error or an abort,
- * whichever comes first. `release` runs as it settles.
- */
 function exchangeDatagram(
   socket: Socket,
   endpoint: Endpoint,

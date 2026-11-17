@@ -8,9 +8,7 @@ export interface DiscordCounts {
 
 export interface LiveData {
   servers: ServerSnapshot;
-  /** Absent until Discord has answered once. */
   discord?: DiscordCounts;
-  /** Each project's newest release tag; projects GitHub has not answered for are absent. */
   releases: Partial<Record<ProjectSlug, string>>;
 }
 

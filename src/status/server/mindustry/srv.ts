@@ -10,11 +10,11 @@ export interface Endpoint {
   port: number;
 }
 
-/** The fields of an SRV record are 16-bit; a target of "." says the service is not offered. */
+const SERVICE_NOT_OFFERED = new Set(["", "."]);
+
 export function isUsableSrvRecord(record: SrvRecord): boolean {
   return (
-    record.name !== "" &&
-    record.name !== "." &&
+    !SERVICE_NOT_OFFERED.has(record.name) &&
     isUint16(record.port) &&
     record.port > 0 &&
     isUint16(record.priority) &&
@@ -26,7 +26,6 @@ function isUint16(value: number): boolean {
   return Number.isInteger(value) && value >= 0 && value <= 65_535;
 }
 
-/** The order RFC 2782 asks for: lowest priority first, then by weighted lottery within each. */
 export function orderSrvEndpoints(records: readonly SrvRecord[], random: () => number): Endpoint[] {
   const priorities = [...new Set(records.map((record) => record.priority))].sort((a, b) => a - b);
   return priorities.flatMap((priority) =>
@@ -41,30 +40,23 @@ function weightedOrder(records: readonly SrvRecord[], random: () => number): Srv
   const remaining = [...records];
   const ordered: SrvRecord[] = [];
   while (remaining.length > 0) {
-    const selected = pickByWeight(remaining, unitInterval(random()));
+    const selected = pickByWeight(remaining, random());
     ordered.push(selected);
     remaining.splice(remaining.indexOf(selected), 1);
   }
   return ordered;
 }
 
-/** A roll held inside [0, 1), so a faulty source of randomness cannot pick past the last record. */
-function unitInterval(value: number): number {
-  return Number.isFinite(value) ? Math.min(Math.max(value, 0), 1 - Number.EPSILON) : 0;
-}
-
-/**
- * Records of weight 0 come first and each record owns a run of the total weight as long as its own;
- * the roll lands in one of them. When no record has weight, each is as likely as the others.
- */
+// RFC 2782's weighted selection, page 3: https://www.rfc-editor.org/rfc/rfc2782
 function pickByWeight(records: readonly SrvRecord[], unit: number): SrvRecord {
+  if (!(unit >= 0 && unit < 1)) throw new RangeError(`random() gave ${unit}, outside [0, 1)`);
   const selectionOrder = [...records].sort(zeroWeightFirst);
   const totalWeight = selectionOrder.reduce((sum, record) => sum + record.weight, 0);
   if (totalWeight === 0) return selectionOrder[Math.floor(unit * selectionOrder.length)];
 
   const draw = Math.floor(unit * (totalWeight + 1));
   let runningWeight = 0;
-  for (const record of selectionOrder) {
+  for (const record of selectionOrder.slice(0, -1)) {
     runningWeight += record.weight;
     if (runningWeight >= draw) return record;
   }

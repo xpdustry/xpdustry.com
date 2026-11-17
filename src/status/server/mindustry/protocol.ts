@@ -2,11 +2,11 @@ import * as v from "valibot";
 import type { ServerInfo } from "../../snapshots";
 import { stripMindustryMarkup } from "./markup";
 
-/** Framework message, then the discover-host opcode. */
-export const QUERY_PACKET = Uint8Array.from([0xfe, 0x01]);
+const FRAMEWORK_MESSAGE = 0xfe;
+const DISCOVER_HOST = 0x01;
+export const QUERY_PACKET = Uint8Array.from([FRAMEWORK_MESSAGE, DISCOVER_HOST]);
 
-/** Mindustry's `Gamemode` ordinals, in declaration order. */
-const GAMEMODES = ["survival", "sandbox", "attack", "pvp", "editor"] as const;
+const GAMEMODE_BY_ORDINAL = ["survival", "sandbox", "attack", "pvp", "editor"] as const;
 
 const MAX_PLAYERS = 1_000_000;
 
@@ -18,7 +18,7 @@ const RawServerInfoSchema = v.object({
     v.number(),
     v.integer("gamemode ordinal must be an integer"),
     v.minValue(0, "gamemode ordinal is out of range"),
-    v.maxValue(GAMEMODES.length - 1, "gamemode ordinal is out of range")
+    v.maxValue(GAMEMODE_BY_ORDINAL.length - 1, "gamemode ordinal is out of range")
   ),
   modeName: v.string(),
   players: v.pipe(
@@ -90,7 +90,6 @@ class Reader {
   }
 }
 
-/** Removes Mindustry markup but does not make strings safe for HTML injection. */
 export function decodeServerInfo(packet: Uint8Array): ServerInfo {
   const reader = new Reader(packet);
 
@@ -121,7 +120,7 @@ export function decodeServerInfo(packet: Uint8Array): ServerInfo {
   });
 
   const mode =
-    raw.modeName === "" ? GAMEMODES[raw.modeOrdinal] : stripMindustryMarkup(raw.modeName);
+    raw.modeName === "" ? GAMEMODE_BY_ORDINAL[raw.modeOrdinal] : stripMindustryMarkup(raw.modeName);
 
   return {
     name: stripMindustryMarkup(raw.name),

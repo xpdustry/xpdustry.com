@@ -1,6 +1,5 @@
 import type { ServerDefinition } from "./servers";
 
-/** What a server answers a status query with, its Mindustry markup stripped. */
 export interface ServerInfo {
   name: string;
   description: string;

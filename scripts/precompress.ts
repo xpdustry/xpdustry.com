@@ -3,23 +3,17 @@ import { extname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { brotliCompressSync, constants } from "node:zlib";
 
-/**
- * Compresses the built scripts and styles once, as hard as Brotli goes, into `.br` files the
- * server sends as they are. Compressing while answering has to be quick, and quick is a seventh
- * larger: on a slow connection that is the difference this makes.
- */
 const CLIENT = fileURLToPath(new URL("../dist/client", import.meta.url));
-const TEXT = new Set([".js", ".css", ".svg", ".json", ".txt", ".xml"]);
-/** Below this, the server sends a file as it is. */
-const SMALLEST = 1024;
+const TEXT_EXTENSIONS = new Set([".js", ".css", ".svg", ".json", ".txt", ".xml"]);
+const SMALLEST_WORTH_COMPRESSING = 1024;
 
 let files = 0;
 let saved = 0;
 for (const entry of readdirSync(CLIENT, { recursive: true, withFileTypes: true })) {
-  if (!entry.isFile() || !TEXT.has(extname(entry.name))) continue;
+  if (!entry.isFile() || !TEXT_EXTENSIONS.has(extname(entry.name))) continue;
   const path = join(entry.parentPath, entry.name);
   const source = readFileSync(path);
-  if (source.length < SMALLEST) continue;
+  if (source.length < SMALLEST_WORTH_COMPRESSING) continue;
   const compressed = brotliCompressSync(source, {
     params: {
       [constants.BROTLI_PARAM_QUALITY]: constants.BROTLI_MAX_QUALITY,

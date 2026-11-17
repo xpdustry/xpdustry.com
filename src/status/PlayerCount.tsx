@@ -5,7 +5,6 @@ import type { PlayerCount as Count } from "./live";
 import { Online } from "./Online";
 import * as styles from "./PlayerCount.css";
 
-/** "31 online" with a green light, or a grey one while the servers are being checked or are down. */
 export function PlayerCount({
   count,
   className,
@@ -13,7 +12,6 @@ export function PlayerCount({
 }: {
   count: Count;
   className?: string;
-  /** The number alone when online, a status icon otherwise. */
   compact?: boolean;
 }) {
   const gt = useGT();
