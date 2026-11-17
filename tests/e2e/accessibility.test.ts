@@ -67,6 +67,10 @@ test.describe("axe finds nothing", () => {
       await page.setViewportSize({ width, height: 800 });
       await page.goto(path);
       expect(await axeViolations(page)).toEqual([]);
+      if (!path.startsWith("/blog/")) return;
+      await page.getByRole("button", { name: "phinner, open profile" }).click();
+      await expect(page.getByRole("dialog", { name: "phinner" })).toBeVisible();
+      expect(await axeViolations(page)).toEqual([]);
     });
   }
 
@@ -132,7 +136,14 @@ test.describe("the keyboard sees where it is on every control it reaches", () =>
     {
       path: "/blog/nohorny-4-beta-8",
       width: 390,
-      reaches: [/^Blog$/, /^Copy link$/, /^Copy IP/, /Questions or feedback/, /^Back to top$/]
+      reaches: [
+        /^Blog$/,
+        /^phinner, open profile$/,
+        /^Copy link$/,
+        /^Copy IP/,
+        /Questions or feedback/,
+        /^Back to top$/
+      ]
     }
   ]) {
     test(`on ${path} at ${width}px`, async ({ page }) => {

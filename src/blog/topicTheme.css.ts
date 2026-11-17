@@ -34,16 +34,18 @@ export const pill = style({
   selectors: {
     "&:has(> img:first-child, > svg:first-child)": { paddingLeft: 8 },
     [`&:has(> ${avatar}:first-child)`]: { padding: "5px 12px 5px 5px" },
-    "&:is(a)": { transition: "background-color 0.15s" }
+    "&:is(a, button)": { transition: "background-color 0.15s" },
+    "&:is(button)": { border: 0, textAlign: "start", cursor: "pointer" },
+    "&:has(+ :popover-open)": { background: tintHover }
   },
   "@media": {
     [media.hover]: {
-      selectors: { "&:is(a):hover": { background: tintHover } }
+      selectors: { "&:is(a, button):hover": { background: tintHover } }
     }
   }
 });
 
-globalStyle(`a${pill}`, touchTargetHeight);
+globalStyle(`:is(a, button)${pill}`, touchTargetHeight);
 
 export const accented = style({
   color: accent

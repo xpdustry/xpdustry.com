@@ -63,7 +63,7 @@ export function postStructuredData(
         datePublished: publishedAt,
         ...(updatedAt ? { dateModified: updatedAt } : {}),
         image: `${SITE.origin}${postCard(post.slug, title).url}`,
-        author: { "@type": "Person", name: author, url: authors[author].url },
+        author: { "@type": "Person", name: author, url: authors[author].github },
         publisher: { "@id": ORGANIZATION_ID },
         mainEntityOfPage: url
       },

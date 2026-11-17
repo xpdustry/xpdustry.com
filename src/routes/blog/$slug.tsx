@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { getLocale, getMessages, useGT, useMessages, useLocale } from "gt-tanstack-start";
-import { authors } from "#app/blog/content/authors";
+import { authorProfile, authors } from "#app/blog/content/authors";
 import { nearbyPosts, postsBySlug, translated } from "#app/blog/content/registry";
 import { PostAside } from "#app/blog/PostAside";
 import { PostBody } from "#app/blog/PostBody";
@@ -10,6 +10,7 @@ import { BLOG_TAGLINE } from "#app/blog/titles";
 import { postTitle } from "#app/blog/titles";
 import { postCard, seo } from "#app/seo/meta";
 import { postStructuredData } from "#app/seo/structuredData";
+import { getTeam } from "#app/status/team.functions";
 import { Newspaper } from "#app/ui/icons";
 import { Tray } from "#app/ui/Tray";
 import * as styles from "#app/blog/PostPage.css";
@@ -19,7 +20,8 @@ export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const post = postsBySlug.get(params.slug);
     if (!post) throw notFound();
-    return { document: await translated(post, getLocale()).load() };
+    const [document, team] = await Promise.all([translated(post, getLocale()).load(), getTeam()]);
+    return { document, author: authorProfile(post.frontmatter.author, team) };
   },
   head: async ({ params }) => {
     const original = postsBySlug.get(params.slug);
@@ -37,7 +39,7 @@ export const Route = createFileRoute("/blog/$slug")({
       image: postCard(post.slug, title),
       publishedAt,
       updatedAt,
-      authorProfileUrl: authors[author].url,
+      authorProfileUrl: authors[author].github,
       jsonLd: postStructuredData(post, locale, await getMessages())
     });
   },
@@ -46,7 +48,7 @@ export const Route = createFileRoute("/blog/$slug")({
 
 function PostPage() {
   const { slug } = Route.useParams();
-  const { document } = Route.useLoaderData();
+  const { document, author } = Route.useLoaderData();
   const locale = useLocale();
   const post = translated(postsBySlug.get(slug)!, locale);
   const nearby = nearbyPosts(slug).map((other) => translated(other, locale));
@@ -57,7 +59,7 @@ function PostPage() {
     <main id="main">
       <div className={styles.post}>
         <article className={styles.article}>
-          <PostCover post={post} className={`${styles.cover} reveal`} />
+          <PostCover post={post} author={author} className={`${styles.cover} reveal`} />
           <div className={`${card.card} ${styles.body} reveal`}>
             <PostBody document={document} />
           </div>

@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { T, useLocale, Var } from "gt-tanstack-start";
+import { T, useGT, useLocale, Var } from "gt-tanstack-start";
+import type { Teammate } from "#app/brand/team";
 import { formatDate } from "#app/i18n/format";
+import { ProfileButton } from "#app/status/Profile";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";
-import { outbound } from "#app/ui/outbound";
-import { authors } from "./content/authors";
 import type { Post } from "./content/registry";
 import { postTitle } from "./titles";
 import { TopicChip } from "./TopicChip";
@@ -15,7 +15,15 @@ import * as card from "#app/ui/Card.css";
 import * as styles from "./PostCover.css";
 import { avatar, pill } from "./topicTheme.css";
 
-export function PostCover({ post, className }: { post: Post; className?: string }) {
+export function PostCover({
+  post,
+  author,
+  className
+}: {
+  post: Post;
+  author: Teammate;
+  className?: string;
+}) {
   const theme = topic(post.frontmatter.topic);
   return (
     <header className={`${card.card} ${styles.cover} ${className ?? ""}`} style={themed(theme)}>
@@ -29,7 +37,7 @@ export function PostCover({ post, className }: { post: Post; className?: string 
         <CoverTitle frontmatter={post.frontmatter} />
       </div>
       <p className={styles.description}>{post.frontmatter.description}</p>
-      <Byline frontmatter={post.frontmatter} />
+      <Byline frontmatter={post.frontmatter} author={author} />
     </header>
   );
 }
@@ -55,16 +63,25 @@ function CoverTitle({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
   );
 }
 
-function Byline({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
+function Byline({
+  frontmatter: { publishedAt, updatedAt },
+  author
+}: {
+  frontmatter: Post["frontmatter"];
+  author: Teammate;
+}) {
   const locale = useLocale();
-  const { author, publishedAt, updatedAt } = frontmatter;
-  const profile = authors[author];
+  const gt = useGT();
   return (
     <div className={styles.byline}>
-      <a className={pill} href={profile.url} {...outbound(profile.url)}>
-        <img className={avatar} src={profile.avatar} alt="" />
-        {author}
-      </a>
+      <ProfileButton
+        member={author}
+        className={pill}
+        label={gt("{name}, open profile", { name: author.name })}
+      >
+        {author.avatar && <img className={avatar} src={author.avatar} alt="" />}
+        {author.name}
+      </ProfileButton>
       <time className={pill} dateTime={publishedAt}>
         {formatDate(publishedAt, locale)}
       </time>
