@@ -1,6 +1,9 @@
 import { createGlobalTheme, createGlobalThemeContract, globalStyle } from "@vanilla-extract/css";
 import { FACE } from "./fonts";
 import { media } from "./media";
+import { PALETTE } from "./palette";
+
+export const GAP = 14;
 
 export const vars = createGlobalThemeContract(
   {
@@ -55,44 +58,13 @@ export const vars = createGlobalThemeContract(
 );
 
 createGlobalTheme(":root", vars, {
-  n1: "#f7fdfd",
-  n2: "#eef8f7",
-  n3: "#e4f1f0",
-  n6: "#c2d5d3",
-  n10: "#587270",
-  n11: "#395654",
-  n12: "#0e2625",
-  t3: "#c6f6f2",
-  t9: "#41c1ba",
-  t12: "#003331",
-  a3: "#fde6c1",
-  a9: "#ffd37f",
-  a11: "#795700",
-
-  page: "#135854",
+  ...PALETTE,
   tile: vars.n1,
   ink: vars.n12,
   muted: vars.n11,
-  outline: "#0f3b38",
-  wall: "#1f8f88",
-  amberWall: "#a67618",
-  deep: "#083230",
-  deepInk: "#a2c2bf",
-  tray: "#b8dfda",
-  online: "#3ba55d",
-  focus: "#007f79",
-  onTeal: "#08201e",
-  onAmber: "#2b1a00",
-  alarm: "#ff6369",
-  alarmWall: "#b4282e",
-  onAlarm: "#2b0507",
-  onGround: "#fff",
-  onDeep: "#eaf7f5",
-  deepWall: "#4f8e89",
-  stage: "#0e1514",
 
   r: "26px",
-  gap: "14px",
+  gap: `${GAP}px`,
   group: "56px",
 
   fontDisplay: `"${FACE.display}", "${FACE.cyrillicDisplay}", system-ui, sans-serif`,

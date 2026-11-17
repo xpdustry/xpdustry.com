@@ -75,17 +75,37 @@ export const screenshot = style({
   borderRadius: radius.md,
   boxShadow: "0 20px 50px -18px rgb(0 0 0 / 0.7)",
   transition: `translate 0.45s ${vars.easeOut}`,
-  selectors: {
-    [`${featured}:hover &`]: { translate: "0 -8px" }
+  "@media": {
+    [media.hover]: {
+      selectors: { [`${featured}:hover &`]: { translate: "0 -8px" } }
+    }
   }
 });
+
+const SMALL_PADDING = 22;
+const ART_FROM_RIGHT = 16;
+const ART_FROM_BOTTOM = 14;
+const ART_LIFT = 8;
+const ART_OVERHANG = 4;
 
 const small = style({
   gridColumn: "span 3",
   gridRow: "span 2",
-  display: "flex",
-  flexDirection: "column"
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) auto",
+  gridTemplateRows: "auto auto 1fr auto",
+  padding: SMALL_PADDING
 });
+
+globalStyle(`${small} > :is(h3, p)`, {
+  gridColumn: "1 / -1"
+});
+
+const artLane = {
+  gridRow: 4,
+  alignSelf: "end",
+  marginTop: ART_LIFT + ART_OVERHANG
+} as const;
 
 globalStyle(`${small} h3`, {
   fontSize: rem(font.h3),
@@ -94,6 +114,7 @@ globalStyle(`${small} h3`, {
 });
 
 globalStyle(`${small} p`, {
+  marginTop: 8,
   fontSize: rem(font.small),
   lineHeight: leading.snug
 });
@@ -101,7 +122,6 @@ globalStyle(`${small} p`, {
 export const item = style([
   small,
   {
-    padding: 22,
     color: "#1a1310"
   }
 ]);
@@ -114,24 +134,19 @@ globalStyle(`${item}:nth-child(1 of ${item})`, {
 
 globalStyle(`${item} p`, {
   maxWidth: "26ch",
-  marginTop: 8,
-  opacity: 0.86,
-  "@media": {
-    [media.phone]: { marginBottom: 12 }
-  }
+  opacity: 0.86
 });
 
 globalStyle(`${item} ${version}`, {
-  alignSelf: "start",
-  marginTop: "auto",
+  ...artLane,
+  gridColumn: 1,
+  justifySelf: "start",
   background: "rgb(255 255 255 / 0.45)"
 });
 
 export const more = style([
   small,
   {
-    gap: 6,
-    padding: 24,
     background: vars.deep,
     color: vars.onDeep,
     "@media": {
@@ -146,16 +161,24 @@ globalStyle(`${more} p`, {
 });
 
 export const symbol = style({
-  position: "absolute",
-  right: 16,
-  bottom: 14,
+  ...artLane,
+  gridColumn: 2,
+  marginRight: ART_FROM_RIGHT - SMALL_PADDING,
+  marginBottom: ART_FROM_BOTTOM - SMALL_PADDING,
   width: 58,
+  maxWidth: "none",
   height: 58,
   transform: "rotate(-8deg)",
   filter: "drop-shadow(0 5px 0 rgb(0 0 0 / 0.16))",
   transition: `transform 0.45s ${vars.easeSpring}`,
-  selectors: {
-    [`${small}:hover &`]: { transform: "rotate(0deg) translateY(-8px) scale(1.06)" }
+  "@media": {
+    [media.hover]: {
+      selectors: {
+        [`${small}:hover &`]: {
+          transform: `rotate(0deg) translateY(${-ART_LIFT}px) scale(1.06)`
+        }
+      }
+    }
   }
 });
 

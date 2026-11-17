@@ -87,7 +87,7 @@ globalStyle(`${shot} img`, {
 });
 
 globalStyle(`${lead}:hover ${shot} img`, {
-  scale: "1.03"
+  "@media": { [media.hover]: { scale: "1.03" } }
 });
 
 export const logo = style([

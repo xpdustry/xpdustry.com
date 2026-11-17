@@ -78,11 +78,13 @@ export const option = style({
   textAlign: "start",
   cursor: "pointer",
   selectors: {
-    "&:hover": { background: "rgb(255 255 255 / 0.08)" },
     '&[aria-current="true"]': { color: vars.t9, cursor: "default" }
   },
   "@media": {
-    [media.coarse]: { paddingBlock: 11 }
+    [media.coarse]: { paddingBlock: 11 },
+    [media.hover]: {
+      selectors: { "&:hover": { background: "rgb(255 255 255 / 0.08)" } }
+    }
   }
 });
 

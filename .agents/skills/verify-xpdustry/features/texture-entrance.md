@@ -137,12 +137,13 @@ for (const width of [1280, 390]) {
       .map(({ animation, element }) => {
         const { delay, duration } = animation.effect.getTiming();
         animation.currentTime = delay + duration * 0.9;
-        const grow = Number(getComputedStyle(element).getPropertyValue("--grow"));
+        const style = getComputedStyle(element);
+        const open = Number(style.getPropertyValue("--grow")) * Number(style.getPropertyValue("--opened"));
         animation.finish();
-        return grow;
+        return open;
       })
   );
-  expect(opened.length > 0 && opened.every((grow) => grow > 0.2 && grow <= 0.45), `${width} enter-opens`, opened.join(" "));
+  expect(opened.length > 0 && opened.every((open) => open > 0.2 && open <= 0.45), `${width} enter-opens`, opened.join(" "));
 
   // The play card is on the first screen, so its grown sprites came through the entrance.
   const play = page.locator("#servers");
@@ -276,3 +277,4 @@ Variants:
 - When you change a turn, a stagger or the way cards are counted in `src/shell/enter.script.ts`, change `record` in the script to match: it computes the same turns.
 - `enter-no-scripts` runs in Chromium only: Playwright cannot evaluate in a Firefox page whose scripts are off, and `newPage({ scripts: false })` refuses there.
 - The hover growth is a CSS transition on `--grow`, from `0.45` at rest to `1`. `stuck` counts only script animations as held, so a transition in flight is not a stuck texture.
+- A grown sprite shows `--grow` times `--opened`. The hover transitions `--grow`; the entrance animates only `--opened`, from `0` to its resting `1`. Never let the entrance animate a property that has a transition: Firefox restarts the transition whenever the page restyles an element whose animation it throttles off screen.

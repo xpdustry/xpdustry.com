@@ -50,7 +50,9 @@ globalStyle(`${prose} a`, {
 });
 
 globalStyle(`${prose} a:hover`, {
-  background: `color-mix(in srgb, ${vars.t9} 18%, transparent)`
+  "@media": {
+    [media.hover]: { background: `color-mix(in srgb, ${vars.t9} 18%, transparent)` }
+  }
 });
 
 globalStyle(`${prose} code`, {

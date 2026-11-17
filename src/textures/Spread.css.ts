@@ -127,9 +127,7 @@ export const covered = style({
 globalStyle(`${spread}, ${on}`, {
   "@media": {
     [media.still]: {
-      vars: { [frontRadius]: "4000px" },
-      transition: "opacity 0.15s",
-      animation: "none"
+      vars: { [frontRadius]: "4000px" }
     }
   }
 });
