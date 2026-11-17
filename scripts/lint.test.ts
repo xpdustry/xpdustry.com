@@ -25,10 +25,18 @@ function fixtures(files: Record<string, string>): string {
 function oxlint(name: string, lines: string[]) {
   const run = spawnSync(
     join(repository, "node_modules/.bin/oxlint"),
-    ["-c", join(repository, ".oxlintrc.json"), "--type-aware", "--deny-warnings", name],
+    [
+      "-c",
+      join(repository, ".oxlintrc.json"),
+      "--type-aware",
+      "--deny-warnings",
+      "--format",
+      "unix",
+      name
+    ],
     { cwd: fixtures({ [name]: lines.join("\n") }), encoding: "utf8" }
   );
-  return [...run.stdout.matchAll(/:(\d+):\d+: \w+ xpdustry\(([\w-]+)\)/g)].map(
+  return [...run.stdout.matchAll(/:(\d+):\d+: .* \[\w+\/xpdustry\(([\w-]+)\)\]/g)].map(
     ([, line, rule]) => `${line} ${rule}`
   );
 }
