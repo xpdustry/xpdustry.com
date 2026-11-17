@@ -26,7 +26,7 @@ Or build the `Dockerfile`. These environment variables matter:
 
 - `PORT`: the port to listen on, `3000` by default.
 - `XPD_DISABLE_STATUS=1`: stop polling the Mindustry servers, Discord and GitHub.
-- `XPD_DISCORD_TOKEN` and `XPD_DISCORD_GUILD`: the bot that lists the team, and the server it lists. The bot needs the Server Members intent. Without them, the team is what `src/brand/team.json` names and tags.
+- `XPD_DISCORD_TOKEN` and `XPD_DISCORD_GUILD`: the bot that lists the team, and the server it lists. The bot needs the Server Members intent. Without them, the team is what `src/brand/team.json` names and tags. The team's faces and banners are copied off Discord's CDN at each refresh and served from `/discord/…`, so visitors never load anything from Discord.
 - `XPD_TEAM_ROLE_OWNER`, `XPD_TEAM_ROLE_DEVELOPER`, `XPD_TEAM_ROLE_ADMIN` and `XPD_TEAM_ROLE_MODERATOR`: the role IDs that put someone on the team with that tag, comma separated. Each is optional.
 - `XPD_TEAM_ACTIVE_DAYS`: how many days since their last message, in a channel the bot can read, someone stays on the team. `90` by default, `0` keeps everyone. The bot needs the Message Content intent and Read Message History to search; someone whose search Discord refuses stays.
 
