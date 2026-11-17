@@ -1,5 +1,5 @@
 import { useLocation } from "@tanstack/react-router";
-import { T, useGT } from "gt-tanstack-start";
+import { useGT } from "gt-tanstack-start";
 import { useId, useRef } from "react";
 import { Brand } from "#app/brand/Brand";
 import { SITE } from "#app/brand/site";
@@ -9,6 +9,7 @@ import { PlinthAnchor, PlinthButton, PlinthLink } from "#app/ui/Plinth";
 import { animateOnToggle } from "#app/ui/popoverMotion";
 import { LocaleList, LocaleSwitch } from "./LocaleSwitch";
 import { PlayPill } from "./PlayPill";
+import { SITE_PAGES } from "./sitePages";
 import { useShutPopovers } from "./usePopovers";
 import * as styles from "./Header.css";
 
@@ -54,12 +55,11 @@ function MainNav({ id }: { id: string }) {
   const gt = useGT();
   return (
     <nav id={id} popover="auto" className={styles.nav} aria-label={gt("Main")} {...animateOnToggle}>
-      <PlinthLink tone="ink" to="/" activeOptions={{ exact: true }}>
-        <T>Home</T>
-      </PlinthLink>
-      <PlinthLink tone="ink" to="/blog" activeOptions={{ exact: true }}>
-        <T>Blog</T>
-      </PlinthLink>
+      {SITE_PAGES.map(({ to, name }) => (
+        <PlinthLink key={to} tone="ink" to={to} activeOptions={{ exact: true }}>
+          {name}
+        </PlinthLink>
+      ))}
       <LocaleList className={styles.languages} />
     </nav>
   );
