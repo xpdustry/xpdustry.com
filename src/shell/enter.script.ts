@@ -103,11 +103,10 @@ export default function enter(): void {
       layers: [{}]
     },
     grown: {
-      // No keyframe at 1: Web Animations fills it with the underlying value, where the hover has
-      // `--grow`. https://drafts.csswg.org/web-animations-1/#the-effect-value-of-a-keyframe-animation-effect
       frames: [
-        { "--grow": "0", offset: 0 },
-        { "--grow": "0", offset: 0.45 }
+        { "--opened": "0", offset: 0 },
+        { "--opened": "0", offset: 0.45 },
+        { "--opened": "1", offset: 1 }
       ],
       durationMs: 1000,
       earliestMs: 220,
