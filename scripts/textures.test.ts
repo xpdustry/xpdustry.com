@@ -7,13 +7,13 @@ test("the labyrinth the browser gets is the pattern, give or take its encoding",
   const pattern = await readPattern();
   const labyrinth = await readLabyrinthPixels();
   expect(labyrinth.size, "labyrinth.avif is out of date").toBe(pattern.size);
+  const AVIF_ENCODER_DRIFT = 4;
   let squares = 0;
   for (let at = 0; at < pattern.data.length; at++) {
     squares += (pattern.data[at]! - labyrinth.data[at]!) ** 2;
   }
-  // Another encoder build may differ by a value here and there; another pattern is far off.
-  const error = Math.sqrt(squares / pattern.data.length);
-  expect(error, "labyrinth.avif is out of date").toBeLessThan(4);
+  const rootMeanSquareError = Math.sqrt(squares / pattern.data.length);
+  expect(rootMeanSquareError, "labyrinth.avif is out of date").toBeLessThan(AVIF_ENCODER_DRIFT);
 });
 
 test("the pressable logo's shapes are the logo's", () => {

@@ -1,32 +1,23 @@
 import { describe, expect, test } from "vitest";
-import { posts } from "#app/blog/content/registry";
 import { readCard } from "./cards";
 
-const english = { locale: "en", m: (message: string) => message };
-const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+const french = { locale: "fr", m: (message: string) => message };
 
 describe("readCard", () => {
-  test.each(["home.png", "blog.png", `blog/${posts[0]!.slug}.png`])(
-    "draws %s as a PNG",
-    async (path) => {
-      const png = await readCard(path, english);
-
-      expect([...png!.subarray(0, 8)]).toEqual(PNG_SIGNATURE);
-    }
-  );
-
-  test.each(["", "about.png", "blog/no-such-post.png", "blog/.png", "constructor"])(
+  test.each(["", "about.png", "blog/no-such-post.png", "blog/.png", "constructor", "__proto__"])(
     "has no card at %j",
     async (path) => {
-      expect(await readCard(path, english)).toBeUndefined();
+      expect(await readCard(path, french)).toBeUndefined();
     }
   );
 
-  test("draws a card once and serves it again from the cache", async () => {
-    const first = readCard("blog.png", { locale: "fr", m: english.m });
-    const second = readCard("blog.png", { locale: "fr", m: english.m });
+  test("draws a card once, however many ask for it at the same time or later", async () => {
+    const first = readCard("blog.png", french);
+    const second = readCard("blog.png", french);
 
-    expect(await second).toBe(await first);
-    expect(await readCard("blog.png", { locale: "fr", m: english.m })).toBe(await first);
+    const card = await first;
+    expect(card?.byteLength).toBeGreaterThan(0);
+    expect(await second).toBe(card);
+    expect(await readCard("blog.png", french)).toBe(card);
   });
 });

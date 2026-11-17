@@ -28,7 +28,7 @@ export function TopicChip({ name, tone = "card", version, linked, className }: T
     <Tag
       href={href}
       {...outbound(href)}
-      className={`${styles.tone[tone]} ${className ?? ""}`}
+      className={[styles.tone[tone], className].join(" ")}
       style={colours[tone](chip)}
     >
       {icon && <img src={icon} alt="" />}

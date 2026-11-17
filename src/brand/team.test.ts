@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import sharp from "sharp";
 import { expect, test } from "vitest";
 import { outbound } from "#app/ui/outbound";
 import gt from "../../gt.config.json" with { type: "json" };
@@ -14,6 +15,15 @@ test.each(links)("%s is a teammate's: it learns where the visitor came from", (h
 
 test.each(faces)("%s is a picture the site serves", (avatar) => {
   expect(existsSync(`public${avatar}`)).toBe(true);
+});
+
+test("team.json names some faces, so the checks over them check something", () => {
+  expect(faces.length).toBeGreaterThan(0);
+});
+
+test.each(faces)("%s is square, as the round frame it sits in", async (avatar) => {
+  const { width, height } = await sharp(`public${avatar}`).metadata();
+  expect(width).toBe(height);
 });
 
 test("team.json is keyed by Discord user ID", () => {
@@ -37,7 +47,7 @@ test("before Discord answers, the team is whoever team.json names and tags, high
 });
 
 test.each(everyone.filter(({ about }) => about))(
-  "$name's line is in every language",
+  "$name's line is in every language the site serves, and no other",
   ({ about }) => {
     expect(Object.keys(about!).sort()).toEqual([gt.defaultLocale, ...gt.locales].sort());
   }

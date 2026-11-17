@@ -1,5 +1,6 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import { projects } from "#app/brand/projects";
+import { fakeFetch, pathsOn } from "#tests/support/fetch";
 import { fetchGitHubStats } from "./github";
 
 const repositories = projects.map((project, index) => ({
@@ -7,12 +8,8 @@ const repositories = projects.map((project, index) => ({
   stargazers_count: 10 * (index + 1)
 }));
 
-function github(routes: Record<string, () => Response>): typeof fetch {
-  return vi.fn(async (input: RequestInfo | URL) => {
-    const path = new URL(input instanceof Request ? input.url : input).pathname;
-    return routes[path]?.() ?? Response.json({ message: "Not Found" }, { status: 404 });
-  });
-}
+const github = (paths: Record<string, () => Response>) =>
+  fakeFetch(pathsOn("api.github.com", paths));
 
 const signal = new AbortController().signal;
 
@@ -26,7 +23,7 @@ describe("GitHub stats", () => {
     });
 
     await expect(fetchGitHubStats(signal, fetchImpl)).resolves.toEqual({
-      stars: 100,
+      stars: 10 + 20 + 30 + 40,
       releases: { nohorny: "v4.0.0-beta.11", claj: "2.4.4" }
     });
   });

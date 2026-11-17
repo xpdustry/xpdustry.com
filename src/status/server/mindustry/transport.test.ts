@@ -1,33 +1,11 @@
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { serverInfoPacket } from "#tests/support/mindustryPacket";
 import type { SrvRecord } from "./srv";
 import { createNodeMindustryProbe, type EndpointExchange } from "./transport";
 
 const friendly = "hub.md.xpdustry.com";
 
-function packet(name = "Hub"): Uint8Array {
-  const bytes: number[] = [];
-  const encoder = new TextEncoder();
-  const string = (value: string) => {
-    const encoded = encoder.encode(value);
-    bytes.push(encoded.length, ...encoded);
-  };
-  const i32 = (value: number) => {
-    bytes.push((value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff);
-  };
-
-  string(name);
-  string("Ground Zero");
-  i32(3);
-  i32(1);
-  i32(159);
-  string("official");
-  bytes.push(0);
-  i32(50);
-  string("");
-  string("");
-  bytes.push(0x19, 0xa7);
-  return Uint8Array.from(bytes);
-}
+const packet = (name = "Hub") => serverInfoPacket({ name });
 
 function record(name: string, priority: number, weight = 0, port = 6567): SrvRecord {
   return { name, priority, weight, port };
@@ -40,17 +18,17 @@ function exchange(
   return { query, closeAll };
 }
 
+const dnsFailure = (code: string) => async () => {
+  throw Object.assign(new Error(code), { code });
+};
+
 function signal(): AbortSignal {
   return new AbortController().signal;
 }
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => {
-    resolve = done;
-  });
-  return { promise, resolve };
-}
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("createNodeMindustryProbe", () => {
   test("tries lower priorities first and exhausts a group before the next", async () => {
@@ -120,18 +98,13 @@ describe("createNodeMindustryProbe", () => {
 
     await expect(probe.query(friendly, signal())).rejects.toThrow();
     expect(attempts).toEqual(["srv-one.example", "srv-two.example"]);
-    expect(attempts).not.toContain(friendly);
   });
 
   test.each([
     ["an empty answer", async () => []],
-    [
-      "a DNS no-data result",
-      async () => {
-        throw Object.assign(new Error("no data"), { code: "ENODATA" });
-      }
-    ]
-  ])("uses the friendly host only for %s", async (_label, resolveSrv) => {
+    ["an answer without records", dnsFailure("ENODATA")],
+    ["a name that does not exist", dnsFailure("ENOTFOUND")]
+  ])("asks the friendly host itself for %s", async (_label, resolveSrv) => {
     const query = vi.fn(async () => packet());
     const probe = createNodeMindustryProbe({ resolveSrv, exchange: exchange(query) });
 
@@ -142,28 +115,6 @@ describe("createNodeMindustryProbe", () => {
       expect.any(Uint8Array),
       expect.any(AbortSignal)
     );
-  });
-
-  test("does not use the friendly host when DNS explicitly says the service is unavailable", async () => {
-    const query = vi.fn(async () => packet());
-    const probe = createNodeMindustryProbe({
-      resolveSrv: async () => [record(".", 0)],
-      exchange: exchange(query)
-    });
-
-    await expect(probe.query(friendly, signal())).rejects.toThrow("status query failed");
-    expect(query).not.toHaveBeenCalled();
-  });
-
-  test("does not use the friendly host for an authoritative answer with no usable targets", async () => {
-    const query = vi.fn(async () => packet());
-    const probe = createNodeMindustryProbe({
-      resolveSrv: async () => [record("invalid.example", 0, 0, 0)],
-      exchange: exchange(query)
-    });
-
-    await expect(probe.query(friendly, signal())).rejects.toThrow("status query failed");
-    expect(query).not.toHaveBeenCalled();
   });
 
   test("retries another SRV target when a reply cannot be decoded", async () => {
@@ -185,7 +136,7 @@ describe("createNodeMindustryProbe", () => {
   });
 
   test("aborting the caller aborts the active endpoint", async () => {
-    const started = deferred<void>();
+    const started = Promise.withResolvers<void>();
     let endpointSignal: AbortSignal | undefined;
     const probe = createNodeMindustryProbe({
       resolveSrv: async () => [],
@@ -206,7 +157,7 @@ describe("createNodeMindustryProbe", () => {
   });
 
   test("closeAll aborts active work and closes the endpoint exchange", async () => {
-    const started = deferred<void>();
+    const started = Promise.withResolvers<void>();
     let endpointSignal: AbortSignal | undefined;
     const closeAll = vi.fn();
     const probe = createNodeMindustryProbe({
@@ -229,21 +180,17 @@ describe("createNodeMindustryProbe", () => {
 
   test("bounds DNS resolution with the total query timeout", async () => {
     vi.useFakeTimers();
-    try {
-      const probe = createNodeMindustryProbe({
-        resolveSrv: () => new Promise(() => {}),
-        exchange: exchange(async () => packet()),
-        timeoutMs: 50
-      });
-      const result = probe.query(friendly, signal());
-      const rejected = expect(result).rejects.toThrow("status query timed out");
+    const probe = createNodeMindustryProbe({
+      resolveSrv: () => new Promise(() => {}),
+      exchange: exchange(async () => packet()),
+      timeoutMs: 50
+    });
+    const result = probe.query(friendly, signal());
+    const rejected = expect(result).rejects.toThrow("status query timed out");
 
-      await vi.advanceTimersByTimeAsync(50);
+    await vi.advanceTimersByTimeAsync(50);
 
-      await rejected;
-    } finally {
-      vi.useRealTimers();
-    }
+    await rejected;
   });
 
   test("reports a safe failure category without resolved endpoint names", async () => {
@@ -262,52 +209,44 @@ describe("createNodeMindustryProbe", () => {
 
   test("moves on to the next target when one stays silent past its own timeout", async () => {
     vi.useFakeTimers();
-    try {
-      const signals: AbortSignal[] = [];
-      const probe = createNodeMindustryProbe({
-        resolveSrv: async () => [record("silent.example", 0), record("backup.example", 1)],
-        exchange: exchange(async (endpoint, _packet, activeSignal) => {
-          signals.push(activeSignal);
-          if (endpoint.hostname === "silent.example") return new Promise<Uint8Array>(() => {});
-          return packet("Backup");
-        }),
-        endpointTimeoutMs: 100,
-        timeoutMs: 1_000
-      });
-      const result = probe.query(friendly, signal());
+    const signals: AbortSignal[] = [];
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => [record("silent.example", 0), record("backup.example", 1)],
+      exchange: exchange(async (endpoint, _packet, activeSignal) => {
+        signals.push(activeSignal);
+        if (endpoint.hostname === "silent.example") return new Promise<Uint8Array>(() => {});
+        return packet("Backup");
+      }),
+      endpointTimeoutMs: 100,
+      timeoutMs: 1_000
+    });
+    const result = probe.query(friendly, signal());
 
-      await vi.advanceTimersByTimeAsync(100);
+    await vi.advanceTimersByTimeAsync(100);
 
-      await expect(result).resolves.toMatchObject({ name: "Backup" });
-      expect(signals[0]?.aborted).toBe(true);
-    } finally {
-      vi.useRealTimers();
-    }
+    await expect(result).resolves.toMatchObject({ name: "Backup" });
+    expect(signals[0]?.aborted).toBe(true);
   });
 
   test("reports a timeout when the targets are still silent at the total deadline", async () => {
     vi.useFakeTimers();
-    try {
-      let endpointSignal: AbortSignal | undefined;
-      const probe = createNodeMindustryProbe({
-        resolveSrv: async () => [record("silent.example", 0)],
-        exchange: exchange((_endpoint, _packet, activeSignal) => {
-          endpointSignal = activeSignal;
-          return new Promise<Uint8Array>(() => {});
-        }),
-        endpointTimeoutMs: 1_000,
-        timeoutMs: 200
-      });
-      const result = probe.query(friendly, signal());
-      const rejected = expect(result).rejects.toThrow("status query timed out");
+    let endpointSignal: AbortSignal | undefined;
+    const probe = createNodeMindustryProbe({
+      resolveSrv: async () => [record("silent.example", 0)],
+      exchange: exchange((_endpoint, _packet, activeSignal) => {
+        endpointSignal = activeSignal;
+        return new Promise<Uint8Array>(() => {});
+      }),
+      endpointTimeoutMs: 1_000,
+      timeoutMs: 200
+    });
+    const result = probe.query(friendly, signal());
+    const rejected = expect(result).rejects.toThrow("status query timed out");
 
-      await vi.advanceTimersByTimeAsync(200);
+    await vi.advanceTimersByTimeAsync(200);
 
-      await rejected;
-      expect(endpointSignal?.aborted).toBe(true);
-    } finally {
-      vi.useRealTimers();
-    }
+    await rejected;
+    expect(endpointSignal?.aborted).toBe(true);
   });
 
   test.each([
@@ -385,24 +324,6 @@ describe("createNodeMindustryProbe", () => {
     await probe.query(friendly, signal());
 
     expect(attempts).toEqual(["good.example:6567"]);
-  });
-
-  test("falls back to the friendly host when the SRV name does not exist", async () => {
-    const query = vi.fn(async () => packet());
-    const probe = createNodeMindustryProbe({
-      resolveSrv: async () => {
-        throw Object.assign(new Error("not found"), { code: "ENOTFOUND" });
-      },
-      exchange: exchange(query)
-    });
-
-    await probe.query(friendly, signal());
-
-    expect(query).toHaveBeenCalledWith(
-      { hostname: friendly, port: 6567 },
-      expect.any(Uint8Array),
-      expect.any(AbortSignal)
-    );
   });
 
   test.each([

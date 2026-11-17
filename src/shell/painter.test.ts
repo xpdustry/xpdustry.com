@@ -151,15 +151,14 @@ describe("inline painter", () => {
     runInNewContext(PAINTER, page.context);
     page.answer("crown", "crown.png");
     page.hired[0]!.onerror!();
-    // Asked for while no worker is there: it waits for the next one instead of being given up.
-    const late = page.context.paints!("blob_late_0");
+    const askedWithoutWorker = page.context.paints!("blob_late_0");
     await vi.waitFor(() => expect(page.hired).toHaveLength(2));
     expect(page.hired[0]!.terminate).toHaveBeenCalled();
     const again = page.hired[1]!.posted.map(({ key }) => key);
     expect(again).not.toContain("crown");
     expect(again).toEqual(expect.arrayContaining(["ridge", "blob_a_0", "blob_late_0"]));
     page.answer("blob_late_0", "late.png");
-    expect(await late).toBe("blob:late.png");
+    expect(await askedWithoutWorker).toBe("blob:late.png");
   });
 
   test("gives up once three workers have failed: every texture waited on is absent", async () => {
