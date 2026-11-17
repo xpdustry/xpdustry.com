@@ -9,7 +9,7 @@ import {
   popoverShut,
   underParent
 } from "./popover";
-import { tone, wall } from "#app/ui/Plinth.css";
+import { PLINTH_BORDER, PLINTH_DEPTH, tone, wall } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const navFolded = upTo(1160);
@@ -201,8 +201,6 @@ export const whenOpen = style({
 
 const TOUCH_TARGET = 44;
 const CONTROL_SIZE = 40;
-const PLINTH_BORDER = 2;
-const PLINTH_DEPTH = 4;
 const touchSlack = (TOUCH_TARGET - CONTROL_SIZE) / 2;
 const touchInset = [PLINTH_BORDER + PLINTH_DEPTH, PLINTH_BORDER + touchSlack, PLINTH_BORDER]
   .map((px) => `${-px}px`)
