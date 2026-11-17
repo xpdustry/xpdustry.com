@@ -2,7 +2,8 @@ import { vi, type Mock } from "vitest";
 
 export type Route = (url: URL) => Response | undefined;
 
-const urlOf = (input: RequestInfo | URL) => new URL(input instanceof Request ? input.url : input);
+export const urlOf = (input: RequestInfo | URL) =>
+  new URL(input instanceof Request ? input.url : input);
 
 export function fakeFetch(...routesInTurn: Route[]): Mock<typeof fetch> {
   return vi.fn<typeof fetch>(async (input) => {
