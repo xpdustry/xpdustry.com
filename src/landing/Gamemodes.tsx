@@ -4,6 +4,7 @@ import { useId, useRef, type RefCallback } from "react";
 import { findServer, playerCount } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/status/snapshots";
+import { texture } from "#app/textures/enter";
 import { Patches } from "#app/textures/Patches";
 import { Spread } from "#app/textures/Spread";
 import { CopyCard } from "#app/ui/copy/CopyCard";
@@ -116,7 +117,12 @@ function Mode({
 
 function Tint({ edge }: { edge: Gamemode["edge"] }) {
   return (
-    <span className={styles.tinted} aria-hidden="true">
+    <span
+      className={styles.tinted}
+      aria-hidden="true"
+      {...texture("face")}
+      suppressHydrationWarning
+    >
       <span className={`${styles.edge} ${styles.side}`}>
         <Patches patches={edge} className={styles.patches} still />
       </span>

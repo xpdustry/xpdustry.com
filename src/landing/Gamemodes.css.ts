@@ -3,6 +3,7 @@ import { paint } from "#app/textures/catalogue";
 import { media, narrowerThan } from "#app/ui/styles/media";
 import { DIMMED, font, leading, OUTLINE, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
+import { faceFrom } from "#app/textures/enter.css";
 import {
   CHIP_OVERHANG,
   face,
@@ -16,6 +17,9 @@ import { vars } from "#app/ui/styles/theme.css";
 const narrow = narrowerThan(660);
 const phone = narrowerThan(440);
 const narrowest = narrowerThan(270);
+
+const RIDGE_REACH = 90;
+const FRINGE_HEIGHT = 48;
 
 const bandWidth = createVar();
 const headHeight = createVar();
@@ -58,6 +62,7 @@ export const copied = style({});
 export const failed = style({});
 
 export const tinted = style({
+  vars: { [faceFrom]: `calc(-100% - ${RIDGE_REACH}px) 0` },
   position: "absolute",
   inset: `${FACE_INSET}px auto ${FACE_INSET}px ${FACE_INSET}px`,
   zIndex: -2,
@@ -68,6 +73,7 @@ export const tinted = style({
   background: tint,
   "@container": {
     [narrow]: {
+      vars: { [faceFrom]: `0 calc(-100% - ${FACE_BLEED + FRINGE_HEIGHT}px)` },
       gridArea: "1 / 1 / 2 / 2",
       inset: `${-FACE_BLEED}px ${-FACE_BLEED}px 22px`,
       width: "auto",
@@ -107,9 +113,9 @@ export const fringe = style({
     [narrow]: {
       inset: "100% 0 auto",
       display: "block",
-      height: 48,
+      height: FRINGE_HEIGHT,
       background: tint,
-      mask: `${paint("fringe")} ${fringeAt(0)} / 486px 48px repeat-x`,
+      mask: `${paint("fringe")} ${fringeAt(0)} / 486px ${FRINGE_HEIGHT}px repeat-x`,
       selectors: {
         [`${mode}:nth-child(2) &`]: { maskPosition: fringeAt(-190) },
         [`${mode}:nth-child(3) &`]: { maskPosition: fringeAt(-75) },

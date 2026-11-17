@@ -47,6 +47,11 @@ export default function painter(
 
   const paint = (key: string, keyPriority: number) => {
     let image = painted.get(key);
+    const queued = unpainted.get(key);
+    if (queued && keyPriority < queued.priority) {
+      queued.priority = keyPriority;
+      port?.postMessage({ key, priority: keyPriority });
+    }
     if (!image) {
       image = new Promise((done) => {
         if (gaveUp) return done(undefined);

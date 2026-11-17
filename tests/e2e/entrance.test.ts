@@ -13,6 +13,7 @@ interface Entrance {
 declare global {
   interface Window {
     entrances: Entrance[];
+    deliverPaintings: () => void;
   }
 }
 
@@ -55,22 +56,67 @@ function recordEntrances() {
   });
 }
 
+/** Keeps what the painter's worker sends until the test calls `deliverPaintings`. */
+function holdPaintings() {
+  const kept: (() => void)[] = [];
+  let holding = true;
+  window.deliverPaintings = () => {
+    holding = false;
+    for (const deliver of kept.splice(0)) deliver();
+  };
+  const handler = Object.getOwnPropertyDescriptor(Worker.prototype, "onmessage")!;
+  Object.defineProperty(Worker.prototype, "onmessage", {
+    ...handler,
+    set(this: Worker, show: ((event: MessageEvent) => void) | null) {
+      handler.set!.call(
+        this,
+        show && ((event: MessageEvent) => (holding ? kept.push(() => show(event)) : show(event)))
+      );
+    }
+  });
+}
+
 const stuckTextures = (page: Page) =>
   page.evaluate(() =>
     [...document.querySelectorAll<HTMLElement>("[data-texture]")]
       .filter((element) => {
-        const { opacity, maskImage } = getComputedStyle(element);
+        const kind = element.dataset.texture!;
+        const restsMasked = kind === "rise";
+        const pseudos = kind === "backdrop" ? ["::before", "::after"] : [];
+        const unrested = [undefined, ...pseudos].some((pseudo) => {
+          const { opacity, maskImage, maskPosition, translate } = getComputedStyle(element, pseudo);
+          const masked = !restsMasked && maskImage.includes("url(");
+          const tornAside =
+            restsMasked && maskPosition.split(",")[0]!.trim().split(" ")[1] !== "0px";
+          return opacity === "0" || translate !== "none" || masked || tornAside;
+        });
         const held = element
           .getAnimations({ subtree: true })
           .some(
             (animation) =>
               !(animation instanceof CSSAnimation || animation instanceof CSSTransition)
           );
-        return opacity === "0" || maskImage.includes("url(") || held;
+        return unrested || held || "held" in element.dataset;
       })
       .map((element) => element.dataset.texture!)
       .concat("enter" in document.documentElement.dataset ? ["data-enter on <html>"] : [])
   );
+
+/** The gamemode rows whose colour shows: drawn, and at least partly over its own row. */
+const colouredRows = (page: Page) =>
+  page.evaluate(
+    () =>
+      [...document.querySelectorAll<HTMLElement>('#gamemodes [data-texture="face"]')].filter(
+        (face) => {
+          const row = face.closest("li")!.getBoundingClientRect();
+          const box = face.getBoundingClientRect();
+          const drawn = getComputedStyle(face).opacity !== "0";
+          return drawn && box.right > row.left + 8 && box.bottom > row.top + 8;
+        }
+      ).length
+  );
+
+const GAMEMODES = 5;
 
 /** How many entrances are still paused, waiting for a texture; with `finish`, ends the rest. */
 const heldEntrances = (page: Page, finish = false) =>
@@ -174,7 +220,15 @@ for (const width of [1280, 390]) {
           window.entrances.map(({ kind, card, onFirstScreen }) => ({ kind, card, onFirstScreen }))
         );
         const kinds = [...new Set(played.map(({ kind }) => kind))].sort();
-        expect(kinds).toEqual(["backdrop::after", "backdrop::before", "drop", "grow", "grown"]);
+        const gamemodesOnFirstScreen = width === 1280 ? ["face"] : [];
+        expect(kinds).toEqual([
+          "backdrop::after",
+          "backdrop::before",
+          "drop",
+          ...gamemodesOnFirstScreen,
+          "grow",
+          "grown"
+        ]);
         expect(played.filter(({ onFirstScreen }) => !onFirstScreen)).toEqual([]);
         expect(new Set(played.map(({ card }) => card)).size).toBeGreaterThan(2);
         expect(await entrancesOverTransitions(page)).toEqual([]);
@@ -193,9 +247,8 @@ for (const width of [1280, 390]) {
           await page.evaluate(() => ({
             edges: document.querySelectorAll("#gamemodes [data-paint]").length > 0,
             ridges: document.querySelectorAll('footer > div[aria-hidden="true"]').length,
-            marked: document.querySelectorAll("#gamemodes [data-texture], footer [data-texture]")
-              .length,
-            entered: window.entrances.filter(({ element }) => element.closest("#gamemodes, footer"))
+            marked: document.querySelectorAll("footer [data-texture]").length,
+            entered: window.entrances.filter(({ element }) => element.closest("#news, footer"))
               .length
           }))
         ).toEqual({ edges: true, ridges: 1, marked: 0, entered: 0 });
@@ -214,6 +267,69 @@ for (const width of [1280, 390]) {
         await play.hover({ position: { x: 24, y: 24 } });
         await expect.poll(async () => new Set(await grown())).toEqual(new Set(["1"]));
       });
+    });
+
+    test("a gamemode row shows no colour until its edge is painted, then the colour comes in behind it", async ({
+      page
+    }) => {
+      await holdTheClock(page);
+      await page.addInitScript(holdPaintings);
+      await page.addInitScript(recordEntrances);
+      await page.goto("/");
+      await page.locator("#gamemodes").scrollIntoViewIfNeeded();
+      await page.waitForTimeout(300);
+      expect(await colouredRows(page)).toBe(0);
+
+      await page.evaluate(() => window.deliverPaintings());
+      await expect
+        .poll(() =>
+          page.evaluate(
+            () =>
+              window.entrances.filter(
+                ({ kind, animation }) => kind === "face" && animation.playState !== "paused"
+              ).length
+          )
+        )
+        .toBeGreaterThan(0);
+      const sliding = await page.evaluate(async () => {
+        const unpaintedEdges = (face: HTMLElement) =>
+          [...face.querySelectorAll<HTMLElement>("[data-paint]"), face.lastElementChild!]
+            .filter((edge) => edge.getClientRects().length)
+            .filter((edge) => {
+              const { backgroundImage, maskImage } = getComputedStyle(edge);
+              return !`${backgroundImage} ${maskImage}`.includes("blob:");
+            }).length;
+        const faces = window.entrances.filter(({ kind }) => kind === "face");
+        for (const { animation } of faces) animation.pause();
+        await Promise.all(faces.map(({ animation }) => animation.ready));
+        return faces.map(({ animation, element }) => {
+          const { delay = 0, duration } = animation.effect!.getTiming();
+          const at = (fraction: number) => {
+            animation.currentTime = Number(delay) + Number(duration) * fraction;
+            return element.getBoundingClientRect();
+          };
+          const resting = at(1);
+          const away = (fraction: number) => {
+            const { x, y } = at(fraction);
+            return Math.hypot(x - resting.x, y - resting.y);
+          };
+          const [start, midway] = [away(0), away(0.4)];
+          return { start, midway, unpainted: unpaintedEdges(element) };
+        });
+      });
+      expect(sliding.length).toBeGreaterThan(0);
+      for (const { start, midway, unpainted } of sliding) {
+        expect(midway).toBeGreaterThan(8);
+        expect(midway).toBeLessThan(start);
+        expect(unpainted).toBe(0);
+      }
+      expect(await colouredRows(page)).toBeGreaterThan(0);
+
+      await page.evaluate(() => {
+        for (const { animation } of window.entrances) animation.finish();
+      });
+      await expect.poll(() => colouredRows(page)).toBe(GAMEMODES);
+      expect(await stuckTextures(page)).toEqual([]);
     });
 
     test("a blob grows in through threads, and its sprite opens to where it rests", async ({
@@ -341,6 +457,37 @@ test.describe("with motion", () => {
     });
   }
 
+  test("asking for less motion mid-entrance rests every entrance at once", async ({ page }) => {
+    await holdTheClock(page);
+    await page.addInitScript(holdPaintings);
+    await page.addInitScript(recordEntrances);
+    await page.goto("/");
+    await page.evaluate(() => window.deliverPaintings());
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          window.entrances.some(
+            ({ kind, animation }) => kind === "face" && animation.playState === "running"
+          )
+        )
+      )
+      .toBe(true);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.waitForTimeout(100);
+    const moving = await page.evaluate(
+      () =>
+        document
+          .getAnimations()
+          .filter(
+            (animation) =>
+              !(animation instanceof CSSAnimation || animation instanceof CSSTransition) &&
+              animation.playState === "running"
+          ).length
+    );
+    expect(moving).toBe(0);
+    await expect.poll(() => stuckTextures(page)).toEqual([]);
+  });
+
   test("a stalled painter holds the textures for four seconds, then lets them go", async ({
     page
   }) => {
@@ -355,12 +502,39 @@ test.describe("with motion", () => {
   });
 });
 
-test("a visitor who wants less motion gets no entrance and nothing hidden", async ({ page }) => {
-  await page.addInitScript(recordEntrances);
-  await page.goto("/");
-  await expect.poll(() => unpainted(page)).toEqual([]);
-  expect(await page.evaluate(() => window.entrances.length)).toBe(0);
-  expect(await stuckTextures(page)).toEqual([]);
+test.describe("for a visitor who wants less motion", () => {
+  test("nothing enters, and nothing stays hidden", async ({ page }) => {
+    await page.addInitScript(recordEntrances);
+    await page.goto("/");
+    await expect.poll(() => unpainted(page)).toEqual([]);
+    expect(await page.evaluate(() => window.entrances.length)).toBe(0);
+    expect(await stuckTextures(page)).toEqual([]);
+  });
+
+  test("a gamemode row shows its colour once its edge is painted, even scrolled to early", async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await holdTheClock(page);
+    await page.addInitScript(holdPaintings);
+    await page.addInitScript(recordEntrances);
+    await page.goto("/");
+    await page.locator("#gamemodes").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    expect(await colouredRows(page)).toBe(0);
+    await page.evaluate(() => window.deliverPaintings());
+    await expect.poll(() => colouredRows(page)).toBe(GAMEMODES);
+    expect(await page.evaluate(() => window.entrances.length)).toBe(0);
+  });
+
+  test("a stalled painter holds the gamemode colour until the deadline", async ({ page }) => {
+    await holdTheClock(page);
+    await page.route(/painter\.worker/, () => {});
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(await colouredRows(page)).toBe(0);
+    await page.clock.runFor(STALL_DEADLINE_MS + 100);
+    await expect.poll(() => colouredRows(page)).toBe(GAMEMODES);
+  });
 });
 
 test.describe("a browser that runs no scripts", () => {
