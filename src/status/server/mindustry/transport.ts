@@ -2,12 +2,12 @@ import { createSocket, type Socket } from "node:dgram";
 import { Resolver } from "node:dns/promises";
 import type { ServerInfo } from "../../snapshots";
 import { decodeServerInfo, MalformedPacketError, QUERY_PACKET } from "./protocol";
-import { isUsableSrvRecord, orderSrvEndpoints, type Endpoint, type SrvRecord } from "./srv";
+import { inTheGamesOrder, isUsableSrvRecord, type Endpoint, type SrvRecord } from "./srv";
 import type { MindustryStatusProbe } from "./status";
 
 const DEFAULT_MINDUSTRY_PORT = 6567;
-const QUERY_TIMEOUT_MS = 5_000;
-const ENDPOINT_TIMEOUT_MS = 1_500;
+const GAME_REPLY_WAIT_MS = 2_000;
+const CHECK_DEADLINE_MS = 4 * GAME_REPLY_WAIT_MS;
 
 const MAX_REPLY_BYTES = 4096;
 
@@ -23,42 +23,31 @@ export interface NodeMindustryProbe extends MindustryStatusProbe {
 export interface NodeMindustryProbeOptions {
   resolveSrv?: (service: string) => Promise<readonly SrvRecord[]>;
   exchange?: EndpointExchange;
-  random?: () => number;
-  timeoutMs?: number;
-  endpointTimeoutMs?: number;
 }
 
-type SrvResolution = { kind: "direct-fallback" } | { kind: "authoritative"; records: SrvRecord[] };
-
-class CategorisedFailure extends Error {}
+type Ask = (endpoint: Endpoint) => Promise<ServerInfo>;
 
 export function createNodeMindustryProbe(
   options: NodeMindustryProbeOptions = {}
 ): NodeMindustryProbe {
-  const resolver = new Resolver({ timeout: 2_000, tries: 2 });
+  const resolver = new Resolver({ timeout: GAME_REPLY_WAIT_MS, tries: 1 });
   const resolveSrv = options.resolveSrv ?? ((service) => resolver.resolveSrv(service));
   const exchange = options.exchange ?? createUdpExchange();
-  const random = options.random ?? Math.random;
-  const timeoutMs = options.timeoutMs ?? QUERY_TIMEOUT_MS;
-  const endpointTimeoutMs = options.endpointTimeoutMs ?? ENDPOINT_TIMEOUT_MS;
   const active = new Set<AbortController>();
 
   return {
     async query(hostname, signal) {
-      const operation = deadline(signal, timeoutMs);
-      active.add(operation.controller);
+      const check = deadline(signal, CHECK_DEADLINE_MS);
+      active.add(check.controller);
+      const ask: Ask = async (endpoint) =>
+        decodeServerInfo(await attemptEndpoint(endpoint, exchange, check.signal));
       try {
-        const endpoints = await findEndpoints(hostname, resolveSrv, random, operation.signal);
-        return await firstServerInfo(
-          endpoints,
-          (endpoint) => attemptEndpoint(endpoint, exchange, endpointTimeoutMs, operation.signal),
-          operation.signal
-        );
+        return await reachLikeTheGame(hostname, ask, resolveSrv, check.signal);
       } catch (error) {
-        throw queryError(error, signal, operation);
+        throw queryError(error, signal, check);
       } finally {
-        operation.release();
-        active.delete(operation.controller);
+        check.release();
+        active.delete(check.controller);
       }
     },
 
@@ -69,6 +58,47 @@ export function createNodeMindustryProbe(
       exchange.closeAll();
     }
   };
+}
+
+const failedToReceive = (error: unknown, signal: AbortSignal) =>
+  !signal.aborted && !(error instanceof MalformedPacketError);
+
+async function reachLikeTheGame(
+  hostname: string,
+  ask: Ask,
+  resolveSrv: (service: string) => Promise<readonly SrvRecord[]>,
+  signal: AbortSignal
+): Promise<ServerInfo> {
+  if (signal.aborted) throw abortError();
+  let directFailure: unknown;
+  try {
+    return await ask({ hostname, port: DEFAULT_MINDUSTRY_PORT });
+  } catch (error) {
+    if (!failedToReceive(error, signal)) throw error;
+    directFailure = error;
+  }
+  for (const endpoint of await srvTargets(hostname, resolveSrv, signal)) {
+    try {
+      return await ask(endpoint);
+    } catch (error) {
+      if (!failedToReceive(error, signal)) throw error;
+    }
+  }
+  throw directFailure;
+}
+
+async function srvTargets(
+  hostname: string,
+  resolveSrv: (service: string) => Promise<readonly SrvRecord[]>,
+  signal: AbortSignal
+): Promise<Endpoint[]> {
+  try {
+    const records = await withAbort(resolveSrv(`_mindustry._tcp.${hostname}`), signal);
+    return inTheGamesOrder(records.filter(isUsableSrvRecord));
+  } catch (error) {
+    if (signal.aborted) throw error;
+    return [];
+  }
 }
 
 interface Deadline {
@@ -97,45 +127,14 @@ function deadline(parent: AbortSignal, timeoutMs: number): Deadline {
   };
 }
 
-async function findEndpoints(
-  hostname: string,
-  resolveSrv: (service: string) => Promise<readonly SrvRecord[]>,
-  random: () => number,
-  signal: AbortSignal
-): Promise<Endpoint[]> {
-  const resolution = await resolveRecords(hostname, resolveSrv, signal);
-  if (resolution.kind === "direct-fallback") return [{ hostname, port: DEFAULT_MINDUSTRY_PORT }];
-  return orderSrvEndpoints(resolution.records, random);
-}
-
-async function firstServerInfo(
-  endpoints: readonly Endpoint[],
-  ask: (endpoint: Endpoint) => Promise<Uint8Array>,
-  signal: AbortSignal
-): Promise<ServerInfo> {
-  if (endpoints.length === 0) throw new CategorisedFailure("no usable SRV endpoints");
-  let lastFailure = "endpoint exchange failed";
-  for (const endpoint of endpoints) {
-    if (signal.aborted) break;
-    try {
-      return decodeServerInfo(await ask(endpoint));
-    } catch (error) {
-      if (signal.aborted) break;
-      lastFailure =
-        error instanceof MalformedPacketError
-          ? "malformed reply"
-          : describeFailure("endpoint exchange", error);
-    }
-  }
-  throw new CategorisedFailure(lastFailure);
-}
-
-function queryError(error: unknown, caller: AbortSignal, operation: Deadline): Error {
+function queryError(error: unknown, caller: AbortSignal, check: Deadline): Error {
   if (caller.aborted) return abortError();
-  if (operation.timedOut()) return new Error("Mindustry status query timed out", { cause: error });
-  if (operation.signal.aborted) return abortError();
+  if (check.timedOut()) return new Error("Mindustry status query timed out", { cause: error });
+  if (check.signal.aborted) return abortError();
   const detail =
-    error instanceof CategorisedFailure ? error.message : describeFailure("SRV lookup", error);
+    error instanceof MalformedPacketError
+      ? "malformed reply"
+      : describeFailure("endpoint exchange", error);
   return new Error(`Mindustry status query failed: ${detail}`, { cause: error });
 }
 
@@ -150,35 +149,12 @@ function describeFailure(phase: string, error: unknown): string {
     : `${phase} failed`;
 }
 
-async function resolveRecords(
-  hostname: string,
-  resolveSrv: (service: string) => Promise<readonly SrvRecord[]>,
-  signal: AbortSignal
-): Promise<SrvResolution> {
-  try {
-    if (signal.aborted) throw abortError();
-    const records = await withAbort(resolveSrv(`_mindustry._tcp.${hostname}`), signal);
-    if (records.length === 0) return { kind: "direct-fallback" };
-    return { kind: "authoritative", records: records.filter(isUsableSrvRecord) };
-  } catch (error) {
-    if (signal.aborted) throw error;
-    if (isNoRecordsError(error)) return { kind: "direct-fallback" };
-    throw error;
-  }
-}
-
-function isNoRecordsError(error: unknown): boolean {
-  const code = errorCode(error);
-  return code === "ENODATA" || code === "ENOTFOUND";
-}
-
 async function attemptEndpoint(
   endpoint: Endpoint,
   exchange: EndpointExchange,
-  timeoutMs: number,
   parentSignal: AbortSignal
 ): Promise<Uint8Array> {
-  const attempt = deadline(parentSignal, timeoutMs);
+  const attempt = deadline(parentSignal, GAME_REPLY_WAIT_MS);
   try {
     if (attempt.signal.aborted) throw abortError();
     return await withAbort(exchange.query(endpoint, QUERY_PACKET, attempt.signal), attempt.signal);

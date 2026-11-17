@@ -1,4 +1,3 @@
-import { setTimeout as sleep } from "node:timers/promises";
 import * as v from "valibot";
 import {
   byRank,
@@ -18,9 +17,15 @@ const CDN = "https://cdn.discordapp.com";
 const MAX_MEMBERS_PER_PAGE = 1000;
 const DISCORD_EPOCH_MS = 1_420_070_400_000n;
 const SNOWFLAKE_TIMESTAMP_SHIFT = 22n;
+const MIGRATED_DISCRIMINATOR = "0";
 const DEFAULT_AVATARS = 6n;
+const LEGACY_DEFAULT_AVATARS = 5n;
+const BANNER_SIZE = 512;
 const INDEX_NOT_YET_AVAILABLE = 110000;
-const RATE_LIMIT_RETRIES = 3;
+const INDEX_SHORT_DELAY_MS = 500;
+const TIMES_ASKED_AGAIN = 3;
+export const TEAM_REFRESH_TIMEOUT_MS = 5 * 60_000;
+const INDEX_WAIT_BUDGET_MS = TEAM_REFRESH_TIMEOUT_MS / 5;
 const DEFAULT_ACTIVE_DAYS = 90;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -59,6 +64,7 @@ export function teamConfig(env: Record<string, string | undefined>): TeamConfig 
 const UserSchema = v.object({
   id: v.string(),
   username: v.string(),
+  discriminator: v.string(),
   global_name: v.nullish(v.string()),
   avatar: v.nullish(v.string()),
   banner: v.nullish(v.string()),
@@ -84,26 +90,70 @@ const SearchSchema = v.union([
 type Search = v.InferOutput<typeof SearchSchema>;
 
 const RateLimitSchema = v.object({ retry_after: v.number() });
+const IndexNotReadySchema = v.object({
+  code: v.literal(INDEX_NOT_YET_AVAILABLE),
+  retry_after: v.number()
+});
 
 type Get = <T>(path: string, schema: v.GenericSchema<unknown, T>) => Promise<T>;
 
-async function cooldownMs(response: Response): Promise<number> {
+interface AskedToWait {
+  for: "rate limit" | "index";
+  ms: number;
+}
+
+async function askedToWait(response: Response): Promise<AskedToWait | undefined> {
   if (response.status === 429) {
-    return v.parse(RateLimitSchema, await response.json()).retry_after * 1000;
+    const { retry_after } = v.parse(RateLimitSchema, await response.clone().json());
+    return { for: "rate limit", ms: retry_after * 1000 };
   }
+  if (response.status !== 202) return undefined;
+  const notReady = v.safeParse(IndexNotReadySchema, await response.clone().json());
+  if (!notReady.success) return undefined;
+  return { for: "index", ms: notReady.output.retry_after * 1000 || INDEX_SHORT_DELAY_MS };
+}
+
+function spentWindowMs(response: Response): number {
   const spent = response.headers.get("x-ratelimit-remaining") === "0";
   return spent ? Number(response.headers.get("x-ratelimit-reset-after")) * 1000 || 0 : 0;
+}
+
+function pause(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    signal.throwIfAborted();
+    const abort = () => {
+      clearTimeout(timer);
+      reject(signal.reason);
+    };
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    signal.addEventListener("abort", abort, { once: true });
+  });
 }
 
 function discordApi(token: string, signal: AbortSignal, fetchImpl: typeof fetch): Get {
   const headers = { authorization: `Bot ${token}`, accept: "application/json" };
   let ready = 0;
+  let indexWaitLeftMs = INDEX_WAIT_BUDGET_MS;
   let previous: Promise<unknown> = Promise.resolve();
-  const send = async (path: string, retries = RATE_LIMIT_RETRIES): Promise<Response> => {
-    await sleep(Math.max(0, ready - Date.now()), undefined, { signal });
+  const spentOnIndex = (ms: number) => {
+    if (ms > indexWaitLeftMs) {
+      indexWaitLeftMs = 0;
+      return false;
+    }
+    indexWaitLeftMs -= ms;
+    return true;
+  };
+  const send = async (path: string, timesLeft = TIMES_ASKED_AGAIN): Promise<Response> => {
+    await pause(Math.max(0, ready - Date.now()), signal);
     const response = await fetchImpl(`${API}${path}`, { headers, signal });
-    ready = Date.now() + (await cooldownMs(response));
-    return response.status === 429 && retries > 0 ? send(path, retries - 1) : response;
+    const asked = await askedToWait(response);
+    const waitMs =
+      asked && (asked.for === "rate limit" || spentOnIndex(asked.ms)) ? asked.ms : undefined;
+    ready = Date.now() + (waitMs ?? spentWindowMs(response));
+    return waitMs !== undefined && timesLeft > 0 ? send(path, timesLeft - 1) : response;
   };
   return (path, schema) => {
     const call = previous.then(async () => {
@@ -155,7 +205,7 @@ const indexed = (search: Search) => "total_results" in search;
 
 async function wroteSince(get: Get, guild: string, id: string, since: string): Promise<boolean> {
   const search = await get(
-    `/guilds/${guild}/messages/search?author_id=${id}&min_id=${since}&limit=1`,
+    `/guilds/${guild}/messages/search?author_id=${id}&min_id=${since}&limit=1&include_nsfw=true`,
     SearchSchema
   );
   return !indexed(search) || search.total_results > 0;
@@ -172,13 +222,18 @@ function uploadedFace({ user, avatar }: Member, guild: string): string | undefin
   return undefined;
 }
 
+function defaultAvatarIndex({ id, discriminator }: User): bigint {
+  return discriminator === MIGRATED_DISCRIMINATOR
+    ? (BigInt(id) >> SNOWFLAKE_TIMESTAMP_SHIFT) % DEFAULT_AVATARS
+    : BigInt(discriminator) % LEGACY_DEFAULT_AVATARS;
+}
+
 function faceOf(member: Member, guild: string, fromTeamJson?: string): Face {
   const uploaded = uploadedFace(member, guild);
   if (uploaded)
     return { url: `${uploaded}.webp?size=128`, pngThumbnail: `${uploaded}.png?size=16` };
   if (fromTeamJson) return { url: fromTeamJson };
-  const index = (BigInt(member.user.id) >> SNOWFLAKE_TIMESTAMP_SHIFT) % DEFAULT_AVATARS;
-  const builtIn = `${CDN}/embed/avatars/${index}.png`;
+  const builtIn = `${CDN}/embed/avatars/${defaultAvatarIndex(member.user)}.png`;
   return { url: builtIn, pngThumbnail: builtIn };
 }
 
@@ -228,7 +283,9 @@ export async function fetchTeam(
     return {
       ...teammate(id, { ...person, name }, tagsOf(person, rank)),
       avatar: face.url,
-      banner: profile.banner ? `${CDN}/banners/${id}/${profile.banner}.webp?size=480` : undefined,
+      banner: profile.banner
+        ? `${CDN}/banners/${id}/${profile.banner}.webp?size=${BANNER_SIZE}`
+        : undefined,
       accent:
         chosenAccent(profile) ??
         (profile.banner ? undefined : await averageFaceColour(face, signal, fetchImpl))

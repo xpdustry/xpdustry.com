@@ -1,16 +1,19 @@
 import { describe, expect, test } from "vitest";
 import { withHeadScript } from "./headScript";
 
-const page = (...chunks: string[]) =>
+const pageOfBytes = (...chunks: Uint8Array[]) =>
   new Response(
     new ReadableStream<Uint8Array>({
       start(controller) {
-        for (const chunk of chunks) controller.enqueue(new TextEncoder().encode(chunk));
+        for (const chunk of chunks) controller.enqueue(chunk);
         controller.close();
       }
     }),
     { status: 404, headers: { "content-type": "text/html; charset=utf-8", "content-length": "9" } }
   );
+
+const utf8 = (text: string) => new TextEncoder().encode(text);
+const page = (...chunks: string[]) => pageOfBytes(...chunks.map(utf8));
 
 const HEAD =
   '<!DOCTYPE html><html><head><meta charSet="utf-8"/><meta name="viewport" content="x"/>';
@@ -41,6 +44,78 @@ describe("withHeadScript", () => {
     );
     expect(await response.text()).toBe(
       `${HEAD}<script type="text/javascript">go()</script><title>é</title></head><body>ü</body>`
+    );
+  });
+
+  test.each([
+    ["two", "é"],
+    ["three", "€"],
+    ["four", "🌍"]
+  ])("keeps a %s byte character whole wherever a chunk boundary cuts it", async (_, character) => {
+    const head = `<html><head><title>${character}</title><meta name="viewport" content="x"/>`;
+    const rest = `${character}<title>${character}</title></head><body>${character}</body>`;
+    const bytes = utf8(head + rest);
+    const expected = utf8(`${head}<script type="text/javascript">go()</script>${rest}`);
+    for (let cut = 1; cut < bytes.length; cut++) {
+      const response = withHeadScript(pageOfBytes(bytes.slice(0, cut), bytes.slice(cut)), "go()");
+      expect(new Uint8Array(await response.arrayBuffer()), `cut at byte ${cut}`).toEqual(expected);
+    }
+  });
+
+  test("passes a byte order mark and bytes that are not UTF-8 through untouched", async () => {
+    const head = utf8('<html><head><meta name="viewport" content="x"/>');
+    const response = withHeadScript(
+      pageOfBytes(new Uint8Array([0xef, 0xbb, 0xbf]), head, new Uint8Array([0xc3, 0x28])),
+      "go()"
+    );
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(
+      new Uint8Array([
+        0xef,
+        0xbb,
+        0xbf,
+        ...head,
+        ...utf8('<script type="text/javascript">go()</script>'),
+        0xc3,
+        0x28
+      ])
+    );
+  });
+
+  test("moves the charset declaration first, where Redact's hints and the title came ahead of it", async () => {
+    const charset = '<meta charset="utf-8"/>';
+    const fonts = '<link rel="preload" href="/assets/font.woff2" as="font"/>'.repeat(6);
+    const sheets = '<link rel="stylesheet" href="/assets/a.css"/>'.repeat(6);
+    const redactOrder = `<!DOCTYPE html><html lang="en"><head>${fonts}${sheets}<style>x</style><title>Xpdustry</title>${charset}<meta name="viewport" content="x"/>`;
+
+    const text = await withHeadScript(
+      page(`${redactOrder}</head><body>é</body>`),
+      "go();".repeat(500)
+    ).text();
+
+    expect(text).toBe(
+      `<!DOCTYPE html><html lang="en"><head>${charset}${fonts}<script type="text/javascript">${"go();".repeat(500)}</script>${sheets}<style>x</style><title>Xpdustry</title><meta name="viewport" content="x"/></head><body>é</body>`
+    );
+    expect(
+      Buffer.byteLength(text.slice(0, text.indexOf(charset) + charset.length))
+    ).toBeLessThanOrEqual(1024);
+  });
+
+  test("moves a charset declaration that follows the viewport ahead of the script", async () => {
+    const head =
+      '<html><head><meta name="viewport" content="x"/><meta charset="utf-8"/><link rel="stylesheet" href="a.css"/>';
+    const text = await withHeadScript(page(head), "go()").text();
+    expect(text).toBe(
+      '<html><head><meta charset="utf-8"/><meta name="viewport" content="x"/><script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/>'
+    );
+  });
+
+  test("waits for a charset declaration in a later chunk before placing the script", async () => {
+    const response = withHeadScript(
+      page('<html><head><link rel="stylesheet" href="a.css"/>', '<meta charset="utf-8"/></head>'),
+      "go()"
+    );
+    expect(await response.text()).toBe(
+      '<html><head><meta charset="utf-8"/><script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/></head>'
     );
   });
 

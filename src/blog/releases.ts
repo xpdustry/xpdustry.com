@@ -7,7 +7,7 @@ interface ParsedReleaseId {
 }
 
 function parseReleaseId(id: string): ParsedReleaseId | undefined {
-  const at = id.lastIndexOf("@");
+  const at = id.indexOf("@");
   if (at <= 0 || at === id.length - 1) return undefined;
   return { repository: id.slice(0, at), tag: id.slice(at + 1) };
 }

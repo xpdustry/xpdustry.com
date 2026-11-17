@@ -9,7 +9,7 @@ import { pollingSnapshot, queryServers } from "./mindustry/status";
 import { createNodeMindustryProbe } from "./mindustry/transport";
 import { Pictures } from "./pictures";
 import { Poller, type PollerHealth } from "./poller";
-import { fetchTeam, teamConfig } from "./team";
+import { fetchTeam, TEAM_REFRESH_TIMEOUT_MS, teamConfig } from "./team";
 
 interface ServicesHealth {
   status: "ok";
@@ -47,7 +47,7 @@ class Services {
   readonly #team = new Poller<Teammate[]>({
     name: "team",
     intervalMs: 30 * 60_000,
-    timeoutMs: 5 * 60_000,
+    timeoutMs: TEAM_REFRESH_TIMEOUT_MS,
     load: async (signal) =>
       TEAM ? this.pictures.localise(await fetchTeam(TEAM, signal), signal) : knownTeam
   });

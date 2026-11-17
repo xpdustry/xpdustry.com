@@ -22,6 +22,11 @@ test.each([
     [playing(0), polling],
     { state: "online", players: 0 }
   ],
+  [
+    "no one for a server that reports fewer than nobody",
+    [playing(-4), playing(3)],
+    { state: "online", players: 3 }
+  ],
   ["that it is still checking until a server answers", [offline, polling], { state: "polling" }],
   ["that every server is down", [offline, offline], { state: "offline" }]
 ] as const)("the player count says %s", (_label, servers, count) => {

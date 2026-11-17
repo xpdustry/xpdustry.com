@@ -1,5 +1,5 @@
 import type { ProjectSlug } from "#app/brand/projects";
-import type { ServerSnapshot, ServerSnapshotItem } from "./snapshots";
+import type { ServerInfo, ServerSnapshot, ServerSnapshotItem } from "./snapshots";
 
 export interface DiscordCounts {
   members: number;
@@ -21,12 +21,14 @@ export type PlayerCount =
   | { state: "polling" }
   | { state: "offline" };
 
+const shownPlayers = (info: ServerInfo) => Math.max(info.players, 0);
+
 export function playerCount(servers: readonly ServerSnapshotItem[]): PlayerCount {
   const online = servers.filter((server) => server.status === "online");
   if (online.length > 0) {
     return {
       state: "online",
-      players: online.reduce((total, server) => total + server.info.players, 0)
+      players: online.reduce((total, server) => total + shownPlayers(server.info), 0)
     };
   }
   return servers.some((server) => server.status === "polling")
