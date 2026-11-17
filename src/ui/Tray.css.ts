@@ -1,4 +1,5 @@
 import { createVar, globalStyle, style, type GlobalStyleRule } from "@vanilla-extract/css";
+import { ringOutside } from "./styles/focus";
 import { media, narrowerThan, upTo } from "./styles/media";
 import { font, leading, OUTLINE, radius, rem, tracking } from "./styles/scale";
 import { GAP, vars } from "./styles/theme.css";
@@ -256,8 +257,10 @@ globalStyle(`${icon} svg`, {
 
 export const titles = style({
   display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
   gap: 4,
-  minWidth: 0
+  minWidth: 0,
+  hyphens: "auto"
 });
 
 globalStyle(`${titles} h2`, {
@@ -296,8 +299,8 @@ export const action = style({
       inset: `0 0 -${OUTLINE}px`,
       borderRadius: `${vars.r} ${vars.r} 0 0`
     },
-    [`${tab} > &:focus-visible`]: {
-      outline: "none"
+    [`${tab} > &:focus-visible::before`]: {
+      content: "none"
     }
   }
 });
@@ -310,10 +313,7 @@ globalStyle(`${tab} > ${action} > span`, {
   padding: 7
 });
 
-globalStyle(`${tab}:has(> ${action}:focus-visible)`, {
-  outline: `3px solid ${vars.t9}`,
-  outlineOffset: 2
-});
+globalStyle(`${tab}:has(> ${action}:focus-visible)`, ringOutside);
 
 globalStyle(`${tab}:has(> ${action})`, {
   "@media": {

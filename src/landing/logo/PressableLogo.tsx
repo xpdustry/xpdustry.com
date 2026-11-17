@@ -1,5 +1,5 @@
+import { useGT } from "gt-tanstack-start";
 import { useId, type MouseEventHandler } from "react";
-import { SITE } from "#app/brand/site";
 import { COG_INK, COG_NORTH, COG_SIDES, COG_SOUTH, SQUASH, X, X_INK } from "./shapes";
 import * as styles from "./PressableLogo.css";
 
@@ -27,6 +27,7 @@ export function PressableLogo({
   className?: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
 }) {
+  const gt = useGT();
   const id = useId();
   const xBehindSides = `${id}upper`;
   const xBeforeSides = `${id}lower`;
@@ -36,7 +37,7 @@ export function PressableLogo({
     <button
       type="button"
       className={`${styles.mark} ${className ?? ""}`}
-      aria-label={SITE.name}
+      aria-label={gt("Send a wave from the Xpdustry logo")}
       onClick={onClick}
       onTouchStart={noop}
     >

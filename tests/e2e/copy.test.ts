@@ -1,6 +1,6 @@
 import { holdTheClock } from "#tests/support/clock.ts";
 import { overflowFindings } from "#tests/support/fit.ts";
-import { expect, test, type Page } from "#tests/support/test.ts";
+import { expect, test, type Locator, type Page } from "#tests/support/test.ts";
 
 const HUB = "hub.md.xpdustry.com";
 const COPIED_FOR_MS = 1400;
@@ -42,7 +42,7 @@ test("the header pill copies the hub's address on every other page", async ({ pa
   await emptyClipboard(page);
   await page
     .getByRole("banner")
-    .getByRole("button", { name: `Copy ${HUB}` })
+    .getByRole("button", { name: `Copy IP ${HUB}` })
     .click();
   await expect.poll(() => clipboard(page)).toBe(HUB);
 });
@@ -50,7 +50,9 @@ test("the header pill copies the hub's address on every other page", async ({ pa
 test.describe("on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
-  test("/ copies a gamemode's address, confirms it for a moment, and fits", async ({ page }) => {
+  test("/ copies a gamemode's address, confirms it for a moment, keeps saying so, and fits", async ({
+    page
+  }) => {
     await page.goto("/");
     await emptyClipboard(page);
     const card = page.locator("#gamemodes").getByRole("listitem").filter({ hasText: "Survival" });
@@ -64,7 +66,7 @@ test.describe("on a phone", () => {
 
     await page.clock.runFor(COPIED_FOR_MS);
     await expect(copied).toHaveCSS("opacity", "0");
-    await expect(status).toBeEmpty();
+    await expect(status).toHaveText(`Copied ${SURVIVAL}. Paste it in Play, Join game, Add server.`);
   });
 });
 
@@ -94,6 +96,17 @@ const REFUSALS = {
   }
 };
 
+const realClipboard = (page: Page) => page.evaluate(() => window.realClipboard.readText());
+
+async function copyByKeyboard(page: Page, control: Locator) {
+  await page.evaluate(() => window.realClipboard.writeText("what the visitor had copied"));
+  await control.focus();
+  await page.keyboard.press("Enter");
+  await expect.poll(() => page.evaluate(() => getSelection()?.toString())).not.toBe("");
+  expect(await realClipboard(page)).toBe("what the visitor had copied");
+  await page.keyboard.press("ControlOrMeta+C");
+}
+
 for (const [refusal, refuse] of Object.entries(REFUSALS)) {
   test.describe(`a browser that ${refusal}`, () => {
     test.beforeEach(async ({ page }) => {
@@ -101,45 +114,53 @@ for (const [refusal, refuse] of Object.entries(REFUSALS)) {
       await page.addInitScript(refuse);
     });
 
-    test("is shown the hub's address to select by hand, and the clipboard keeps what it held", async ({
+    test("is handed the hub's address selected, to copy by keyboard or by hand", async ({
       page
     }) => {
       await page.goto("/");
-      await page.evaluate(
-        (held) => window.realClipboard.writeText(held),
-        "what the visitor had copied"
-      );
       const play = page.locator("#servers");
-      await play.getByRole("button", { name: `Copy ${HUB}`, exact: true }).click();
+      await copyByKeyboard(page, play.getByRole("button", { name: `Copy ${HUB}`, exact: true }));
+      expect(await realClipboard(page)).toBe(HUB);
       await expect(play.getByRole("status")).toHaveText(`Could not copy. The address is ${HUB}.`);
       await expect(play.getByText("Could not copy. Select the address")).toBeVisible();
 
+      await page.evaluate(() => getSelection()?.removeAllRanges());
       await play.getByText(HUB, { exact: true }).click();
       expect(await page.evaluate(() => getSelection()?.toString())).toBe(HUB);
-      expect(await page.evaluate(() => window.realClipboard.readText())).toBe(
-        "what the visitor had copied"
-      );
     });
 
-    test("is shown a gamemode's address in place of its player count", async ({ page }) => {
+    test("is handed a gamemode's address selected, in place of its player count", async ({
+      page
+    }) => {
       await page.goto("/");
       const card = page.locator("#gamemodes").getByRole("listitem").filter({ hasText: "Survival" });
-      await card.getByRole("button").click();
+      await copyByKeyboard(page, card.getByRole("button"));
+      expect(await realClipboard(page)).toBe(SURVIVAL);
       await expect(card.getByRole("status")).toHaveText(
         `Could not copy. The address is ${SURVIVAL}.`
       );
       await expect(card.getByText(SURVIVAL, { exact: true })).toBeVisible();
     });
 
-    test("is shown the hub's address in the pill, even on the narrowest phone", async ({
+    test("is handed the hub's address selected in the pill, even on the narrowest phone", async ({
       page
     }) => {
       await page.setViewportSize({ width: 320, height: 640 });
       await page.goto("/blog");
-      const pill = page.getByRole("banner").getByRole("button", { name: `Copy ${HUB}` });
-      await pill.click();
+      const pill = page.getByRole("banner").getByRole("button", { name: `Copy IP ${HUB}` });
+      await copyByKeyboard(page, pill);
+      expect(await realClipboard(page)).toBe(HUB);
       await expect(pill.getByText(HUB, { exact: true })).toBeVisible();
       expect(await overflowFindings(page)).toEqual([]);
+    });
+
+    test("is handed a post's link selected beside its button", async ({ page }) => {
+      const link = "https://xpdustry.com/blog/nohorny-4-beta-8";
+      await page.goto("/blog/nohorny-4-beta-8");
+      const share = page.getByRole("region", { name: "Share this post" });
+      await copyByKeyboard(page, share.getByRole("button", { name: "Copy link" }));
+      expect(await realClipboard(page)).toBe(link);
+      await expect(share.getByText(link, { exact: true })).toBeVisible();
     });
   });
 }

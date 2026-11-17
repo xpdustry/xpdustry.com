@@ -1,6 +1,6 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
-import { useId, useRef } from "react";
+import { useId, useRef, type RefCallback } from "react";
 import { findServer, playerCount } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import type { ServerSnapshot, ServerSnapshotItem } from "#app/status/snapshots";
@@ -62,7 +62,7 @@ function Mode({
   const gt = useGT();
   const m = useMessages();
   const hostname = server?.hostname ?? "";
-  const { state, spread, chip, press } = useCopyPress(hostname);
+  const { state, outcome, address, spread, chip, press } = useCopyPress(hostname);
   const ids = useId();
   const Icon = mode.icon;
   return (
@@ -71,7 +71,7 @@ function Mode({
       className={`${styles.mode} ${STATES[state]}`}
       style={assignInlineVars({ [styles.tint]: mode.edge.color })}
       text={hostname}
-      state={state}
+      outcome={outcome}
       copiedMessage={gt("Copied {address}. Paste it in Play, Join game, Add server.", {
         address: hostname
       })}
@@ -93,7 +93,7 @@ function Mode({
           <Roll
             id={`${ids}line`}
             rolled={state !== "idle"}
-            said={<Said failed={state === "failed"} hostname={hostname} />}
+            said={<Said failed={state === "failed"} hostname={hostname} address={address} />}
             saidClassName={styles.said}
           >
             <Players server={server} />
@@ -131,7 +131,21 @@ function Players({ server }: { server?: ServerSnapshotItem }) {
   return <PlayerCount count={count} className={`${styles.count} ${empty ? styles.empty : ""}`} />;
 }
 
-function Said({ failed, hostname }: { failed: boolean; hostname: string }) {
+function Said({
+  failed,
+  hostname,
+  address
+}: {
+  failed: boolean;
+  hostname: string;
+  address: RefCallback<HTMLElement>;
+}) {
   const gt = useGT();
-  return failed ? <Hostname name={hostname} /> : gt("Copied");
+  return failed ? (
+    <span ref={address}>
+      <Hostname name={hostname} />
+    </span>
+  ) : (
+    gt("Copied")
+  );
 }

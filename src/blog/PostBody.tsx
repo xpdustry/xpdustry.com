@@ -1,6 +1,6 @@
 import type { MarkdownDocument } from "@tanstack/markdown";
 import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
-import type { ComponentProps, ReactNode } from "react";
+import { useId, type ComponentProps, type ReactNode } from "react";
 import { outbound } from "#app/ui/outbound";
 import { POST_ELEMENTS } from "./content/elements";
 import * as styles from "./PostBody.css";
@@ -21,10 +21,13 @@ interface MediaProps {
 
 function Callout({ kind, title, children }: CalloutProps) {
   return (
-    <aside className={kind === "warning" ? `${styles.callout} ${styles.warning}` : styles.callout}>
+    <div
+      role="note"
+      className={kind === "warning" ? `${styles.callout} ${styles.warning}` : styles.callout}
+    >
       <span className={styles.label}>{title}</span>
       {children}
-    </aside>
+    </div>
   );
 }
 
@@ -46,9 +49,11 @@ function PostVideo({
   caption,
   children
 }: MediaProps & { poster: string; webm?: string }) {
+  const described = useId();
   return (
     <figure>
       <video
+        aria-describedby={described}
         controls
         muted
         playsInline
@@ -59,9 +64,13 @@ function PostVideo({
       >
         {webm && <source src={webm} type='video/webm; codecs="av01.0.08M.10"' />}
         <source src={src} type="video/mp4" />
-        {children}
       </video>
-      {caption && <figcaption>{caption}</figcaption>}
+      <figcaption>
+        {caption}
+        <div id={described} className={styles.described}>
+          {children}
+        </div>
+      </figcaption>
     </figure>
   );
 }

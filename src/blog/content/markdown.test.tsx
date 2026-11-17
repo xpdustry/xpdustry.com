@@ -51,14 +51,14 @@ describe("compileBlogMarkdown", () => {
 
     expect(html).toMatch(
       new RegExp(
-        `^<div[^>]*><aside[^>]*><span[^>]*>${title}</span><p>Read this.</p></aside></div>$`
+        `^<div[^>]*><div role="note"[^>]*><span[^>]*>${title}</span><p>Read this.</p></div></div>$`
       )
     );
   });
 
   test("titles a callout with the words after its marker, this site's own extension", () => {
     expect(render("> [!NOTE] The short version\n> Read this.")).toMatch(
-      /^<div[^>]*><aside[^>]*><span[^>]*>The short version<\/span><p>Read this.<\/p><\/aside><\/div>$/
+      /^<div[^>]*><div role="note"[^>]*><span[^>]*>The short version<\/span><p>Read this.<\/p><\/div><\/div>$/
     );
   });
 
@@ -75,7 +75,7 @@ describe("compileBlogMarkdown", () => {
     const html = render(written);
 
     expect(html).toContain("<blockquote>");
-    expect(html).not.toContain("<aside");
+    expect(html).not.toContain('role="note"');
   });
 
   test("leaves an escaped marker as the quote it is", () => {
@@ -87,8 +87,8 @@ describe("compileBlogMarkdown", () => {
   test("renders callouts as the site's own, without enabling raw HTML", () => {
     const html = render("> [!WARNING] Upgrade first\n> Do not use <script>alert(1)</script>.");
 
-    expect(firstTagAttributes(html, "aside").class).toContain("warning");
-    expect(html).toMatch(/<aside[^>]*>[\s\S]*Upgrade first[\s\S]*<\/aside>/);
+    expect(html).toMatch(/<div role="note" class="[^"]*warning/);
+    expect(html).toMatch(/<div role="note"[^>]*>[\s\S]*Upgrade first[\s\S]*<\/div>/);
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(html).not.toContain("<script>");
   });

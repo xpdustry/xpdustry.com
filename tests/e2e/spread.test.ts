@@ -200,7 +200,7 @@ async function pvpCard(page: Page, { holdGrowths = true } = {}) {
 
 async function introduction(page: Page, { holdGrowths = true } = {}) {
   await page.goto("/");
-  const logo = page.getByRole("button", { name: "Xpdustry", exact: true });
+  const logo = page.getByRole("button", { name: "Send a wave from the Xpdustry logo" });
   const card = page.locator("section").filter({ has: logo });
   if (holdGrowths) await holdEveryGrowthFrom(card);
   const cardBox = (await card.boundingBox())!;
@@ -228,7 +228,7 @@ test.describe("held at known moments", () => {
       .toBe(false);
     await holdEveryDissolveIn(card);
     await page.clock.runFor(COPIED_FOR_MS);
-    await expect(card.getByRole("status")).toBeEmpty();
+    await expect.poll(() => sweeping(card)).toBeGreaterThan(0);
 
     await holdEveryGrowthFrom(card);
     const growth = await pressHoldingItsGrowth(page, () => press(0.2));
@@ -257,8 +257,9 @@ test.describe("on their own", () => {
     const { card, press, reachFrom } = await pvpCard(page, { holdGrowths: false });
     await recordFrames(card);
     await press(0.05);
-    await expect(card.getByRole("status")).not.toBeEmpty();
-    await expect(card.getByRole("status")).toBeEmpty();
+    const copied = card.getByText("Copied", { exact: true });
+    await expect(copied).toHaveCSS("opacity", "1");
+    await expect(copied).toHaveCSS("opacity", "0");
     await untilAtRest(card);
     await expect
       .poll(async () => new Set((await statesOf(card)).map(({ opacity }) => opacity)))

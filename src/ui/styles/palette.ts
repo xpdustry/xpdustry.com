@@ -20,7 +20,6 @@ export const PALETTE = {
   deepInk: "#a2c2bf",
   tray: "#b8dfda",
   online: "#3ba55d",
-  focus: "#007f79",
   onTeal: "#08201e",
   onAmber: "#2b1a00",
   alarm: "#ff6369",

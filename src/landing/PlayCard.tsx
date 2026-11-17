@@ -16,7 +16,7 @@ import * as styles from "./PlayCard.css";
 
 export function PlayCard({ players, className }: { players: Count; className?: string }) {
   const gt = useGT();
-  const { state, spread, chip, press } = useCopyPress(HUB.hostname);
+  const { state, outcome, address, spread, chip, press } = useCopyPress(HUB.hostname);
   const seen = useSeen(chip);
   const failed = state === "failed";
   return (
@@ -25,7 +25,7 @@ export function PlayCard({ players, className }: { players: Count; className?: s
       id="servers"
       className={`${styles.play} ${failed ? styles.failed : ""} ${className ?? ""}`}
       text={HUB.hostname}
-      state={state}
+      outcome={outcome}
       cover={{
         "aria-label": gt("Copy {address}", { address: HUB.hostname }),
         title: gt("Copy address"),
@@ -38,7 +38,7 @@ export function PlayCard({ players, className }: { players: Count; className?: s
       <h2 className={styles.label}>
         <T>Play with us</T>
       </h2>
-      <span className={styles.address}>
+      <span ref={address} className={styles.address}>
         <Hostname name={HUB.hostname} />
       </span>
       <How failed={failed} />

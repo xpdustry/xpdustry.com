@@ -117,6 +117,17 @@ globalStyle(`${prose} figcaption`, {
   color: vars.muted
 });
 
+export const described = style({
+  marginTop: 6,
+  selectors: {
+    "&:first-child": { marginTop: 0 }
+  }
+});
+
+globalStyle(`${described} > * + *`, {
+  marginTop: 6
+});
+
 const tealWash = "#dcf4f1";
 const amberWash = "#fff2d9";
 

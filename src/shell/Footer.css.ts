@@ -4,7 +4,6 @@ import { RIDGE } from "#app/textures/page";
 import { media, upTo } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
-import { onDeep } from "./onDeep";
 import { logoWidth, nameSize } from "#app/brand/Brand.css";
 import { PLINTH_CENTRED_ABOVE_ITS_BOX_BY } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
@@ -14,8 +13,8 @@ const narrow = upTo(900);
 export const ridgeHeight = createVar();
 
 export const footer = style({
-  ...onDeep,
-  vars: { ...onDeep.vars, [ridgeHeight]: `${RIDGE.height}px` },
+  vars: { [ridgeHeight]: `${RIDGE.height}px` },
+  color: vars.onDeep,
   position: "relative",
   marginTop: `calc(${ridgeHeight} + ${vars.group})`,
   background: vars.deep,

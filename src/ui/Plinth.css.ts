@@ -1,4 +1,5 @@
 import { createVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
+import { ringOutside } from "./styles/focus";
 import { media } from "./styles/media";
 import { font, radius, rem } from "./styles/scale";
 import { vars } from "./styles/theme.css";
@@ -52,6 +53,20 @@ export const tone = styleVariants({
     vars: palette({ face: vars.a9, hover: AMBER_HOVER, wall: vars.amberWall, on: vars.onAmber })
   },
   ink: { vars: palette({ face: vars.tile, hover: vars.n3, wall: vars.outline, on: vars.ink }) }
+});
+
+globalStyle(`${plinth}:focus-visible`, {
+  outline: "none",
+  boxShadow: "none"
+});
+
+globalStyle(`${plinth}:focus-visible::before`, {
+  content: '""',
+  position: "absolute",
+  inset: `calc(-${PLINTH_BORDER}px - ${depth}) -${PLINTH_BORDER}px -${PLINTH_BORDER}px`,
+  borderRadius: "inherit",
+  pointerEvents: "none",
+  ...ringOutside
 });
 
 export const done = style({});

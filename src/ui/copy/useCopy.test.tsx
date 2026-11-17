@@ -13,11 +13,18 @@ function Probe({ text, onRender }: { text: string; onRender: (copy: typeof copie
 }
 
 function mount(text = "hub.md.xpdustry.com") {
-  root = createRoot(document.createElement("div"));
+  root = createRoot(document.body.appendChild(document.createElement("div")));
   act(() => root!.render(<Probe text={text} onRender={(rendered) => (copier = rendered)} />));
+  const shown = document.body.appendChild(document.createElement("span"));
+  shown.textContent = text;
+  copier.address(shown);
+  document.body.appendChild(document.createElement("p")).textContent = "Play with us";
   return {
     get state() {
       return copier.state;
+    },
+    get outcome() {
+      return copier.outcome;
     },
     copy: () => act(() => copier.copy())
   };
@@ -26,6 +33,7 @@ function mount(text = "hub.md.xpdustry.com") {
 function unmount() {
   act(() => root?.unmount());
   root = undefined;
+  document.body.replaceChildren();
 }
 
 const clipboard = (writeText: (text: string) => Promise<void>) =>
@@ -54,6 +62,17 @@ describe("useCopy", () => {
     await mount().copy();
 
     expect(writeText).toHaveBeenCalledWith("hub.md.xpdustry.com");
+  });
+
+  test("shows copied for a moment, and says it until the next press", async () => {
+    clipboard(vi.fn<() => Promise<void>>().mockResolvedValueOnce().mockImplementationOnce(refusal));
+    const copier = mount();
+
+    await copier.copy();
+    await elapse(60_000);
+    expect([copier.state, copier.outcome]).toEqual(["idle", "copied"]);
+    await copier.copy();
+    expect(copier.outcome).toBe("failed");
   });
 
   test("says copied once the clipboard took the text, then goes back to idle", async () => {
@@ -99,6 +118,28 @@ describe("useCopy", () => {
 
     await copier.copy();
     expect(copier.state).toBe("failed");
+  });
+
+  test("a refusal selects the shown address, for the keyboard to copy", async () => {
+    clipboard(refusal);
+
+    await mount().copy();
+
+    expect(getSelection()!.toString()).toBe("hub.md.xpdustry.com");
+  });
+
+  test("a refusal that comes late leaves alone what the visitor selected meanwhile", async () => {
+    const write = Promise.withResolvers<void>();
+    clipboard(() => write.promise);
+    const copier = mount();
+
+    const pressed = copier.copy();
+    getSelection()!.selectAllChildren(document.querySelector("p")!);
+    write.reject(new DOMException("No", "NotAllowedError"));
+    await pressed;
+
+    expect(copier.state).toBe("failed");
+    expect(getSelection()!.toString()).toBe("Play with us");
   });
 
   test("a retry that works replaces a failure", async () => {

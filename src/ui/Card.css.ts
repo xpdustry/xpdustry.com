@@ -1,4 +1,5 @@
 import { createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
+import { ringInside } from "./styles/focus";
 import { OUTLINE, radius } from "./styles/scale";
 import { vars } from "./styles/theme.css";
 
@@ -46,8 +47,6 @@ const CHIP_SIZE = 34;
 const CHIP_ICON = 18;
 export const CHIP_OVERHANG = (CHIP_SIZE - CHIP_ICON) / 2;
 
-const COVER_FOCUS_INSET = 5;
-
 export const cover = style({
   position: "absolute",
   inset: 0,
@@ -57,10 +56,7 @@ export const cover = style({
   background: "none",
   cursor: "pointer",
   selectors: {
-    "&:focus-visible": {
-      outline: `3px solid ${vars.focus}`,
-      outlineOffset: -(COVER_FOCUS_INSET + OUTLINE)
-    }
+    "&:focus-visible": ringInside(OUTLINE)
   }
 });
 

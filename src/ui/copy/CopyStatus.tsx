@@ -1,20 +1,20 @@
 import { useGT } from "gt-tanstack-start";
-import type { CopyState } from "./useCopy";
+import type { CopyOutcome } from "./useCopy";
 
 export function CopyStatus({
-  state,
+  outcome,
   text,
   copiedMessage
 }: {
-  state: CopyState;
+  outcome: CopyOutcome | undefined;
   text: string;
   copiedMessage?: string;
 }) {
   const gt = useGT();
   return (
     <output className="sr-only">
-      {state === "copied" && (copiedMessage ?? gt("Copied {text}", { text }))}
-      {state === "failed" && gt("Could not copy. The address is {address}.", { address: text })}
+      {outcome === "copied" && (copiedMessage ?? gt("Copied {text}", { text }))}
+      {outcome === "failed" && gt("Could not copy. The address is {address}.", { address: text })}
     </output>
   );
 }

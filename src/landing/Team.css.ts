@@ -1,5 +1,6 @@
 import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import { movingPopover, shownPopover, shutPopover } from "#app/ui/popoverMotion";
+import { ringOutside } from "#app/ui/styles/focus";
 import { media } from "#app/ui/styles/media";
 import { font, leading, OUTLINE, radius, rem, tracking } from "#app/ui/styles/scale";
 import { TOUCH_TARGET, reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
@@ -52,7 +53,7 @@ export const member = style({
   transition: "background-color 0.15s",
   selectors: {
     "&:has(+ :popover-open)": { background: vars.tile },
-    "&:focus-visible": { outline: `3px solid ${vars.focus}`, outlineOffset: 2 }
+    "&:focus-visible": ringOutside
   },
   "@media": {
     [media.hover]: {
@@ -248,7 +249,7 @@ export const close = style({
   color: vars.onGround,
   cursor: "pointer",
   selectors: {
-    "&:focus-visible": { outline: `3px solid ${vars.focus}`, outlineOffset: 2 }
+    "&:focus-visible": ringOutside
   },
   "@media": {
     [media.phone]: { right: CLOSE_INSET },
@@ -292,9 +293,6 @@ globalStyle(`${links} a:hover`, {
   }
 });
 
-globalStyle(`${links} a:focus-visible`, {
-  outline: `3px solid ${vars.focus}`,
-  outlineOffset: 2
-});
+globalStyle(`${links} a:focus-visible`, ringOutside);
 
 globalStyle(`${links} svg`, { width: 14, height: 14 });

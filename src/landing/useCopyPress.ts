@@ -3,7 +3,7 @@ import { spreadFromPress, type SpreadStart } from "#app/textures/Spread";
 import { useCopy } from "#app/ui/copy/useCopy";
 
 export function useCopyPress(text: string) {
-  const { state, copy } = useCopy(text);
+  const { state, outcome, address, copy } = useCopy(text);
   const [spread, setSpread] = useState<SpreadStart>();
   const chip = useRef<HTMLSpanElement>(null);
 
@@ -12,5 +12,5 @@ export function useCopyPress(text: string) {
     setSpread(spreadFromPress(event, box, chip.current!.getBoundingClientRect()));
     void copy();
   };
-  return { state, spread, chip, press };
+  return { state, outcome, address, spread, chip, press };
 }

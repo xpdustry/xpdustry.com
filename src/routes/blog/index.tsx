@@ -41,8 +41,8 @@ function BlogIndex() {
         </h1>
         <p>{m(BLOG_DESCRIPTION)}</p>
       </section>
-      <DiscordCard title={gt("Questions about a release?")} className={`${styles.ask} reveal`}>
-        <T>Ask in our Discord.</T>
+      <DiscordCard title={gt("Questions about an article?")} className={`${styles.ask} reveal`}>
+        {gt("Join our Discord.")}
       </DiscordCard>
       {latest ? (
         <LeadPost post={latest} className={`${styles.wide} reveal`} />
