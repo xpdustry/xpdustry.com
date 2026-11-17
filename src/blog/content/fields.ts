@@ -7,7 +7,6 @@ export const NonBlankStringSchema = v.pipe(
 
 export const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg", ".webp"] as const;
 
-/** A file under `public/blog/`, addressed from the site root, with one of the given extensions. */
 export function blogMediaPathSchema(extensions: readonly string[]) {
   return v.pipe(
     v.string(),

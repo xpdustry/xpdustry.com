@@ -7,7 +7,6 @@ export interface Topic extends ProjectTheme {
   website?: string;
 }
 
-/** The site's own theme, worn by posts outside any project and by the site's social cards. */
 export const SITE_THEME: ProjectTheme = {
   ground: "#083230",
   patches: PATCHES.siteCover,

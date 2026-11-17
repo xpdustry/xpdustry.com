@@ -4,8 +4,7 @@ import type { Patches, SpreadPalette } from "#app/textures/texture";
 import { CastleTurret, Crosshair, Cube, Shield, Sword, type Icon } from "#app/ui/icons";
 
 export interface Gamemode {
-  /** The `servers` entry that runs it. */
-  server: string;
+  serverSlug: string;
   name: string;
   description: string;
   icon: Icon;
@@ -15,7 +14,7 @@ export interface Gamemode {
 
 export const gamemodes: readonly Gamemode[] = [
   {
-    server: "survival",
+    serverSlug: "survival",
     name: msg("Survival"),
     description: msg("The classic Mindustry experience. Defend against waves of enemy units."),
     icon: Shield,
@@ -23,7 +22,7 @@ export const gamemodes: readonly Gamemode[] = [
     spread: SPREADS.survival
   },
   {
-    server: "pvp",
+    serverSlug: "pvp",
     name: msg("PvP"),
     description: msg("Fight and destroy other players with your team."),
     icon: Sword,
@@ -31,7 +30,7 @@ export const gamemodes: readonly Gamemode[] = [
     spread: SPREADS.pvp
   },
   {
-    server: "attack",
+    serverSlug: "attack",
     name: msg("Attack"),
     description: msg("Team up against a fortified enemy base and destroy its cores."),
     icon: Crosshair,
@@ -39,7 +38,7 @@ export const gamemodes: readonly Gamemode[] = [
     spread: SPREADS.attack
   },
   {
-    server: "tower",
+    serverSlug: "tower",
     name: msg("Tower Defense"),
     description: msg("Line the path with turrets and stop the enemies reaching your core."),
     icon: CastleTurret,
@@ -47,7 +46,7 @@ export const gamemodes: readonly Gamemode[] = [
     spread: SPREADS.tower
   },
   {
-    server: "sandbox",
+    serverSlug: "sandbox",
     name: msg("Sandbox"),
     description: msg("Unlimited resources. Build and test anything you like."),
     icon: Cube,

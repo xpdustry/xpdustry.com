@@ -109,7 +109,6 @@ function assertBody(node: ComponentNode, media: Media) {
   if (!media.body && hasBody) throw new Error(`${node.name} cannot have body content`);
 }
 
-/** The validated attributes as element properties, without the optional ones left out. */
 function mediaProperties(node: ComponentNode, media: Media): Record<string, string> {
   const result = v.safeParse(media.schema, node.attributes);
   if (!result.success) throw new Error(`${node.name}: ${v.summarize(result.issues)}`);

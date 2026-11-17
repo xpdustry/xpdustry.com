@@ -6,7 +6,6 @@ const depth = createVar();
 const faceColor = createVar();
 const hoverColor = createVar();
 const onColor = createVar();
-/** The wall's colour, and the face's edge. Exported for a plinth on the deep teal to retune. */
 export const wall = createVar();
 
 const TEAL_HOVER = "#62d4cd";

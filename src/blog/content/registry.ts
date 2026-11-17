@@ -11,7 +11,6 @@ export interface PostModule {
 export interface Post {
   slug: string;
   frontmatter: BlogFrontmatter;
-  /** The post's body, in its own chunk. */
   load: () => Promise<MarkdownDocument>;
 }
 
@@ -24,7 +23,6 @@ const documents = import.meta.glob<MarkdownDocument>("../posts/*/*.md", { import
 
 const byLocale = buildPosts();
 
-/** Newest first, in the default locale. */
 export const posts: readonly Post[] = [...(byLocale.get(DEFAULT_LOCALE)?.values() ?? [])].sort(
   (a, b) => Date.parse(b.frontmatter.publishedAt) - Date.parse(a.frontmatter.publishedAt)
 );
@@ -44,12 +42,10 @@ function buildPosts(): Map<string, Map<string, Post>> {
   return byLocale;
 }
 
-/** `post` as `locale` reads it: its translation, or the post itself where there is none. */
 export function translated(post: Post, locale: string): Post {
   return byLocale.get(locale)?.get(post.slug) ?? post;
 }
 
-/** A release belongs to one post at most, so the build fails on a second post that lists it. */
 export function assertReleasesAreClaimedOnce(posts: readonly Post[]): void {
   const claimedBy = new Map<string, string>();
   const claims = posts.flatMap((post) =>
@@ -62,7 +58,6 @@ export function assertReleasesAreClaimedOnce(posts: readonly Post[]): void {
   }
 }
 
-/** The `count` posts published closest to `slug`, newer ones winning ties, newest first. */
 export function nearbyPosts(slug: string, count = 3): Post[] {
   const index = posts.findIndex((post) => post.slug === slug);
   return posts

@@ -3,7 +3,6 @@ import { media } from "./media";
 import { font, rem } from "./scale";
 import { vars } from "./theme.css";
 
-/** The canvas shows past either end of the page when it bounces, so it matches the crown and footer. */
 globalStyle(":root", {
   background: vars.deep,
   colorScheme: "light",
@@ -21,7 +20,6 @@ globalStyle("*, *::before, *::after", {
   boxSizing: "border-box"
 });
 
-/** A column at least a screen tall, so a short page still ends on its footer, not on the backdrop. */
 globalStyle("body", {
   position: "relative",
   display: "flex",
@@ -77,7 +75,6 @@ globalStyle(".wrap", {
   padding: vars.gap
 });
 
-/** The page's own content takes up whatever height the screen has left over it. */
 globalStyle("body > .wrap", {
   flexGrow: 1
 });

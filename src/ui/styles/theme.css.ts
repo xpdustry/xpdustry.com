@@ -29,8 +29,6 @@ export const vars = createGlobalThemeContract(
     deepInk: "deep-ink",
     tray: "tray",
     online: "online",
-    /** As `r g b`, for `rgb(var(--glow) / alpha)`. */
-    glow: "glow",
     focus: "focus",
     onTeal: "on-teal",
     onAmber: "on-amber",
@@ -82,7 +80,6 @@ createGlobalTheme(":root", vars, {
   deepInk: "#a2c2bf",
   tray: "#b8dfda",
   online: "#3ba55d",
-  glow: "65 193 186",
   focus: "#007f79",
   onTeal: "#08201e",
   onAmber: "#2b1a00",

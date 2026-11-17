@@ -1,6 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
+import { selectableAboveCover } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const play = style({
@@ -16,7 +17,6 @@ export const label = style({
   color: vars.a11
 });
 
-/** The browser refused the copy: the address is for the visitor to select instead. */
 export const failed = style({});
 
 export const address = style({
@@ -26,13 +26,9 @@ export const address = style({
   color: vars.ink,
   overflowWrap: "anywhere",
   selectors: {
-    // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
-      position: "relative",
-      zIndex: 2,
-      alignSelf: "start",
-      userSelect: "all",
-      cursor: "text"
+      ...selectableAboveCover,
+      alignSelf: "start"
     }
   }
 });
@@ -44,7 +40,6 @@ export const how = style({
   textWrap: "balance"
 });
 
-/** At the card's foot: the player count, which "Copied" takes the place of after a press. */
 export const foot = style({
   alignSelf: "start",
   marginTop: "auto",

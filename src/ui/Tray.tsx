@@ -11,11 +11,9 @@ type TrayAction = { label: string } & (
 
 interface TrayProps {
   id: string;
-  /** What the tray holds, on its tab. */
   icon: Icon;
   title: string;
   subtitle?: ReactNode;
-  /** The tab's button, which the whole tab answers to. */
   action?: TrayAction;
   children: ReactNode;
 }
@@ -42,10 +40,10 @@ function slantPath(inset: number): string {
  * the SVG's edges and the border's on their own, so pieces that only met edge to edge would leave
  * a hairline of the other between them at some device pixel ratios.
  */
-const OVERLAP = 2;
+const SEAM_OVERLAP = 2;
 
-const SLANT_LINE = `${slantPath(1)}H${SLANT.width + OVERLAP}`;
-const SLANT_FACE = `${slantPath(0)}V${SLANT.height + OVERLAP}H0Z`;
+const SLANT_LINE = `${slantPath(1)}H${SLANT.width + SEAM_OVERLAP}`;
+const SLANT_FACE = `${slantPath(0)}V${SLANT.height + SEAM_OVERLAP}H0Z`;
 
 export function Tray({ id, icon: Icon, title, subtitle, action, children }: TrayProps) {
   return (
