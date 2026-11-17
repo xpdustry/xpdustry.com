@@ -1,6 +1,5 @@
 import { createVar, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { DIMMED } from "#app/ui/styles/scale";
 import { reachTouchTarget } from "#app/ui/styles/touch";
 
 type LogoUnits = number;
@@ -51,7 +50,7 @@ export const logo = style({
     },
     [media.still]: {
       selectors: {
-        [`${mark}:active &`]: { opacity: DIMMED }
+        [`${mark}:active &`]: { filter: "brightness(0.8)" }
       }
     },
     [`${media.motion} and ${media.hover}`]: {
