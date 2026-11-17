@@ -4,10 +4,12 @@ description: "Install Node.js, pnpm and the dependencies."
 runs:
   using: composite
   steps:
-    - name: "Setup pnpm at package.json's packageManager"
+    # The version `packageManager` names in package.json
+    - name: "Setup pnpm"
       uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
 
-    - name: "Setup Node.js 26, as the Dockerfile's image"
+    # The Node.js major the Dockerfile's image runs
+    - name: "Setup Node.js 26"
       uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
       with:
         node-version: "26"
@@ -17,8 +19,8 @@ runs:
       shell: bash
       run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
-    # setup-node's own cache falls back to an older key for Yarn Berry only
-    - name: "Restore pnpm Store, or the last one for a changed lockfile"
+    # A changed lockfile starts from the last store, which setup-node's own cache can't
+    - name: "Restore pnpm Store"
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ steps.pnpm-store.outputs.path }}
