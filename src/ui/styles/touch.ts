@@ -1,7 +1,7 @@
 import { globalStyle } from "@vanilla-extract/css";
 import { media } from "./media";
 
-const TOUCH_TARGET = 44;
+export const TOUCH_TARGET = 44;
 
 const growToTouchTarget = `min(0px, (100% - ${TOUCH_TARGET}px) / 2)`;
 

@@ -2,7 +2,7 @@ import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import { movingPopover, shownPopover, shutPopover } from "#app/ui/popoverMotion";
 import { media } from "#app/ui/styles/media";
 import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
-import { reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
+import { TOUCH_TARGET, reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const roleColour = styleVariants({
@@ -194,14 +194,19 @@ export const about = style({
   overflowWrap: "anywhere"
 });
 
+const CLOSE_SIZE = 32;
+const touchTargetOverhang = (TOUCH_TARGET - CLOSE_SIZE) / 2;
+const SQUARE_CORNER_INSIDE_A_ROUND_ONE = 1 - Math.SQRT1_2;
+const touchTargetInsideTheProfileCorner = `calc(${touchTargetOverhang}px + ${vars.r} * ${SQUARE_CORNER_INSIDE_A_ROUND_ONE})`;
+
 export const close = style({
   position: "absolute",
   top: 10,
   right: 10,
   display: "grid",
   placeItems: "center",
-  width: 32,
-  height: 32,
+  width: CLOSE_SIZE,
+  height: CLOSE_SIZE,
   border: 0,
   borderRadius: "50%",
   background: "rgb(0 0 0 / 0.45)",
@@ -209,6 +214,12 @@ export const close = style({
   cursor: "pointer",
   selectors: {
     "&:focus-visible": { outline: `3px solid ${vars.focus}`, outlineOffset: 2 }
+  },
+  "@media": {
+    [media.coarse]: {
+      top: touchTargetInsideTheProfileCorner,
+      right: touchTargetInsideTheProfileCorner
+    }
   }
 });
 
