@@ -69,9 +69,12 @@ globalStyle(":where(:focus-visible)", {
   borderRadius: 4
 });
 
+const PAGE_WIDTH = "1180px";
+const NARROWEST_GUTTER = "clamp(20px, 5vw, 56px)";
+export const pageGutter = `max(${NARROWEST_GUTTER}, (100% - ${PAGE_WIDTH}) / 2)`;
+
 globalStyle(".wrap", {
-  width: "min(1180px, 100% - 2 * clamp(20px, 5vw, 56px))",
-  marginInline: "auto",
+  marginInline: pageGutter,
   padding: vars.gap
 });
 

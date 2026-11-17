@@ -1,10 +1,11 @@
 import type { StyleRule } from "@vanilla-extract/css";
+import { movingPopover, shownPopover, shutPopover } from "#app/ui/popoverMotion";
 import { radius } from "#app/ui/styles/scale";
+import { pageGutter } from "#app/ui/styles/global.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 type Selectors = NonNullable<StyleRule["selectors"]>;
 
-const DURATION = "0.18s";
 const GAP_UNDER_BUTTON = "10px";
 
 export const popoverBox: StyleRule = {
@@ -17,32 +18,20 @@ export const popoverBox: StyleRule = {
   color: "inherit"
 };
 
-// Hidden rather than the browser's `display: none`: without `overlay`, which Firefox and Safari lack
-// (https://bugzil.la/1841456), a popover cannot animate on its way out of the top layer.
 export const popoverShut: StyleRule = {
-  visibility: "hidden",
-  opacity: 0,
+  ...shutPopover,
   translate: "0 -8px",
   scale: "0.97",
   transformOrigin: "top right"
 };
 
 const popoverShown: StyleRule = {
-  visibility: "visible",
-  opacity: 1,
+  ...shownPopover,
   translate: "0",
   scale: "1"
 };
 
-export const MOVING = "data-moving";
-
-const popoverTransition = `opacity ${DURATION} ${vars.easeOut}, translate ${DURATION} ${vars.easeOut}, scale ${DURATION} ${vars.easeOut}, visibility 0s ${DURATION}`;
-const visibleAtOnce = { transitionDelay: "0s" };
-
-export const popoverMoving: Selectors = {
-  [`&[${MOVING}]`]: { transition: popoverTransition },
-  [`&[${MOVING}]:popover-open`]: visibleAtOnce
-};
+export const popoverMoving = movingPopover(["opacity", "translate", "scale"], vars.easeOut);
 
 export const popoverPanel: StyleRule = {
   border: `2px solid ${vars.deepWall}`,
@@ -58,7 +47,7 @@ interface Place {
 
 const HEADER_END_IN_TOP_LAYER: Place = {
   top: `calc(${vars.gap} + 60px)`,
-  right: `calc(clamp(20px, 5vw, 56px) + ${vars.gap} + 6px)`
+  right: `calc(${pageGutter} + ${vars.gap} + 6px)`
 };
 
 export const underParent = (right: Place["right"], lift = "0px"): Place => ({

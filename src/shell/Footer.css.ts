@@ -3,6 +3,7 @@ import { paint } from "#app/textures/catalogue";
 import { RIDGE } from "#app/textures/page";
 import { media, upTo } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
 import { onDeep } from "./onDeep";
 import { logoWidth, nameSize } from "#app/brand/Brand.css";
 import { vars } from "#app/ui/styles/theme.css";
@@ -70,6 +71,9 @@ export const brand = style({
     }
   },
   "@media": {
+    [media.coarse]: {
+      selectors: { [`${footer} &`]: { position: "relative" } }
+    },
     [media.phone]: {
       selectors: {
         [`${footer} &`]: { vars: { [logoWidth]: "44px", [nameSize]: `${rem(font.h2)}` } }
@@ -82,6 +86,8 @@ export const brand = style({
     }
   }
 });
+
+reachTouchTarget(`${footer} ${brand}`);
 
 globalStyle(`${footer} ${brand} span`, {
   minWidth: 0,
@@ -104,11 +110,12 @@ globalStyle(`${links} a`, {
   overflowWrap: "anywhere",
   textDecoration: "underline 2px transparent",
   textUnderlineOffset: 5,
-  transition: "text-decoration-color 0.13s"
+  transition: "text-decoration-color 0.13s",
+  ...touchTargetHeight
 });
 
 globalStyle(`${links} a:hover`, {
-  textDecorationColor: vars.t9
+  "@media": { [media.hover]: { textDecorationColor: vars.t9 } }
 });
 
 export const copyright = style({
@@ -125,6 +132,8 @@ export const top = style({
     }
   }
 });
+
+reachTouchTarget(`${footer} ${top}`);
 
 globalStyle(`${footer} ${top} > span`, {
   "@media": {

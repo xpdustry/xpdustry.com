@@ -1,4 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
+import { media } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
 import { selectableAboveCover } from "#app/ui/Card.css";
@@ -58,7 +59,9 @@ globalStyle(`${play} ${online}`, {
 
 export const hint = style({
   color: vars.a11,
-  selectors: {
-    [`${play}:has(> button:hover) &`]: { transform: "scale(1.08)" }
+  "@media": {
+    [media.hover]: {
+      selectors: { [`${play}:has(> button:hover) &`]: { transform: "scale(1.08)" } }
+    }
   }
 });

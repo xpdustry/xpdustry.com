@@ -6,9 +6,10 @@ import { SITE } from "#app/brand/site";
 import type { PlayerCount } from "#app/status/live";
 import { GitHub, List, X } from "#app/ui/icons";
 import { PlinthAnchor, PlinthButton, PlinthLink } from "#app/ui/Plinth";
+import { animateOnToggle } from "#app/ui/popoverMotion";
 import { LocaleList, LocaleSwitch } from "./LocaleSwitch";
 import { PlayPill } from "./PlayPill";
-import { animateOnToggle, useShutPopovers } from "./usePopovers";
+import { useShutPopovers } from "./usePopovers";
 import * as styles from "./Header.css";
 
 const FOLDS = [styles.navFolded, styles.controlsFolded];

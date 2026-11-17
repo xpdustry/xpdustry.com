@@ -72,8 +72,10 @@ export const photo = style({
   objectFit: "cover",
   objectPosition: "left top",
   transition: `scale 0.6s ${vars.easeOut}`,
-  selectors: {
-    [`${tile}:hover &`]: { scale: "1.04" }
+  "@media": {
+    [media.hover]: {
+      selectors: { [`${tile}:hover &`]: { scale: "1.04" } }
+    }
   }
 });
 

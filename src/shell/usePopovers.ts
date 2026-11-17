@@ -1,13 +1,6 @@
 import { useRouter } from "@tanstack/react-router";
-import { useEffect, type RefObject, type ToggleEvent, type TransitionEvent } from "react";
-import { MOVING } from "./popover";
-
-export const animateOnToggle = {
-  onBeforeToggle: (event: ToggleEvent<HTMLElement>) => event.currentTarget.setAttribute(MOVING, ""),
-  onTransitionEnd: (event: TransitionEvent<HTMLElement>) => {
-    if (event.target === event.currentTarget) event.currentTarget.removeAttribute(MOVING);
-  }
-};
+import { useEffect, type RefObject } from "react";
+import { stopMoving } from "#app/ui/popoverMotion";
 
 export function useShutPopovers(within: RefObject<HTMLElement | null>, folds: readonly string[]) {
   const router = useRouter();
@@ -15,7 +8,7 @@ export function useShutPopovers(within: RefObject<HTMLElement | null>, folds: re
     const shut = (animate: boolean) => {
       for (const popover of within.current?.querySelectorAll<HTMLElement>(":popover-open") ?? []) {
         popover.hidePopover();
-        if (!animate) popover.removeAttribute(MOVING);
+        if (!animate) stopMoving(popover);
       }
     };
     const shutAnimated = () => shut(true);

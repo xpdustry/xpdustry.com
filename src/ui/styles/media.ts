@@ -7,7 +7,8 @@ export const media = {
   motion: "(prefers-reduced-motion: no-preference)",
   still: "(prefers-reduced-motion: reduce)",
   coarse: "(pointer: coarse)",
-  fine: "(pointer: fine)"
+  fine: "(pointer: fine)",
+  hover: "(hover: hover) and (pointer: fine)"
 } as const;
 
 export function upTo(px: number) {

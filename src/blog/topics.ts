@@ -1,5 +1,6 @@
 import { projectForTopic, type ProjectTheme } from "#app/brand/projects";
 import { PATCHES } from "#app/textures/cards";
+import { PALETTE } from "#app/ui/styles/palette";
 
 export interface Topic extends ProjectTheme {
   name: string;
@@ -8,11 +9,11 @@ export interface Topic extends ProjectTheme {
 }
 
 export const SITE_THEME: ProjectTheme = {
-  ground: "#083230",
+  ground: PALETTE.deep,
   patches: PATCHES.siteCover,
-  muted: "#a2c2bf",
-  chip: { background: "#c6f6f2", color: "#003331" },
-  accent: "#c6f6f2"
+  muted: PALETTE.deepInk,
+  chip: { background: PALETTE.t3, color: PALETTE.t12 },
+  accent: PALETTE.t3
 };
 
 export function topic(name: string): Topic {

@@ -1,4 +1,5 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
+import { media } from "#app/ui/styles/media";
 import { font, radius, rem } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -32,8 +33,12 @@ export const pill = style({
   selectors: {
     "&:has(> img:first-child, > svg:first-child)": { paddingLeft: 8 },
     [`&:has(> ${avatar}:first-child)`]: { padding: "5px 12px 5px 5px" },
-    "&:is(a)": { transition: "background-color 0.15s" },
-    "&:is(a):hover": { background: tintHover }
+    "&:is(a)": { transition: "background-color 0.15s" }
+  },
+  "@media": {
+    [media.hover]: {
+      selectors: { "&:is(a):hover": { background: tintHover } }
+    }
   }
 });
 

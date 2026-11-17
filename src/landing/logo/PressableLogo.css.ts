@@ -1,5 +1,7 @@
 import { createVar, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
+import { DIMMED } from "#app/ui/styles/scale";
+import { reachTouchTarget } from "#app/ui/styles/touch";
 
 type LogoUnits = number;
 
@@ -21,8 +23,13 @@ export const mark = style({
   cursor: "pointer",
   userSelect: "none",
   WebkitTouchCallout: "none",
-  WebkitTapHighlightColor: "transparent"
+  WebkitTapHighlightColor: "transparent",
+  "@media": {
+    [media.coarse]: { position: "relative" }
+  }
 });
+
+reachTouchTarget(mark);
 
 export const logo = style({
   display: "block",
@@ -42,7 +49,12 @@ export const logo = style({
         }
       }
     },
-    [`${media.motion} and (hover: hover)`]: {
+    [media.still]: {
+      selectors: {
+        [`${mark}:active &`]: { opacity: DIMMED }
+      }
+    },
+    [`${media.motion} and ${media.hover}`]: {
       selectors: {
         [`${mark}:hover:not(:active) &`]: { vars: { [faceDrop]: inLogoUnits(-HOVER_LIFT) } }
       }

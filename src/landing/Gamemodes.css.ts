@@ -1,7 +1,7 @@
 import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { paint } from "#app/textures/catalogue";
-import { narrowerThan } from "#app/ui/styles/media";
-import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { media, narrowerThan } from "#app/ui/styles/media";
+import { DIMMED, font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
 import { CHIP_OVERHANG, selectableAboveCover } from "#app/ui/Card.css";
 import { line } from "#app/ui/copy/Roll.css";
@@ -16,6 +16,7 @@ const headHeight = createVar();
 export const tint = createVar();
 
 export const total = style({
+  verticalAlign: "top",
   color: vars.ink
 });
 
@@ -49,6 +50,9 @@ export const mode = style({
   }
 });
 
+const copyable = `${mode}:has(> button:enabled)`;
+const uncopyable = `${mode}:has(> button:disabled)`;
+
 export const copied = style({});
 export const failed = style({});
 
@@ -67,11 +71,16 @@ export const tinted = style({
   }
 });
 
+const grownEdge = { vars: { "--grow": "1" } };
+
 export const edge = style({
   position: "absolute",
   selectors: {
-    [`${mode}:is(:hover, :has(:focus-visible)) &`]: {
-      vars: { "--grow": "1" }
+    [`${mode}:has(:focus-visible) &`]: grownEdge
+  },
+  "@media": {
+    [media.hover]: {
+      selectors: { [`${copyable}:hover &`]: grownEdge }
     }
   }
 });
@@ -129,7 +138,7 @@ export const band = style({
   }
 });
 
-globalStyle(`${mode} > button:disabled`, {
+globalStyle(`${uncopyable} > button`, {
   cursor: "default"
 });
 
@@ -146,7 +155,7 @@ export const icon = style({
   filter: "drop-shadow(0 4px 0 rgb(0 0 0 / 0.14))",
   transition: `scale 0.18s ${vars.easeOut}`,
   selectors: {
-    [`${mode}:active &`]: {
+    [`${copyable}:active &`]: {
       scale: "0.9",
       transitionDuration: "0.06s"
     },
@@ -219,14 +228,17 @@ export const said = style({
 });
 
 export const chip = style({
-  margin: `${-CHIP_OVERHANG}px ${-CHIP_OVERHANG}px ${-CHIP_OVERHANG}px 2px`
+  margin: `${-CHIP_OVERHANG}px ${-CHIP_OVERHANG}px ${-CHIP_OVERHANG}px 2px`,
+  selectors: {
+    [`${uncopyable} &`]: { visibility: "hidden" }
+  }
 });
 
 export const glyph = style({
-  opacity: 0.75,
-  selectors: {
-    [`${mode}:hover:not(${copied}) &`]: {
-      opacity: 1
+  opacity: DIMMED,
+  "@media": {
+    [media.hover]: {
+      selectors: { [`${copyable}:hover:not(${copied}) &`]: { opacity: 1 } }
     }
   }
 });

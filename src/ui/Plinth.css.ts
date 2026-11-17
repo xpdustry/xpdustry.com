@@ -1,8 +1,9 @@
 import { createVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
+import { media } from "./styles/media";
 import { font, radius, rem } from "./styles/scale";
 import { vars } from "./styles/theme.css";
 
-export const PLINTH_BORDER = 2;
+const PLINTH_BORDER = 2;
 export const PLINTH_DEPTH = 4;
 
 const depth = createVar();
@@ -81,13 +82,19 @@ export const face = style({
   selectors: {
     [`${sm} > &`]: { padding: "7px 13px" },
     [`${icon} > &`]: { padding: 8 },
-    [`${plinth}:hover > &`]: {
-      transform: `translateY(calc(${depth} * -1 - 2px))`,
-      backgroundColor: hoverColor
-    },
     [`${plinth}:active > &`]: {
       transform: "none",
       transitionDuration: "0.06s"
+    }
+  },
+  "@media": {
+    [media.hover]: {
+      selectors: {
+        [`${plinth}:hover > &`]: { backgroundColor: hoverColor },
+        [`${plinth}:hover:not(:active) > &`]: {
+          transform: `translateY(calc(${depth} * -1 - 2px))`
+        }
+      }
     }
   }
 });

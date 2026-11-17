@@ -4,6 +4,7 @@ import { aboutIn, type Tag, type Teammate as Person } from "#app/brand/team";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { GitHub, UsersThree, X } from "#app/ui/icons";
 import { outbound } from "#app/ui/outbound";
+import { animateOnToggle } from "#app/ui/popoverMotion";
 import { rem } from "#app/ui/styles/scale";
 import { Tray } from "#app/ui/Tray";
 import * as styles from "./Team.css";
@@ -93,7 +94,13 @@ function Profile({ id, member }: { id: string; member: Person }) {
     backgroundImage: banner && `url(${banner})`
   } satisfies CSSProperties;
   return (
-    <dialog id={id} popover="auto" aria-labelledby={`${id}-name`} className={styles.profile}>
+    <dialog
+      id={id}
+      popover="auto"
+      aria-labelledby={`${id}-name`}
+      className={styles.profile}
+      {...animateOnToggle}
+    >
       <div className={styles.banner} style={top} />
       <button
         type="button"

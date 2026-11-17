@@ -1,6 +1,8 @@
 import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
+import { movingPopover, shownPopover, shutPopover } from "#app/ui/popoverMotion";
 import { media } from "#app/ui/styles/media";
 import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
+import { reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const roleColour = styleVariants({
@@ -48,8 +50,13 @@ export const member = style({
   cursor: "pointer",
   transition: "background-color 0.15s",
   selectors: {
-    "&:hover, &:has(+ :popover-open)": { background: vars.tile },
+    "&:has(+ :popover-open)": { background: vars.tile },
     "&:focus-visible": { outline: `3px solid ${vars.focus}`, outlineOffset: 2 }
+  },
+  "@media": {
+    [media.hover]: {
+      selectors: { "&:hover": { background: vars.tile } }
+    }
   }
 });
 
@@ -62,7 +69,6 @@ export const face = style({
   background: vars.deep,
   color: vars.onDeep,
   fontFamily: vars.fontDisplay,
-  fontWeight: 700,
   textTransform: "uppercase"
 });
 
@@ -72,7 +78,6 @@ export const name = style({
   color: "var(--role)",
   fontFamily: vars.fontDisplay,
   fontSize: rem(16),
-  fontWeight: 700,
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   overflowWrap: "anywhere"
@@ -104,7 +109,10 @@ export const tag = style({
   }
 });
 
+const profileShut = { ...shutPopover, translate: "0 6px" };
+
 export const profile = style({
+  ...profileShut,
   width: rem(300),
   maxWidth: "calc(100vw - 32px)",
   maxHeight: "calc(100dvh - 16px)",
@@ -138,19 +146,14 @@ export const profile = style({
       borderRadius: `${vars.r} ${vars.r} 0 0`
     },
     [media.motion]: {
-      transition:
-        "opacity 0.18s, translate 0.18s, display 0.18s allow-discrete, overlay 0.18s allow-discrete"
+      selectors: movingPopover(["opacity", "translate"], "ease", { display: "block" })
     }
   },
   selectors: {
-    "&:not(:popover-open)": { opacity: 0, translate: "0 6px" },
+    "&:popover-open": { ...shownPopover, translate: "0", "@starting-style": profileShut },
     "&::backdrop": { background: "transparent" }
   }
 });
-
-globalStyle(`${profile}:popover-open`, {
-  "@starting-style": { opacity: 0, translate: "0 6px" }
-} as never);
 
 globalStyle(`${profile}::backdrop`, {
   "@media": { [media.phone]: { background: "rgb(0 0 0 / 0.4)" } }
@@ -174,7 +177,6 @@ export const title = style({
   marginTop: 8,
   fontFamily: vars.fontDisplay,
   fontSize: rem(22),
-  fontWeight: 700,
   lineHeight: leading.tight,
   letterSpacing: tracking.display,
   overflowWrap: "anywhere"
@@ -203,12 +205,14 @@ export const close = style({
   border: 0,
   borderRadius: "50%",
   background: "rgb(0 0 0 / 0.45)",
-  color: "#fff",
+  color: vars.onGround,
   cursor: "pointer",
   selectors: {
     "&:focus-visible": { outline: `3px solid ${vars.focus}`, outlineOffset: 2 }
   }
 });
+
+reachTouchTarget(close);
 
 globalStyle(`${close} svg`, { width: 14, height: 14 });
 
@@ -231,11 +235,14 @@ globalStyle(`${links} a`, {
   font: caption(600),
   textDecoration: "none",
   overflowWrap: "anywhere",
-  transition: "background-color 0.15s"
+  transition: "background-color 0.15s",
+  ...touchTargetHeight
 });
 
 globalStyle(`${links} a:hover`, {
-  background: "color-mix(in srgb, currentColor 18%, transparent)"
+  "@media": {
+    [media.hover]: { background: "color-mix(in srgb, currentColor 18%, transparent)" }
+  }
 });
 
 globalStyle(`${links} a:focus-visible`, {

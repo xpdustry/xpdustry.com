@@ -1,4 +1,5 @@
 import { style } from "@vanilla-extract/css";
+import { media } from "#app/ui/styles/media";
 import { font, leading, rem } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -26,8 +27,10 @@ export const glyph = style({
 });
 
 export const go = style({
-  selectors: {
-    [`${discord}:hover &`]: { transform: "translate(2px, -2px)" }
+  "@media": {
+    [media.hover]: {
+      selectors: { [`${discord}:hover &`]: { transform: "translate(2px, -2px)" } }
+    }
   }
 });
 

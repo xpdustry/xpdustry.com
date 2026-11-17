@@ -26,6 +26,8 @@ export const tracking = {
   title: "-0.01em"
 } as const;
 
+export const DIMMED = 0.75;
+
 export const radius = {
   xs: 4,
   sm: 8,

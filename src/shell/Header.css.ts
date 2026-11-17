@@ -1,5 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media, upTo } from "#app/ui/styles/media";
+import { reachTouchTarget } from "#app/ui/styles/touch";
 import { onDeep } from "./onDeep";
 import {
   hangUnder,
@@ -9,7 +10,7 @@ import {
   popoverShut,
   underParent
 } from "./popover";
-import { PLINTH_BORDER, PLINTH_DEPTH, tone, wall } from "#app/ui/Plinth.css";
+import { PLINTH_DEPTH, tone, wall } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const navFolded = upTo(1160);
@@ -199,21 +200,9 @@ export const whenOpen = style({
   }
 });
 
-const TOUCH_TARGET = 44;
-const CONTROL_SIZE = 40;
-const touchSlack = (TOUCH_TARGET - CONTROL_SIZE) / 2;
-const touchInset = [PLINTH_BORDER + PLINTH_DEPTH, PLINTH_BORDER + touchSlack, PLINTH_BORDER]
-  .map((px) => `${-px}px`)
-  .join(" ");
+const plinthFaceCentredAboveItsBoxBy = PLINTH_DEPTH / 2;
 
-globalStyle(`${toggle}::after, ${play}::after, ${language} > button::after, ${github}::after`, {
-  "@media": {
-    [media.coarse]: { content: '""', position: "absolute", inset: touchInset }
-  }
-});
-
-globalStyle(`${brand}::after`, {
-  "@media": {
-    [media.coarse]: { content: '""', position: "absolute", inset: -2 }
-  }
-});
+for (const plinth of [toggle, play, `${language} > button`, github]) {
+  reachTouchTarget(plinth, plinthFaceCentredAboveItsBoxBy);
+}
+reachTouchTarget(brand);

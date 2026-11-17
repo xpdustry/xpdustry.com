@@ -5,7 +5,7 @@ import { withLocale } from "#app/i18n/localePath";
 import { LOCALES, localeInfo } from "#app/i18n/locales";
 import { CaretDown, Check, Globe } from "#app/ui/icons";
 import { PlinthButton } from "#app/ui/Plinth";
-import { animateOnToggle } from "./usePopovers";
+import { animateOnToggle } from "#app/ui/popoverMotion";
 import * as styles from "./LocaleSwitch.css";
 
 export function LocaleSwitch({ className }: { className?: string }) {

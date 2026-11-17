@@ -9,6 +9,7 @@ import { formatNumber, formatShortDate } from "#app/i18n/format";
 import { withLocale } from "#app/i18n/localePath";
 import texture from "#app/textures/assets/reticulate.png?inline";
 import { FACE } from "#app/ui/styles/fonts";
+import { PALETTE } from "#app/ui/styles/palette";
 import { CARD_SIZE } from "../../meta";
 
 export interface CardPost {
@@ -62,8 +63,7 @@ function mix(from: string, to: string, amount: number): string {
     .join("")}`;
 }
 
-const BRAND_TEAL = "#41c1ba";
-const SITE_PALETTE: Palette = { ...cardPalette(SITE_THEME), bar: BRAND_TEAL };
+const SITE_PALETTE: Palette = { ...cardPalette(SITE_THEME), bar: PALETTE.t9 };
 
 export interface CardLanguage {
   locale: string;
