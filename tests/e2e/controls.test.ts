@@ -15,9 +15,9 @@ declare global {
  * Each header and footer control a fingertip would miss somewhere in the 44 px box centred on
  * its drawing: a point of the box's grid where the page hands the tap to something else.
  */
-const missedTaps = (page: Page) =>
+const missedTaps = (page: Page, among: string) =>
   page.evaluate(
-    async ({ half, step }) => {
+    async ({ half, step, among }) => {
       /** The middle of what is drawn: the control and all it holds, a plinth's raised face too. */
       const middle = (control: Element) => {
         const drawn = [control, ...control.querySelectorAll("*")]
@@ -38,11 +38,7 @@ const missedTaps = (page: Page) =>
         }
         return missed;
       };
-      const controls = [
-        ...document.querySelectorAll<HTMLElement>(
-          "header a, header button, footer a, footer button"
-        )
-      ].filter(
+      const controls = [...document.querySelectorAll<HTMLElement>(among)].filter(
         (control) =>
           control.checkVisibility({ visibilityProperty: true }) &&
           control.getAttribute("aria-hidden") !== "true" &&
@@ -59,7 +55,7 @@ const missedTaps = (page: Page) =>
       }
       return found;
     },
-    { half: TOUCH_TARGET / 2, step: STEP }
+    { half: TOUCH_TARGET / 2, step: STEP, among }
   );
 
 for (const width of [390, 320]) {
@@ -71,7 +67,16 @@ for (const width of [390, 320]) {
     }) => {
       await page.goto("/");
       expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
-      expect(await missedTaps(page)).toEqual([]);
+      expect(await missedTaps(page, "header a, header button, footer a, footer button")).toEqual(
+        []
+      );
+    });
+
+    test("so does every control of an open team profile", async ({ page }) => {
+      await page.goto("/");
+      await page.locator("#team button[popovertarget]").first().click();
+      await expect(page.locator(":popover-open")).toBeVisible();
+      expect(await missedTaps(page, ":popover-open a, :popover-open button")).toEqual([]);
     });
   });
 }
