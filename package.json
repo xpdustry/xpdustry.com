@@ -6,7 +6,8 @@
   "license": "MIT",
   "type": "module",
   "imports": {
-    "#app/*": "./src/*"
+    "#app/*": "./src/*",
+    "#tests/*": "./tests/*"
   },
   "scripts": {
     "dev": "vite dev",

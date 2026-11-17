@@ -95,6 +95,7 @@
       "requireAllFiles": true,
       "allowUnmatched": [
         "scripts/**",
+        "tests/**",
         ".agents/**",
         "{vite,vitest}.config.ts",
         "src/routeTree.gen.ts"
