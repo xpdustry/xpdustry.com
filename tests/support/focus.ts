@@ -99,8 +99,9 @@ async function changedPixels(page: Page, ringed: Box) {
 }
 
 /**
- * WCAG's focus appearance, which assumes no ring style: the pixels that change by 3:1 between
- * the focused and the unfocused control must cover a band 2 px thick around its rounded perimeter.
+ * WCAG 2.4.13 Focus Appearance (AAA), which assumes no ring style: the area that changes by 3:1
+ * between the focused and the unfocused control must be at least that of a band 2 px thick around
+ * its perimeter. It counts changed pixels anywhere in the control, so a fill passes as a ring does.
  * https://www.w3.org/WAI/WCAG22/Understanding/focus-appearance
  */
 export async function ringStrength(page: Page) {
@@ -126,11 +127,20 @@ export async function focusFindings(page: Page) {
     await page.keyboard.press("Tab");
     const control = await focused(page);
     if (!control) continue;
-    if (control.stop < names.length) return { names, findings };
-    names.push(control.name);
-    if (control.covered) findings.push(`${control.name} is covered`);
-    const { changed, needed } = await ringStrength(page);
-    if (changed < needed) findings.push(`${control.name}: ${changed} of ${needed} ring pixels`);
+    const reachedBefore = control.stop < names.length;
+    if (!reachedBefore) {
+      names.push(control.name);
+      if (control.covered) findings.push(`${control.name} is covered`);
+      const { changed, needed } = await ringStrength(page);
+      if (changed < needed) findings.push(`${control.name}: ${changed} of ${needed} ring pixels`);
+      continue;
+    }
+    const stillOnTheLastStop = control.stop === names.length - 1;
+    if (stillOnTheLastStop) continue;
+    const backAtTheStart = control.stop === 0;
+    if (!backAtTheStart)
+      findings.push(`after ${names.at(-1)} the keyboard goes back to ${control.name}`);
+    return { names, findings };
   }
   throw new Error(
     `the keyboard never came back round after ${MAX_STOPS} stops: ${names.join(", ")}`

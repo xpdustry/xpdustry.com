@@ -5,6 +5,16 @@ export type CopyOutcome = Exclude<CopyState, "idle">;
 
 const COPIED_MS = 1400;
 
+const selectionNow = () => {
+  const selection = getSelection();
+  return [
+    selection?.anchorNode,
+    selection?.anchorOffset,
+    selection?.focusNode,
+    selection?.focusOffset
+  ] as const;
+};
+
 async function writeClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
@@ -37,6 +47,7 @@ export function useCopy(text: string) {
 
   const copy = async () => {
     const attempt = ++latestAttempt.current;
+    const selectionAtThePress = selectionNow();
     clearTimeout(timer.current);
     setOutcome(undefined);
     const copied = await writeClipboard(text);
@@ -44,7 +55,8 @@ export function useCopy(text: string) {
     setState(copied ? "copied" : "failed");
     setOutcome(copied ? "copied" : "failed");
     if (copied) timer.current = setTimeout(() => setState("idle"), COPIED_MS);
-    else setRefusals((count) => count + 1);
+    else if (selectionNow().every((part, index) => part === selectionAtThePress[index]))
+      setRefusals((count) => count + 1);
   };
   return { state, outcome, address, copy };
 }

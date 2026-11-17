@@ -9,21 +9,42 @@ import { expect, test, type Page } from "#tests/support/test.ts";
 const AXE = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
 const TEXT_CONTRAST = 4.5;
 
+const UNDECIDED_BY_AXE_AND_CHECKED_ELSEWHERE: Record<string, string> = {
+  "color-contrast": "text over painted textures and photos, measured on rendered pixels below",
+  "video-caption": "the one video has no sound track"
+};
+
 async function axeViolations(page: Page): Promise<string[]> {
   await page.evaluate(AXE);
-  return page.evaluate(async () => {
-    const { violations } = await window.axe.run(document, {
+  const { violations, undecided } = await page.evaluate(async () => {
+    const { violations, incomplete } = await window.axe.run(document, {
       runOnly: {
         type: "tag",
         values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"]
       },
       rules: { "label-content-name-mismatch": { enabled: true } },
-      resultTypes: ["violations"]
+      resultTypes: ["violations", "incomplete"]
     });
-    return violations.flatMap(({ id, nodes }) =>
-      nodes.map(({ target, failureSummary }) => `${id} on ${target.join(" ")}: ${failureSummary}`)
-    );
+    return {
+      violations: violations.flatMap(({ id, nodes }) =>
+        nodes.map(({ target, failureSummary }) => `${id} on ${target.join(" ")}: ${failureSummary}`)
+      ),
+      undecided: incomplete.flatMap(({ id, nodes }) =>
+        nodes.map(({ target }) => ({ id, where: target.join(" ") }))
+      )
+    };
   });
+  await test.info().attach(`what axe could not decide on ${page.url()}`, {
+    body: undecided
+      .map(({ id, where }) => `${id} on ${where}: ${UNDECIDED_BY_AXE_AND_CHECKED_ELSEWHERE[id]}`)
+      .join("\n")
+  });
+  return [
+    ...violations,
+    ...undecided
+      .filter(({ id }) => !(id in UNDECIDED_BY_AXE_AND_CHECKED_ELSEWHERE))
+      .map(({ id, where }) => `axe could not decide ${id} on ${where}, and nothing else checks it`)
+  ];
 }
 
 declare global {
@@ -98,13 +119,20 @@ test.describe("the keyboard sees where it is on every control it reaches", () =>
     {
       path: "/",
       width: 1280,
-      reaches: [/^Skip to content$/, /^Copy hub/, /^Send a wave/, /^ZetaMap/, /Discord/]
+      reaches: [
+        /^Skip to content$/,
+        /^Copy hub/,
+        /^Send a wave/,
+        /^ZetaMap/,
+        /Discord/,
+        /^Back to top$/
+      ]
     },
     { path: "/", width: 390, reaches: [/^Menu$/, /^Copy hub/, /^ZetaMap/, /^Back to top$/] },
     {
       path: "/blog/nohorny-4-beta-8",
       width: 390,
-      reaches: [/^Blog$/, /^Copy link$/, /^Copy IP/, /Questions or feedback/]
+      reaches: [/^Blog$/, /^Copy link$/, /^Copy IP/, /Questions or feedback/, /^Back to top$/]
     }
   ]) {
     test(`on ${path} at ${width}px`, async ({ page }) => {
@@ -161,6 +189,26 @@ test.describe("the keyboard sees where it is on every control it reaches", () =>
       });
       expect(ring).toBe(true);
     }
+  });
+
+  test("a control that sends Tab back up the page is a finding, not the end of it", async ({
+    page
+  }) => {
+    test.setTimeout(120_000);
+    await page.addInitScript(() =>
+      document.addEventListener("keydown", (pressed) => {
+        const firstTeammate = document.querySelector("#team button[popovertarget]");
+        if (pressed.key !== "Tab" || document.activeElement !== firstTeammate) return;
+        pressed.preventDefault();
+        document.querySelector<HTMLElement>("#servers button")!.focus();
+      })
+    );
+    await page.goto("/");
+    const { names, findings } = await focusFindings(page);
+    expect(names).not.toContainEqual("Back to top");
+    expect(findings).toContainEqual(
+      expect.stringMatching(/^after ZetaMap.* the keyboard goes back to Copy hub/)
+    );
   });
 
   test("a ring painted in a transparent colour is no ring", async ({ page }) => {
