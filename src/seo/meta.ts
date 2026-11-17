@@ -25,6 +25,9 @@ export function postCard(slug: string, title: string): PageImage {
   return { url: `/og/blog/${slug}.png`, alt: `${title} - ${SITE.name}` };
 }
 
+const unableToCloseItsScriptTag = (jsonLd: JsonLd) =>
+  JSON.stringify(jsonLd).replaceAll("<", "\\u003c");
+
 export interface PageSeo {
   title: string;
   withoutSiteName?: boolean;
@@ -85,12 +88,7 @@ export function seo(page: PageSeo) {
       { rel: "alternate", hrefLang: "x-default", href: urlIn(DEFAULT_LOCALE) }
     ],
     scripts: page.jsonLd
-      ? [
-          {
-            type: "application/ld+json",
-            children: JSON.stringify(page.jsonLd).replace(/</g, "\\u003c")
-          }
-        ]
+      ? [{ type: "application/ld+json", children: unableToCloseItsScriptTag(page.jsonLd) }]
       : []
   };
 }
