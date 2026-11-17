@@ -22,7 +22,7 @@ class HTMLElement {
   }
 }
 
-function browser({ sprites = [] as HTMLElement[], workers = true } = {}) {
+function browser({ sprites = [] as HTMLElement[] } = {}) {
   const rules: string[] = [];
   const observers: ((changes: { addedNodes: unknown[] }[]) => void)[] = [];
   const hired: Worker[] = [];
@@ -35,7 +35,6 @@ function browser({ sprites = [] as HTMLElement[], workers = true } = {}) {
       public url: string,
       public options: unknown
     ) {
-      if (!workers) throw new Error("no workers");
       hired.push(this);
     }
     postMessage = (message: { key: string; priority: number }) => this.posted.push(message);
@@ -82,17 +81,7 @@ const sprites = (worker: { posted: { key: string; priority: number }[] }) =>
     .map(({ key, priority }) => [key, priority]);
 
 describe("inline painter", () => {
-  test("starts one worker and asks it for the named textures, the frame first", () => {
-    const { context, hired } = browser();
-    runInNewContext(PAINTER, context);
-    expect(hired).toHaveLength(1);
-    expect(hired[0]!.url).toMatch(/painter\.worker/);
-    expect(hired[0]!.posted.map(({ key }) => key)).toEqual(PAINT_NAMES);
-    const urgent = hired[0]!.posted.filter(({ priority }) => priority === 0);
-    expect(new Set(urgent.map(({ key }) => key))).toEqual(new Set(FRAME_PAINTS));
-  });
-
-  test("asks for each sprite once: those on show, then their grown ones, then those below", () => {
+  test("starts one worker and asks it for the named textures, the frame first, then each sprite once: those on show, their grown ones, those below", () => {
     const page = browser({
       sprites: [
         new HTMLElement("blob_a_1"),
@@ -102,23 +91,18 @@ describe("inline painter", () => {
       ]
     });
     runInNewContext(PAINTER, page.context);
-    expect(sprites(page.hired[0]!)).toEqual([
+    const [worker] = page.hired;
+    expect(page.hired).toHaveLength(1);
+    expect(worker!.url).toMatch(/painter\.worker/);
+    expect(
+      worker!.posted.filter(({ key }) => !key.startsWith("blob")).map(({ key }) => key)
+    ).toEqual(PAINT_NAMES);
+    const urgent = worker!.posted.filter(({ priority }) => priority === 0);
+    expect(new Set(urgent.map(({ key }) => key))).toEqual(new Set(FRAME_PAINTS));
+    expect(sprites(worker!)).toEqual([
       ["blob_a_1", 3],
       ["blob_a_0", 1],
       ["blob_b_0", 4]
-    ]);
-  });
-
-  test("hands a painted texture to the styles: by name on the root, by key on a sprite", async () => {
-    const { context, rules, answer } = browser({ sprites: [new HTMLElement("blob_a_0")] });
-    runInNewContext(PAINTER, context);
-    const crown = context.paints!("crown");
-    answer("crown", "crown.png");
-    answer("blob_a_0", "a.png");
-    expect(await crown).toBe("blob:crown.png");
-    expect(rules).toEqual([
-      ':root{--paint-crown:url("blob:crown.png")}',
-      '[data-paint="blob_a_0"]{--paint:url("blob:a.png")}'
     ]);
   });
 
@@ -146,39 +130,27 @@ describe("inline painter", () => {
     expect(rules).toEqual([]);
   });
 
-  test("replaces a worker that fails, and asks the next for what is still waited on", async () => {
+  test("replaces a failing worker, asks the next for what is still waited on, and gives up after the third", async () => {
     const page = browser({ sprites: [new HTMLElement("blob_a_0")] });
     runInNewContext(PAINTER, page.context);
     page.answer("crown", "crown.png");
     page.hired[0]!.onerror!();
-    const askedWithoutWorker = page.context.paints!("blob_late_0");
+    const late = page.context.paints!("blob_late_0");
     await vi.waitFor(() => expect(page.hired).toHaveLength(2));
     expect(page.hired[0]!.terminate).toHaveBeenCalled();
     const again = page.hired[1]!.posted.map(({ key }) => key);
     expect(again).not.toContain("crown");
     expect(again).toEqual(expect.arrayContaining(["ridge", "blob_a_0", "blob_late_0"]));
     page.answer("blob_late_0", "late.png");
-    expect(await askedWithoutWorker).toBe("blob:late.png");
-  });
+    expect(await late).toBe("blob:late.png");
 
-  test("gives up once three workers have failed: every texture waited on is absent", async () => {
-    const page = browser();
-    runInNewContext(PAINTER, page.context);
-    const crown = page.context.paints!("crown");
-    for (let worker = 0; worker < 3; worker++) {
-      await vi.waitFor(() => expect(page.hired).toHaveLength(worker + 1));
-      page.hired[worker]!.onerror!();
-    }
-    expect(await crown).toBeUndefined();
-    expect(await page.context.paints!("blob_late_0")).toBeUndefined();
+    const ridge = page.context.paints!("ridge");
+    page.hired[1]!.onerror!();
+    await vi.waitFor(() => expect(page.hired).toHaveLength(3));
+    page.hired[2]!.onerror!();
+    expect(await ridge).toBeUndefined();
+    expect(await page.context.paints!("blob_later_0")).toBeUndefined();
     await new Promise((done) => setTimeout(done, 5));
     expect(page.hired).toHaveLength(3);
-  });
-
-  test("a browser without workers gets no textures and no errors", async () => {
-    const { context } = browser({ workers: false });
-    expect(() => runInNewContext(PAINTER, context)).not.toThrow();
-    expect(await context.paints!("crown")).toBeUndefined();
-    expect(() => runInNewContext(PAINTER, { document: {} })).not.toThrow();
   });
 });

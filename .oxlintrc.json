@@ -3,6 +3,17 @@
   "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y"],
   "ignorePatterns": ["dist/**", "node_modules/**", "src/routeTree.gen.ts", ".claude/**"],
   "rules": {
-    "typescript/no-deprecated": "error"
-  }
+    "typescript/no-deprecated": "error",
+    "xpdustry/hover-needs-hover-media": "error",
+    "xpdustry/no-layout-transition": "error"
+  },
+  "jsPlugins": ["./scripts/oxlint-plugin.ts"],
+  "overrides": [
+    {
+      "files": ["src/shell/Scrollbar.css.ts"],
+      "rules": {
+        "xpdustry/hover-needs-hover-media": "off"
+      }
+    }
+  ]
 }

@@ -1,18 +1,4 @@
-export interface PacketFields {
-  name: string;
-  map: string;
-  players: number;
-  wave: number;
-  version: number;
-  versionType: string;
-  mode: number;
-  playerLimit: number;
-  description: string;
-  modeName: string;
-  port: number;
-}
-
-const PACKET_FIELDS: PacketFields = {
+const PACKET_FIELDS = {
   name: "<CN> Survival",
   map: "Fungal Pass",
   players: 27,
@@ -26,56 +12,35 @@ const PACKET_FIELDS: PacketFields = {
   port: 6567
 };
 
-const GAME_BYTE_BUDGET = { name: 100, map: 64, versionType: 32, description: 100, modeName: 50 };
+/** A string as the game writes it: a length byte, then UTF-8 cut to the field's byte budget. */
+const text = (value: string, budget: number) => {
+  const encoded = Buffer.from(value).subarray(0, budget);
+  return Buffer.concat([Buffer.of(encoded.length), encoded]);
+};
 
-class PacketWriter {
-  readonly bytes: number[] = [];
+const int = (bytes: 2 | 4, value: number) => {
+  const out = Buffer.alloc(bytes);
+  if (bytes === 4) out.writeInt32BE(value);
+  else out.writeUInt16BE(value);
+  return out;
+};
 
-  string(value: string, budget = 255) {
-    const encoded = new TextEncoder().encode(value).subarray(0, budget);
-    this.bytes.push(encoded.length, ...encoded);
-  }
-
-  i32(value: number) {
-    this.bytes.push(
-      (value >>> 24) & 0xff,
-      (value >>> 16) & 0xff,
-      (value >>> 8) & 0xff,
-      value & 0xff
-    );
-  }
-
-  u8(value: number) {
-    this.bytes.push(value & 0xff);
-  }
-
-  u16(value: number) {
-    this.bytes.push((value >> 8) & 0xff, value & 0xff);
-  }
-}
-
-function write(fields: PacketFields, budget: Partial<typeof GAME_BYTE_BUDGET>): Uint8Array {
-  const out = new PacketWriter();
-  out.string(fields.name, budget.name);
-  out.string(fields.map, budget.map);
-  out.i32(fields.players);
-  out.i32(fields.wave);
-  out.i32(fields.version);
-  out.string(fields.versionType, budget.versionType);
-  out.u8(fields.mode);
-  out.i32(fields.playerLimit);
-  out.string(fields.description, budget.description);
-  out.string(fields.modeName, budget.modeName);
-  out.u16(fields.port);
-  return Uint8Array.from(out.bytes);
-}
-
-export function serverInfoPacket(overrides: Partial<PacketFields> = {}): Uint8Array {
-  return write({ ...PACKET_FIELDS, ...overrides }, GAME_BYTE_BUDGET);
-}
-
-export function packetClaimingLongerName(): Uint8Array {
-  const bytes = serverInfoPacket();
-  bytes[0] = 255;
-  return bytes;
+/** A server's answer to a discovery ping, the way the game's writeServerData lays it out. */
+export function serverInfoPacket(overrides: Partial<typeof PACKET_FIELDS> = {}): Uint8Array {
+  const fields = { ...PACKET_FIELDS, ...overrides };
+  return Uint8Array.from(
+    Buffer.concat([
+      text(fields.name, 100),
+      text(fields.map, 64),
+      int(4, fields.players),
+      int(4, fields.wave),
+      int(4, fields.version),
+      text(fields.versionType, 32),
+      Buffer.of(fields.mode),
+      int(4, fields.playerLimit),
+      text(fields.description, 100),
+      text(fields.modeName, 50),
+      int(2, fields.port)
+    ])
+  );
 }

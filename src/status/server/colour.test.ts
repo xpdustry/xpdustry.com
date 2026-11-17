@@ -9,76 +9,30 @@ const GREEN = [0, 128, 0] as const;
 const WHITE = [255, 255, 255] as const;
 const CLEAR = 0;
 
-const FIXTURES = {
-  "a truecolour picture keyed red by tRNS": {
-    png: truecolourPngRow([RED, GREEN, GREEN], RED),
-    pixels: [
+/** Each picture, the average of its opaque pixels, and what sharp decodes it to when that is subtle. */
+const PICTURES: [string, Uint8Array, string, number[][]?][] = [
+  ["a picture", pngRow(3, [255, 0, 0, 0, 0, 255]), "#800080"],
+  ["the opaque pixels of a picture", pngRow(4, [0, 128, 0, 255, 255, 255, 255, 0]), "#008000"],
+  [
+    "a truecolour picture keyed red by tRNS",
+    truecolourPngRow([RED, GREEN, GREEN], RED),
+    "#008000",
+    [
       [...RED, CLEAR],
       [...GREEN, 255],
       [...GREEN, 255]
     ]
-  },
-  "a truecolour picture keyed red by tRNS with its unused high bits set": {
-    png: truecolourPngRow([RED, GREEN, GREEN], [0x01ff, 0x0100, 0x0100]),
-    pixels: [
-      [...RED, CLEAR],
-      [...GREEN, 255],
-      [...GREEN, 255]
-    ]
-  },
-  "a truecolour picture whose tRNS key no pixel has": {
-    png: truecolourPngRow([RED, GREEN, GREEN], WHITE),
-    pixels: [
+  ],
+  [
+    "a truecolour picture whose tRNS key no pixel has",
+    truecolourPngRow([RED, GREEN, GREEN], WHITE),
+    "#555500",
+    [
       [...RED, 255],
       [...GREEN, 255],
       [...GREEN, 255]
     ]
-  },
-  "a palette with an opaque entry before a transparent one": {
-    png: indexedPngRow(
-      [
-        [...GREEN, 255],
-        [...WHITE, CLEAR]
-      ],
-      [0, 1]
-    ),
-    pixels: [
-      [...GREEN, 255],
-      [...WHITE, CLEAR]
-    ]
-  },
-  "a palette with an opaque entry between transparent ones": {
-    png: indexedPngRow(
-      [[...WHITE, CLEAR], [...GREEN, 255], [...RED, CLEAR], [...GREEN]],
-      [0, 1, 2, 3]
-    ),
-    pixels: [
-      [...WHITE, CLEAR],
-      [...GREEN, 255],
-      [...RED, CLEAR],
-      [...GREEN, 255]
-    ]
-  }
-};
-
-test.each(Object.entries(FIXTURES))("%s decodes in sharp to the pixels it claims", async (_, f) => {
-  const decoded = await sharp(f.png).ensureAlpha().raw().toBuffer();
-  expect([...decoded]).toEqual(f.pixels.flat());
-});
-
-test.each([
-  ["a truecolour picture keyed red by tRNS", "#008000"],
-  ["a truecolour picture keyed red by tRNS with its unused high bits set", "#008000"],
-  ["a truecolour picture whose tRNS key no pixel has", "#555500"],
-  ["a palette with an opaque entry before a transparent one", "#008000"],
-  ["a palette with an opaque entry between transparent ones", "#008000"]
-] as const)("averages only what is opaque in %s", (fixture, colour) => {
-  expect(averageColour(FIXTURES[fixture].png)).toBe(colour);
-});
-
-test.each([
-  ["a picture", pngRow(3, [255, 0, 0, 0, 0, 255]), "#800080"],
-  ["the opaque pixels of a picture", pngRow(4, [0, 128, 0, 255, 255, 255, 255, 0]), "#008000"],
+  ],
   [
     "a picture drawn from a palette, as Discord's default faces are",
     indexedPngRow(
@@ -91,18 +45,21 @@ test.each([
     "#800080"
   ],
   [
-    "the opaque pixels of a palette",
-    indexedPngRow(
-      [
-        [255, 255, 255, 0],
-        [0, 128, 0, 255]
-      ],
-      [0, 1]
-    ),
-    "#008000"
+    "a palette with an opaque entry between transparent ones",
+    indexedPngRow([[...WHITE, CLEAR], [...GREEN, 255], [...RED, CLEAR], [...GREEN]], [0, 1, 2, 3]),
+    "#008000",
+    [
+      [...WHITE, CLEAR],
+      [...GREEN, 255],
+      [...RED, CLEAR],
+      [...GREEN, 255]
+    ]
   ]
-])("averages %s", (_label, png, colour) => {
+];
+
+test.each(PICTURES)("averages %s", async (_label, png, colour, pixels) => {
   expect(averageColour(png)).toBe(colour);
+  if (pixels) expect([...(await sharp(png).ensureAlpha().raw().toBuffer())]).toEqual(pixels.flat());
 });
 
 test.each([

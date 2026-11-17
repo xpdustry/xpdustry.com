@@ -4,7 +4,6 @@ on:
   push:
     branches: ["**"]
     tags-ignore: ["**"]
-    # Blog posts are Markdown too, so only the prose outside `src` is skipped
     paths-ignore: ["*.md", ".agents/**/*.md"]
   pull_request:
     paths-ignore: ["*.md", ".agents/**/*.md"]
@@ -13,20 +12,16 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.event.number || github.ref }}"
   cancel-in-progress: true
 
-# Static checks first, then the tests and the image, which is built and smoke tested but never
-# published
 jobs:
   static:
     name: "Static"
-    # Same-repo PRs are already built by their push
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      # All of history, as fallow ranks its refactoring targets by each file's changes
-      - name: "Checkout Repository"
+      - name: "Checkout Repository With the History Fallow Ranks Changes By"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -67,7 +62,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: "Run Unit Tests"
-        run: pnpm exec vitest run --project unit --reporter=default --reporter=junit --outputFile.junit=reports/unit.xml
+        run: pnpm test:unit --reporter=default --reporter=junit --outputFile.junit=reports/unit.xml
 
       - name: "Upload Test Results"
         if: ${{ always() }}
@@ -76,7 +71,6 @@ jobs:
           name: test-results-unit
           path: reports/
 
-  # The tests that read the production build, which also proves it builds
   artifact:
     name: "Artifact Tests"
     needs: static
@@ -91,11 +85,8 @@ jobs:
       - name: "Setup Node.js And Dependencies"
         uses: ./.github/actions/setup
 
-      - name: "Build Site"
-        run: pnpm build
-
-      - name: "Run Artifact Tests"
-        run: pnpm exec vitest run --project artifact --reporter=default --reporter=junit --outputFile.junit=reports/artifact.xml
+      - name: "Build Site And Run Artifact Tests"
+        run: pnpm test:artifact --reporter=default --reporter=junit --outputFile.junit=reports/artifact.xml
 
       - name: "Upload Test Results"
         if: ${{ always() }}
@@ -104,12 +95,11 @@ jobs:
           name: test-results-artifact
           path: reports/
 
-  # What only a browser shows: that a page is hydrated in place
-  browser:
-    name: "Browser Tests"
+  e2e:
+    name: "End-to-End Tests"
     needs: static
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -119,23 +109,43 @@ jobs:
       - name: "Setup Node.js And Dependencies"
         uses: ./.github/actions/setup
 
-      - name: "Install Chromium"
-        run: pnpm exec playwright install --with-deps chromium
+      - name: "Find Playwright Version"
+        id: playwright
+        run: echo "version=$(pnpm exec playwright --version | cut -d ' ' -f 2)" >> "$GITHUB_OUTPUT"
 
-      - name: "Build Site"
-        run: pnpm build
+      - name: "Restore Chromium And Firefox For This Playwright"
+        id: browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-firefox
 
-      - name: "Run Browser Tests"
-        run: pnpm exec vitest run --project browser --reporter=default --reporter=junit --outputFile.junit=reports/browser.xml
+      - name: "Install Chromium And Firefox"
+        if: ${{ steps.browsers.outputs.cache-hit != 'true' }}
+        run: pnpm exec playwright install --with-deps chromium firefox
+
+      # The cache holds the browsers, not the system libraries they need
+      - name: "Install The Browsers' System Dependencies"
+        if: ${{ steps.browsers.outputs.cache-hit == 'true' }}
+        run: pnpm exec playwright install-deps chromium firefox
+
+      - name: "Build Site And Run End-to-End Tests"
+        run: pnpm test:e2e
 
       - name: "Upload Test Results"
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: test-results-browser
+          name: test-results-e2e
           path: reports/
 
-  # A broken image only shows once it starts
+      - name: "Upload Screenshots And Traces Of Failed Tests"
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-traces
+          path: test-results/
+
   image:
     name: "Image"
     needs: static
@@ -152,8 +162,7 @@ jobs:
       - name: "Build Image"
         run: podman build --tag "$IMAGE:$GITHUB_SHA" .
 
-      # The image boots and serves a page, a translation and the sitemap, without polling the servers
-      - name: "Smoke Test Image"
+      - name: "Serve A Page, A Translation And The Sitemap From The Image"
         run: |
           podman run --detach --name smoke --publish 3000:3000 --env XPD_DISABLE_STATUS=1 "$IMAGE:$GITHUB_SHA"
           for _ in $(seq 30); do

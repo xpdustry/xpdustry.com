@@ -14,8 +14,8 @@ jobs:
     timeout-minutes: 5
     permissions:
       checks: write
-      pull-requests: write # needed unless run with comment_mode: off
-      actions: read # required by download step to access artifacts API
+      pull-requests: write
+      actions: read
     steps:
       - name: "Download and Extract Test Results"
         uses: dawidd6/action-download-artifact@a92c7ae74cf1df8810783758581e485ac3aaa309 # v28

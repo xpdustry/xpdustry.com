@@ -4,16 +4,37 @@ Source for [xpdustry.com](https://xpdustry.com), built with React and [TanStack 
 
 ## Develop
 
-You need Node 26 or newer and pnpm.
+You need Node 26 or newer and pnpm. Node 26 ships no Corepack, so install pnpm with npm: in this repository it switches itself to the version `package.json` names.
 
 ```bash
-corepack enable
+npm install --global pnpm
 pnpm install
+pnpm exec playwright install chromium firefox   # once, for the end-to-end tests
 pnpm dev      # http://localhost:3000
-pnpm check    # format, lint, types, tests and a production build
+pnpm check    # the fast loop: everything below but the end-to-end tests
+pnpm test:e2e # the end-to-end tests, a few minutes; CI runs them on every push
 ```
 
-The tests include a few run in Chromium, which Playwright installs once with `pnpm exec playwright install chromium`.
+## Check and test
+
+`pnpm check` runs these in order, all but `pnpm test:e2e`, and stops at the first that fails. CI runs every one of them on
+each push. Run the narrow one while you work.
+
+| Command                | What it checks                                                                                                                                                        | Where                                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `pnpm format:check`    | Formatting, fixed by `pnpm format`                                                                                                                                    | `.oxfmtrc.json`                                                      |
+| `pnpm lint`            | Code rules with types, warnings included; hover outside `media.hover`; transitions of `all` or the layout; images without `alt`; en and em dashes and horizontal bars | `.oxlintrc.json`, `scripts/oxlint-plugin.ts`, `scripts/lint-text.ts` |
+| `pnpm typecheck`       | Types                                                                                                                                                                 | `tsconfig.json`                                                      |
+| `pnpm deadcode`        | Files, exports and dependencies nothing uses                                                                                                                          | `.fallowrc.jsonc`                                                    |
+| `pnpm health`          | Functions too tangled to follow. The CRAP score is shown, not enforced: fallow guesses its coverage                                                                   | `.fallowrc.jsonc`                                                    |
+| `pnpm architecture`    | Which folders may import which                                                                                                                                        | `.fallowrc.jsonc`                                                    |
+| `pnpm test:unit`       | Logic, beside the code it tests                                                                                                                                       | `src/**/*.test.ts`, `scripts`                                        |
+| `pnpm test:artifact`   | What the production server answers: pages, metadata, sitemap, crawler rules, redirects, headers                                                                       | `tests/artifact`                                                     |
+| `pnpm test:e2e [file]` | What a visitor does and sees in Chromium: text that fits and grows with the browser's font size, touch targets, reduced motion; motion and popovers in Firefox too    | `tests/e2e`                                                          |
+
+Only the entrance and spread tests paint the procedural textures: everywhere else `tests/support/test.ts` refuses the painter's worker, which is most of what a page load costs. The artifact and end-to-end tests build the site first when the source changed since the last build, and serve it on a free `127.0.0.1` port. `tests/artifact/__snapshots__/crawl.json` records what crawlers read of every page: when a change to it is intended, accept it with `pnpm test:artifact -u` and commit it. A failed end-to-end test leaves a screenshot and a trace in `test-results/`, opened with `pnpm exec playwright show-trace`.
+
+What no test can judge (how a motion feels, whether a page or a social card looks right, live server status) is in the `verify-xpdustry` skill under `.agents/skills/`, which also serves the build and takes screenshots and videos of it.
 
 ## Run in production
 

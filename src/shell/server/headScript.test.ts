@@ -17,34 +17,49 @@ const page = (...chunks: string[]) => pageOfBytes(...chunks.map(utf8));
 
 const HEAD =
   '<!DOCTYPE html><html><head><meta charSet="utf-8"/><meta name="viewport" content="x"/>';
+const SCRIPT = '<script type="text/javascript">go()</script>';
 
 describe("withHeadScript", () => {
-  test("puts the script after the viewport, ahead of the stylesheets", async () => {
-    const response = withHeadScript(page(`${HEAD}<link rel="stylesheet" href="a.css"/>`), "go()");
-    expect(await response.text()).toBe(
-      `${HEAD}<script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/>`
-    );
+  const VIEWPORT = '<meta name="viewport" content="x"/>';
+  const SHEET = '<link rel="stylesheet" href="a.css"/>';
+  const CHARSET = '<meta charset="utf-8"/>';
+
+  test.each([
+    [
+      "after the viewport, ahead of the stylesheets",
+      [`${HEAD}${SHEET}`],
+      `${HEAD}${SCRIPT}${SHEET}`
+    ],
+    [
+      "before stylesheets that come ahead of the viewport",
+      [`<head><link rel="preload" href="a.woff2"/>${SHEET}${VIEWPORT}`],
+      `<head><link rel="preload" href="a.woff2"/>${SCRIPT}${SHEET}${VIEWPORT}`
+    ],
+    [
+      "after a viewport cut across chunks, passing the rest of the page through",
+      [HEAD.slice(0, 60), `${HEAD.slice(60)}<title>é</title>`, "</head><body>ü</body>"],
+      `${HEAD}${SCRIPT}<title>é</title></head><body>ü</body>`
+    ],
+    [
+      "behind a charset declaration it moves ahead of the viewport",
+      [`<head>${VIEWPORT}${CHARSET}${SHEET}`],
+      `<head>${CHARSET}${VIEWPORT}${SCRIPT}${SHEET}`
+    ],
+    [
+      "once a charset declaration in a later chunk has come",
+      [`<head>${SHEET}`, `${CHARSET}</head>`],
+      `<head>${CHARSET}${SCRIPT}${SHEET}</head>`
+    ],
+    [
+      "nowhere in a page without a viewport",
+      ["<head></head>", "<body></body>"],
+      "<head></head><body></body>"
+    ]
+  ])("puts the script %s", async (_label, chunks, expected) => {
+    const response = withHeadScript(page(...chunks), "go()");
+    expect(await response.text()).toBe(expected);
     expect(response.status).toBe(404);
     expect(response.headers.has("content-length")).toBe(false);
-  });
-
-  test("puts the script before stylesheets that come ahead of the viewport", async () => {
-    const sheets =
-      '<html><head><link rel="preload" href="a.woff2"/><link rel="stylesheet" href="a.css"/>';
-    const response = withHeadScript(page(`${sheets}<meta name="viewport" content="x"/>`), "go()");
-    expect(await response.text()).toBe(
-      '<html><head><link rel="preload" href="a.woff2"/><script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/><meta name="viewport" content="x"/>'
-    );
-  });
-
-  test("finds a viewport cut across chunks, and passes the rest of the page through", async () => {
-    const response = withHeadScript(
-      page(HEAD.slice(0, 60), `${HEAD.slice(60)}<title>é</title>`, "</head><body>ü</body>"),
-      "go()"
-    );
-    expect(await response.text()).toBe(
-      `${HEAD}<script type="text/javascript">go()</script><title>é</title></head><body>ü</body>`
-    );
   });
 
   test.each([
@@ -55,7 +70,7 @@ describe("withHeadScript", () => {
     const head = `<html><head><title>${character}</title><meta name="viewport" content="x"/>`;
     const rest = `${character}<title>${character}</title></head><body>${character}</body>`;
     const bytes = utf8(head + rest);
-    const expected = utf8(`${head}<script type="text/javascript">go()</script>${rest}`);
+    const expected = utf8(`${head}${SCRIPT}${rest}`);
     for (let cut = 1; cut < bytes.length; cut++) {
       const response = withHeadScript(pageOfBytes(bytes.slice(0, cut), bytes.slice(cut)), "go()");
       expect(new Uint8Array(await response.arrayBuffer()), `cut at byte ${cut}`).toEqual(expected);
@@ -69,15 +84,7 @@ describe("withHeadScript", () => {
       "go()"
     );
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(
-      new Uint8Array([
-        0xef,
-        0xbb,
-        0xbf,
-        ...head,
-        ...utf8('<script type="text/javascript">go()</script>'),
-        0xc3,
-        0x28
-      ])
+      new Uint8Array([0xef, 0xbb, 0xbf, ...head, ...utf8(SCRIPT), 0xc3, 0x28])
     );
   });
 
@@ -98,35 +105,6 @@ describe("withHeadScript", () => {
     expect(
       Buffer.byteLength(text.slice(0, text.indexOf(charset) + charset.length))
     ).toBeLessThanOrEqual(1024);
-  });
-
-  test("moves a charset declaration that follows the viewport ahead of the script", async () => {
-    const head =
-      '<html><head><meta name="viewport" content="x"/><meta charset="utf-8"/><link rel="stylesheet" href="a.css"/>';
-    const text = await withHeadScript(page(head), "go()").text();
-    expect(text).toBe(
-      '<html><head><meta charset="utf-8"/><meta name="viewport" content="x"/><script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/>'
-    );
-  });
-
-  test("waits for a charset declaration in a later chunk before placing the script", async () => {
-    const response = withHeadScript(
-      page('<html><head><link rel="stylesheet" href="a.css"/>', '<meta charset="utf-8"/></head>'),
-      "go()"
-    );
-    expect(await response.text()).toBe(
-      '<html><head><meta charset="utf-8"/><script type="text/javascript">go()</script><link rel="stylesheet" href="a.css"/></head>'
-    );
-  });
-
-  test("places the script once", async () => {
-    const text = await withHeadScript(page(HEAD, HEAD), "go()").text();
-    expect(text.split('<script type="text/javascript">go()</script>')).toHaveLength(2);
-  });
-
-  test("leaves a page without a viewport as it is", async () => {
-    const response = withHeadScript(page("<html><head></head>", "<body></body></html>"), "go()");
-    expect(await response.text()).toBe("<html><head></head><body></body></html>");
   });
 
   test("leaves what is not a page alone", () => {

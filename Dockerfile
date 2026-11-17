@@ -31,9 +31,7 @@ RUN groupadd --gid 1001 appgroup && \
 
 COPY --from=prod-deps --chown=appuser:appgroup /app/node_modules ./node_modules
 COPY --from=build --chown=appuser:appgroup /app/dist ./dist
-COPY --from=build --chown=appuser:appgroup /app/scripts/serve.ts ./scripts/serve.ts
-COPY --from=build --chown=appuser:appgroup /app/scripts/compression.ts ./scripts/compression.ts
-COPY --from=build --chown=appuser:appgroup /app/scripts/files.ts ./scripts/files.ts
+COPY --from=build --chown=appuser:appgroup /app/scripts/server ./scripts/server
 COPY --from=build --chown=appuser:appgroup /app/package.json ./package.json
 
 ENV NODE_ENV=production \
@@ -43,4 +41,4 @@ ENV NODE_ENV=production \
 USER appuser:appgroup
 EXPOSE 3000
 
-CMD ["node", "scripts/serve.ts"]
+CMD ["node", "scripts/server/serve.ts"]

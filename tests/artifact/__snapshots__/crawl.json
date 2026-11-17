@@ -72,7 +72,7 @@
   "/fr/blog/nohorny-4-beta-11": {
     "title": "NoHorny 4 Bêta 11 : panneau d’admin et suivi étendu - Xpdustry",
     "description": "NoHorny gère les écrans modulaires, trieurs et illuminateurs, et s’offre un site avec pages de requêtes et panneau d’admin. Sans doute la dernière bêta avant la v4.",
-    "h1": "NoHorny 4 Bêta 11 : panneau d’admin et suivi étendu",
+    "h1": "NoHorny 4 Bêta 11 : panneau d’admin et suivi étendu",
     "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-11",
     "card": "/fr/og/blog/nohorny-4-beta-11.png",
     "structuredData": "BlogPosting, BreadcrumbList",
@@ -102,7 +102,7 @@
   "/fr/blog/nohorny-4-beta-8": {
     "title": "NoHorny 4 Bêta 8 : incompatibilité et alertes floutées - Xpdustry",
     "description": "Le rendu des bâtiments suivis se fait désormais en local : les clients bêta 7 sont incompatibles avec le serveur public. Les alertes Discord sont floutées.",
-    "h1": "NoHorny 4 Bêta 8 : incompatibilité et alertes floutées",
+    "h1": "NoHorny 4 Bêta 8 : incompatibilité et alertes floutées",
     "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-8",
     "card": "/fr/og/blog/nohorny-4-beta-8.png",
     "structuredData": "BlogPosting, BreadcrumbList",
@@ -132,7 +132,7 @@
   "/fr/blog/nohorny-4-beta-7": {
     "title": "NoHorny 4 Bêta 7 : des bannissements automatiques fiables - Xpdustry",
     "description": "Deux améliorations de la précision qui, ensemble, rendent enfin fiables les bannissements automatiques sur la base d’un verdict NSFW.",
-    "h1": "NoHorny 4 Bêta 7 : des bannissements automatiques fiables",
+    "h1": "NoHorny 4 Bêta 7 : des bannissements automatiques fiables",
     "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-7",
     "card": "/fr/og/blog/nohorny-4-beta-7.png",
     "structuredData": "BlogPosting, BreadcrumbList",
@@ -162,7 +162,7 @@
   "/fr/blog/nohorny-4-beta-3": {
     "title": "NoHorny 4 Bêta 3 : regroupement incrémental - Xpdustry",
     "description": "Comment NoHorny est passé du balayage de toute la carte dans un thread en arrière-plan à un algorithme de regroupement incrémental synchrone.",
-    "h1": "NoHorny 4 Bêta 3 : regroupement incrémental",
+    "h1": "NoHorny 4 Bêta 3 : regroupement incrémental",
     "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-3",
     "card": "/fr/og/blog/nohorny-4-beta-3.png",
     "structuredData": "BlogPosting, BreadcrumbList",
@@ -192,7 +192,7 @@
   "/fr/blog/nohorny-4-beta-1": {
     "title": "NoHorny v4 bêta 1 est là ! - Xpdustry",
     "description": "Plus besoin de configurer manuellement un service externe de détection NSFW. Un serveur hébergé est fourni par défaut et le suivi est quasi instantané.",
-    "h1": "NoHorny v4 bêta 1 est là !",
+    "h1": "NoHorny v4 bêta 1 est là !",
     "canonical": "https://xpdustry.com/fr/blog/nohorny-4-beta-1",
     "card": "/fr/og/blog/nohorny-4-beta-1.png",
     "structuredData": "BlogPosting, BreadcrumbList",

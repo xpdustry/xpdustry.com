@@ -1,142 +1,78 @@
 ---
 name: verify-xpdustry
-description: "Drive a production build of the Xpdustry website (xpdustry.com: TanStack Start, served by scripts/serve.ts) in a real browser and over HTTP, and capture proof that a page, a language, the blog, the copy-address buttons, the team and its profiles, search metadata or live server status works. Use before shipping, after changing UI, routes, translations or SEO, and whenever `pnpm check` passing is not enough evidence."
+description: "Serve a production build of the Xpdustry website (xpdustry.com: TanStack Start, served by scripts/server/serve.ts) for someone to look at, and capture screenshots, ARIA trees and videos of it as evidence. Use after a visible change, to reply with screenshots; for live server status against the real game servers, Discord and GitHub; and for what no test can judge: how an animation feels, whether a social card or a page looks right."
 ---
 
 # Verify Xpdustry
 
-`pnpm check` proves the code compiles and the built server answers. This skill proves what a visitor gets: it serves the production build on its own port, drives it with Playwright, and keeps screenshots, ARIA trees and transcripts.
+What a machine can judge is tested: `pnpm check` runs all of it but the end-to-end tests, which `pnpm test:e2e` and CI run. This skill is for the rest: showing what changed, and the checks that need eyes or the real outside world.
 
-Everything goes through one helper, run from the repository root:
+## What the tests already prove
 
-```sh
-V="node .agents/skills/verify-xpdustry/verify.ts"
-```
+Run the narrow one while you work; `pnpm check && pnpm test:e2e` runs all of them.
 
-Shell state does not carry between tool calls, so start every command with that `V=` line.
+| What                                                                                                                                                        | Where                                                          | Run                                                                      |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Pages, metadata, sitemap, crawler rules, redirects, headers, caching, languages by address, the API                                                         | `tests/artifact/`                                              | `pnpm test:artifact`                                                     |
+| What crawlers read of every page, against its snapshot                                                                                                      | `tests/artifact/crawl.test.ts`                                 | `pnpm exec vitest run --project artifact crawl`, `-u` to accept a change |
+| Hydration, the language switch, copying addresses, the team and its profiles, opening a post                                                                | `tests/e2e/`                                                   | `pnpm test:e2e <file>`, as in `pnpm test:e2e copy`                       |
+| The texture entrance, the spreads and the team's popovers, in Chromium and Firefox                                                                          | `tests/e2e/entrance.test.ts`, `spread.test.ts`, `team.test.ts` | `pnpm test:e2e entrance --project firefox`                               |
+| Text that no longer fits or grows with the browser's font size, project art over text: 4 pages, up to 7 widths and 3 languages, 4 text settings, 188 states | `tests/e2e/fit.test.ts`                                        | `pnpm test:e2e fit`, or `-g " /fr/blog fits"` for one page               |
+| Hover outside `media.hover`, transitions of `all` or the layout, images without `alt`, en and em dashes and horizontal bars                                 | `pnpm lint`                                                    | `pnpm lint`                                                              |
+| Touch targets, reduced motion, the language list without anchor positioning                                                                                 | `tests/e2e/controls.test.ts`, `popover-fallback.test.ts`       | `pnpm test:e2e controls`                                                 |
 
-`verify.ts` only dispatches; each command lives in a module beside it: `instance.ts` (`launch`, `doctor`, `stop`), `run.ts`, `audit.ts`, `seo.ts`. The checks `audit` runs inside the page are in `page-checks.ts`. Playwright sends each one to the browser as source text, so a check can use only what `installHelpers` puts on `window`, never an import.
-
-Run `pnpm install` first: the helper uses the repo's own `playwright` dev dependency. A machine that has never run it also needs each browser once, and again after a Playwright upgrade: `pnpm exec playwright install chromium firefox`. Playwright never downloads one on its own; the helper says what is missing and the command that installs it.
+When a test fails, `test-results/` holds its screenshot and a trace: `pnpm exec playwright show-trace <trace.zip>`. When a translation, a heading or a post changes what crawlers read on purpose, accept the snapshot with `-u` and commit it with the change.
 
 ## Launch
 
 ```sh
-$V launch          # build, serve on a free 127.0.0.1 port, wait until / and /fr/blog render
-$V launch --live   # same, with status polling on
-```
-
-Ready is the line `ready: http://127.0.0.1:<port>`. The instance is recorded in `.verify/instance.json` and its log is `.verify/server.log`.
-
-- Without `--live` the server makes no outside requests: player counts read "Checking" and the Discord and GitHub figures are absent. Use this for everything except [live status](features/live-status.md).
-- With `--live` it queries the real Mindustry servers, Discord and the GitHub API every 30 seconds. Those are public, read-only requests.
-- One instance per checkout; `launch` refuses while one runs. Separate checkouts get separate ports and never collide.
-- `launch` builds into the checkout's `dist/`, which `pnpm start` and any preview of it serve too. It refuses while such a server runs, since swapping the files under it makes it answer with 500s and missing assets: stop that server, launch, then start it again.
-- The site has no database, accounts or seed data. Content is the Markdown under `src/blog/posts/` and the strings in `src/_gt/`, all compiled into the build.
-- Never drive the developer's `pnpm dev` server or the deployed site with these recipes.
-
-## Doctor
-
-```sh
-$V doctor
-```
-
-Read-only. It exits 0 only when the recorded process is still this checkout's server, `/healthz` reports `ok`, the home page renders, and no source file changed since the build. Run it first whenever a result looks wrong. `run`, `audit` and `seo` refuse the same way on a stale build. After any edit it fails with "source changed since the build": `$V stop`, then `$V launch`.
-
-## Drive
-
-Pipe JavaScript to `run`, with a label that names the evidence folder. The script is the body of an async function, so `await` works at the top level:
-
-```sh
-$V run languages <<'EOF'
-const page = await newPage({ width: 390, language: "fr" });
-await go(page, "/");
-print(page.url());
-await snap(page, "home");
-EOF
-```
-
-The script gets:
-
-| Name                                                                                                       | What it is                                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `newPage({ width = 1280, height = 800, language = "en", motion = false, scripts = true, record = false })` | A fresh visitor (no cookies) as a Playwright `Page`. `language` is the browser language. Clipboard access is granted. Motion is reduced unless `motion` is true: pass it to see an animation. `scripts: false` gives the page as the server sent it, in Chromium only. `record: true` keeps a video of the visit in the evidence folder. |
-| `go(page, path)`                                                                                           | Navigate to a site path and wait for the network and fonts to settle.                                                                                                                                                                                                                                                                    |
-| `get(path, headers)`                                                                                       | Plain HTTP GET that does not follow redirects: `{ status, headers, body }`, with lower-case header names and `body` as a `Buffer`. Use it for redirects, feeds, images and status codes.                                                                                                                                                 |
-| `snap(page, name)`                                                                                         | Save `name.png` and `name.aria.txt` (URL, title and ARIA tree) to the evidence folder.                                                                                                                                                                                                                                                   |
-| `save(name, content)`                                                                                      | Save a string or bytes as evidence.                                                                                                                                                                                                                                                                                                      |
-| `print(...)`                                                                                               | Like `console.log`, also written to `output.txt` in the evidence folder.                                                                                                                                                                                                                                                                 |
-| `expect(ok, what, seen)`                                                                                   | Print `ok` or `FAIL`, the check's name and what was seen, and end the run on a `FAIL`. Use it for every check a recipe makes, so a run either prints all `ok` or stops at the first failure.                                                                                                                                             |
-| `base`, `browser`, `evidence`                                                                              | The instance URL, the Playwright browser and the evidence folder.                                                                                                                                                                                                                                                                        |
-
-When a script throws, the helper prints the failing line of your script (the outermost one, so a check that throws from your own helper names its caller), saves `failure-*.png` of every open page, and exits 1. Pages of a context you opened yourself with `browser.newContext` are included, and every context is closed when the run ends.
-
-Find elements by role and accessible name (`page.getByRole("button", { name: "Language: English" })`), never by generated class names: they change on every build. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`, `#team`. Names are translated: `src/_gt/*.json` are keyed by a hash, so find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. Below 520px the navigation links and the language button are not in the accessibility tree until the `Menu` button is pressed; wait for the `h1` or the `Menu` button, and expect the menu to close after a language is chosen. Client-side navigation changes the URL before the new page paints, so wait for something on the new page (`await page.getByRole("heading", { level: 1, name: "…" }).waitFor()`), not only for the URL.
-
-`run` drives Chromium. To repeat a script in Firefox, pass the browser after the label:
-
-```sh
-$V run languages --browser firefox < script.js
-```
-
-`audit` and `seo` always use Chromium.
-
-Each [feature file](features/README.md) has the exact script for its journeys. Read the index first.
-
-```sh
-$V audit                   # every language, 8 widths, 5 pages (about a minute)
-$V audit fr               # one language
-```
-
-`audit` looks for text that no longer fits. The widths are 1440, 1280, 1160, 1000, 760, 600, 390 and 320px. Each page is loaded once per width and checked under four text settings in turn:
-
-| Setting          | What it does                                                                                                                     | What it catches                                            |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| default          | nothing                                                                                                                          | the design checks below, clipped text, sideways scrolling  |
-| `text 200%`      | sets the browser's own font size to 32px, as a reader does in the settings of Chrome, Edge or Firefox; rem breakpoints follow it | clipped text, sideways scrolling, text that keeps its size |
-| `text zoom 200%` | doubles the root font size while every breakpoint stays put, the worst case of a text-only zoom                                  | clipped text, sideways scrolling                           |
-| `text spacing`   | applies the WCAG 1.4.12 overrides: line height 1.5, letter spacing 0.12em, word spacing 0.16em, paragraphs 2em                   | clipped text, sideways scrolling                           |
-
-The design checks, at the default size only: a navigation item that wraps, a header control left adrift from the group on the right, a section title that runs under its button, a truncated section subtitle, text that leaves the screen. Under every setting:
-
-- `page scrolls sideways by Npx, <region>: <text>` names the widest element that is not inside a clipping box, and whether it is in the header, `main` or the footer.
-- `popover leaves the screen: <text>` is a popover, as a teammate's profile is, that reaches past an edge of the screen once open, where nothing can scroll to it. Each one whose button is on show is opened with that button in view, measured and closed.
-- `text clipped, <region>: <text>` is text cut off by a box with hidden overflow: a fixed height, `nowrap`, an ellipsis, a word too long for its column. Text that is visually hidden on purpose (`.sr-only`, transparent, a 1px box) is skipped.
-- `text ignores the font size setting, <region>: <text>` is text under 24px that kept its size when the browser's font size doubled: a font size in px. Font sizes go through `rem()` from `src/ui/styles/scale.ts`, breakpoints through `media` and `upTo` from `src/ui/styles/media.ts`, container queries through `narrowerThan`.
-
-It prints one line per finding, as `<width> <url>[, <setting>]: <what>`, and exits 1 if there is any. It is the check for visible text; `seo` does not notice a label that wraps. Run it after every change to `src/_gt/*.json`, to a heading, or to layout styles. A full run takes about a minute and a half.
-
-```sh
-$V seo            # every sitemap page: fixed rules, then a comparison with the baseline
-$V seo --accept   # record the current state as the new baseline
-```
-
-`seo` reads every page in the sitemap as served, with scripts off and no cookies, the way a crawler does, and exits 1 on either kind of finding:
-
-- `PROBLEM` lines break a rule that always holds: a sitemap page that is not 200, a title over 70 characters or a description outside 50-170, a duplicated title or description, a canonical that is not the page's own production URL, `noindex`, the wrong `<html lang>`, not exactly one `h1`, `hreflang` links that are incomplete or not returned by the other language, missing Open Graph tags, a card image that does not load, structured data that does not parse, an image without `alt`, an internal link that redirects or 404s or leads to a page missing from the sitemap. Fix these.
-- `CHANGED` lines differ from `seo-baseline.json` beside this file: a page added or gone, or a page's title, description, `h1`, canonical, card, structured data types, word count or link count. Read each one. An intended change is accepted with `--accept` and the baseline is committed with it; an unintended one (a page that lost half its words, a title that reverted to English) is the regression this exists to catch.
-
-It needs the default launch and refuses a `--live` one, because live counts change the page text it compares.
-
-Run it after any change to routes, `src/seo/meta.ts`, `src/seo/structuredData.ts`, the sitemap, page headings, posts or `src/_gt/*.json`.
-
-## Evidence
-
-Each `run` writes `.verify/evidence/<date>-<time>-<label>/` (local time): the script as `drive.js`, `output.txt`, and whatever it snapped or saved. `audit` and `seo` write their findings to an `output.txt` in a folder of their own. `.verify/` is git-ignored. Cite the folder when you report a result.
-
-A proof is acceptable when it:
-
-- goes through what a visitor does (a click, a typed URL, a browser language), not through component props, router internals or a unit test;
-- records the action and the state after it: the URL, the `lang`, the clipboard, the announced status, not only a final screenshot;
-- checks the side effect itself. For a copy button that is the clipboard content; for a language choice it is the `generaltranslation.locale` cookie and where `/` lands afterwards;
-- states which launch mode it used. A journey that needs `--live` and ran without it is skipped, not passed.
-
-Report a journey you could not run with the command you tried and what was missing. Do not count it as verified through another path.
-
-## Cleanup
-
-```sh
+V="node .agents/skills/verify-xpdustry/verify.ts"
+$V launch          # build if the source changed, serve on a free 127.0.0.1 port
+$V launch --live   # the same, polling the real Mindustry servers, Discord and GitHub
+$V doctor          # is it this checkout's server, healthy, and built from the current source?
 $V stop
 ```
 
-It signals only the process group this checkout launched, after checking the pid still is that server, and removes `.verify/instance.json`. It never kills by name and never touches `.verify/evidence/`. Run it after a failed attempt too. Evidence folders accumulate; delete old ones by hand when they are no longer cited.
+Shell state does not carry between tool calls: start every command with the `V=` line. Run `pnpm install` once, and `pnpm exec playwright install chromium firefox` on a machine that has never run Playwright.
+
+- `ready: http://127.0.0.1:<port>` means it serves. The instance is recorded in `.verify/instance.json`, its log is `.verify/server.log`.
+- Without `--live` the server makes no outside request: player counts read "Checking", and the Discord and GitHub figures are absent.
+- One instance per checkout. `launch` refuses while another server of this checkout's `dist/` runs, as `pnpm start` does: a build would replace its files under it.
+- After an edit `doctor` and `run` say the source changed: `stop`, then `launch`.
+- Never point this at the developer's `pnpm dev` server or the deployed site.
+
+## Capture evidence
+
+Pipe a script to `run`, with a label that names its evidence folder. The script is the body of an async function:
+
+```sh
+$V run header <<'EOF'
+const page = await newPage({ width: 390, language: "fr" });
+await go(page, "/");
+await page.getByRole("button", { name: "Menu" }).click();
+await snap(page, "menu-open");
+EOF
+```
+
+| Name                                                                                                       | What it is                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `newPage({ width = 1280, height = 800, language = "en", motion = false, scripts = true, record = false })` | A fresh visitor, as a Playwright `Page`. Motion is reduced unless `motion` is true. `scripts: false` works in Chromium only. `record: true` keeps a video of the visit. |
+| `go(page, path)`                                                                                           | Navigate and wait for the network and the fonts to settle.                                                                                                              |
+| `get(path, headers)`                                                                                       | A plain GET that sends only `headers` and follows no redirect, as a `Response`.                                                                                         |
+| `snap(page, name)`                                                                                         | Save `name.png` and `name.aria.txt` (URL, title and ARIA tree).                                                                                                         |
+| `save(name, content)`, `print(...)`                                                                        | Keep a string or bytes; print a line, also kept in `output.txt`.                                                                                                        |
+| `base`, `browser`, `evidence`                                                                              | The instance URL, the Playwright browser, the evidence folder.                                                                                                          |
+
+`--browser firefox` after the label runs the script in Firefox. A script that throws leaves `failure-*.png` of every open page and exits 1. Each run writes `.verify/evidence/<date>-<time>-<label>/`, which is git-ignored: cite it, and attach the screenshots to your reply.
+
+Find elements by role and accessible name, never by generated class names. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`, `#team`. Names are translated: find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. Below 520px the navigation and the language list are in the `Menu`.
+
+A screenshot proves what it shows. Look at it before you cite it: text in the wrong language, a fallback font, a cut word or an overlap are failures even when every test passes. For a change that moves, record it.
+
+## What only a person or the real world can check
+
+Each file says how to get there and what to judge. Read the [index](features/README.md).
+
+- [Live status](features/live-status.md): counts from the real game servers, Discord and GitHub, and the team as Discord lists it.
+- [Texture entrance](features/texture-entrance.md) and [copy spreads](features/copy-server-address.md): how the motion feels.
+- [Social cards](features/search-metadata.md): whether each card reads well in its language.

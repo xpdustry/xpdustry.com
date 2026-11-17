@@ -24,3 +24,7 @@ Thumbs.db
 # Verification runs (.agents/skills/verify-xpdustry)
 .verify
 .fallow/
+
+# Test reports and Playwright Test runs
+reports
+test-results
