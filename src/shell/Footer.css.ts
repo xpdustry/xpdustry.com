@@ -6,6 +6,7 @@ import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
 import { onDeep } from "./onDeep";
 import { logoWidth, nameSize } from "#app/brand/Brand.css";
+import { PLINTH_CENTRED_ABOVE_ITS_BOX_BY } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = upTo(900);
@@ -133,7 +134,7 @@ export const top = style({
   }
 });
 
-reachTouchTarget(`${footer} ${top}`);
+reachTouchTarget(`${footer} ${top}`, PLINTH_CENTRED_ABOVE_ITS_BOX_BY);
 
 globalStyle(`${footer} ${top} > span`, {
   "@media": {

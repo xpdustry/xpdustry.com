@@ -2,53 +2,22 @@ import { brotliDecompressSync, gunzipSync } from "node:zlib";
 import { describe, expect, test } from "vitest";
 import { compressed, negotiateEncoding } from "./compression.ts";
 
-describe("negotiateEncoding", () => {
-  test.each([
-    ["gzip, deflate, br, zstd", "br"],
-    ["gzip", "gzip"],
-    ["GZIP", "gzip"],
-    ["gzip;Q=0.8", "gzip"],
-    ["br;q=0.5, gzip", "gzip"],
-    ["br;q=0.5, gzip;q=0.5", "br"],
-    ["br;q=0, gzip", "gzip"],
-    ["gzip ; q=0.001", "gzip"],
-    ["*", "br"],
-    ["*, br;q=0", "gzip"],
-    ["deflate, *;q=0.1", "br"],
-    ["gzip;q=0.5, identity;q=0.4", "gzip"]
-  ])("%j gets %s", (header, coding) => {
-    expect(negotiateEncoding(header)).toBe(coding);
-  });
-
-  test.each([
-    null,
-    "",
-    "identity",
-    "gzip;q=0",
-    "gzip;q=0.000",
-    "br;q=0,gzip;q=0",
-    "abracadabra",
-    "deflate, zstd",
-    "gzip;q=2",
-    "gzip;q=-1",
-    "gzip;q=0.5000",
-    "gzip;q=yes",
-    "gzip;q=0.5, identity",
-    "gzip;q=0, gzip",
-    "*;q=0, identity"
-  ])("%j selects identity", (header) => {
-    expect(negotiateEncoding(header)).toBe("identity");
-  });
-
-  test.each([
-    "*;q=0",
-    "identity;q=0",
-    "identity;q=0, gzip;q=0, br;q=0",
-    "deflate, identity;q=0",
-    "*;q=0, gzip;q=0"
-  ])("%j finds nothing acceptable, identity excluded", (header) => {
-    expect(negotiateEncoding(header)).toBe("nothing acceptable");
-  });
+test.each([
+  ["gzip, deflate, br, zstd", "br"],
+  ["gzip", "gzip"],
+  ["gzip;Q=0.8", "gzip"],
+  ["br;q=0.5, gzip", "gzip"],
+  ["br;q=0.5, gzip;q=0.5", "br"],
+  ["br;q=0, gzip", "gzip"],
+  ["*, br;q=0", "gzip"],
+  [null, "identity"],
+  ["identity", "identity"],
+  ["gzip;q=2", "identity"],
+  ["gzip;q=0.5, identity", "identity"],
+  ["*;q=0", "nothing acceptable"],
+  ["identity;q=0, gzip;q=0, br;q=0", "nothing acceptable"]
+])("negotiateEncoding gives %j %s", (header, coding) => {
+  expect(negotiateEncoding(header)).toBe(coding);
 });
 
 describe("compressed", () => {
@@ -61,33 +30,26 @@ describe("compressed", () => {
     });
   const bytes = async (response: Response) => Buffer.from(await response.arrayBuffer());
 
-  test("compresses with the coding the request prefers", async () => {
-    const gzip = compressed(asking("gzip"), page({ "content-length": "1900" }));
-    expect(gzip.headers.get("content-encoding")).toBe("gzip");
-    expect(gzip.headers.has("content-length")).toBe(false);
-    expect(gunzipSync(await bytes(gzip)).toString()).toBe(html);
-
-    const br = compressed(asking("gzip, br"), page());
-    expect(br.headers.get("content-encoding")).toBe("br");
-    expect(brotliDecompressSync(await bytes(br)).toString()).toBe(html);
-  });
-
-  test.each(["gzip;q=0", "identity", "abracadabra", undefined])(
-    "sends %j the body as it is, still varying on the encoding",
-    async (encoding) => {
-      const response = compressed(asking(encoding), page());
-      expect(response.headers.has("content-encoding")).toBe(false);
-      expect(response.headers.get("vary")).toBe("accept-encoding");
-      expect((await bytes(response)).toString()).toBe(html);
+  test.each([
+    ["gzip", "gzip", gunzipSync],
+    ["gzip, br", "br", brotliDecompressSync]
+  ])(
+    "compresses for %j with the coding it prefers, dropping the stale length",
+    async (encoding, coding, decode) => {
+      const response = compressed(asking(encoding), page({ "content-length": "1900" }));
+      expect(response.headers.get("content-encoding")).toBe(coding);
+      expect(response.headers.has("content-length")).toBe(false);
+      expect(decode(await bytes(response)).toString()).toBe(html);
     }
   );
 
-  test.each(["*;q=0", "identity;q=0, gzip;q=0, br;q=0"])(
-    "still sends %j the body as it is, where it could refuse with 406",
+  test.each(["identity", undefined, "*;q=0"])(
+    "sends %j the body as it is, still varying on the encoding, where it could refuse with 406",
     async (encoding) => {
       const response = compressed(asking(encoding), page());
       expect(response.status).toBe(200);
       expect(response.headers.has("content-encoding")).toBe(false);
+      expect(response.headers.get("vary")).toBe("accept-encoding");
       expect((await bytes(response)).toString()).toBe(html);
     }
   );

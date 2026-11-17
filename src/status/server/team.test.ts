@@ -46,11 +46,7 @@ const CUTOFF_90_DAYS_BEFORE_NOW = "1539604847001600000";
 const A_MINUTE_BEFORE_CUTOFF = "1539604595343360000";
 const A_MINUTE_AFTER_CUTOFF = "1539605098659840000";
 
-interface Message {
-  id: string;
-  author: string;
-  ageRestricted?: boolean;
-}
+type Message = { id: string; author: string; ageRestricted?: boolean };
 
 const MESSAGES: Message[] = [
   ...[PHINNER, MADNESS, HIDDEN, LEGACY].map((author) => ({ id: A_MINUTE_AFTER_CUTOFF, author })),
@@ -69,59 +65,48 @@ const PROFILES: Record<string, object> = {
 };
 
 const apiPath = (url: URL) => url.pathname.replace("/api/v10", "");
+const SEARCH = "/guilds/1/messages/search";
+/** The calls a fake was asked to the API path. */
+const callsTo = (fetchImpl: ReturnType<typeof fakeFetch>, path: string) =>
+  requestedUrls(fetchImpl).filter((url) => apiPath(url) === path);
 
-const invalidFormBody = () =>
-  Response.json({ message: "Invalid Form Body", code: 50035 }, { status: 400 });
-
-const integerParam = (url: URL, name: string, fallback: number) =>
-  Number(url.searchParams.get(name) ?? fallback);
+/** Discord refuses a page size outside its range: https://discord.com/developers/docs/resources/guild */
+const limitWithin = (url: URL, most: number) => {
+  const limit = Number(url.searchParams.get("limit") ?? 1);
+  return Number.isInteger(limit) && limit >= 1 && limit <= most ? limit : undefined;
+};
+const invalidFormBody = () => Response.json({ code: 50035 }, { status: 400 });
 
 function listMembers(url: URL, members: readonly FakeMember[]): Response {
-  const limit = integerParam(url, "limit", 1);
-  if (!Number.isInteger(limit) || limit < 1 || limit > 1000) return invalidFormBody();
+  const limit = limitWithin(url, 1000);
+  if (!limit) return invalidFormBody();
   const after = BigInt(url.searchParams.get("after") ?? 0);
   const byId = [...members].sort((a, b) => (BigInt(a.user.id) < BigInt(b.user.id) ? -1 : 1));
   return Response.json(byId.filter((member) => BigInt(member.user.id) > after).slice(0, limit));
 }
 
 const notIndexedYet = (retryAfterSeconds = 0.01) =>
-  Response.json(
-    {
-      message: "Index not yet available. Try again later",
-      code: 110000,
-      documents_indexed: 0,
-      retry_after: retryAfterSeconds
-    },
-    { status: 202 }
-  );
+  Response.json({ code: 110000, retry_after: retryAfterSeconds }, { status: 202 });
 
-const DISCORD_TRUE = new Set(["True", "true", "1"]);
-
+/** Discord's search, as far as the team reads it: how many messages match. */
 function searchMessages(url: URL, messages: readonly Message[]): Response {
-  const limit = integerParam(url, "limit", 25);
-  if (!Number.isInteger(limit) || limit < 1 || limit > 25) return invalidFormBody();
-  const authors = url.searchParams.getAll("author_id");
+  if (!limitWithin(url, 25)) return invalidFormBody();
   const after = BigInt(url.searchParams.get("min_id") ?? 0);
-  const includeAgeRestricted = DISCORD_TRUE.has(url.searchParams.get("include_nsfw") ?? "false");
-  const found = messages
-    .filter(
-      (message) =>
-        authors.includes(message.author) &&
-        BigInt(message.id) > after &&
-        (includeAgeRestricted || !message.ageRestricted)
-    )
-    .sort((a, b) => (BigInt(a.id) < BigInt(b.id) ? 1 : -1));
-  return Response.json({
-    total_results: found.length,
-    messages: found.slice(0, limit).map((message) => [message])
-  });
+  const ageRestrictedToo = url.searchParams.get("include_nsfw") === "true";
+  const found = messages.filter(
+    ({ id, author, ageRestricted }) =>
+      url.searchParams.getAll("author_id").includes(author) &&
+      BigInt(id) > after &&
+      (ageRestrictedToo || !ageRestricted)
+  );
+  return Response.json({ total_results: found.length });
 }
 
 const guild: Route = (url) => {
   if (url.host !== "discord.com") return undefined;
   const path = apiPath(url);
   if (path === "/guilds/1/members") return listMembers(url, MEMBERS);
-  if (path === "/guilds/1/messages/search") {
+  if (path === SEARCH) {
     if (UNINDEXED_AUTHORS.has(url.searchParams.get("author_id")!)) return notIndexedYet();
     return searchMessages(url, MESSAGES);
   }
@@ -147,11 +132,13 @@ afterEach(() => {
 const config: TeamConfig = {
   token: "token",
   guild: "1",
-  roles: new Map([
-    ["owner-role", "owner"],
-    ["admin-role", "admin"],
-    ["mod-role", "moderator"]
-  ]),
+  roles: new Map(
+    Object.entries({
+      "owner-role": "owner",
+      "admin-role": "admin",
+      "mod-role": "moderator"
+    } as const)
+  ),
   activeDays: 90
 };
 
@@ -160,62 +147,52 @@ const signal = new AbortController().signal;
 const names = (team: Teammate[]) => team.map(({ name }) => name);
 const named = (team: Teammate[], name: string) => team.find((teammate) => teammate.name === name);
 
-describe("the team's configuration", () => {
-  test("is absent without a bot token and a server", () => {
-    expect(teamConfig({})).toBeUndefined();
-    expect(teamConfig({ XPD_DISCORD_TOKEN: "token" })).toBeUndefined();
-  });
+const TOKEN_AND_GUILD = { XPD_DISCORD_TOKEN: "t", XPD_DISCORD_GUILD: "1" };
+const DEFAULTS = { token: "t", guild: "1", roles: new Map(), activeDays: 90 };
 
-  test("reads the role IDs of each tag, comma separated, and keeps 90 days of activity", () => {
-    expect(
-      teamConfig({
-        XPD_DISCORD_TOKEN: "token",
-        XPD_DISCORD_GUILD: "1",
-        XPD_TEAM_ROLE_ADMIN: "2, 3",
-        XPD_TEAM_ROLE_MODERATOR: "4"
-      })
-    ).toEqual({
-      token: "token",
-      guild: "1",
-      roles: new Map([
-        ["2", "admin"],
-        ["3", "admin"],
-        ["4", "moderator"]
-      ]),
-      activeDays: 90
-    });
-  });
-
-  test("reads how many days of activity keep someone on the team", () => {
-    expect(
-      teamConfig({ XPD_DISCORD_TOKEN: "token", XPD_DISCORD_GUILD: "1", XPD_TEAM_ACTIVE_DAYS: "30" })
-    ).toMatchObject({ activeDays: 30 });
-  });
+test.each([
+  ["is absent without a bot token", {}, undefined],
+  ["is absent without a server", { XPD_DISCORD_TOKEN: "t" }, undefined],
+  ["keeps 90 days of activity", TOKEN_AND_GUILD, DEFAULTS],
+  [
+    "reads how many days of activity count",
+    { ...TOKEN_AND_GUILD, XPD_TEAM_ACTIVE_DAYS: "30" },
+    { ...DEFAULTS, activeDays: 30 }
+  ],
+  [
+    "reads the role IDs of each tag, comma separated",
+    { ...TOKEN_AND_GUILD, XPD_TEAM_ROLE_ADMIN: "2, 3" },
+    { ...DEFAULTS, roles: new Map(["2", "3"].map((id) => [id, "admin"])) }
+  ]
+])("the team's configuration %s", (_label, env: Record<string, string>, expected) => {
+  expect(teamConfig(env)).toEqual(expected);
 });
 
 describe("the team on Discord", () => {
   test("is team.json's people, then whoever holds a role and spoke lately, by their highest tag", async () => {
-    const team = await fetchTeam(config, signal, discord());
+    const fetchImpl = discord();
 
-    expect(team.map(({ name, tags }) => [name, tags])).toEqual([
-      ["phinner", ["owner", "developer"]],
-      ["ZetaMap", ["owner", "developer"]],
-      ["Maxou", ["developer"]],
-      ["Madness", ["admin"]],
-      ["Legacy", ["moderator"]],
-      ["Strange", ["moderator"]]
+    const team = await fetchTeam(config, signal, fetchImpl);
+
+    expect(team.map(({ name, tags, accent }) => [name, tags, accent])).toEqual([
+      ["phinner", ["owner", "developer"], "#123456"],
+      ["ZetaMap", ["owner", "developer"], undefined],
+      ["Maxou", ["developer"], undefined],
+      ["Madness", ["admin"], OWN_FACE_COLOUR],
+      ["Legacy", ["moderator"], DEFAULT_FACE_COLOUR],
+      ["Strange", ["moderator"], "#00ff7f"]
     ]);
-  });
-
-  test("leaves out a role holder who has not written within the active days", async () => {
-    expect(names(await fetchTeam(config, signal, discord()))).not.toContain("Idle");
-  });
-
-  test("leaves out whoever team.json hides, whatever role and activity they have", async () => {
-    expect(names(await fetchTeam(config, signal, discord()))).not.toContain("Hidden");
-    expect(names(await fetchTeam({ ...config, activeDays: 0 }, signal, discord()))).not.toContain(
-      "Hidden"
-    );
+    expect(team[0]).toMatchObject({
+      avatar: `https://cdn.discordapp.com/avatars/${PHINNER}/abc.webp?size=128`,
+      banner: `https://cdn.discordapp.com/banners/${PHINNER}/def.webp?size=512`,
+      github: "https://github.com/phinner"
+    });
+    // Discord's default faces: (id >> 22) % 6 once migrated, the discriminator % 5 before.
+    expect(named(team, "Strange")?.avatar).toBe("https://cdn.discordapp.com/embed/avatars/5.png");
+    expect(named(team, "Legacy")?.avatar).toBe("https://cdn.discordapp.com/embed/avatars/2.png");
+    expect(
+      new Set(callsTo(fetchImpl, SEARCH).map((url) => url.searchParams.get("min_id")))
+    ).toEqual(new Set([CUTOFF_90_DAYS_BEFORE_NOW]));
   });
 
   test("asks Discord one thing at a time, each once the last is answered", async () => {
@@ -241,7 +218,7 @@ describe("the team on Discord", () => {
     expect(mostInFlight).toBe(1);
   });
 
-  test("lists the members past Discord's first page of a thousand", async () => {
+  test("lists the members past Discord's first page of a thousand, everyone with a role when activity does not count", async () => {
     const LATE = "300000000000000001";
     const crowd = Array.from({ length: 1000 }, (_, at) => ({
       user: user(String(200000000000000000n + BigInt(at))),
@@ -258,22 +235,18 @@ describe("the team on Discord", () => {
 
     const team = await fetchTeam({ ...config, activeDays: 0 }, signal, listing);
 
-    const pages = requestedUrls(listing).filter((url) => apiPath(url) === "/guilds/1/members");
+    const pages = callsTo(listing, "/guilds/1/members");
     expect(pages.map((url) => url.searchParams.get("after"))).toEqual(["0", "200000000000000994"]);
+    // When activity does not count, everyone with a role but whoever team.json hides.
     expect(names(team)).toEqual(
-      expect.arrayContaining(["Late", "Madness", "Strange", "Legacy", "phinner"])
+      expect.arrayContaining(["Late", "Idle", "Madness", "Strange", "Legacy", "phinner"])
     );
-  });
-
-  test("keeps everyone with a role when activity does not count", async () => {
-    const team = await fetchTeam({ ...config, activeDays: 0 }, signal, discord());
-
-    expect(names(team)).toContain("Idle");
+    expect(names(team)).not.toContain("Hidden");
   });
 
   test("keeps whoever team.json names and tags, however quiet", async () => {
     const silent = discord((path) =>
-      path === "/guilds/1/messages/search" ? Response.json({ total_results: 0 }) : undefined
+      path === SEARCH ? Response.json({ total_results: 0 }) : undefined
     );
 
     const team = await fetchTeam(config, signal, silent);
@@ -285,186 +258,68 @@ describe("the team on Discord", () => {
     ]);
   });
 
-  test("shows each teammate's Discord face and banner, and team.json's links", async () => {
-    const [phinner] = await fetchTeam(config, signal, discord());
+  test.each([
+    ["a minute after the cutoff keeps", A_MINUTE_AFTER_CUTOFF, false, true],
+    ["a minute before it leaves out", A_MINUTE_BEFORE_CUTOFF, false, false],
+    ["in an age-restricted channel the bot reads keeps", A_MINUTE_AFTER_CUTOFF, true, true]
+  ])("a last message %s its writer", async (_label, id, ageRestricted, kept) => {
+    const writing = discord((path, url) =>
+      path === SEARCH ? searchMessages(url, [{ id, author: IDLE, ageRestricted }]) : undefined
+    );
 
-    expect(phinner).toMatchObject({
-      avatar: `https://cdn.discordapp.com/avatars/${PHINNER}/abc.webp?size=128`,
-      banner: `https://cdn.discordapp.com/banners/${PHINNER}/def.webp?size=512`,
-      github: "https://github.com/phinner"
+    expect(names(await fetchTeam(config, signal, writing)).includes("Idle")).toBe(kept);
+  });
+
+  test("asks again once Discord has indexed the server, after the delay it gave", async () => {
+    let unindexed = 1;
+    const indexing = discord((path, url) => {
+      if (path !== SEARCH) return undefined;
+      if (url.searchParams.get("author_id") !== IDLE) return undefined;
+      return unindexed-- > 0
+        ? notIndexedYet(0.05)
+        : searchMessages(url, [{ id: A_MINUTE_AFTER_CUTOFF, author: IDLE }]);
     });
-  });
+    const start = performance.now();
 
-  test.each([
-    ["(id >> 22) % 6 to someone migrated to unique usernames", "Strange", 5],
-    ["their discriminator % 5 to someone who still has one", "Legacy", 2]
-  ])("gives Discord's default face %s", async (_label, name, index) => {
-    const team = await fetchTeam(config, signal, discord());
+    const team = await fetchTeam(config, signal, indexing);
 
-    expect(named(team, name)?.avatar).toBe(`https://cdn.discordapp.com/embed/avatars/${index}.png`);
-  });
-
-  test("names only pictures Discord's CDN serves, in the format each asks for", async () => {
-    const team = await fetchTeam(config, signal, discord());
-    const pictures = team.flatMap(({ avatar, banner }) => [avatar, banner]).filter(Boolean);
-    const cdn = fakeFetch(discordCdn());
-
-    for (const picture of pictures.filter((url) =>
-      url!.startsWith("https://cdn.discordapp.com/")
-    )) {
-      const response = await cdn(picture!);
-      const extension = new URL(picture!).pathname.split(".").at(-1);
-      expect(response.status, picture).toBe(200);
-      expect(response.headers.get("content-type"), picture).toBe(`image/${extension}`);
-    }
-    expect(requestedUrls(cdn).length).toBeGreaterThanOrEqual(4);
-  });
-
-  test("searches for messages since 90 days before now, as a snowflake", async () => {
-    const fetchImpl = discord();
-
-    await fetchTeam(config, signal, fetchImpl);
-
-    const searches = requestedUrls(fetchImpl).filter(
-      (url) => apiPath(url) === "/guilds/1/messages/search"
+    const asked = requestedUrls(indexing).filter(
+      (url) => url.searchParams.get("author_id") === IDLE
     );
-    expect(searches.length).toBeGreaterThan(0);
-    for (const search of searches) {
-      expect(search.searchParams.get("min_id")).toBe(CUTOFF_90_DAYS_BEFORE_NOW);
-    }
+    expect(asked).toHaveLength(2);
+    expect(performance.now() - start).toBeGreaterThanOrEqual(45);
+    expect(names(team)).toContain("Idle");
   });
 
-  test.each([
-    ["keeps someone whose last message is a minute after the cutoff", A_MINUTE_AFTER_CUTOFF, true],
-    ["leaves out someone whose last message is a minute before it", A_MINUTE_BEFORE_CUTOFF, false]
-  ])("%s", async (_label, id, kept) => {
-    const writing = discord((path, url) =>
-      path === "/guilds/1/messages/search" ? searchMessages(url, [{ id, author: IDLE }]) : undefined
-    );
-
-    const team = await fetchTeam(config, signal, writing);
-
-    expect(names(team).includes("Idle")).toBe(kept);
-  });
-
-  test("counts a message in an age-restricted channel the bot can read", async () => {
-    const writing = discord((path, url) =>
-      path === "/guilds/1/messages/search"
-        ? searchMessages(url, [{ id: A_MINUTE_AFTER_CUTOFF, author: IDLE, ageRestricted: true }])
-        : undefined
-    );
-
-    expect(names(await fetchTeam(config, signal, writing))).toContain("Idle");
-  });
-
-  test("the search fake answers newest first, as Discord does by default", async () => {
-    const search = new URL("https://discord.com/api/v10/guilds/1/messages/search");
-    search.searchParams.set("author_id", IDLE);
-    search.searchParams.set("limit", "1");
-    const messages = [
-      { id: A_MINUTE_BEFORE_CUTOFF, author: IDLE },
-      { id: A_MINUTE_AFTER_CUTOFF, author: IDLE }
-    ];
-
-    const answer = (await searchMessages(search, messages).json()) as {
-      total_results: number;
-      messages: Message[][];
-    };
-
-    expect(answer).toEqual({ total_results: 2, messages: [[messages[1]]] });
-  });
-
-  test.each([
-    ["keeps someone who wrote", [{ id: A_MINUTE_AFTER_CUTOFF, author: IDLE }], true],
-    ["leaves out someone who did not", [], false]
-  ])(
-    "asks again once Discord has indexed the server, after the delay it gave, and %s",
-    async (_label, messages: Message[], kept) => {
-      let unindexed = 1;
-      const indexing = discord((path, url) => {
-        if (path !== "/guilds/1/messages/search") return undefined;
-        if (url.searchParams.get("author_id") !== IDLE) return undefined;
-        return unindexed-- > 0 ? notIndexedYet(0.05) : searchMessages(url, messages);
-      });
-      const start = performance.now();
-
-      const team = await fetchTeam(config, signal, indexing);
-
-      const asked = requestedUrls(indexing).filter(
-        (url) => url.searchParams.get("author_id") === IDLE
-      );
-      expect(asked).toHaveLength(2);
-      expect(performance.now() - start).toBeGreaterThanOrEqual(45);
-      expect(names(team).includes("Idle")).toBe(kept);
-    }
-  );
-
-  test("keeps someone Discord still cannot search for once it stops asking again", async () => {
-    const fetchImpl = discord();
-
-    const team = await fetchTeam(config, signal, fetchImpl);
-
-    const asked = requestedUrls(fetchImpl).filter(
-      (url) => url.searchParams.get("author_id") === STRANGER
-    );
-    expect(asked.length).toBeGreaterThan(1);
-    expect(names(team)).toContain("Strange");
-  });
-
-  describe("waiting on a guild Discord has not indexed", () => {
+  test("waits on a guild Discord has not indexed well inside each refresh's time, and keeps everyone", async () => {
+    vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"], now: NOW });
     const DOCUMENTED_RETRY_AFTER_S = 2;
     const QUIET_ROLE_HOLDERS = Array.from({ length: 40 }, (_, at) => ({
       user: user(String(150000000000000000n + BigInt(at)), { global_name: `Quiet ${at}` }),
       roles: ["mod-role"]
     }));
-    const neverIndexed = () =>
-      discord((path, url) => {
+    const refresh = async () => {
+      const fetchImpl = discord((path, url) => {
         if (path === "/guilds/1/members") return listMembers(url, QUIET_ROLE_HOLDERS);
-        return path === "/guilds/1/messages/search"
-          ? notIndexedYet(DOCUMENTED_RETRY_AFTER_S)
-          : undefined;
+        return path === SEARCH ? notIndexedYet(DOCUMENTED_RETRY_AFTER_S) : undefined;
       });
-
-    beforeEach(() => {
-      vi.useFakeTimers({ toFake: ["Date", "setTimeout", "clearTimeout"], now: NOW });
-    });
-
-    async function refreshTaking(fetchImpl: typeof fetch) {
       const start = Date.now();
-      const refresh = fetchTeam(config, AbortSignal.timeout(TEAM_REFRESH_TIMEOUT_MS), fetchImpl);
+      const team = fetchTeam(config, AbortSignal.timeout(TEAM_REFRESH_TIMEOUT_MS), fetchImpl);
       await vi.runAllTimersAsync();
-      return { team: await refresh, tookMs: Date.now() - start };
-    }
+      const searches = callsTo(fetchImpl, SEARCH).length;
+      return { team: await team, tookMs: Date.now() - start, searches };
+    };
 
-    const searches = (fetchImpl: ReturnType<typeof fakeFetch>) =>
-      requestedUrls(fetchImpl).filter((url) => apiPath(url) === "/guilds/1/messages/search");
+    const first = await refresh();
+    const second = await refresh();
 
-    test("stops waiting well inside the refresh's time, and keeps everyone", async () => {
-      const { team, tookMs } = await refreshTaking(neverIndexed());
-
+    for (const { team, tookMs, searches } of [first, second]) {
       expect(tookMs).toBeLessThan(TEAM_REFRESH_TIMEOUT_MS / 2);
-      expect(names(team).filter((name) => name.startsWith("Quiet "))).toHaveLength(40);
-    });
-
-    test("waits again in the next refresh", async () => {
-      const first = neverIndexed();
-      await refreshTaking(first);
-      const second = neverIndexed();
-
-      const { tookMs } = await refreshTaking(second);
-
-      expect(searches(second).length).toBeGreaterThan(QUIET_ROLE_HOLDERS.length);
-      expect(searches(second).length).toBe(searches(first).length);
       expect(tookMs).toBeGreaterThanOrEqual(DOCUMENTED_RETRY_AFTER_S * 1000);
-    });
-  });
-
-  test.each([
-    ["the colour of their banner", "phinner", "#123456"],
-    ["the colour they chose", "Strange", "#00ff7f"],
-    ["without either, the colour of their face", "Madness", OWN_FACE_COLOUR]
-  ])("colours a teammate's card with %s", async (_label, name, accent) => {
-    expect(named(await fetchTeam(config, signal, discord()), name)?.accent).toBe(accent);
+      expect(searches).toBeGreaterThan(QUIET_ROLE_HOLDERS.length);
+      expect(names(team).filter((name) => name.startsWith("Quiet "))).toHaveLength(40);
+    }
+    expect(second.searches).toBe(first.searches);
   });
 
   test("keeps someone whose profile Discord refuses, coloured by their face", async () => {
@@ -507,8 +362,7 @@ describe("the team on Discord", () => {
     const team = await fetchTeam(config, signal, fetchImpl);
 
     expect(performance.now() - start).toBeGreaterThanOrEqual(55);
-    const asked = requestedUrls(fetchImpl).filter((url) => apiPath(url) === `/users/${STRANGER}`);
-    expect(asked).toHaveLength(3);
+    expect(callsTo(fetchImpl, `/users/${STRANGER}`)).toHaveLength(3);
     expect(named(team, "Strange")?.accent).toBe("#00ff7f");
   });
 

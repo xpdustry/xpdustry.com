@@ -4,7 +4,9 @@ import { font, radius, rem } from "./styles/scale";
 import { vars } from "./styles/theme.css";
 
 const PLINTH_BORDER = 2;
-export const PLINTH_DEPTH = 4;
+const PLINTH_DEPTH = 4;
+/** How far above its box a plinth's drawing is centred: the face rises by the depth, the wall stays. */
+export const PLINTH_CENTRED_ABOVE_ITS_BOX_BY = PLINTH_DEPTH / 2;
 
 const depth = createVar();
 const faceColor = createVar();

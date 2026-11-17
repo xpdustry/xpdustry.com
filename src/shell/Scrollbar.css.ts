@@ -47,6 +47,7 @@ export const thumb = style({
   borderRadius: 99,
   background: onDeepAt(55),
   boxShadow: `0 0 0 1px color-mix(in srgb, ${vars.deep} 50%, transparent)`,
+  // oxlint-disable-next-line xpdustry/no-layout-transition -- the audited exception: a 6 to 8px thumb
   transition: "width 150ms",
   selectors: {
     [`${track}:hover &, ${track}[data-drag] &`]: { width: 8, background: onDeepAt(80) }

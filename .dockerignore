@@ -18,6 +18,10 @@ Thumbs.db
 .verify
 .fallow/
 
+# Test reports and Playwright Test runs
+reports
+test-results
+
 Dockerfile
 .dockerignore
 .git

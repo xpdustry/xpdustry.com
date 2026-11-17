@@ -19,65 +19,41 @@ const answering = (response: () => Response) => vi.fn<typeof fetch>(async () => 
 const signal = new AbortController().signal;
 
 describe("the team's pictures", () => {
-  test("serves the CDN's faces and banners from the site, by their path on the CDN", async () => {
+  test("serves the CDN's pictures from the site by their path, copying each once until nobody shows it", async () => {
     const pictures = new Pictures();
-    const team = [
+    const shared = `${CDN}/embed/avatars/3.png`;
+    const team = (face: string) => [
       person("1", {
-        avatar: `${CDN}/avatars/1/abc.webp?size=128`,
+        avatar: `${CDN}/avatars/1/${face}.webp?size=128`,
         banner: `${CDN}/banners/1/def.webp?size=512`
       }),
-      person("2", { avatar: "/phinner.svg" })
+      person("2", { avatar: shared }),
+      person("3", { avatar: shared }),
+      person("4", { avatar: "/phinner.svg" })
     ];
+    const first = cdn();
 
-    const localised = await pictures.localise(team, signal, cdn());
+    const localised = await pictures.localise(team("old"), signal, first);
 
     expect(localised.map(({ avatar, banner }) => [avatar, banner])).toEqual([
-      ["/discord/avatars/1/abc.webp", "/discord/banners/1/def.webp"],
+      ["/discord/avatars/1/old.webp", "/discord/banners/1/def.webp"],
+      ["/discord/embed/avatars/3.png", undefined],
+      ["/discord/embed/avatars/3.png", undefined],
       ["/phinner.svg", undefined]
     ]);
-    for (const path of ["/avatars/1/abc.webp", "/banners/1/def.webp"]) {
-      expect(pictures.get(path)).toEqual(await cdnPicture(path));
+    expect(first).toHaveBeenCalledTimes(3);
+    for (const path of ["/avatars/1/old.webp", "/banners/1/def.webp", "/embed/avatars/3.png"]) {
+      expect(pictures.get(path)).toEqual(cdnPicture(path));
     }
-  });
+    const unchanged = cdn();
+    await pictures.localise(team("old"), signal, unchanged);
+    expect(unchanged).not.toHaveBeenCalled();
 
-  test("downloads a picture it already has no more", async () => {
-    const pictures = new Pictures();
-    const team = [person("1", { avatar: `${CDN}/avatars/1/abc.webp?size=128` })];
-    await pictures.localise(team, signal, cdn());
-    const refresh = cdn();
-
-    await pictures.localise(team, signal, refresh);
-
-    expect(refresh).not.toHaveBeenCalled();
-    expect(pictures.get("/avatars/1/abc.webp")).toBeDefined();
-  });
-
-  test("copies a face two teammates share once", async () => {
-    const fetchImpl = cdn();
-    const avatar = `${CDN}/embed/avatars/3.png`;
-
-    const team = await new Pictures().localise(
-      [person("1", { avatar }), person("2", { avatar })],
-      signal,
-      fetchImpl
-    );
-
-    expect(team.map((teammate) => teammate.avatar)).toEqual([
-      "/discord/embed/avatars/3.png",
-      "/discord/embed/avatars/3.png"
-    ]);
-    expect(fetchImpl).toHaveBeenCalledOnce();
-  });
-
-  test("forgets a picture once nobody shows it", async () => {
-    const pictures = new Pictures();
-    const showing = (avatar: string) => [person("1", { avatar: `${CDN}${avatar}?size=128` })];
-
-    await pictures.localise(showing("/avatars/1/old.webp"), signal, cdn());
-    await pictures.localise(showing("/avatars/1/new.webp"), signal, cdn());
+    await pictures.localise(team("new"), signal, cdn());
 
     expect(pictures.get("/avatars/1/old.webp")).toBeUndefined();
-    expect(pictures.get("/avatars/1/new.webp")).toBeDefined();
+    expect(pictures.get("/avatars/1/new.webp")).toEqual(cdnPicture("/avatars/1/new.webp"));
+    expect(cdnPicture("/avatars/1/new.webp")).not.toEqual(cdnPicture("/avatars/1/old.webp"));
   });
 
   test("falls back to team.json's face, never to Discord's, when a copy fails", async () => {

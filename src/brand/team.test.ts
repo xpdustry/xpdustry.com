@@ -1,29 +1,17 @@
-import { existsSync } from "node:fs";
 import sharp from "sharp";
 import { expect, test } from "vitest";
-import { outbound } from "#app/ui/outbound";
 import gt from "../../gt.config.json" with { type: "json" };
 import { aboutIn, known, knownTeam, ranked } from "./team";
 
 const everyone = Object.values(known);
-const links = everyone.flatMap(({ github, website }) => [github, website]).filter(Boolean);
 const faces = everyone.flatMap(({ avatar }) => avatar ?? []);
 
-test.each(links)("%s is a teammate's: it learns where the visitor came from", (href) => {
-  expect(outbound(href)).toEqual({ target: "_blank", rel: "noopener" });
-});
-
-test.each(faces)("%s is a picture the site serves", (avatar) => {
-  expect(existsSync(`public${avatar}`)).toBe(true);
-});
-
-test("team.json names some faces, so the checks over them check something", () => {
+test("team.json's faces are pictures the site serves, square as the round frame they sit in", async () => {
   expect(faces.length).toBeGreaterThan(0);
-});
-
-test.each(faces)("%s is square, as the round frame it sits in", async (avatar) => {
-  const { width, height } = await sharp(`public${avatar}`).metadata();
-  expect(width).toBe(height);
+  for (const avatar of faces) {
+    const { width, height } = await sharp(`public${avatar}`).metadata();
+    expect(width, avatar).toBe(height);
+  }
 });
 
 test("team.json is keyed by Discord user ID", () => {

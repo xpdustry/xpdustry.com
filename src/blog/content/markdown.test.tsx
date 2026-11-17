@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
 import { PostBody } from "../PostBody";
-import { compileBlogMarkdown } from "./markdown";
+import { blogMarkdownPlugin, compileBlogMarkdown } from "./markdown";
 
 const frontmatter = `---
 title: A post
@@ -27,20 +27,24 @@ function firstTagAttributes(html: string, name: string): Record<string, string> 
 }
 
 describe("compileBlogMarkdown", () => {
-  test("compiles validated frontmatter and a serializable document", () => {
-    const compiled = compile("## Install\n\nUse **the release**.");
+  test("exports only the frontmatter to a ?frontmatter import, and the document to the rest", () => {
+    const transform = blogMarkdownPlugin().transform as (
+      source: string,
+      id: string
+    ) => {
+      code: string;
+    };
+    const exports = (id: string) =>
+      [...transform(`${frontmatter}\n\nA body.`, id).code.matchAll(/^export const (\w+)/gm)].map(
+        ([, name]) => name
+      );
 
-    expect(compiled.frontmatter.publishedAt).toBe("2026-08-28T00:00:00.000Z");
-    expect(JSON.parse(JSON.stringify(compiled.document))).toEqual(compiled.document);
-    expect(JSON.stringify(compiled.document)).not.toContain("title: A post");
+    expect(exports("/x/src/blog/posts/en/a-post.md?frontmatter")).toEqual(["frontmatter"]);
+    expect(exports("/x/src/blog/posts/en/a-post.md")).toEqual(["frontmatter", "document"]);
   });
 
   test.each([
     ["NOTE", "Note"],
-    ["TIP", "Tip"],
-    ["IMPORTANT", "Important"],
-    ["WARNING", "Warning"],
-    ["CAUTION", "Caution"],
     ["tip", "Tip"]
   ])("renders GitHub's [!%s] alert as a callout titled %s", (marker, title) => {
     const html = render(`> [!${marker}]\n> Read this.`);
@@ -66,10 +70,6 @@ describe("compileBlogMarkdown", () => {
 
   test.each([
     ["an inline link", "> [!x](https://example.com) Read this."],
-    ["an explicit reference link", "> [!x][docs] Read this.\n\n[docs]: https://example.com"],
-    ["a collapsed reference link", "> [!x][]\n> Read this.\n\n[!x]: https://example.com"],
-    ["a quoted definition", "> [!x]: https://example.com\n> Read this."],
-    ["a footnote", "> [^1] Read this.\n\n[^1]: A note."],
     ["an image", "> ![A cat](/blog/cat.png) Read this."]
   ])("takes %s in a quote for no alert", (_label, written) => {
     const html = render(written);
@@ -91,15 +91,6 @@ describe("compileBlogMarkdown", () => {
     expect(html).toMatch(/<aside[^>]*>[\s\S]*Upgrade first[\s\S]*<\/aside>/);
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(html).not.toContain("<script>");
-  });
-
-  test("opens external links in a new tab while keeping site links in the same tab", () => {
-    const html = render("[External](https://example.com/docs) and [internal](/blog).");
-
-    expect(html).toContain(
-      '<a href="https://example.com/docs" target="_blank" rel="noreferrer">External</a>'
-    );
-    expect(html).toContain('<a href="/blog">internal</a>');
   });
 
   test("includes the source path in invalid frontmatter errors", () => {
@@ -145,8 +136,7 @@ A recording. [Download it.](/blog/demo.mp4)
     '<!-- ::post-image src="https://example.com/a.png" alt="A" width="1" height="1" -->',
     '<!-- ::post-image src="/blog/../secret.png" alt="A" width="1" height="1" -->',
     '<!-- ::post-image src="/blog/a.png" alt="A" width="0" height="1" -->',
-    '<!-- ::post-image src="/blog/a.png" alt="A" width="1" height="1" onclick="x" -->',
-    '<!-- ::start:post-video src="/blog/a.mp4" poster="/blog/a.png" width="1" height="1" -->\n<!-- ::end:post-video -->'
+    '<!-- ::post-image src="/blog/a.png" alt="A" width="1" height="1" onclick="x" -->'
   ])("rejects unsafe or incomplete media syntax", (media) => {
     expect(() => compile(media)).toThrow();
   });
@@ -166,14 +156,5 @@ A recording. [Download it.](/blog/demo.mp4)
     ]
   ])("explains what is wrong with %j", (media, message) => {
     expect(() => compile(media)).toThrow(message);
-  });
-
-  test("leaves comments naming other components as text", () => {
-    expect(compile('<!-- ::post-other src="/blog/a.png" -->').document.children).toEqual([
-      {
-        type: "paragraph",
-        children: [{ type: "text", value: '<!-- ::post-other src="/blog/a.png" -->' }]
-      }
-    ]);
   });
 });

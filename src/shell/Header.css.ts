@@ -10,7 +10,7 @@ import {
   popoverShut,
   underParent
 } from "./popover";
-import { PLINTH_DEPTH, tone, wall } from "#app/ui/Plinth.css";
+import { PLINTH_CENTRED_ABOVE_ITS_BOX_BY, tone, wall } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const navFolded = upTo(1160);
@@ -200,9 +200,7 @@ export const whenOpen = style({
   }
 });
 
-const plinthFaceCentredAboveItsBoxBy = PLINTH_DEPTH / 2;
-
 for (const plinth of [toggle, play, `${language} > button`, github]) {
-  reachTouchTarget(plinth, plinthFaceCentredAboveItsBoxBy);
+  reachTouchTarget(plinth, PLINTH_CENTRED_ABOVE_ITS_BOX_BY);
 }
 reachTouchTarget(brand);

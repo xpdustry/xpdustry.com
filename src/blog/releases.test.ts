@@ -1,54 +1,36 @@
-import { describe, expect, test } from "vitest";
+import { expect, test } from "vitest";
 import { SITE } from "#app/brand/site";
 import { releaseLabel, releaseUrl } from "./releases";
 
-describe("releaseLabel", () => {
-  test("names the project of a known repository, or the repository", () => {
-    expect(releaseLabel("xpdustry/nohorny@v4.0.0")).toBe("NoHorny v4.0.0");
-    expect(releaseLabel("someone/plugin@1.2")).toBe("plugin 1.2");
-  });
-
-  test("gives only the tag for a release of the post's own project", () => {
-    expect(releaseLabel("xpdustry/nohorny@v4.0.0", "xpdustry/nohorny")).toBe("v4.0.0");
-    expect(releaseLabel("xpdustry/claj@v2", "xpdustry/nohorny")).toBe("CLaJ v2");
-  });
-
-  test("splits at the first @, since a repository name cannot hold one and a tag can", () => {
-    expect(releaseLabel("xpdustry/claj@scope@v2")).toBe("CLaJ scope@v2");
-    expect(releaseLabel("changesets/changesets@@changesets/cli@2.27.1")).toBe(
-      "changesets @changesets/cli@2.27.1"
-    );
-  });
-
-  test("leaves an id it cannot read as it is", () => {
-    expect(releaseLabel("@v2")).toBe("@v2");
-    expect(releaseLabel("xpdustry/claj@")).toBe("xpdustry/claj@");
-  });
+test.each([
+  ["xpdustry/nohorny@v4.0.0", undefined, "NoHorny v4.0.0"],
+  ["someone/plugin@1.2", undefined, "plugin 1.2"],
+  ["xpdustry/nohorny@v4.0.0", "xpdustry/nohorny", "v4.0.0"],
+  ["xpdustry/claj@v2", "xpdustry/nohorny", "CLaJ v2"],
+  // A repository name cannot hold an @ and a tag can: the first one splits.
+  ["xpdustry/claj@scope@v2", undefined, "CLaJ scope@v2"],
+  ["changesets/changesets@@changesets/cli@2.27.1", undefined, "changesets @changesets/cli@2.27.1"],
+  ["@v2", undefined, "@v2"],
+  ["xpdustry/claj@", undefined, "xpdustry/claj@"]
+])("labels %s, in a post about %s, as %s", (id, ownProject, label) => {
+  expect(releaseLabel(id, ownProject)).toBe(label);
 });
 
-describe("releaseUrl", () => {
-  test("links to the release's tag on GitHub, encoding each part", () => {
-    expect(releaseUrl("xpdustry/nohorny@v4.0.0-beta.1")).toBe(
-      "https://github.com/xpdustry/nohorny/releases/tag/v4.0.0-beta.1"
-    );
-    expect(releaseUrl("xpdustry/claj@v1#2")).toBe(
-      "https://github.com/xpdustry/claj/releases/tag/v1%232"
-    );
-    expect(releaseUrl("xpdustry/claj@50%off")).toBe(
-      "https://github.com/xpdustry/claj/releases/tag/50%25off"
-    );
-  });
+const TAG = "https://github.com/xpdustry/claj/releases/tag/";
 
-  test("links to a tag holding an @ or a slash", () => {
-    expect(releaseUrl("xpdustry/claj@scope@v2")).toBe(
-      "https://github.com/xpdustry/claj/releases/tag/scope%40v2"
-    );
-    expect(releaseUrl("changesets/changesets@@changesets/cli@2.27.1")).toBe(
-      "https://github.com/changesets/changesets/releases/tag/%40changesets%2Fcli%402.27.1"
-    );
-  });
-
-  test("falls back to the organisation for an id it cannot read", () => {
-    expect(releaseUrl("nothing")).toBe(SITE.github);
-  });
+test.each([
+  [
+    "xpdustry/nohorny@v4.0.0-beta.1",
+    "https://github.com/xpdustry/nohorny/releases/tag/v4.0.0-beta.1"
+  ],
+  ["xpdustry/claj@v1#2", `${TAG}v1%232`],
+  ["xpdustry/claj@50%off", `${TAG}50%25off`],
+  ["xpdustry/claj@scope@v2", `${TAG}scope%40v2`],
+  [
+    "changesets/changesets@@changesets/cli@2.27.1",
+    "https://github.com/changesets/changesets/releases/tag/%40changesets%2Fcli%402.27.1"
+  ],
+  ["nothing", SITE.github]
+])("links %s to %s", (id, url) => {
+  expect(releaseUrl(id)).toBe(url);
 });

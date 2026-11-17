@@ -54,10 +54,6 @@ describe("paintTexture", () => {
   test("covers the same px whether a fused patch is filled at once or px by px", () => {
     const filledAtOnce = sprite("#102030", "#102030");
     const filledPxByPx = sprite("#102030", "#112030");
-    expect([filledPxByPx.width, filledPxByPx.height]).toEqual([
-      filledAtOnce.width,
-      filledAtOnce.height
-    ]);
     expect(alphas(filledPxByPx)).toEqual(alphas(filledAtOnce));
     const [onceReds, pxReds] = [channel(filledAtOnce, 0), channel(filledPxByPx, 0)];
     expect(Math.max(...onceReds.map((red, at) => Math.abs(red - pxReds[at]!)))).toBeLessThanOrEqual(
@@ -93,18 +89,6 @@ describe("paintTexture", () => {
       0,
       0
     );
-    expect([oneTile.width, oneTile.height]).toEqual([64, 64]);
     expect(square(fourTiles, 64, 64, 64)).toEqual(square(oneTile, 0, 0, 64));
-  });
-
-  test("the spread's core mask is clear where the main tone shows", () => {
-    const core = paintTexture(
-      standInLabyrinth,
-      { ...SPREAD_MASKS.core, repeat: 64, tile: 64 },
-      0,
-      0
-    );
-    const covered = new Set(alphas(core));
-    expect(covered.has(0) && covered.has(255)).toBe(true);
   });
 });

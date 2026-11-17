@@ -11,8 +11,5 @@ test("writes structured data that cannot close its script tag, and reads back th
   expect(script?.type).toBe("application/ld+json");
   expect(script?.children).not.toContain("<");
   expect(JSON.parse(script!.children)).toEqual(jsonLd);
-});
-
-test("writes no structured data for a page without any", () => {
   expect(seo(page).scripts).toEqual([]);
 });
