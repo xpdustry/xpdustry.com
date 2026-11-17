@@ -278,7 +278,7 @@ test.describe("text keeps 4.5:1 to the pixels behind it", () => {
       await page.goto("/blog/nohorny-4-beta-3");
       await page.locator("#more").scrollIntoViewIfNeeded();
       await expect.poll(() => unpaintedIn(page, "main")).toBe(0);
-      for (const text of [...(await tileTexts(page)), page.getByText("Ask in our Discord")]) {
+      for (const text of [...(await tileTexts(page)), page.getByText("Join our Discord.")]) {
         expect(await worstTextContrast(text)).toBeGreaterThanOrEqual(TEXT_CONTRAST);
       }
     });

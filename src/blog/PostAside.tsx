@@ -10,7 +10,7 @@ import * as card from "#app/ui/Card.css";
 import * as styles from "./PostAside.css";
 
 export function PostAside({ post, className }: { post: Post; className?: string }) {
-  const { releases = [], topic, author } = post.frontmatter;
+  const { releases = [], topic } = post.frontmatter;
   const project = projectForTopic(topic);
   const gt = useGT();
   return (
@@ -42,7 +42,7 @@ export function PostAside({ post, className }: { post: Post; className?: string 
         </CopyButton>
       </section>
       <DiscordCard title={gt("Questions or feedback?")} compact>
-        {gt("Ask in our Discord, or ping {author} there.", { author })}
+        {gt("Join our Discord.")}
       </DiscordCard>
     </aside>
   );
