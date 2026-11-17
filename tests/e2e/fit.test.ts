@@ -10,13 +10,15 @@ import { expect, test, type CDPSession, type Page } from "#tests/support/test.ts
 
 const HEIGHT = 900;
 const MAIN_WIDTHS = [1280, 1000, 600, 320];
+const HEADER_AT_ITS_TIGHTEST = [841, 681, 471];
 /**
- * Each page with the widths and languages it is measured at: 47 layouts under the four text
- * settings make 188 states. The home page adds the header's fold at 1160/1161 and a phone.
+ * Each page with the widths and languages it is measured at: 56 layouts under the four text
+ * settings make 224 states. The home page adds the header's fold at 1160/1161 and a phone; the
+ * blog, whose header carries the play pill, adds the width just above each of its other folds.
  */
 const MATRIX = [
   { path: "/", widths: [1280, 1161, 1160, 1000, 600, 390, 320], locales: LOCALES },
-  { path: "/blog", widths: MAIN_WIDTHS, locales: LOCALES },
+  { path: "/blog", widths: [...MAIN_WIDTHS, ...HEADER_AT_ITS_TIGHTEST], locales: LOCALES },
   { path: "/blog/nohorny-4-beta-8", widths: MAIN_WIDTHS, locales: LOCALES },
   { path: "/no-such-page", widths: [1280, 320], locales: ["en"] }
 ];

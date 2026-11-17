@@ -13,7 +13,8 @@ import { PLINTH_CENTRED_ABOVE_ITS_BOX_BY, tone, wall } from "#app/ui/Plinth.css"
 import { vars } from "#app/ui/styles/theme.css";
 
 export const navFolded = upTo(1160);
-export const controlsFolded = upTo(520);
+export const controlsFolded = upTo(680);
+const brandWordFolded = upTo(470);
 const navUnfolded = `not all and ${navFolded}`;
 
 const ANCHOR = "--site-menu";
@@ -53,7 +54,7 @@ export const brand = style({
 
 globalStyle(`${brand} span`, {
   "@media": {
-    [media.small]: {
+    [brandWordFolded]: {
       position: "absolute",
       width: 1,
       height: 1,

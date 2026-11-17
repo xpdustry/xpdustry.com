@@ -3,7 +3,7 @@ import { upTo } from "#app/ui/styles/media";
 import { font, leading, rem } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
-const narrow = upTo(780);
+const narrow = upTo(840);
 const PILL_HEIGHT = 40;
 
 export const pill = style({

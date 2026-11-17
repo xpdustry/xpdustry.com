@@ -81,6 +81,18 @@ function navOverSeveralRows(): string[] {
   return rows.size > 1 ? [`navigation runs over ${rows.size} rows`] : [];
 }
 
+function headerOverSeveralRows(): string[] {
+  const header = document.querySelector(".wrap > header");
+  if (!header) return [];
+  const boxes = [...header.children]
+    .filter((control) => getComputedStyle(control).position !== "absolute")
+    .map((control) => control.getBoundingClientRect())
+    .filter((box) => box.width > 0);
+  const firstRowEnds = Math.min(...boxes.map((box) => box.bottom));
+  const wrapped = boxes.some((box) => box.top >= firstRowEnds);
+  return wrapped ? ["header runs over several rows"] : [];
+}
+
 function crowdedSectionHeaders(): string[] {
   return [...document.querySelectorAll("section > header")].flatMap((header) => {
     const title = header.querySelector("h2");
@@ -116,7 +128,12 @@ function artOverText(): string[] {
   });
 }
 
-const LAYOUT_CHECKS = [artOverText, navOverSeveralRows, crowdedSectionHeaders];
+const LAYOUT_CHECKS = [
+  artOverText,
+  navOverSeveralRows,
+  headerOverSeveralRows,
+  crowdedSectionHeaders
+];
 
 function sidewaysScroll(): string[] {
   const root = document.documentElement;
