@@ -24,7 +24,7 @@ describe("the team's pictures", () => {
     const team = [
       person("1", {
         avatar: `${CDN}/avatars/1/abc.webp?size=128`,
-        banner: `${CDN}/banners/1/def.webp?size=480`
+        banner: `${CDN}/banners/1/def.webp?size=512`
       }),
       person("2", { avatar: "/phinner.svg" })
     ];
@@ -36,7 +36,7 @@ describe("the team's pictures", () => {
       ["/phinner.svg", undefined]
     ]);
     for (const path of ["/avatars/1/abc.webp", "/banners/1/def.webp"]) {
-      expect(pictures.get(path)).toEqual({ body: cdnPicture(path), type: "image/png" });
+      expect(pictures.get(path)).toEqual(await cdnPicture(path));
     }
   });
 
@@ -88,7 +88,7 @@ describe("the team's pictures", () => {
         person(ZETAMAP, { avatar: `${CDN}/avatars/${ZETAMAP}/abc.webp?size=128` }),
         person("2", {
           avatar: `${CDN}/embed/avatars/3.png`,
-          banner: `${CDN}/banners/2/def.webp?size=480`
+          banner: `${CDN}/banners/2/def.webp?size=512`
         })
       ],
       signal,

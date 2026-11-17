@@ -49,14 +49,14 @@ const MEDIA = {
 } as const;
 
 const extensions: MarkdownExtension[] = [
-  calloutsExtension(),
+  githubAlertsExtension(),
   mediaExtension(),
   calloutElementExtension()
 ];
 const parseOptions: ParseOptions = { extensions, frontmatter: true, headingIds: true };
 
 export function compileBlogMarkdown(file: string, source: string): PostModule {
-  const { frontmatter, ...document } = parseMarkdown(source, parseOptions);
+  const { frontmatter, ...document } = parseBody(file, source);
 
   return {
     frontmatter: parseBlogFrontmatter(file, parseFrontmatter(file, frontmatter)),
@@ -88,6 +88,16 @@ export function blogMarkdownPlugin(): Plugin {
       }
     }
   };
+}
+
+function parseBody(file: string, source: string) {
+  try {
+    return parseMarkdown(source, parseOptions);
+  } catch (error) {
+    throw new ContentError(file, error instanceof Error ? error.message : String(error), {
+      cause: error
+    });
+  }
 }
 
 function parseFrontmatter(file: string, source: string | undefined): unknown {
@@ -131,6 +141,29 @@ function mediaExtension(): MarkdownExtension {
       const media = MEDIA[node.name as MediaName];
       assertBody(node, media);
       return { ...node, tagName: media.tagName, properties: mediaProperties(node, media) };
+    }
+  };
+}
+
+const GITHUB_ALERTS: ReadonlySet<string> = new Set([
+  "note",
+  "tip",
+  "important",
+  "warning",
+  "caution"
+]);
+
+function githubAlertsExtension(): MarkdownExtension {
+  const { parseBlock } = calloutsExtension();
+  return {
+    name: "xpdustry:github-alerts",
+    parseBlock(context) {
+      const node = parseBlock?.(context);
+      if (node?.type === "callout" && !GITHUB_ALERTS.has(node.kind)) {
+        const alerts = [...GITHUB_ALERTS].map((kind) => `[!${kind.toUpperCase()}]`).join(", ");
+        throw new Error(`[!${node.kind.toUpperCase()}] is none of GitHub's alerts: ${alerts}`);
+      }
+      return node;
     }
   };
 }

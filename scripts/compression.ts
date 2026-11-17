@@ -35,17 +35,27 @@ function weightByCoding(header: string): Map<string, number> {
   return found;
 }
 
+type Negotiated = Coding | "identity" | "nothing acceptable";
+
 // https://www.rfc-editor.org/rfc/rfc9110#section-12.5.3
-export function negotiateEncoding(header: string | null): Coding | undefined {
-  if (!header) return undefined;
+export function negotiateEncoding(header: string | null): Negotiated {
+  if (!header) return "identity";
   const named = weightByCoding(header);
   const weightOf = (name: string) => named.get(name) ?? named.get("*") ?? REFUSED;
   let best: Coding | undefined;
   for (const coding of CODINGS_BY_PREFERENCE) {
     if (weightOf(coding) > (best ? weightOf(best) : REFUSED)) best = coding;
   }
-  if (best && (named.get("identity") ?? REFUSED) > weightOf(best)) return undefined;
-  return best;
+  const identity = named.get("identity") ?? named.get("*");
+  if (best && (identity ?? REFUSED) <= weightOf(best)) return best;
+  return identity === REFUSED ? "nothing acceptable" : "identity";
+}
+
+const INSTEAD_OF_406 = "identity";
+
+export function encodingFor(request: Request): Coding | "identity" {
+  const negotiated = negotiateEncoding(request.headers.get("accept-encoding"));
+  return negotiated === "nothing acceptable" ? INSTEAD_OF_406 : negotiated;
 }
 
 function addVary(headers: Headers, field: string) {
@@ -59,9 +69,9 @@ export function compressed(request: Request, response: Response): Response {
 
   const headers = new Headers(response.headers);
   addVary(headers, "accept-encoding");
-  const encoding = negotiateEncoding(request.headers.get("accept-encoding"));
+  const encoding = encodingFor(request);
   let body = response.body;
-  if (encoding && body) {
+  if (encoding !== "identity" && body) {
     headers.set("content-encoding", encoding);
     headers.delete("content-length");
     const stream = Readable.fromWeb(body as NodeReadableStream).pipe(COMPRESSORS[encoding]());

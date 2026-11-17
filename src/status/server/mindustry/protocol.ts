@@ -1,4 +1,3 @@
-import * as v from "valibot";
 import type { ServerInfo } from "../../snapshots";
 import { stripMindustryMarkup } from "./markup";
 
@@ -7,44 +6,19 @@ const DISCOVER_HOST = 0x01;
 export const QUERY_PACKET = Uint8Array.from([FRAMEWORK_MESSAGE, DISCOVER_HOST]);
 
 const GAMEMODE_BY_ORDINAL = ["survival", "sandbox", "attack", "pvp", "editor"] as const;
-
-const MAX_PLAYERS = 1_000_000;
-
-const RawServerInfoSchema = v.object({
-  name: v.string(),
-  description: v.string(),
-  map: v.string(),
-  modeOrdinal: v.pipe(
-    v.number(),
-    v.integer("gamemode ordinal must be an integer"),
-    v.minValue(0, "gamemode ordinal is out of range"),
-    v.maxValue(GAMEMODE_BY_ORDINAL.length - 1, "gamemode ordinal is out of range")
-  ),
-  modeName: v.string(),
-  players: v.pipe(
-    v.number(),
-    v.integer("player count must be an integer"),
-    v.minValue(0, "player count is out of range"),
-    v.maxValue(MAX_PLAYERS, "player count is out of range")
-  ),
-  playerLimit: v.pipe(
-    v.number(),
-    v.integer("player limit must be an integer"),
-    v.minValue(0, "player limit is out of range"),
-    v.maxValue(MAX_PLAYERS, "player limit is out of range")
-  ),
-  wave: v.pipe(v.number(), v.integer(), v.minValue(0, "wave is out of range")),
-  version: v.pipe(v.number(), v.integer()),
-  versionType: v.string(),
-  port: v.pipe(v.number(), v.integer(), v.minValue(0), v.maxValue(65535))
-});
-
-type RawServerInfo = v.InferOutput<typeof RawServerInfoSchema>;
+const UNKNOWN_GAMEMODE = GAMEMODE_BY_ORDINAL[0];
 
 export class MalformedPacketError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = "MalformedPacketError";
+  }
+}
+
+export class TruncatedPacketError extends MalformedPacketError {
+  constructor(field: string) {
+    super(`packet ended while reading ${field}, where the game would read zeros`);
+    this.name = "TruncatedPacketError";
   }
 }
 
@@ -64,7 +38,7 @@ class Reader {
 
   #take(length: number, what: string): number {
     if (length < 0 || this.remaining < length) {
-      throw new MalformedPacketError(`packet ended while reading ${what}`);
+      throw new TruncatedPacketError(what);
     }
     const at = this.#offset;
     this.#offset += length;
@@ -73,6 +47,10 @@ class Reader {
 
   u8(what: string): number {
     return this.#view.getUint8(this.#take(1, what));
+  }
+
+  i8(what: string): number {
+    return this.#view.getInt8(this.#take(1, what));
   }
 
   i32(what: string): number {
@@ -99,44 +77,26 @@ export function decodeServerInfo(packet: Uint8Array): ServerInfo {
   const wave = reader.i32("wave");
   const version = reader.i32("version");
   const versionType = reader.string("version type");
-  const modeOrdinal = reader.u8("mode");
+  const mode = gamemode(reader.i8("mode"));
   const playerLimit = reader.i32("player limit");
   const description = reader.string("description");
   const modeName = reader.string("mode name");
-  const port = reader.u16("port");
+  reader.u16("port");
 
-  const raw = parseRawServerInfo({
-    name,
-    description,
-    map,
-    modeOrdinal,
-    modeName,
+  return {
+    name: stripMindustryMarkup(name),
+    description: stripMindustryMarkup(description),
+    map: stripMindustryMarkup(map),
+    mode: modeName === "" ? mode : stripMindustryMarkup(modeName),
     players,
     playerLimit,
     wave,
     version,
-    versionType,
-    port
-  });
-
-  const mode =
-    raw.modeName === "" ? GAMEMODE_BY_ORDINAL[raw.modeOrdinal] : stripMindustryMarkup(raw.modeName);
-
-  return {
-    name: stripMindustryMarkup(raw.name),
-    description: stripMindustryMarkup(raw.description),
-    map: stripMindustryMarkup(raw.map),
-    mode,
-    players: raw.players,
-    playerLimit: raw.playerLimit,
-    wave: raw.wave,
-    version: raw.version,
-    versionType: stripMindustryMarkup(raw.versionType)
+    versionType: stripMindustryMarkup(versionType)
   };
 }
 
-function parseRawServerInfo(value: unknown): RawServerInfo {
-  const result = v.safeParse(RawServerInfoSchema, value);
-  if (result.success) return result.output;
-  throw new MalformedPacketError(v.summarize(result.issues));
+function gamemode(ordinal: number): string {
+  if (ordinal < 0) throw new MalformedPacketError("gamemode ordinal is negative");
+  return GAMEMODE_BY_ORDINAL[ordinal] ?? UNKNOWN_GAMEMODE;
 }

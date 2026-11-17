@@ -27,7 +27,6 @@ describe("negotiateEncoding", () => {
     "gzip;q=0",
     "gzip;q=0.000",
     "br;q=0,gzip;q=0",
-    "*;q=0",
     "abracadabra",
     "deflate, zstd",
     "gzip;q=2",
@@ -35,9 +34,20 @@ describe("negotiateEncoding", () => {
     "gzip;q=0.5000",
     "gzip;q=yes",
     "gzip;q=0.5, identity",
-    "gzip;q=0, gzip"
-  ])("%j gets the body as it is", (header) => {
-    expect(negotiateEncoding(header)).toBeUndefined();
+    "gzip;q=0, gzip",
+    "*;q=0, identity"
+  ])("%j selects identity", (header) => {
+    expect(negotiateEncoding(header)).toBe("identity");
+  });
+
+  test.each([
+    "*;q=0",
+    "identity;q=0",
+    "identity;q=0, gzip;q=0, br;q=0",
+    "deflate, identity;q=0",
+    "*;q=0, gzip;q=0"
+  ])("%j finds nothing acceptable, identity excluded", (header) => {
+    expect(negotiateEncoding(header)).toBe("nothing acceptable");
   });
 });
 
@@ -68,6 +78,16 @@ describe("compressed", () => {
       const response = compressed(asking(encoding), page());
       expect(response.headers.has("content-encoding")).toBe(false);
       expect(response.headers.get("vary")).toBe("accept-encoding");
+      expect((await bytes(response)).toString()).toBe(html);
+    }
+  );
+
+  test.each(["*;q=0", "identity;q=0, gzip;q=0, br;q=0"])(
+    "still sends %j the body as it is, where it could refuse with 406",
+    async (encoding) => {
+      const response = compressed(asking(encoding), page());
+      expect(response.status).toBe(200);
+      expect(response.headers.has("content-encoding")).toBe(false);
       expect((await bytes(response)).toString()).toBe(html);
     }
   );
