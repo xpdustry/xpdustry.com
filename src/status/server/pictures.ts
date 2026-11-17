@@ -16,14 +16,30 @@ interface Picture {
   type: string;
 }
 
+/** The body of `response`, or nothing once it runs past {@link LIMIT}, which stops the download. */
+async function capped(response: Response): Promise<Uint8Array<ArrayBuffer> | undefined> {
+  if (!response.body) return undefined;
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for await (const chunk of response.body) {
+    size += chunk.byteLength;
+    if (size > LIMIT) {
+      await response.body.cancel();
+      return undefined;
+    }
+    chunks.push(chunk);
+  }
+  return new Uint8Array(Buffer.concat(chunks));
+}
+
 /** A picture off the CDN, or nothing for what is not one or failed to arrive. */
 async function download(url: string, signal: AbortSignal, fetchImpl: typeof fetch) {
   try {
     const response = await fetchImpl(url, { signal });
     const type = response.headers.get("content-type") ?? "";
     if (!response.ok || !type.startsWith("image/")) return undefined;
-    const body = new Uint8Array(await response.arrayBuffer());
-    return body.byteLength <= LIMIT ? { body, type } : undefined;
+    const body = await capped(response);
+    return body && { body, type };
   } catch {
     signal.throwIfAborted();
     return undefined;
@@ -39,21 +55,24 @@ export class Pictures {
     return this.#pictures.get(path);
   }
 
-  /** A copy of a CDN picture, or the one already made: its local URL, or nothing if it failed. */
+  /**
+   * A copy of a CDN picture: the one already made, the one this refresh is making, or a new one.
+   * Its local URL, or nothing if it failed.
+   */
   async #copy(
     url: string,
     signal: AbortSignal,
     fetchImpl: typeof fetch,
-    kept: Map<string, Picture>
+    kept: Map<string, Promise<Picture | undefined>>
   ): Promise<string | undefined> {
     const { pathname } = new URL(url);
-    const picture =
-      kept.get(pathname) ??
-      this.#pictures.get(pathname) ??
-      (await download(url, signal, fetchImpl));
-    if (!picture) return undefined;
-    kept.set(pathname, picture);
-    return `${PREFIX}${pathname}`;
+    const had = this.#pictures.get(pathname);
+    let picture = kept.get(pathname);
+    if (!picture) {
+      picture = had ? Promise.resolve(had) : download(url, signal, fetchImpl);
+      kept.set(pathname, picture);
+    }
+    return (await picture) && `${PREFIX}${pathname}`;
   }
 
   /**
@@ -66,7 +85,7 @@ export class Pictures {
     signal: AbortSignal,
     fetchImpl: typeof fetch = fetch
   ): Promise<Teammate[]> {
-    const kept = new Map<string, Picture>();
+    const kept = new Map<string, Promise<Picture | undefined>>();
     const copy = async (url: string | undefined) =>
       url?.startsWith(`${CDN}/`) ? this.#copy(url, signal, fetchImpl, kept) : url;
     const localised = await Promise.all(
@@ -76,7 +95,12 @@ export class Pictures {
         banner: await copy(person.banner)
       }))
     );
-    this.#pictures = kept;
+    const copied = await Promise.all(
+      [...kept].map(async ([path, picture]) => [path, await picture] as const)
+    );
+    this.#pictures = new Map(
+      copied.flatMap(([path, picture]) => (picture ? [[path, picture]] : []))
+    );
     return localised;
   }
 }

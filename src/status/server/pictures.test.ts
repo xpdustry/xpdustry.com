@@ -102,4 +102,50 @@ describe("the team's pictures", () => {
     expect(stranger?.avatar).toBeUndefined();
     expect(pictures.get("/avatars/2/abc.webp")).toBeUndefined();
   });
+
+  test("copies a face two teammates share once", async () => {
+    const pictures = new Pictures();
+    const fetchImpl = cdn();
+    const avatar = `${CDN}/embed/avatars/3.png`;
+
+    const team = await pictures.localise(
+      [person("1", { avatar }), person("2", { avatar })],
+      signal,
+      fetchImpl
+    );
+
+    expect(team.map((teammate) => teammate.avatar)).toEqual([
+      "/discord/embed/avatars/3.png",
+      "/discord/embed/avatars/3.png"
+    ]);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  test("stops downloading a picture past a megabyte", async () => {
+    const pictures = new Pictures();
+    let sent = 0;
+    let cancelled = false;
+    const endless = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        sent += 64 * 1024;
+        controller.enqueue(new Uint8Array(64 * 1024));
+      },
+      cancel() {
+        cancelled = true;
+      }
+    });
+    const fetchImpl = vi.fn(
+      async () => new Response(endless, { headers: { "content-type": "image/webp" } })
+    );
+
+    const [stranger] = await pictures.localise(
+      [person("2", { avatar: `${CDN}/avatars/2/abc.webp?size=128` })],
+      signal,
+      fetchImpl
+    );
+
+    expect(stranger?.avatar).toBeUndefined();
+    expect(cancelled).toBe(true);
+    expect(sent).toBeLessThan(2 * 1024 * 1024);
+  });
 });
