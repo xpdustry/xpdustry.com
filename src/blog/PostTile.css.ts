@@ -1,7 +1,8 @@
 import { createVar, fallbackVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import { paint } from "#app/textures/catalogue";
 import { media } from "#app/ui/styles/media";
-import { font, leading, rem } from "#app/ui/styles/scale";
+import { font, insideOutline, leading, rem } from "#app/ui/styles/scale";
+import { FACE_BLEED, FACE_INSET } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 import { artLogo, artTop } from "./PostArt.css";
 
@@ -16,7 +17,7 @@ export const tile = style({
   display: "flex",
   flexDirection: "column",
   justifyContent: "end",
-  padding: `${padFoot} ${pad}`,
+  padding: insideOutline(padFoot, pad),
   color: vars.ink
 });
 
@@ -50,11 +51,13 @@ export const foot = style({
   overflow: "hidden",
   display: "flex",
   flexDirection: "column",
-  margin: `0 calc(-1 * ${pad}) calc(-1 * ${padFoot})`,
-  padding: `calc(${fade} + 14px) ${pad} ${padFoot}`,
-  background: `${paint("fade")} 0 0 / 240px`,
+  margin: `0 calc(-1 * (${pad} + ${FACE_BLEED}px)) calc(-1 * (${padFoot} + ${FACE_BLEED}px))`,
+  padding: `calc(${fade} + 14px) calc(${pad} + ${FACE_BLEED}px) calc(${padFoot} + ${FACE_BLEED}px)`,
+  borderBottomLeftRadius: "inherit",
+  borderBottomRightRadius: "inherit",
+  background: `${paint("fade")} ${FACE_BLEED}px 0 / 240px`,
   mask: [
-    `${paint("rise")} ${fallbackVar(fray, "0")} 0 / 486px 48px repeat-x`,
+    `${paint("rise")} calc(${fallbackVar(fray, "0px")} + ${FACE_BLEED}px) 0 / 486px 48px repeat-x`,
     "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat"
   ].join(", "),
   selectors: {
@@ -65,10 +68,11 @@ export const foot = style({
 
 export const photo = style({
   position: "absolute",
-  inset: 0,
+  inset: FACE_INSET,
+  borderRadius: "inherit",
   zIndex: -2,
-  width: "100%",
-  height: "100%",
+  width: `calc(100% - ${2 * FACE_INSET}px)`,
+  height: `calc(100% - ${2 * FACE_INSET}px)`,
   objectFit: "cover",
   objectPosition: "left top",
   transition: `scale 0.6s ${vars.easeOut}`,

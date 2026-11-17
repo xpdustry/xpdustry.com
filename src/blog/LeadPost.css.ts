@@ -1,7 +1,8 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, radius, rem } from "#app/ui/styles/scale";
+import { font, insideOutline, radius, rem } from "#app/ui/styles/scale";
 import { displayTitle } from "#app/ui/styles/titles";
+import { FACE_BLEED } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 import { ground, logo as themedLogo } from "./topicTheme.css";
 
@@ -15,10 +16,10 @@ export const lead = style([
     gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)",
     gap: 40,
     minHeight: 400,
-    padding: `${pad.block}px ${pad.inline}px`,
+    padding: insideOutline(pad.block, pad.inline),
     "@media": {
       [media.tablet]: { gridTemplateColumns: "1fr" },
-      [media.phone]: { padding: `${padPhone.block}px ${padPhone.inline}px` }
+      [media.phone]: { padding: insideOutline(padPhone.block, padPhone.inline) }
     }
   }
 ]);
@@ -63,15 +64,18 @@ export const shot = style({
   position: "relative",
   overflow: "hidden",
   alignSelf: "stretch",
-  margin: `0 -${pad.inline + 2}px -${pad.block + 2}px 0`,
+  margin: `0 -${pad.inline + FACE_BLEED}px -${pad.block + FACE_BLEED}px 0`,
   border: "2px solid rgb(0 0 0 / 0.55)",
   borderRight: 0,
   borderBottom: 0,
   borderRadius: `${radius.lg}px 0 0`,
+  borderBottomRightRadius: "inherit",
   background: vars.stage,
   "@media": {
-    [media.tablet]: { minHeight: 260 },
-    [media.phone]: { margin: `0 -${padPhone.inline + 2}px -${padPhone.block + 2}px 0` }
+    [media.tablet]: { minHeight: 260 - FACE_BLEED },
+    [media.phone]: {
+      margin: `0 -${padPhone.inline + FACE_BLEED}px -${padPhone.block + FACE_BLEED}px 0`
+    }
   }
 });
 

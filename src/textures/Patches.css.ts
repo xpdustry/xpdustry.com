@@ -1,6 +1,6 @@
 import { createGlobalVar, globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { cover } from "#app/ui/Card.css";
+import { card, cover, FACE_INSET } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const GROW = "--grow";
@@ -26,6 +26,10 @@ globalStyle(`:where(${patches})`, {
   overflow: "hidden",
   borderRadius: "inherit",
   pointerEvents: "none"
+});
+
+globalStyle(`:where(${card}) > :where(${patches})`, {
+  inset: FACE_INSET
 });
 
 export const placement = style({

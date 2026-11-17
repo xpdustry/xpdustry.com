@@ -1,6 +1,7 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { useState } from "react";
 import type { Px, SpreadPalette } from "./texture";
+import { FACE_INSET } from "#app/ui/Card.css";
 import * as styles from "./Spread.css";
 
 export type SpreadOrigin = readonly [x: Px, y: Px];
@@ -53,13 +54,15 @@ export function Spread({
   });
 }
 
+const withinSpread = (fromCardEdge: Px) => `${fromCardEdge - FACE_INSET}px`;
+
 const place = (palette: SpreadPalette | undefined, from: SpreadStart | undefined) =>
   assignInlineVars({
     [styles.color]: palette?.color,
     [styles.inner]: palette?.inner,
     ...(from && {
-      [styles.originX]: `${from.origin[0]}px`,
-      [styles.originY]: `${from.origin[1]}px`,
+      [styles.originX]: withinSpread(from.origin[0]),
+      [styles.originY]: withinSpread(from.origin[1]),
       [styles.reach]: `${from.reach}px`
     })
   });

@@ -1,16 +1,16 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { font, insideOutline, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
-import { selectableAboveCover } from "#app/ui/Card.css";
+import { face, selectableAboveCover } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const play = style({
   containerType: "inline-size",
   display: "flex",
   flexDirection: "column",
-  padding: "22px 24px",
-  background: vars.a3
+  padding: insideOutline(22, 24),
+  vars: { [face]: vars.a3 }
 });
 
 export const label = style({

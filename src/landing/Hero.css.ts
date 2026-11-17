@@ -1,6 +1,7 @@
 import { createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { font, insideOutline, leading, rem, tracking } from "#app/ui/styles/scale";
+import { face } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const size = createVar();
@@ -11,8 +12,8 @@ export const hero = style({
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
-  padding: 34,
-  background: vars.t3
+  padding: insideOutline(34),
+  vars: { [face]: vars.t3 }
 });
 
 const NAME_WIDTH_EM = 4.45;

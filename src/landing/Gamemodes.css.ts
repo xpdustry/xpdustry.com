@@ -1,9 +1,15 @@
 import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { paint } from "#app/textures/catalogue";
 import { media, narrowerThan } from "#app/ui/styles/media";
-import { DIMMED, font, leading, rem, tracking } from "#app/ui/styles/scale";
+import { DIMMED, font, leading, OUTLINE, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
-import { CHIP_OVERHANG, selectableAboveCover } from "#app/ui/Card.css";
+import {
+  CHIP_OVERHANG,
+  face,
+  FACE_BLEED,
+  FACE_INSET,
+  selectableAboveCover
+} from "#app/ui/Card.css";
 import { line } from "#app/ui/copy/Roll.css";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -26,19 +32,14 @@ export const modes = style({
 });
 
 export const mode = style({
-  vars: { [bandWidth]: `clamp(${rem(342)}, 32cqi, ${rem(372)})` },
+  vars: {
+    [bandWidth]: `clamp(${rem(342)}, 32cqi, ${rem(372)})`,
+    [face]: `${paint("fade")} ${FACE_BLEED}px ${FACE_BLEED - 60}px / 240px, ${vars.tile}`
+  },
   display: "grid",
   gridTemplateColumns: `${bandWidth} minmax(0, 1fr)`,
   alignItems: "center",
-  selectors: {
-    "&::before": {
-      content: "",
-      position: "absolute",
-      inset: 0,
-      zIndex: -2,
-      background: `${paint("fade")} 0 -60px / 240px`
-    }
-  },
+  padding: OUTLINE,
   "@container": {
     [narrow]: {
       vars: { [headHeight]: "68px" },
@@ -58,15 +59,20 @@ export const failed = style({});
 
 export const tinted = style({
   position: "absolute",
-  inset: "0 auto 0 0",
+  inset: `${FACE_INSET}px auto ${FACE_INSET}px ${FACE_INSET}px`,
   zIndex: -2,
-  width: `calc(${bandWidth} - 34px)`,
+  width: `calc(${bandWidth} + ${FACE_BLEED}px - 34px)`,
+  borderRadius: "inherit",
+  borderTopRightRadius: 0,
+  borderBottomRightRadius: 0,
   background: tint,
   "@container": {
     [narrow]: {
       gridArea: "1 / 1 / 2 / 2",
-      inset: "0 0 22px",
-      width: "auto"
+      inset: `${-FACE_BLEED}px ${-FACE_BLEED}px 22px`,
+      width: "auto",
+      borderTopRightRadius: "inherit",
+      borderBottomLeftRadius: 0
     }
   }
 });
@@ -93,6 +99,8 @@ export const side = style({
   }
 });
 
+const fringeAt = (x: number) => `${x + FACE_BLEED}px 0`;
+
 export const fringe = style({
   display: "none",
   "@container": {
@@ -101,12 +109,12 @@ export const fringe = style({
       display: "block",
       height: 48,
       background: tint,
-      mask: `${paint("fringe")} 0 0 / 486px 48px repeat-x`,
+      mask: `${paint("fringe")} ${fringeAt(0)} / 486px 48px repeat-x`,
       selectors: {
-        [`${mode}:nth-child(2) &`]: { maskPosition: "-190px 0" },
-        [`${mode}:nth-child(3) &`]: { maskPosition: "-75px 0" },
-        [`${mode}:nth-child(4) &`]: { maskPosition: "-330px 0" },
-        [`${mode}:nth-child(5) &`]: { maskPosition: "-255px 0" }
+        [`${mode}:nth-child(2) &`]: { maskPosition: fringeAt(-190) },
+        [`${mode}:nth-child(3) &`]: { maskPosition: fringeAt(-75) },
+        [`${mode}:nth-child(4) &`]: { maskPosition: fringeAt(-330) },
+        [`${mode}:nth-child(5) &`]: { maskPosition: fringeAt(-255) }
       }
     }
   }

@@ -18,49 +18,11 @@ interface TrayProps {
   children: ReactNode;
 }
 
-const RISE = 70;
-const RUN = 35;
-const BEND = 14;
-const SLANT = { width: RUN + 2 * BEND, height: RISE + 2 };
-
-const toHundredths = (value: number) => Math.round(value * 100) / 100;
-
-function slantPath(inset: number): string {
-  const length = Math.hypot(RUN, RISE);
-  const [u, v] = [(RUN / length) * BEND, (RISE / length) * BEND];
-  const [x0, x1, i] = [BEND, BEND + RUN, inset];
-  return (
-    `M0 ${i}Q${x0} ${i} ${toHundredths(x0 + u)} ${toHundredths(i + v)}L${toHundredths(x1 - u)} ${toHundredths(RISE + i - v)}` +
-    `Q${x1} ${RISE + i} ${SLANT.width} ${RISE + i}`
-  );
-}
-
-/**
- * How far the slant runs into the body's top border, below and past its end. The browser rounds
- * the SVG's edges and the border's on their own, so pieces that only met edge to edge would leave
- * a hairline of the other between them at some device pixel ratios.
- */
-const SEAM_OVERLAP = 2;
-
-const SLANT_LINE = `${slantPath(1)}H${SLANT.width + SEAM_OVERLAP}`;
-const SLANT_FACE = `${slantPath(0)}V${SLANT.height + SEAM_OVERLAP}H0Z`;
-
 export function Tray({ id, icon: Icon, title, subtitle, action, children }: TrayProps) {
   return (
     <section id={id} className={`${styles.tray} reveal`}>
       <span className={styles.body} aria-hidden="true" />
       <header className={styles.tab}>
-        <svg
-          className={styles.slant}
-          width={SLANT.width}
-          height={SLANT.height}
-          viewBox={`0 0 ${SLANT.width} ${SLANT.height}`}
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <path className={styles.face} d={SLANT_FACE} />
-          <path className={styles.line} d={SLANT_LINE} />
-        </svg>
         <span className={styles.icon}>
           <Icon />
         </span>

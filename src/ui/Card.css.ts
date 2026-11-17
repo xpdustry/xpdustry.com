@@ -1,24 +1,52 @@
-import { globalStyle, style } from "@vanilla-extract/css";
-import { radius } from "./styles/scale";
+import { createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
+import { OUTLINE, radius } from "./styles/scale";
 import { vars } from "./styles/theme.css";
 
 export const card = style({});
+
+export const face = createVar();
+export const FACE_INSET = OUTLINE / 2;
+export const FACE_BLEED = OUTLINE - FACE_INSET;
+
+const FACE_LAYER = -3;
+const COVER_LAYER = 1;
+const ABOVE_COVER_LAYER = COVER_LAYER + 1;
+const OUTLINE_LAYER = ABOVE_COVER_LAYER + 1;
 
 globalStyle(`:where(${card})`, {
   position: "relative",
   isolation: "isolate",
   overflow: "hidden",
-  border: `2px solid ${vars.outline}`,
   borderRadius: vars.r,
-  background: vars.tile,
   color: "inherit",
   textDecoration: "none"
 });
 
-const COVER_LAYER = 1;
+globalStyle(`:where(${card})::before`, {
+  content: '""',
+  position: "absolute",
+  inset: FACE_INSET,
+  zIndex: FACE_LAYER,
+  borderRadius: "inherit",
+  background: fallbackVar(face, vars.tile),
+  pointerEvents: "none"
+});
+
+globalStyle(`:where(${card})::after`, {
+  content: '""',
+  position: "absolute",
+  inset: 0,
+  zIndex: OUTLINE_LAYER,
+  border: `${OUTLINE}px solid ${vars.outline}`,
+  borderRadius: "inherit",
+  pointerEvents: "none"
+});
+
 const CHIP_SIZE = 34;
 const CHIP_ICON = 18;
 export const CHIP_OVERHANG = (CHIP_SIZE - CHIP_ICON) / 2;
+
+const COVER_FOCUS_INSET = 5;
 
 export const cover = style({
   position: "absolute",
@@ -29,7 +57,10 @@ export const cover = style({
   background: "none",
   cursor: "pointer",
   selectors: {
-    "&:focus-visible": { outline: `3px solid ${vars.focus}`, outlineOffset: -5 }
+    "&:focus-visible": {
+      outline: `3px solid ${vars.focus}`,
+      outlineOffset: -(COVER_FOCUS_INSET + OUTLINE)
+    }
   }
 });
 
@@ -49,17 +80,19 @@ globalStyle(`${chip} svg`, {
 
 export const selectableAboveCover = {
   position: "relative",
-  zIndex: COVER_LAYER + 1,
+  zIndex: ABOVE_COVER_LAYER,
   userSelect: "all",
   cursor: "text"
 } as const;
+
+const HINT_INSET = 16;
 
 export const hint = style([
   chip,
   {
     position: "absolute",
-    top: 16,
-    right: 16,
+    top: HINT_INSET + OUTLINE,
+    right: HINT_INSET + OUTLINE,
     background: "color-mix(in srgb, currentColor 14%, transparent)",
     transition: `transform 0.25s ${vars.easeSpring}`
   }

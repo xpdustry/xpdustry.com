@@ -81,6 +81,18 @@ for (const width of [390, 320]) {
   });
 }
 
+test.describe("on a touch phone held sideways, under doubled text", () => {
+  test.use({ viewport: { width: 667, height: 375 }, hasTouch: true, isMobile: true });
+
+  test("every control of an open team profile still takes a whole fingertip", async ({ page }) => {
+    await page.goto("/");
+    await page.addStyleTag({ content: ":root { font-size: 200% }" });
+    await page.locator("#team button[popovertarget]").first().click();
+    await expect(page.locator(":popover-open")).toBeVisible();
+    expect(await missedTaps(page, ":popover-open a, :popover-open button")).toEqual([]);
+  });
+});
+
 /** Records every animation and transition the page starts, by what it moves. */
 function recordMotion() {
   window.motions = [];
