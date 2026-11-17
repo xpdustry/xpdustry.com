@@ -31,7 +31,7 @@ export default defineConfig({
         ...BROWSERS_WITH_OPEN_CLIPBOARD.firefox.context,
         launchOptions: BROWSERS_WITH_OPEN_CLIPBOARD.firefox.launch
       },
-      testMatch: ["entrance.test.ts", "spread.test.ts", "team.test.ts"]
+      testMatch: ["entrance.test.ts", "spread.test.ts", "team.test.ts", "tray-outline.test.ts"]
     }
   ]
 });

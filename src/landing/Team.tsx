@@ -101,23 +101,25 @@ function Profile({ id, member }: { id: string; member: Person }) {
       className={styles.profile}
       {...animateOnToggle}
     >
-      <div className={styles.banner} style={top} />
-      <button
-        type="button"
-        className={styles.close}
-        popoverTarget={id}
-        popoverTargetAction="hide"
-        aria-label={gt("Close")}
-      >
-        <X />
-      </button>
-      <Face name={name} avatar={member.avatar} size={styles.PROFILE_FACE} />
-      <p id={`${id}-name`} className={styles.title}>
-        {name}
-      </p>
-      <Tags tags={member.tags} />
-      <About member={member} />
-      <Links member={member} />
+      <div className={styles.sheet}>
+        <div className={styles.banner} style={top} />
+        <button
+          type="button"
+          className={styles.close}
+          popoverTarget={id}
+          popoverTargetAction="hide"
+          aria-label={gt("Close")}
+        >
+          <X />
+        </button>
+        <Face name={name} avatar={member.avatar} size={styles.PROFILE_FACE} />
+        <p id={`${id}-name`} className={styles.title}>
+          {name}
+        </p>
+        <Tags tags={member.tags} />
+        <About member={member} />
+        <Links member={member} />
+      </div>
     </dialog>
   );
 }

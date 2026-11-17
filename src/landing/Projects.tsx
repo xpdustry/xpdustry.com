@@ -1,3 +1,4 @@
+import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { T, useGT, useMessages } from "gt-tanstack-start";
 import type { ReactNode } from "react";
 import { projects, repositoryUrl, type Project } from "#app/brand/projects";
@@ -76,7 +77,7 @@ function Tile({
       href={href}
       {...outbound(href)}
       className={`${card.card} ${className}`}
-      style={{ background: ground }}
+      style={ground ? assignInlineVars({ [card.face]: ground }) : undefined}
     >
       <Patches patches={patches} />
       {children}

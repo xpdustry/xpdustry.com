@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media, narrowerThan } from "#app/ui/styles/media";
-import { font, radius, rem, tracking } from "#app/ui/styles/scale";
+import { font, insideOutline, radius, rem, tracking } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
 const stackedControls = narrowerThan(512);
@@ -18,7 +18,7 @@ export const aside = style({
 });
 
 export const panel = style({
-  padding: 22
+  padding: insideOutline(22)
 });
 
 export const label = style({

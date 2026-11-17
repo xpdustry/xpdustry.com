@@ -9,6 +9,7 @@ import {
 import { media } from "#app/ui/styles/media";
 import { paint, type PaintName } from "./catalogue";
 import { SPREAD_MASK_TILE, type Px } from "./texture";
+import { FACE_INSET } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const color = createVar();
@@ -56,8 +57,10 @@ export const spread = style({
     [frontRadius]: pastFarthestCorner
   },
   position: "absolute",
-  inset: 0,
+  inset: FACE_INSET,
   zIndex: -2,
+  overflow: "hidden",
+  borderRadius: "inherit",
   opacity: 0,
   pointerEvents: "none",
   transition: `opacity 0s linear ${DISSOLVE_MS}ms`

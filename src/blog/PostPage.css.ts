@@ -1,5 +1,6 @@
 import { style } from "@vanilla-extract/css";
 import { media, upTo } from "#app/ui/styles/media";
+import { insideOutline } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
 const threeUp = upTo(900);
@@ -40,9 +41,9 @@ export const body = style({
   alignSelf: "start",
   gridColumn: 1,
   minWidth: 0,
-  padding: "44px 52px 52px",
+  padding: insideOutline(44, 52, 52),
   "@media": {
-    [media.phone]: { padding: "28px 22px" }
+    [media.phone]: { padding: insideOutline(28, 22) }
   }
 });
 

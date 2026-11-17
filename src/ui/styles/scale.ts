@@ -35,3 +35,12 @@ export const radius = {
   lg: 18,
   pill: 999
 } as const;
+
+export const OUTLINE = 2;
+
+export const insideOutline = (...sides: (number | string)[]) =>
+  sides
+    .map((side) =>
+      typeof side === "number" ? `${side + OUTLINE}px` : `calc(${side} + ${OUTLINE}px)`
+    )
+    .join(" ");

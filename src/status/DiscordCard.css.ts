@@ -1,6 +1,7 @@
 import { style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, leading, rem } from "#app/ui/styles/scale";
+import { font, insideOutline, leading, rem } from "#app/ui/styles/scale";
+import { face } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const BLURPLE = "#5b6bd7";
@@ -9,8 +10,8 @@ export const discord = style({
   display: "flex",
   flexDirection: "column",
   justifyContent: "space-between",
-  padding: "20px 22px",
-  background: BLURPLE,
+  padding: insideOutline(20, 22),
+  vars: { [face]: BLURPLE },
   color: vars.onGround
 });
 

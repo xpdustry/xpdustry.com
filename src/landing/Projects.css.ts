@@ -1,7 +1,8 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
+import { font, insideOutline, leading, radius, rem, tracking } from "#app/ui/styles/scale";
 import { cards, figures } from "./sections";
+import { face } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const glass = "rgb(255 255 255 / 0.12)";
@@ -19,7 +20,7 @@ export const featured = style({
   gridRow: "span 4",
   display: "flex",
   flexDirection: "column",
-  padding: 24,
+  padding: insideOutline(24),
   color: vars.onGround,
   "@media": {
     [media.phone]: { minHeight: 300 }
@@ -94,7 +95,7 @@ const small = style({
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr) auto",
   gridTemplateRows: "auto auto 1fr auto",
-  padding: SMALL_PADDING
+  padding: insideOutline(SMALL_PADDING)
 });
 
 globalStyle(`${small} > :is(h3, p)`, {
@@ -147,7 +148,7 @@ globalStyle(`${item} ${version}`, {
 export const more = style([
   small,
   {
-    background: vars.deep,
+    vars: { [face]: vars.deep },
     color: vars.onDeep,
     "@media": {
       [media.tablet]: { gridColumn: "span 6" }

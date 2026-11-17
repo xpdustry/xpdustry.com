@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
-import { font, rem } from "#app/ui/styles/scale";
+import { font, insideOutline, OUTLINE, rem } from "#app/ui/styles/scale";
 import { displayTitle } from "#app/ui/styles/titles";
 import { vars } from "#app/ui/styles/theme.css";
 import { ground, logo as themedLogo } from "./topicTheme.css";
@@ -12,9 +12,9 @@ export const cover = style([
     flexDirection: "column",
     justifyContent: "flex-end",
     minHeight: 300,
-    padding: "40px 44px 34px",
+    padding: insideOutline(40, 44, 34),
     "@media": {
-      [media.phone]: { padding: "28px 24px" }
+      [media.phone]: { padding: insideOutline(28, 24) }
     }
   }
 ]);
@@ -24,7 +24,7 @@ export const logo = style([
   {
     position: "absolute",
     top: "50%",
-    right: 56,
+    right: 56 + OUTLINE,
     width: 132,
     translate: "0 -50%",
     "@media": {
