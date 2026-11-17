@@ -39,6 +39,8 @@
         "patterns": [
           "src/status/DiscordCard.tsx",
           "src/status/PlayerCount.tsx",
+          "src/status/Profile.css.ts",
+          "src/status/Profile.tsx",
           "src/status/live.ts",
           "src/status/servers.ts",
           "src/status/snapshots.ts"
