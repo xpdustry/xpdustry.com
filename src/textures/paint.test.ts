@@ -84,7 +84,7 @@ describe("paintTexture", () => {
   });
 
   test("the spread's core mask is clear where the main tone shows", () => {
-    const core = paintTexture(labyrinth, { ...SPREAD_MASKS.solid, repeat: 64, tile: 64 }, 0, 0);
+    const core = paintTexture(labyrinth, { ...SPREAD_MASKS.core, repeat: 64, tile: 64 }, 0, 0);
     const alphas = new Set<number>();
     for (let at = 3; at < core.pixels.length; at += 4) alphas.add(core.pixels[at]!);
     expect(alphas.has(0) && alphas.has(255)).toBe(true);

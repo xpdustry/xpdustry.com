@@ -49,7 +49,6 @@ const NOHORNY_THEME: ProjectTheme = {
   accent: "#f9cfe1"
 };
 
-/** In display order. */
 export const projects: readonly Project[] = [
   {
     slug: "nohorny",

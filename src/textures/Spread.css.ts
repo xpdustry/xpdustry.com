@@ -8,67 +8,59 @@ import {
 } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
 import { paint, type PaintName } from "./catalogue";
+import { SPREAD_MASK_TILE, type Px } from "./texture";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const color = createVar();
 export const inner = createVar();
-/** Where the spread starts, from the top left corner. */
-export const x = createVar();
-export const y = createVar();
-/** How far the farthest corner is from where it starts. */
+export const originX = createVar();
+export const originY = createVar();
 export const reach = createVar();
 
-/** How far behind the front each layer ends, in px: `[solid up to, clear from]`. */
-const THIN = [10, 0] as const;
-const THICK = [52, 38] as const;
-const SOLID = [110, 92] as const;
+interface LayerEdge {
+  solidBehind: Px;
+  clearBehind: Px;
+}
 
-/** The radius of the front. */
-const SPREAD = "--spread";
-const spreadVar = createGlobalVar(SPREAD, {
+const THIN: LayerEdge = { solidBehind: 10, clearBehind: 0 };
+const THICK: LayerEdge = { solidBehind: 52, clearBehind: 38 };
+const CORE: LayerEdge = { solidBehind: 110, clearBehind: 92 };
+
+const MASK_TILE = `${SPREAD_MASK_TILE}px`;
+
+const FRONT_RADIUS = "--spread";
+const frontRadius = createGlobalVar(FRONT_RADIUS, {
   syntax: "<length>",
   inherits: true,
   initialValue: "0px"
 });
 
-/**
- * The radius of the clear hole in the middle of a wave, whose edge frays like the front does, in
- * the opposite order. A fill has no hole.
- */
-const HOLE = "--spread-hole";
-const holeVar = createGlobalVar(HOLE, {
+const HOLE_RADIUS = "--spread-hole";
+const holeRadius = createGlobalVar(HOLE_RADIUS, {
   syntax: "<length>",
   inherits: true,
   initialValue: "0px"
 });
 
 const at = createVar();
-/** A front that has closed over the farthest corner. */
-const rest = `calc(${fallbackVar(reach, "700px")} + 120px)`;
+const pastFarthestCorner = `calc(${fallbackVar(reach, "700px")} + 120px)`;
 
-/** Out from nothing to the spread's resting reach, so every play starts over from the press. */
-const grow = keyframes({ from: { vars: { [spreadVar]: "0px" } } });
+const grow = keyframes({ from: { vars: { [frontRadius]: "0px" } } });
 
-/** How long a spread takes to dissolve once `on` is over, in ms: the delays of its layers below. */
-const DISSOLVE = 800;
+const DISSOLVE_MS = 800;
+const DISSOLVE_DELAYS_MS = { core: 0, thick: 200, thin: DISSOLVE_MS - 350 };
 
-/**
- * At rest it already reaches past the farthest corner, so it dissolves whole once `on` is over,
- * and `on` only has to play `grow`: an animation starts over each time it is applied, where a
- * transition would carry on from wherever the last one left off and only fade the colour back in.
- * It stays opaque until its layers have dissolved, each in its turn.
- */
 export const spread = style({
   vars: {
-    [at]: `circle at ${fallbackVar(x, "50%")} ${fallbackVar(y, "50%")}`,
-    [spreadVar]: rest
+    [at]: `circle at ${fallbackVar(originX, "50%")} ${fallbackVar(originY, "50%")}`,
+    [frontRadius]: pastFarthestCorner
   },
   position: "absolute",
   inset: 0,
   zIndex: -2,
   opacity: 0,
   pointerEvents: "none",
-  transition: `opacity 0s linear ${DISSOLVE}ms`
+  transition: `opacity 0s linear ${DISSOLVE_MS}ms`
 });
 
 globalStyle(`${spread} > i, ${spread}::before, ${spread}::after`, {
@@ -77,24 +69,21 @@ globalStyle(`${spread} > i, ${spread}::before, ${spread}::after`, {
   inset: 0
 });
 
-/** Everything out to the front. */
-const front = ([solidTo, clearFrom]: readonly [number, number]) =>
-  `radial-gradient(${at}, #000 calc(${spreadVar} - ${solidTo}px), transparent calc(${spreadVar} - ${clearFrom}px))`;
-/** Everything past the hole. */
-const hole = ([solidFrom, clearTo]: readonly [number, number]) =>
-  `radial-gradient(${at}, transparent calc(${holeVar} + ${clearTo}px), #000 calc(${holeVar} + ${solidFrom}px))`;
+const insideFront = ({ solidBehind, clearBehind }: LayerEdge) =>
+  `radial-gradient(${at}, #000 calc(${frontRadius} - ${solidBehind}px), transparent calc(${frontRadius} - ${clearBehind}px))`;
+const outsideHole = ({ solidBehind, clearBehind }: LayerEdge) =>
+  `radial-gradient(${at}, transparent calc(${holeRadius} + ${clearBehind}px), #000 calc(${holeRadius} + ${solidBehind}px))`;
 
-const layer = (image: PaintName, edge: readonly [number, number]) => ({
+const fillLayer = (image: PaintName, edge: LayerEdge) => ({
   background: color,
-  maskImage: `${paint(image)}, ${front(edge)}`,
+  maskImage: `${paint(image)}, ${insideFront(edge)}`,
   maskComposite: "intersect",
-  maskSize: "240px, auto",
+  maskSize: `${MASK_TILE}, auto`,
   maskRepeat: "repeat, no-repeat"
 });
-/** The same layer with a wave's hole cut out of it. */
-const holed = (image: PaintName, edge: readonly [number, number]) => ({
-  maskImage: `${paint(image)}, ${front(edge)}, ${hole(edge)}`,
-  maskSize: "240px, auto, auto",
+const waveLayer = (image: PaintName, edge: LayerEdge) => ({
+  maskImage: `${paint(image)}, ${insideFront(edge)}, ${outsideHole(edge)}`,
+  maskSize: `${MASK_TILE}, auto, auto`,
   maskRepeat: "repeat, no-repeat, no-repeat"
 });
 
@@ -102,17 +91,17 @@ export const ready = style({});
 
 globalStyle(`${ready} > i`, {
   background: color,
-  mask: front(SOLID)
+  mask: insideFront(CORE)
 });
 globalStyle(`${ready} > i::before`, {
   content: '""',
   position: "absolute",
   inset: 0,
   background: inner,
-  mask: `${paint("spread-core")} 0 0 / 240px repeat`
+  mask: `${paint("spread-core")} 0 0 / ${MASK_TILE} repeat`
 });
-globalStyle(`${ready}::before`, layer("spread-thick", THICK));
-globalStyle(`${ready}::after`, layer("threads", THIN));
+globalStyle(`${ready}::before`, fillLayer("spread-thick", THICK));
+globalStyle(`${ready}::after`, fillLayer("threads", THIN));
 
 export const on = style({
   opacity: 1,
@@ -120,22 +109,17 @@ export const on = style({
   animation: `${grow} 0.9s ${vars.easeGrow}`
 });
 
-/**
- * Once `on` is over the spread dissolves the way it fused, backwards and all over at once: the
- * solid goes first, which leaves the thick threads, then those, which leaves the thin ones.
- */
-const dissolving = (delay: number) => ({
-  "@media": { [media.motion]: { opacity: 0, transition: `opacity 0.3s ease-in ${delay}ms` } }
+const dissolving = (delayMs: number) => ({
+  "@media": { [media.motion]: { opacity: 0, transition: `opacity 0.3s ease-in ${delayMs}ms` } }
 });
-globalStyle(`${spread} > i`, dissolving(0));
-globalStyle(`${spread}::before`, dissolving(200));
-globalStyle(`${spread}::after`, dissolving(DISSOLVE - 350));
+globalStyle(`${spread} > i`, dissolving(DISSOLVE_DELAYS_MS.core));
+globalStyle(`${spread}::before`, dissolving(DISSOLVE_DELAYS_MS.thick));
+globalStyle(`${spread}::after`, dissolving(DISSOLVE_DELAYS_MS.thin));
 globalStyle(`${on} > i, ${on}::before, ${on}::after`, {
   "@media": { [media.motion]: { opacity: 1, transition: "none" } }
 });
 
-/** A play a newer one covers: it keeps `on`'s growth going, if it had it, as it fades out. */
-export const gone = style({
+export const covered = style({
   opacity: 0,
   transition: `opacity 0.55s ${vars.easeOut}`
 });
@@ -143,26 +127,23 @@ export const gone = style({
 globalStyle(`${spread}, ${on}`, {
   "@media": {
     [media.still]: {
-      vars: { [spreadVar]: "4000px" },
+      vars: { [frontRadius]: "4000px" },
       transition: "opacity 0.15s",
       animation: "none"
     }
   }
 });
 
-/** How wide a wave is, in px, from its front to the far edge of its hole. */
-const BAND = 240;
+const WAVE_BAND: Px = 240;
 const sweep = keyframes({
-  from: { vars: { [spreadVar]: "0px", [holeVar]: `${-BAND}px` } }
+  from: { vars: { [frontRadius]: "0px", [holeRadius]: `${-WAVE_BAND}px` } }
 });
 
-/**
- * A spread that passes instead of filling: a band of the reticulate out from the press and off
- * the card, which it leaves as it was. At rest the band is past the farthest corner, so a wave
- * needs no end to its `on`. It is all motion, so a visitor who wants less of it gets none.
- */
 export const wave = style({
-  vars: { [spreadVar]: `calc(${rest} + ${BAND}px)`, [holeVar]: rest },
+  vars: {
+    [frontRadius]: `calc(${pastFarthestCorner} + ${WAVE_BAND}px)`,
+    [holeRadius]: pastFarthestCorner
+  },
   selectors: {
     [`&${on}`]: {
       "@media": {
@@ -173,8 +154,8 @@ export const wave = style({
 });
 
 globalStyle(`${wave}${ready} > i`, {
-  maskImage: `${front(SOLID)}, ${hole(SOLID)}`,
+  maskImage: `${insideFront(CORE)}, ${outsideHole(CORE)}`,
   maskComposite: "intersect"
 });
-globalStyle(`${wave}${ready}::before`, holed("spread-thick", THICK));
-globalStyle(`${wave}${ready}::after`, holed("threads", THIN));
+globalStyle(`${wave}${ready}::before`, waveLayer("spread-thick", THICK));
+globalStyle(`${wave}${ready}::after`, waveLayer("threads", THIN));

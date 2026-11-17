@@ -26,7 +26,6 @@ export const placement = style({
   contentVisibility: "auto"
 });
 
-/** The painter sets `--paint` on a sprite once its image is painted: until then it is clear. */
 export const sprite = style({
   position: "absolute",
   inset: 0,

@@ -1,13 +1,11 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { font, rem, tracking } from "#app/ui/styles/scale";
 
-/** The logo's width. */
-export const mark = createVar();
-/** The name's font size. */
-export const name = createVar();
+export const logoWidth = createVar();
+export const nameSize = createVar();
 
 export const brand = style({
-  vars: { [mark]: "40px", [name]: `${rem(font.h3)}` },
+  vars: { [logoWidth]: "40px", [nameSize]: `${rem(font.h3)}` },
   display: "flex",
   alignItems: "center",
   gap: 10,
@@ -16,11 +14,11 @@ export const brand = style({
 });
 
 globalStyle(`${brand} img`, {
-  width: mark,
+  width: logoWidth,
   height: "auto"
 });
 
 globalStyle(`${brand} span`, {
-  fontSize: name,
+  fontSize: nameSize,
   letterSpacing: tracking.heading
 });

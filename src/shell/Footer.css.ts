@@ -4,7 +4,7 @@ import { RIDGE } from "#app/textures/page";
 import { media, upTo } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { onDeep } from "./onDeep";
-import { mark, name } from "#app/brand/Brand.css";
+import { logoWidth, nameSize } from "#app/brand/Brand.css";
 import { vars } from "#app/ui/styles/theme.css";
 
 const narrow = upTo(900);
@@ -61,7 +61,7 @@ export const inner = style({
 export const brand = style({
   selectors: {
     [`${footer} &`]: {
-      vars: { [mark]: "52px", [name]: `${rem(font.h1)}` },
+      vars: { [logoWidth]: "52px", [nameSize]: `${rem(font.h1)}` },
       gridArea: "brand",
       justifySelf: "start",
       maxWidth: "100%",
@@ -72,12 +72,12 @@ export const brand = style({
   "@media": {
     [media.phone]: {
       selectors: {
-        [`${footer} &`]: { vars: { [mark]: "44px", [name]: `${rem(font.h2)}` } }
+        [`${footer} &`]: { vars: { [logoWidth]: "44px", [nameSize]: `${rem(font.h2)}` } }
       }
     },
     [media.small]: {
       selectors: {
-        [`${footer} &`]: { vars: { [mark]: "34px", [name]: `${rem(font.h3)}` }, gap: 10 }
+        [`${footer} &`]: { vars: { [logoWidth]: "34px", [nameSize]: `${rem(font.h3)}` }, gap: 10 }
       }
     }
   }
