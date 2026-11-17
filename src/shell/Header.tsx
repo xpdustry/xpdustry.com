@@ -12,14 +12,12 @@ import { PlayPill } from "./PlayPill";
 import { useShutPopovers } from "./usePopovers";
 import * as styles from "./Header.css";
 
-const FOLDS = [styles.navFolded, styles.controlsFolded];
-
 export function Header({ players }: { players: PlayerCount }) {
   const header = useRef<HTMLElement>(null);
   const menu = useId();
   const gt = useGT();
   const pageHasPlayCard = useLocation({ select: (location) => location.pathname === "/" });
-  useShutPopovers(header, FOLDS);
+  useShutPopovers(header);
 
   return (
     <header ref={header} className={`${styles.header} reveal`}>

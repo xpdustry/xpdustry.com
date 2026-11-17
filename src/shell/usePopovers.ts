@@ -2,7 +2,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useEffect, type RefObject } from "react";
 import { stopMoving } from "#app/ui/popoverMotion";
 
-export function useShutPopovers(within: RefObject<HTMLElement | null>, folds: readonly string[]) {
+export function useShutPopovers(within: RefObject<HTMLElement | null>) {
   const router = useRouter();
   useEffect(() => {
     const shut = (animate: boolean) => {
@@ -19,12 +19,23 @@ export function useShutPopovers(within: RefObject<HTMLElement | null>, folds: re
       }
     };
     const restored = (event: PageTransitionEvent) => event.persisted && shutStill();
-    const queries = folds.map((fold) => matchMedia(fold));
+    const shown = new Map<Element, boolean>();
+    const refolded = new ResizeObserver((entries) => {
+      let folded = false;
+      for (const { target, contentRect } of entries) {
+        const nowShown = contentRect.width > 0;
+        folded ||= shown.has(target) && shown.get(target) !== nowShown;
+        shown.set(target, nowShown);
+      }
+      if (folded) shutStill();
+    });
 
     const header = within.current;
     header?.addEventListener("click", followed);
     addEventListener("pageshow", restored);
-    for (const query of queries) query.addEventListener("change", shutStill);
+    for (const control of header?.querySelectorAll(":scope > :not([popover])") ?? []) {
+      refolded.observe(control);
+    }
     const unsubscribe = router.subscribe(
       "onBeforeNavigate",
       (event) => event.hrefChanged && shutAnimated()
@@ -32,8 +43,8 @@ export function useShutPopovers(within: RefObject<HTMLElement | null>, folds: re
     return () => {
       header?.removeEventListener("click", followed);
       removeEventListener("pageshow", restored);
-      for (const query of queries) query.removeEventListener("change", shutStill);
+      refolded.disconnect();
       unsubscribe();
     };
-  }, [router, within, folds]);
+  }, [router, within]);
 }

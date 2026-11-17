@@ -21,14 +21,11 @@ export function PlayPill({ players, className }: { players: Count; className?: s
         })
       : `${gt("Copy IP {address}", { address: HUB.hostname })}, ${players.state === "polling" ? gt("Checking") : gt("Offline")}`;
   return (
-    <CopyButton
-      tone="amber"
-      text={HUB.hostname}
-      label={label}
-      className={`${styles.pill} ${className ?? ""}`}
-    >
-      {(state, address) => <Face players={players} state={state} address={address} />}
-    </CopyButton>
+    <span className={`${styles.slot} ${className ?? ""}`}>
+      <CopyButton tone="amber" text={HUB.hostname} label={label} className={styles.pill}>
+        {(state, address) => <Face players={players} state={state} address={address} />}
+      </CopyButton>
+    </span>
   );
 }
 

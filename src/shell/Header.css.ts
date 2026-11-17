@@ -12,10 +12,10 @@ import {
 import { PLINTH_CENTRED_ABOVE_ITS_BOX_BY, tone, wall } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
-export const navFolded = upTo(1160);
-export const controlsFolded = upTo(680);
-const brandWordFolded = upTo(470);
-const navUnfolded = `not all and ${navFolded}`;
+const navFolded = upTo(1008);
+const controlsFolded = upTo(572);
+const brandWordFolded = upTo(383);
+const navUnfolded = `not ${navFolded}`;
 
 const ANCHOR = "--site-menu";
 const BRAND = "--site-brand";
@@ -23,18 +23,14 @@ const BRAND = "--site-brand";
 const below = `calc(${vars.group} * 0.55)`;
 
 export const header = style({
+  containerType: "inline-size",
   color: vars.onDeep,
   position: "relative",
   zIndex: 5,
   display: "flex",
-  flexWrap: "wrap",
-  justifyContent: "flex-end",
   alignItems: "center",
-  gap: "10px 22px",
-  padding: `6px 6px ${below}`,
-  "@media": {
-    [controlsFolded]: { columnGap: 10 }
-  }
+  gap: 10,
+  padding: `6px 6px ${below}`
 });
 
 globalStyle(`${header} ${tone.ink}`, {
@@ -48,12 +44,11 @@ globalStyle(`${header} svg`, {
 export const brand = style({
   position: "relative",
   flex: "none",
-  marginRight: "auto",
   anchorName: BRAND
 });
 
 globalStyle(`${brand} span`, {
-  "@media": {
+  "@container": {
     [brandWordFolded]: {
       position: "absolute",
       width: 1,
@@ -78,14 +73,13 @@ export const nav = style({
   ...popoverBox,
   position: "static",
   display: "flex",
-  flex: "1 1 0",
-  flexWrap: "wrap",
+  flex: "none",
   gap: 6,
-  marginLeft: 4,
+  marginInline: "16px 12px",
   padding: 0,
   border: 0,
   background: "none",
-  "@media": {
+  "@container": {
     [navFolded]: {
       position: "absolute",
       ...menuHung.shut,
@@ -100,54 +94,49 @@ export const nav = style({
     },
     [navUnfolded]: {
       selectors: { "&:popover-open": menuLeftOpenWithoutScripts }
-    },
-    [`${navFolded} and ${media.motion}`]: {
-      selectors: popoverMoving
+    }
+  },
+  "@media": {
+    [media.motion]: {
+      "@container": {
+        [navFolded]: { selectors: popoverMoving }
+      }
     }
   }
 });
 
 globalStyle(`${nav} > a > span`, {
   padding: "7px 20px",
-  "@media": {
+  "@container": {
     [navFolded]: { flex: 1, padding: "10px 14px" }
   }
 });
 
-const end = style({
-  selectors: {
-    [`${header} &`]: { marginLeft: -12 }
-  }
-});
+const iconControl = style({});
 
-globalStyle(`${header} ${end} > span`, {
+globalStyle(`${header} ${iconControl} > span`, {
   padding: 9
 });
 
 export const play = style({
-  selectors: {
-    [`${header} &`]: { marginLeft: "auto" }
-  }
-});
-
-globalStyle(`${header} ${play} > span`, {
-  gap: 10,
-  padding: "10px 13px 10px 14px"
+  display: "flex",
+  flex: "1 1 0",
+  justifyContent: "flex-end",
+  minWidth: 0
 });
 
 export const language = style({
-  selectors: {
-    [`${header} &`]: { marginLeft: "auto" },
-    [`${header} ${play} ~ &`]: { marginLeft: -12 }
-  },
-  "@media": {
-    [controlsFolded]: { display: "none" }
+  marginLeft: "auto",
+  "@container": {
+    [controlsFolded]: {
+      selectors: { [`${header} &`]: { display: "none" } }
+    }
   }
 });
 
 export const languages = style({
   display: "none",
-  "@media": {
+  "@container": {
     [controlsFolded]: {
       display: "flex",
       paddingTop: 10,
@@ -157,9 +146,9 @@ export const languages = style({
 });
 
 export const github = style([
-  end,
+  iconControl,
   {
-    "@media": {
+    "@container": {
       [controlsFolded]: {
         selectors: { [`${header} &`]: { display: "none" } }
       }
@@ -168,21 +157,18 @@ export const github = style([
 ]);
 
 export const toggle = style([
-  end,
+  iconControl,
   {
     anchorName: ANCHOR,
     selectors: {
       [`${header} &`]: { display: "none" }
     },
-    "@media": {
+    "@container": {
       [navFolded]: {
         selectors: { [`${header} &`]: { order: 1, display: "inline-flex" } }
       },
       [controlsFolded]: {
-        selectors: {
-          [`${header} &`]: { marginLeft: "auto" },
-          [`${header}:has(${play}) &`]: { marginLeft: 0 }
-        }
+        selectors: { [`${header} &`]: { marginLeft: "auto" } }
       }
     }
   }
@@ -200,7 +186,7 @@ export const whenOpen = style({
   }
 });
 
-for (const plinth of [toggle, play, `${language} > button`, github]) {
+for (const plinth of [toggle, `${language} > button`, github]) {
   reachTouchTarget(plinth, PLINTH_CENTRED_ABOVE_ITS_BOX_BY);
 }
 reachTouchTarget(brand);
