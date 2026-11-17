@@ -6,6 +6,7 @@ import { ProfileButton } from "#app/status/Profile";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";
+import { authors } from "./content/authors";
 import type { Post } from "./content/registry";
 import { postTitle } from "./titles";
 import { TopicChip } from "./TopicChip";
@@ -64,7 +65,7 @@ function CoverTitle({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
 }
 
 function Byline({
-  frontmatter: { publishedAt, updatedAt },
+  frontmatter: { author: signedAs, publishedAt, updatedAt },
   author
 }: {
   frontmatter: Post["frontmatter"];
@@ -79,7 +80,7 @@ function Byline({
         className={pill}
         label={gt("{name}, open profile", { name: author.name })}
       >
-        {author.avatar && <img className={avatar} src={author.avatar} alt="" />}
+        <img className={avatar} src={authors[signedAs].avatar} alt="" />
         {author.name}
       </ProfileButton>
       <time className={pill} dateTime={publishedAt}>

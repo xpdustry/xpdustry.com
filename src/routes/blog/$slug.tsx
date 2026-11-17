@@ -20,7 +20,10 @@ export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
     const post = postsBySlug.get(params.slug);
     if (!post) throw notFound();
-    const [document, team] = await Promise.all([translated(post, getLocale()).load(), getTeam()]);
+    const [document, team] = await Promise.all([
+      translated(post, getLocale()).load(),
+      getTeam().catch(() => [])
+    ]);
     return { document, author: authorProfile(post.frontmatter.author, team) };
   },
   head: async ({ params }) => {
