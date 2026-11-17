@@ -1,3 +1,4 @@
+import { runInNewContext } from "node:vm";
 import { expect, test } from "vitest";
 import { inPage, inlineScript } from "./inlineScript";
 
@@ -15,4 +16,12 @@ test("calls the function with serialized arguments and in-page expressions", () 
   new Function("sink", script)(sink);
 
   expect(sink).toEqual(['a "quoted" label:3']);
+});
+
+test("an argument cannot close the script tag it is written into", () => {
+  const closing = "</script><script>alert(1)</script>";
+  const script = inlineScript("(text) => text", closing);
+
+  expect(script).not.toContain("</script");
+  expect(runInNewContext(script)).toBe(closing);
 });

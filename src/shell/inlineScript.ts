@@ -4,9 +4,11 @@ class PageExpression {
 
 export const inPage = (source: string) => new PageExpression(source);
 
+const unableToCloseItsScriptTag = (json: string) => json.replaceAll("<", "\\u003c");
+
 export function inlineScript(standalone: string, ...args: unknown[]): string {
   const serialized = args.map((arg) =>
-    arg instanceof PageExpression ? arg.source : JSON.stringify(arg)
+    arg instanceof PageExpression ? arg.source : unableToCloseItsScriptTag(JSON.stringify(arg))
   );
   return `(${standalone})(${serialized.join(", ")})`;
 }
