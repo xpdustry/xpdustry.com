@@ -1,33 +1,27 @@
-/**
- * Puts a script at the top of a page's head, ahead of its stylesheets. A script further down only
- * runs once the stylesheets before it have loaded, so what must start with the page's first bytes
- * is written into the response here instead.
- *
- * It goes right after the viewport, so the character set stays within the bytes a browser reads
- * for it: or right before the first stylesheet, when the renderer has put those first. A response
- * that is not a page, or whose head never shows up, is left as it is.
- */
+// A parser-inserted script waits for every stylesheet before it to load:
+// https://html.spec.whatwg.org/multipage/semantics.html#has-a-style-sheet-that-is-blocking-scripts
+// Past the viewport, the charset declaration stays in the first 1024 bytes the browser prescans:
+// https://html.spec.whatwg.org/multipage/parsing.html#prescan-a-byte-stream-to-determine-its-encoding
 const VIEWPORT = /<meta name="viewport"[^>]*>/;
 const STYLESHEET = /<link rel="stylesheet"/;
 
-/** Where in `head` the script goes, once that can be told. */
-function place(head: string): number | undefined {
+function scriptPosition(head: string): number | undefined {
   const viewport = VIEWPORT.exec(head);
-  const after = viewport ? viewport.index + viewport[0].length : undefined;
-  const sheet = STYLESHEET.exec(head)?.index;
-  if (sheet !== undefined && (after === undefined || sheet < after)) return sheet;
-  return after;
+  const afterViewport = viewport ? viewport.index + viewport[0].length : undefined;
+  const beforeStylesheets = STYLESHEET.exec(head)?.index;
+  if (afterViewport === undefined) return beforeStylesheets;
+  if (beforeStylesheets === undefined) return afterViewport;
+  return Math.min(afterViewport, beforeStylesheets);
 }
 
-/** A head that has not shown up within this many characters is not coming. */
-const FAR_ENOUGH = 16_384;
+const HEAD_SEARCH_CHARS = 16_384;
 
 export function withHeadScript(response: Response, script: string): Response {
   const type = response.headers.get("content-type") ?? "";
   if (!response.body || !type.startsWith("text/html")) return response;
 
-  // Redact identifies head scripts by src/type, ignoring id and content. Give this server-only
-  // script a distinct signature so it cannot be claimed by the shell's untyped inline scripts.
+  // Redact 0.3 hydrates head scripts by `src` and `type` alone (`HEAD_KEY_ATTRS`): the type keeps
+  // the shell's untyped scripts from claiming this one.
   const tag = `<script type="text/javascript">${script}</script>`;
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
@@ -38,9 +32,9 @@ export function withHeadScript(response: Response, script: string): Response {
       transform(chunk, controller) {
         if (placed) return controller.enqueue(chunk);
         held += decoder.decode(chunk, { stream: true });
-        const at = place(held);
+        const at = scriptPosition(held);
         if (at !== undefined) held = held.slice(0, at) + tag + held.slice(at);
-        if (at === undefined && held.length < FAR_ENOUGH) return;
+        if (at === undefined && held.length < HEAD_SEARCH_CHARS) return;
         placed = true;
         controller.enqueue(encoder.encode(held));
       },

@@ -46,9 +46,10 @@ export function Footer() {
 function usePageOverflows() {
   const [scrollable, setScrollable] = useState(false);
   useEffect(() => {
-    // Entrance transforms briefly enlarge scrollHeight without making the page itself taller.
-    const measure = () =>
-      setScrollable(document.body.offsetHeight > document.documentElement.clientHeight);
+    const measure = () => {
+      const untransformedPageHeight = document.body.offsetHeight;
+      setScrollable(untransformedPageHeight > document.documentElement.clientHeight);
+    };
     const observer = new ResizeObserver(measure);
     observer.observe(document.documentElement);
     observer.observe(document.body);

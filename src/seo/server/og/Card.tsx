@@ -17,9 +17,7 @@ export interface CardPost {
   author: string;
   topic: string;
   publishedAt: string;
-  /** The topic's icon as a data URI, when it has one. */
   icon?: string;
-  /** The topic's colours: a project's own, or the site's. */
   theme: CardTheme;
 }
 
@@ -28,7 +26,6 @@ export type CardTheme = Pick<ProjectTheme, "ground" | "muted" | "accent" | "chip
 export interface HomeStats {
   projects: number;
   servers: number;
-  /** Dropped rather than faked while GitHub has not answered. */
   stars?: number;
 }
 
@@ -41,12 +38,6 @@ interface Palette {
   bar: string;
 }
 
-/**
- * A card's colours, drawn from a dark theme ground. The ink leans white toward the theme's accent,
- * the description lifts the theme's muted text toward the ink and the small labels sink it a little
- * into the ground. The texture lightens the ground under the type's far edge, so the text is set
- * brighter than the flat ground needs; `palette.test.ts` measures it against the texture.
- */
 export function cardPalette(theme: CardTheme): Palette {
   const ink = mix("#ffffff", theme.accent, 0.4);
   return {
@@ -59,7 +50,6 @@ export function cardPalette(theme: CardTheme): Palette {
   };
 }
 
-/** Mixes two opaque `#rrggbb` colours, the only form the themes use. */
 function mix(from: string, to: string, amount: number): string {
   const channels = (hex: string) => {
     if (!/^#[\da-f]{6}$/i.test(hex)) throw new Error(`Card colours must be #rrggbb, not ${hex}`);
@@ -72,8 +62,8 @@ function mix(from: string, to: string, amount: number): string {
     .join("")}`;
 }
 
-/** The site's cards keep the brand teal for their bar, where a project's take its chip colour. */
-const SITE_PALETTE: Palette = { ...cardPalette(SITE_THEME), bar: "#41c1ba" };
+const BRAND_TEAL = "#41c1ba";
+const SITE_PALETTE: Palette = { ...cardPalette(SITE_THEME), bar: BRAND_TEAL };
 
 export interface CardLanguage {
   locale: string;
@@ -158,7 +148,6 @@ function Frame({ palette, mark, stats, children }: FrameProps) {
   );
 }
 
-/** The reticulate pattern, soft-lit and building toward the mark, away from the type. */
 export function Texture() {
   return (
     <div
@@ -254,9 +243,15 @@ export function HomeCard({ stats, locale, m }: { stats: HomeStats } & CardLangua
   );
 }
 
-/** `posts` are newest first, as the registry sorts them. */
+function newest(posts: readonly CardPost[]): CardPost | undefined {
+  return posts.reduce<CardPost | undefined>(
+    (latest, post) => (!latest || post.publishedAt > latest.publishedAt ? post : latest),
+    undefined
+  );
+}
+
 export function BlogCard({ posts, locale, m }: { posts: readonly CardPost[] } & CardLanguage) {
-  const latest = posts[0];
+  const latest = newest(posts);
   return (
     <Frame
       palette={SITE_PALETTE}

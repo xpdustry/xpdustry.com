@@ -1,8 +1,7 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 
-/** Marks where a navigation put the focus, which a reader did not choose and needs no ring for. */
-export const landing = style({});
+export const focusedByNavigation = style({});
 
-globalStyle(`${landing}:focus`, {
+globalStyle(`${focusedByNavigation}:focus`, {
   outline: "none"
 });

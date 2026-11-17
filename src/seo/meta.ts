@@ -5,14 +5,12 @@ import { DEFAULT_LOCALE, LOCALES, localeInfo } from "#app/i18n/locales";
 import type { JsonLd } from "./structuredData";
 
 export interface PageImage {
-  /** Site-relative, e.g. `/og/home.png`. */
   url: string;
   alt: string;
 }
 
 export const CARD_SIZE = { width: 1200, height: 630 } as const;
 
-/** Looks up a `msg()` string in the language of the request. */
 export type Translate = (message: string) => string;
 
 export function siteCard(m: Translate): PageImage {
@@ -29,26 +27,21 @@ export function postCard(slug: string, title: string): PageImage {
 
 export interface PageSeo {
   title: string;
-  /** Use the title as written, without appending the site name. */
-  fullTitle?: boolean;
+  withoutSiteName?: boolean;
   description: string;
-  /** Site-relative and without a locale, e.g. `/blog`. */
   path: string;
-  /** The locale the page is rendered in; the default one when absent. */
   locale?: string;
   type?: "website" | "article";
   image: PageImage;
   publishedAt?: string;
   updatedAt?: string;
-  /** Profile URL of the author, for `article:author`. */
-  authorUrl?: string;
+  authorProfileUrl?: string;
   jsonLd?: JsonLd;
 }
 
-/** A route's `head()`: title, description, canonical URL, Open Graph and Twitter tags. */
 export function seo(page: PageSeo) {
   const title =
-    page.fullTitle || page.title === SITE.name ? page.title : `${page.title} - ${SITE.name}`;
+    page.withoutSiteName || page.title === SITE.name ? page.title : `${page.title} - ${SITE.name}`;
   const locale = page.locale ?? DEFAULT_LOCALE;
   const urlIn = (other: string) => `${SITE.origin}${withLocale(page.path, other)}`;
   const url = urlIn(locale);
@@ -82,7 +75,9 @@ export function seo(page: PageSeo) {
         ? [{ property: "article:published_time", content: page.publishedAt }]
         : []),
       ...(page.updatedAt ? [{ property: "article:modified_time", content: page.updatedAt }] : []),
-      ...(page.authorUrl ? [{ property: "article:author", content: page.authorUrl }] : [])
+      ...(page.authorProfileUrl
+        ? [{ property: "article:author", content: page.authorProfileUrl }]
+        : [])
     ],
     links: [
       { rel: "canonical", href: url },

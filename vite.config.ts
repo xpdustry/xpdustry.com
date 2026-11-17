@@ -6,6 +6,8 @@ import { defineConfig } from "vite";
 import { inlineScriptsPlugin } from "./scripts/inline-scripts.ts";
 import { blogMarkdownPlugin } from "./src/blog/content/markdown.ts";
 
+const NATIVE_PACKAGES = ["@takumi-rs/core"];
+
 export default defineConfig({
   server: {
     port: 3000
@@ -13,8 +15,6 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true
   },
-  // The footer's copyright year, the same on the server and in the browser, so it never mismatches
-  // when the server outlives a new year.
   define: {
     "import.meta.env.BUILD_YEAR": JSON.stringify(new Date().getUTCFullYear())
   },
@@ -27,13 +27,11 @@ export default defineConfig({
         client: { files: ["**/*.server.*", "**/src/*/server/**"] }
       }
     }),
-    // TanStack Start requires its plugin before React's.
     viteReact(),
     redact()
   ],
-  // Redact stands in for React on the server too, which it can only do in code Vite bundles:
-  // everything but the card renderer, whose native binding has to stay a package.
-  ssr: { noExternal: true, external: ["@takumi-rs/core"] },
+  // Redact swaps React in through Vite's resolver, which never sees an external package's imports.
+  ssr: { noExternal: true, external: NATIVE_PACKAGES },
   build: {
     sourcemap: true,
     assetsInlineLimit: 0

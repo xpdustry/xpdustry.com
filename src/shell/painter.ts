@@ -5,17 +5,15 @@ import { inlineScript } from "./inlineScript";
 import source from "./painter.script.ts?raw";
 
 declare global {
-  /** A texture's image once it is painted, or nothing when it cannot be. */
   var paints: ((key: string) => Promise<string | undefined>) | undefined;
 }
 
-/**
- * How soon a texture is wanted: the worker paints the lowest first. A blob's grown sprite waits
- * behind everything on show, as it only adds to a blob that is already there.
- */
-const ORDER = { frame: 0, shown: 1, named: 2, grown: 3, below: 4 };
+const PAINTED_FIRST_TO_LAST = ["frame", "shown", "named", "grown", "below"] as const;
 
-/** Where the painter's worker is, for the page to say so: its script carries the labyrinth. */
-export const PAINTER_WORKER = worker;
+const PRIORITY = Object.fromEntries(
+  PAINTED_FIRST_TO_LAST.map((stage, priority) => [stage, priority])
+) as Record<(typeof PAINTED_FIRST_TO_LAST)[number], number>;
 
-export const PAINTER = inlineScript(source, PAINT_NAMES, FRAME_PAINTS, GROWN, ORDER);
+export const PAINTER_WORKER_URL = worker;
+
+export const PAINTER = inlineScript(source, PAINT_NAMES, FRAME_PAINTS, GROWN, PRIORITY);

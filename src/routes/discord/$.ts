@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { services } from "#app/status/server/services";
 
-/** The team's pictures, copied off Discord's CDN so visitors never ask it. Only those, never a proxy. */
+const NAMED_AFTER_CONTENT = "public, max-age=31536000, immutable";
+
 export const Route = createFileRoute("/discord/$")({
   server: {
     handlers: {
@@ -11,8 +12,7 @@ export const Route = createFileRoute("/discord/$")({
         return new Response(picture.body, {
           headers: {
             "content-type": picture.type,
-            // Discord names a picture after its content, so a path always holds the same one.
-            "cache-control": "public, max-age=31536000, immutable",
+            "cache-control": NAMED_AFTER_CONTENT,
             "x-content-type-options": "nosniff"
           }
         });

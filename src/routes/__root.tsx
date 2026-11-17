@@ -11,7 +11,7 @@ import { Background } from "#app/shell/Background";
 import { ENTER } from "#app/shell/enter";
 import { Footer } from "#app/shell/Footer";
 import { Header } from "#app/shell/Header";
-import { PAINTER_WORKER } from "#app/shell/painter";
+import { PAINTER_WORKER_URL } from "#app/shell/painter";
 import { REVEAL } from "#app/shell/reveal";
 import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
 import { Scrollbar } from "#app/shell/Scrollbar";
@@ -51,11 +51,10 @@ export const Route = createRootRoute({
   shellComponent: Document
 });
 
-/**
- * The colour a browser shows before the stylesheet arrives, in place of white. It is the same deep
- * green the stylesheet's own `:root` rule gives the canvas.
- */
 const UNSTYLED_CANVAS = `:where(html){background:${CROWN.settings.color}}`;
+
+const ARTICLE_FONTS = { display: "high", text: "high", mono: "low" } as const;
+const PAGE_FONTS = { display: "high", mono: "low", text: "low" } as const;
 
 function useSmoothScrollOnceHydrated() {
   useEffect(() => {
@@ -76,18 +75,11 @@ function Document({ children }: { children: ReactNode }) {
   const { locale, translations, players } = shellData(
     useMatch({ from: rootRouteId, select: (match) => match.loaderData })
   );
-  // The header's language label is set in the text face, on every page; an article's body is too,
-  // and there it is most of the page, so it comes ahead of the monospace.
   const reading = useMatch({ from: "/blog/$slug", shouldThrow: false }) !== undefined;
-  preloadFonts(
-    reading
-      ? { display: "high", text: "high", mono: "low" }
-      : { display: "high", mono: "low", text: "low" },
-    locale
-  );
+  preloadFonts(reading ? ARTICLE_FONTS : PAGE_FONTS, locale);
 
   return (
-    <html lang={locale} data-painter={PAINTER_WORKER} suppressHydrationWarning>
+    <html lang={locale} data-painter={PAINTER_WORKER_URL} suppressHydrationWarning>
       <head>
         <style>{UNSTYLED_CANVAS}</style>
         <HeadContent />

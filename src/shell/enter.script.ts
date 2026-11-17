@@ -1,11 +1,3 @@
-/**
- * Brings in the first screen's textures, those marked with `texture()`, in order as the painter
- * paints them: the crown and the backdrop, then each card's patches, card by card. A texture
- * painted late comes in when it is, never before its turn. A stalled painter releases textures
- * to show as they are painted. Content is never hidden: only textures wait, and only from here, in the
- * head, until the page is parsed. Without motion, or without the animation API, the textures
- * paint as they load.
- */
 export default function enter(): void {
   const paints = globalThis.paints;
   const root = document.documentElement;
@@ -17,172 +9,178 @@ export default function enter(): void {
     return;
   }
 
+  const STALL_MS = 4000;
+  const CARD_STAGGER_MS = 110;
+  const BLOB_STAGGER_MS = 70;
+  const STAGGERED_BLOBS = 4;
+  const LAYER_STAGGER_MS = 140;
+  const FADE_MS = 350;
+  const EASE_OUT = "cubic-bezier(0.22, 1, 0.36, 1)";
+  const EASE_SLOW_START = "cubic-bezier(0.33, 0, 0.2, 1)";
+
   const waiting = new Set<Animation>();
   const release = () => {
     for (const animation of waiting) animation.cancel();
     waiting.clear();
     delete root.dataset.enter;
   };
-  // A stalled painter or module must not hold the page's textures indefinitely.
-  const timeout = setTimeout(release, 4000);
+  const releaseIfStalled = setTimeout(release, STALL_MS);
   addEventListener("pagehide", release, { once: true });
 
-  const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
-  /** Slower out of the start, so the threads show before they fuse. */
-  const steady = "cubic-bezier(0.33, 0, 0.2, 1)";
-
-  /**
-   * A patch's blob grows as the labyrinth does: threads reach out first, then fuse into the
-   * patch behind them. Its mask adds a fused disc to threads cut to a wider disc, both widening
-   * from the blob's middle until the fused one covers the whole sprite.
-   */
-  const fused = "radial-gradient(closest-side, #000 82%, transparent)";
-  const reach = "radial-gradient(closest-side, #000 60%, transparent)";
-  const growth =
-    (tile: string, threads: string) => (disc: string, outer: string, offset: number) => ({
-      offset,
-      maskImage: `${fused}, url("${threads}"), ${reach}`,
-      maskComposite: "add, intersect",
-      maskRepeat: "no-repeat, repeat, no-repeat",
-      maskPosition: "50% 50%, 0 0, 50% 50%",
-      maskSize: `${disc} ${disc}, ${tile}px ${tile}px, ${outer} ${outer}`
-    });
-  const images = new Map<string, Promise<boolean>>();
+  const decoded = new Map<string, Promise<boolean>>();
   const decode = (src: string) => {
-    const loaded = images.get(src);
-    if (loaded) return loaded;
+    const known = decoded.get(src);
+    if (known) return known;
     const image = new Image();
     image.src = src;
     const ready = image.decode().then(
       () => true,
       () => false
     );
-    images.set(src, ready);
+    decoded.set(src, ready);
     return ready;
   };
-  /** Resolves once a texture can show, to its image: painted and decoded, or absent. */
-  const painted = (key?: string) =>
+  const showableImage = (key?: string) =>
     Promise.resolve(key && paints ? paints(key) : undefined).then(
       (image) => image && decode(image).then((ready) => (ready ? image : undefined))
     );
-  /** The thin threads a blob grows in through: its keyframes name them, so it waits for them too. */
-  const threads = painted("threads");
+  const threadsImage = showableImage("threads");
 
-  type Frames = Keyframe[] | ((tile: string, threads: string) => Keyframe[]);
-  /** What holds a blob until it is painted, and all it plays when the threads are absent. */
-  const fade: Keyframe[] = [{ opacity: 0 }, { opacity: 1 }];
-  const grows = (animation: Animation, frames: Frames, tile?: string, threads?: string) => {
-    if (typeof frames !== "function") return;
-    const effect = animation.effect as KeyframeEffect;
-    if (threads) effect.setKeyframes(frames(tile!, threads));
-    else effect.updateTiming({ duration: 350, easing: ease });
+  const FUSED_DISC = "radial-gradient(closest-side, #000 82%, transparent)";
+  const THREAD_REACH = "radial-gradient(closest-side, #000 60%, transparent)";
+  const growthFrames = (tile: string, threads: string): Keyframe[] => {
+    const frame = ({ offset, fused, reach }: { offset: number; fused: string; reach: string }) => ({
+      offset,
+      maskImage: `${FUSED_DISC}, url("${threads}"), ${THREAD_REACH}`,
+      maskComposite: "add, intersect",
+      maskRepeat: "no-repeat, repeat, no-repeat",
+      maskPosition: "50% 50%, 0 0, 50% 50%",
+      maskSize: `${fused} ${fused}, ${tile}px ${tile}px, ${reach} ${reach}`
+    });
+    return [
+      frame({ offset: 0, fused: "0%", reach: "0%" }),
+      frame({ offset: 0.25, fused: "0%", reach: "90%" }),
+      frame({ offset: 1, fused: "190%", reach: "320%" })
+    ];
   };
 
-  /**
-   * For each kind: its keyframes, or how to make them for a labyrinth tile; its duration; when in
-   * the sequence it may start; its easing.
-   */
-  const KINDS: Record<string, [Frames, number, number, string?]> = {
-    drop: [
-      [
+  interface Kind {
+    frames: Keyframe[];
+    growsThroughThreads?: boolean;
+    durationMs: number;
+    earliestMs: number;
+    easing: string;
+    layers: { pseudoElement?: string; texture?: string }[];
+  }
+  const FADE_IN: Keyframe[] = [{ opacity: 0 }, { opacity: 1 }];
+  const KINDS: Record<string, Kind> = {
+    drop: {
+      frames: [
         { opacity: 0, translate: "0 -18px" },
         { opacity: 1, translate: "0 0" }
       ],
-      550,
-      0
-    ],
-    backdrop: [[{ opacity: 0 }, { opacity: 1 }], 900, 80],
-    grow: [
-      (tile, threads) => {
-        const at = growth(tile, threads);
-        return [at("0%", "0%", 0), at("0%", "90%", 0.25), at("190%", "320%", 1)];
-      },
-      1000,
-      220,
-      steady
-    ],
-    // Its grown sprite, which the hover uncovers, opens from nothing to where it rests, inside the
-    // fused disc. Without a last keyframe, it ends wherever the hover has it.
-    grown: [
-      [
+      durationMs: 550,
+      earliestMs: 0,
+      easing: EASE_OUT,
+      layers: [{ texture: "crown" }]
+    },
+    backdrop: {
+      frames: FADE_IN,
+      durationMs: 900,
+      earliestMs: 80,
+      easing: EASE_OUT,
+      layers: [
+        { pseudoElement: "::before", texture: "backdrop-far" },
+        { pseudoElement: "::after", texture: "backdrop-near" }
+      ]
+    },
+    grow: {
+      frames: FADE_IN,
+      growsThroughThreads: true,
+      durationMs: 1000,
+      earliestMs: 220,
+      easing: EASE_SLOW_START,
+      layers: [{}]
+    },
+    grown: {
+      // No keyframe at 1: Web Animations fills it with the underlying value, where the hover has
+      // `--grow`. https://drafts.csswg.org/web-animations-1/#the-effect-value-of-a-keyframe-animation-effect
+      frames: [
         { "--grow": "0", offset: 0 },
         { "--grow": "0", offset: 0.45 }
       ],
-      1000,
-      220,
-      steady
-    ]
-  };
-  const CARD = 110;
-  const BLOB = 70;
-
-  /** The textures the styles name, for the kinds that are not a sprite: one per layer. */
-  const NAMED: Record<string, string[]> = {
-    drop: ["crown"],
-    backdrop: ["backdrop-far", "backdrop-near"]
+      durationMs: 1000,
+      earliestMs: 220,
+      easing: EASE_SLOW_START,
+      layers: [{}]
+    }
   };
 
-  const cards = new Map<Element, number>();
-  const blobs = new Map<Element, number>();
-
-  /**
-   * When a texture may start, in ms from `start`, and how far it trails its card's earlier blobs
-   * if its image is late. A blob's grown sprite comes in with it: only base sprites take a turn.
-   */
-  const turn = (card: Element | null, kind: string, at: number): [number, number] => {
-    if (!card) return [at, 0];
-    if (!cards.has(card)) cards.set(card, cards.size);
-    const blob = blobs.get(card) ?? 0;
-    if (kind !== "grown") blobs.set(card, blob + 1);
-    const trail = Math.max(0, Math.min(kind === "grown" ? blob - 1 : blob, 4)) * BLOB;
-    return [at + cards.get(card)! * CARD + trail, trail];
+  const cardOrder = new Map<Element, number>();
+  const blobsTaken = new Map<Element, number>();
+  const blobIndex = (card: Element, kind: string) => {
+    const taken = blobsTaken.get(card) ?? 0;
+    const sharesItsBlobsTurn = kind === "grown";
+    if (sharesItsBlobsTurn) return taken - 1;
+    blobsTaken.set(card, taken + 1);
+    return taken;
+  };
+  const turn = (card: Element | null, kind: string, earliestMs: number) => {
+    if (!card) return { atMs: earliestMs, trailMs: 0 };
+    if (!cardOrder.has(card)) cardOrder.set(card, cardOrder.size);
+    const blob = Math.max(0, Math.min(blobIndex(card, kind), STAGGERED_BLOBS));
+    const trailMs = blob * BLOB_STAGGER_MS;
+    return { atMs: earliestMs + cardOrder.get(card)! * CARD_STAGGER_MS + trailMs, trailMs };
   };
 
-  /** Holds `element` at its first keyframe until its image can paint and its turn has come. */
-  const play = (element: HTMLElement, kind: string, start: number) => {
-    if (!KINDS[kind]) return;
-    const [frames, duration, at, easing = ease] = KINDS[kind];
+  const enterWhenPainted = (element: HTMLElement, kindName: string, startMs: number) => {
+    const kind = KINDS[kindName];
+    if (!kind) return;
     const card = element.closest(".reveal");
     const box = (card ?? element).getBoundingClientRect();
     if (box.bottom <= 0 || box.top >= innerHeight) return;
-    const [slot, trail] = turn(card, kind, at);
-    const layers = kind === "backdrop" ? ["::before", "::after"] : [undefined];
-    layers.forEach((pseudoElement, layer) => {
-      const animation = element.animate(typeof frames === "function" ? fade : frames, {
-        duration,
-        easing,
+    const { atMs, trailMs } = turn(card, kindName, kind.earliestMs);
+    kind.layers.forEach(({ pseudoElement, texture }, layer) => {
+      const animation = element.animate(kind.frames, {
+        duration: kind.durationMs,
+        easing: kind.easing,
         fill: "backwards",
         pseudoElement
       });
       waiting.add(animation);
       animation.pause();
-      const image = painted(element.dataset.paint ?? NAMED[kind]?.[layer]);
-      void Promise.all([typeof frames === "function" && threads, image]).then(([threads]) => {
+      const image = showableImage(element.dataset.paint ?? texture);
+      void Promise.all([kind.growsThroughThreads && threadsImage, image]).then(([threads]) => {
         if (!waiting.delete(animation)) return;
-        grows(animation, frames, element.dataset.tile, threads || undefined);
-        if (!waiting.size) clearTimeout(timeout);
-        const wait = start + slot + layer * 140 - performance.now();
-        animation.effect!.updateTiming({ delay: Math.max(wait, trail + layer * 140) });
+        const effect = animation.effect as KeyframeEffect;
+        if (kind.growsThroughThreads && threads) {
+          effect.setKeyframes(growthFrames(element.dataset.tile!, threads));
+        } else if (kind.growsThroughThreads) {
+          effect.updateTiming({ duration: FADE_MS, easing: EASE_OUT });
+        }
+        if (!waiting.size) clearTimeout(releaseIfStalled);
+        const layerMs = layer * LAYER_STAGGER_MS;
+        const untilTurnMs = startMs + atMs + layerMs - performance.now();
+        effect.updateTiming({ delay: Math.max(untilTurnMs, trailMs + layerMs) });
         animation.play();
       });
     });
   };
 
-  const run = () => {
+  const holdEachTextureInItsAnimation = () => {
     if (!("enter" in root.dataset)) return;
-    const start = performance.now();
+    const startMs = performance.now();
     try {
       for (const element of document.querySelectorAll<HTMLElement>("[data-texture]")) {
-        play(element, element.dataset.texture!, start);
+        enterWhenPainted(element, element.dataset.texture!, startMs);
       }
     } catch {}
-    // Each waiting texture is now held by its animation, which outranks this.
     delete root.dataset.enter;
   };
 
   if (document.readyState === "loading") {
-    addEventListener("DOMContentLoaded", run, { once: true });
+    addEventListener("DOMContentLoaded", holdEachTextureInItsAnimation, { once: true });
   } else {
-    run();
+    holdEachTextureInItsAnimation();
   }
 }

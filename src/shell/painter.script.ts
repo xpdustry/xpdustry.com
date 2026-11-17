@@ -1,39 +1,22 @@
-/**
- * Has the textures painted in the visitor's browser, from the top of the head, before the
- * stylesheets, so nothing waits on them or on the page's scripts. The server writes it there
- * (`server.ts`); the page says where the worker is, on its root as `data-painter`. Every texture is the one
- * labyrinth tile, fused and frayed by a field: the worker's script carries the tile, so one
- * request is all the network does for every texture, and the worker paints them off the main
- * thread.
- *
- * A painted texture reaches the page through a style rule: `--paint-<name>` on the root for the
- * textures the styles name, `--paint` on `[data-paint="<key>"]` for a blob's sprite. Until then,
- * and in a browser that cannot paint, the texture is simply absent: content never waits on it.
- *
- * The first screen's frame is painted first, then the sprites on show, then the rest, so a slow
- * phone spends its first moments on what is in view. A worker that fails, as its download can on
- * a poor connection, is replaced and asked again for what is still waited on.
- */
 export default function painter(
   names: string[],
   frame: string[],
-  grown: string,
-  order: Record<"frame" | "shown" | "named" | "grown" | "below", number>
+  grownSuffix: string,
+  priority: Record<"frame" | "shown" | "named" | "grown" | "below", number>
 ): void {
-  const TRIES = 3;
-  /** The textures asked for and not yet painted: how soon each is wanted, and who waits. */
-  const waiting = new Map<string, { priority: number; done: (image?: string) => void }>();
+  const WORKER_TRIES = 3;
+  const RETRY_MS = 150;
+  const unpainted = new Map<string, { priority: number; done: (image?: string) => void }>();
   const painted = new Map<string, Promise<string | undefined>>();
   let sheet: CSSStyleSheet | undefined;
   let port: Worker | undefined;
-  let stopped = false;
+  let gaveUp = false;
 
-  /** Nothing more will be painted: every texture still waited on is absent. */
-  const stop = () => {
-    stopped = true;
+  const giveUp = () => {
+    gaveUp = true;
     port = undefined;
-    for (const { done } of waiting.values()) done();
-    waiting.clear();
+    for (const { done } of unpainted.values()) done();
+    unpainted.clear();
   };
 
   const show = ({ data }: MessageEvent<{ key: string; image?: Blob }>) => {
@@ -45,72 +28,78 @@ export default function painter(
           : `[data-paint="${data.key}"]{--paint:url("${image}")}`
       );
     }
-    waiting.get(data.key)?.done(image);
-    waiting.delete(data.key);
+    unpainted.get(data.key)?.done(image);
+    unpainted.delete(data.key);
   };
 
-  /** Starts a worker and asks it for everything waited on; when it fails, another, `tries` times. */
-  const hire = (tries: number) => {
+  const hireWorker = (triesLeft: number) => {
     const hired = new Worker(document.documentElement.dataset.painter!, { type: "module" });
     hired.onmessage = show;
     hired.onerror = () => {
       hired.terminate();
       port = undefined;
-      if (tries > 1) setTimeout(() => hire(tries - 1), 150);
-      else stop();
+      if (triesLeft > 1) setTimeout(() => hireWorker(triesLeft - 1), RETRY_MS);
+      else giveUp();
     };
     port = hired;
-    for (const [key, { priority }] of waiting) hired.postMessage({ key, priority });
+    for (const [key, request] of unpainted) hired.postMessage({ key, priority: request.priority });
   };
 
-  const paint = (key: string, priority: number) => {
+  const paint = (key: string, keyPriority: number) => {
     let image = painted.get(key);
     if (!image) {
       image = new Promise((done) => {
-        if (stopped) return done(undefined);
-        waiting.set(key, { priority, done });
-        port?.postMessage({ key, priority });
+        if (gaveUp) return done(undefined);
+        unpainted.set(key, { priority: keyPriority, done });
+        port?.postMessage({ key, priority: keyPriority });
       });
       painted.set(key, image);
     }
     return image;
   };
-  globalThis.paints = (key) => paint(key, order.shown);
+  globalThis.paints = (key) => paint(key, priority.shown);
 
   try {
     sheet = new CSSStyleSheet();
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
-    hire(TRIES);
+    hireWorker(WORKER_TRIES);
   } catch {
-    return stop();
+    return giveUp();
   }
 
-  for (const name of names) void paint(name, frame.includes(name) ? order.frame : order.named);
+  for (const name of names) {
+    void paint(name, frame.includes(name) ? priority.frame : priority.named);
+  }
 
   const sprites = (root: ParentNode) => root.querySelectorAll<HTMLElement>("[data-paint]");
-  const later = (key: string, priority: number) => (key.endsWith(grown) ? order.grown : priority);
-  /** The sprites on show first, then, as the page changes, each one it gains. */
-  const watch = () => {
+  const onShowPriority = (key: string) =>
+    key.endsWith(grownSuffix) ? priority.grown : priority.shown;
+  const paintSpritesOnShowThenBelow = () => {
     for (const sprite of sprites(document)) {
       const { top, bottom } = sprite.getBoundingClientRect();
       const key = sprite.dataset.paint!;
-      void paint(key, bottom > 0 && top < innerHeight ? later(key, order.shown) : order.below);
+      void paint(key, bottom > 0 && top < innerHeight ? onShowPriority(key) : priority.below);
     }
+  };
+  const paintSpritesTheBodyGains = () =>
     new MutationObserver((changes) => {
       for (const { addedNodes } of changes) {
         for (const node of addedNodes) {
           if (!(node instanceof HTMLElement)) continue;
           const added = node.dataset.paint ? [node, ...sprites(node)] : sprites(node);
           for (const sprite of added) {
-            void paint(sprite.dataset.paint!, later(sprite.dataset.paint!, order.shown));
+            void paint(sprite.dataset.paint!, onShowPriority(sprite.dataset.paint!));
           }
         }
       }
     }).observe(document.body, { childList: true, subtree: true });
+  const paintSprites = () => {
+    paintSpritesOnShowThenBelow();
+    paintSpritesTheBodyGains();
   };
   if (document.readyState === "loading") {
-    addEventListener("DOMContentLoaded", watch, { once: true });
+    addEventListener("DOMContentLoaded", paintSprites, { once: true });
   } else {
-    watch();
+    paintSprites();
   }
 }

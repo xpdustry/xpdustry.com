@@ -6,14 +6,10 @@ import * as styles from "./Scrollbar.css";
 const SCROLLBAR = inlineScript(
   source,
   inPage("document.currentScript.previousElementSibling"),
-  styles.INSET,
-  styles.SHORTEST,
-  styles.IDLE,
-  styles.REACH,
+  styles.THUMB,
   media.fine
 );
 
-/** The page's scrollbar, drawn over it so that it never narrows the layout. */
 export function Scrollbar() {
   return (
     <>

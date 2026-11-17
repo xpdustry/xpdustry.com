@@ -28,7 +28,6 @@ export function PlayPill({ players, className }: { players: Count; className?: s
   );
 }
 
-/** The players online, the hub's address and an icon saying whether the copy landed. */
 function Face({ players, state }: { players: Count; state: CopyState }) {
   const Icon = STATE_ICON[state];
   return (
@@ -44,11 +43,10 @@ function Face({ players, state }: { players: Count; state: CopyState }) {
   );
 }
 
-/** After a refused copy the address shows at every width, ready to be selected by hand. */
 function Address({ failed }: { failed: boolean }) {
   if (failed) {
     return (
-      <span className={`${styles.address} ${styles.failed}`}>
+      <span className={`${styles.address} ${styles.refused}`}>
         <Hostname name={HUB.hostname} />
       </span>
     );
