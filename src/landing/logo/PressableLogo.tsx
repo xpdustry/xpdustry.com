@@ -1,4 +1,5 @@
-import { useId } from "react";
+import { useId, type MouseEventHandler } from "react";
+import { SITE } from "#app/brand/site";
 import { COG_INK, COG_NORTH, COG_SIDES, COG_SOUTH, SQUASH, X, X_INK } from "./shapes";
 import * as styles from "./PressableLogo.css";
 
@@ -24,16 +25,29 @@ function Swept({ shape, color }: { shape: string; color: string }) {
  * a shape swept down, from the back of the logo to the front, as a wall hangs over what lies
  * behind it and under what lies before: the cog's top piece, the X's upper half, the cog's sides,
  * the X's lower half, the cog's bottom piece. Then the faces, which nothing covers. A press moves
- * the faces and resizes the sweeps, with a transition: no script, no image.
+ * the faces and resizes the sweeps, with a transition: no script, no image. A click is the
+ * caller's, which spreads the hero card's colour from it.
  */
-export function PressableLogo({ className }: { className?: string }) {
+export function PressableLogo({
+  className,
+  onClick
+}: {
+  className?: string;
+  onClick: MouseEventHandler<HTMLButtonElement>;
+}) {
   const id = useId();
   const upper = `${id}upper`;
   const lower = `${id}lower`;
 
   return (
     // An empty touch listener lets Safari on iOS apply :active to a tap.
-    <span className={`${styles.mark} ${className ?? ""}`} aria-hidden="true" onTouchStart={noop}>
+    <button
+      type="button"
+      className={`${styles.mark} ${className ?? ""}`}
+      aria-label={SITE.name}
+      onClick={onClick}
+      onTouchStart={noop}
+    >
       <svg className={styles.logo} viewBox="-24 -24 1072 1072">
         <g transform={`scale(${SQUASH} 1)`}>
           <defs>
@@ -56,7 +70,7 @@ export function PressableLogo({ className }: { className?: string }) {
           <path d={X} className={styles.top} fill="#ffffff" />
         </g>
       </svg>
-    </span>
+    </button>
   );
 }
 

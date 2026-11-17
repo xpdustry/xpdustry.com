@@ -98,6 +98,7 @@ export const PATCHES = {
 };
 
 export const SPREADS = {
+  hero: spreadPalette(...LIGHT_TEAL),
   play: spreadPalette(...GOLD),
   survival: spreadPalette(...AMBER),
   pvp: spreadPalette(...BLUE),

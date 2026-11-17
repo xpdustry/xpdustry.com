@@ -31,21 +31,17 @@ export function Spread({
   from?: SpreadStart;
 }) {
   // Each press is a new `from`, and a fresh element, so its animation starts over from nothing.
-  const [plays, setPlays] = useState<readonly Play[]>([{ id: 0, from }]);
+  const [plays, setPlays] = useState<readonly Play[]>([{ id: 0, from, on }]);
   const last = plays.at(-1)!;
-  if (from !== last.from)
-    setPlays([
-      { ...last, on },
-      { id: last.id + 1, from }
-    ]);
+  if (from !== last.from) setPlays([last, { id: last.id + 1, from, on }]);
+  else if (on !== last.on) setPlays([...plays.slice(0, -1), { ...last, on }]);
 
   return plays.map((play) => {
     const current = play === last;
-    const growing = current ? on : play.on;
     return (
       <span
         key={play.id}
-        className={`${styles.spread} ${palette ? styles.ready : ""} ${growing ? styles.on : ""} ${current ? "" : styles.gone}`}
+        className={`${styles.spread} ${palette ? styles.ready : ""} ${play.on ? styles.on : ""} ${current ? "" : styles.gone}`}
         style={place(palette, play.from)}
         aria-hidden="true"
         data-spread={current ? "current" : "covered"}
@@ -57,13 +53,13 @@ export function Spread({
 }
 
 /**
- * A press's spread, and, once a newer one is over it, whether it was still on then: one that had
- * started fading away keeps fading as it was, rather than growing again.
+ * A press's spread and whether it is on. Only the newest follows `on`: a covered one keeps what it
+ * had when covered, so one that had started fading away keeps fading rather than growing again.
  */
 interface Play {
   id: number;
   from?: SpreadStart;
-  on?: boolean;
+  on: boolean;
 }
 
 const place = (palette: SpreadPalette | undefined, from: SpreadStart | undefined) =>

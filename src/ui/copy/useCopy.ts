@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 /** Nothing to report, the text is on the clipboard, or the browser refused to put it there. */
 export type CopyState = "idle" | "copied" | "failed";
 
-const COPIED_MS = 1800;
+/** How long `copied` lasts, in ms. */
+export const COPIED_MS = 1800;
 
 /**
  * Puts `text` on the clipboard and resolves to whether it got there. A browser without the

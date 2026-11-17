@@ -17,11 +17,13 @@ No texture is an image the network carries: `src/shell/painter.script.ts` has a 
 - `enter-reduced`, `enter-no-api`, `enter-no-scripts` play no entrance and hide nothing.
 - `enter-painted` paints every named texture and every sprite on the page, with nothing left waiting.
 - `enter-stalled` holds the textures while the painter's worker never arrives, then releases every one after 4 seconds.
+- `hero-spread` starts a teal spread across the introduction card when its Xpdustry logo is pressed. Each press restarts it from the pointer, or the logo's centre for keyboard activation, and it fades after 1.8 seconds.
 
 ## How to get to it (user POV)
 
 - Open or reload the home page and watch the first second.
 - Scroll to the footer, then hover the `Play with us` card.
+- Press the large Xpdustry logo in the introduction card, or focus it and press Enter or Space.
 
 ## Driving it with verify.ts
 
@@ -197,6 +199,69 @@ EOF
 - **Expected.** Every line starts with `ok`: 40 in Chromium, 38 in Firefox. A failed check throws and names itself. `enter-order` prints each entrance as `<kind> [card n] <began>>=<turn>`, in ms after parsing. `<width>-1-entering.png` is the page 600 ms in, `<width>-2-settled.png` the page after the entrance.
 
 Variants:
+
+- **Logo spread.** Run `$V run hero-spread` with this script. Repeat with `--browser firefox`, then with `width: 390`. Set `motion: false` to verify that reduced motion shows the colour without radial growth.
+
+  ```js
+  const page = await newPage({ width: 1280, motion: true, record: true });
+  await go(page, "/");
+  const logo = page.getByRole("button", { name: "Xpdustry", exact: true });
+  const card = logo.locator("xpath=ancestor::section[1]");
+  const current = () => card.locator('[data-spread="current"]');
+  await logo.click();
+  await page.waitForFunction(() => {
+    const logo = document.querySelector('button[aria-label="Xpdustry"]');
+    return (
+      Number(
+        getComputedStyle(logo.closest("section").querySelector('[data-spread="current"]')).opacity
+      ) === 1
+    );
+  });
+  const first = await current().elementHandle();
+  await logo.click();
+  expect(
+    !(await current().evaluate((element, first) => element === first, first)),
+    "hero-spread restarts"
+  );
+  await page.waitForTimeout(600);
+  await snap(page, "logo-spread");
+  await page.waitForTimeout(2000);
+  expect(
+    await current().evaluate((element) => getComputedStyle(element).opacity === "0"),
+    "hero-spread fades"
+  );
+  await logo.focus();
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(200);
+  expect(
+    await current().evaluate((element) => getComputedStyle(element).opacity === "1"),
+    "hero-spread keyboard"
+  );
+  await page.waitForTimeout(1500);
+  await page.waitForFunction(
+    (card) => {
+      const opacity = Number(
+        getComputedStyle(card.querySelector('[data-spread="current"]')).opacity
+      );
+      return opacity > 0.3 && opacity < 0.8;
+    },
+    await card.elementHandle(),
+    { polling: 16 }
+  );
+  const fading = await current().elementHandle();
+  const radius = await fading.evaluate((element) =>
+    getComputedStyle(element).getPropertyValue("--spread")
+  );
+  await logo.click();
+  await page.waitForTimeout(200);
+  expect(
+    await fading.evaluate(
+      (element, radius) => getComputedStyle(element).getPropertyValue("--spread") === radius,
+      radius
+    ),
+    "hero-spread leaves the fading layer at its size"
+  );
+  ```
 
 - **A recording.** Replace the first `newPage` call with `newPage({ width, motion: true, record: true })`. The videos land in the evidence folder when the run ends, one per width.
 - **Other pages.** `/blog` and a post (take its path from a link on `/blog`) have an entrance too. Replace `go(page, "/")` with `go(page, "/blog")` and `page.goto(base, …)` with `page.goto(base + "/blog", …)`, and delete the `enter-opens`, `enter-hover` and `enter-still` blocks, which name home page elements.
