@@ -1,14 +1,9 @@
-/**
- * Keeps one value fresh in the background: fetched on start, then every `intervalMs`.
- *
- * Readers never wait on the network; they get the last good value, or `undefined` before the
- * first fetch lands. A failed refresh keeps the last value and is retried on the next tick.
- */
+const DEFAULT_TIMEOUT_MS = 10_000;
+
 export interface PollerOptions<T> {
   name: string;
   intervalMs: number;
   load: (signal: AbortSignal) => Promise<T>;
-  /** Abort a refresh that takes longer than this. */
   timeoutMs?: number;
 }
 
@@ -49,9 +44,8 @@ export class Poller<T> {
     clearTimeout(this.#timer);
   }
 
-  /** Fetches once, now. The scheduled refreshes are unaffected. */
   async refresh(signal?: AbortSignal): Promise<void> {
-    const { name, load, timeoutMs = 10_000 } = this.#options;
+    const { name, load, timeoutMs = DEFAULT_TIMEOUT_MS } = this.#options;
     this.#lastAttemptAt = new Date().toISOString();
     const timeout = AbortSignal.timeout(timeoutMs);
     try {

@@ -1,9 +1,9 @@
-import { createVar, globalStyle, style } from "@vanilla-extract/css";
+import { createVar, globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { paint } from "#app/textures/catalogue";
 import { narrowerThan } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
-import { pop } from "#app/ui/Card.css";
+import { CHIP_OVERHANG, selectableAboveCover } from "#app/ui/Card.css";
 import { line } from "#app/ui/copy/Roll.css";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -84,7 +84,7 @@ export const side = style({
   }
 });
 
-export const below = style({
+export const fringe = style({
   display: "none",
   "@container": {
     [narrow]: {
@@ -131,6 +131,12 @@ export const band = style({
 
 globalStyle(`${mode} > button:disabled`, {
   cursor: "default"
+});
+
+const pop = keyframes({
+  "0%": { scale: "0.9" },
+  "45%": { scale: "1.12" },
+  "100%": { scale: "1" }
 });
 
 export const icon = style({
@@ -200,26 +206,20 @@ export const empty = style({
   }
 });
 
-/** When the copy failed, the address to select takes the count's place instead of "Copied". */
 export const said = style({
   selectors: {
-    // Above the button covering the card, so a press selects the address instead of copying.
     [`${failed} &`]: {
-      position: "relative",
-      zIndex: 2,
+      ...selectableAboveCover,
       font: figures(1.25),
       letterSpacing: 0,
       whiteSpace: "normal",
-      overflowWrap: "anywhere",
-      userSelect: "all",
-      cursor: "text"
+      overflowWrap: "anywhere"
     }
   }
 });
 
-export const mark = style({
-  // The chip is wider than its icon; the margins keep the band laid out around the icon alone.
-  margin: "-8px -8px -8px 2px"
+export const chip = style({
+  margin: `${-CHIP_OVERHANG}px ${-CHIP_OVERHANG}px ${-CHIP_OVERHANG}px 2px`
 });
 
 export const glyph = style({

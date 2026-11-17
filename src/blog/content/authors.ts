@@ -1,6 +1,5 @@
 import { known } from "../../brand/team.ts";
 
-/** A teammate can sign a post once `team.json` gives them a name, a face and a GitHub account. */
 export type AuthorName = string;
 
 export interface Author {

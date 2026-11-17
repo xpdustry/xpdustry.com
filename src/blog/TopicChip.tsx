@@ -15,7 +15,6 @@ interface TopicChipProps {
   className?: string;
 }
 
-/** A card chip wears its project's colours; a cover chip takes the accent of the cover it sits on. */
 const colours: Record<Tone, (chip: Topic["chip"]) => CSSProperties | undefined> = {
   card: (chip) => assignInlineVars({ [styles.face]: chip.background, [styles.ink]: chip.color }),
   cover: () => undefined

@@ -3,18 +3,14 @@ import { media } from "../styles/media";
 import { font, leading, rem } from "../styles/scale";
 import { vars } from "../styles/theme.css";
 
-/**
- * A copy card's line, such as its player count, which a word like "Copied" (`said`) takes the
- * place of after a press (`rolled`): the line rolls up and out as the word rolls up and in, in
- * one cell that clips them.
- */
+const GLYPH_OVERHANG = "0.25em";
+
 export const line = style({
   display: "grid",
   gridTemplateColumns: "minmax(0, 1fr)",
   overflow: "hidden",
-  // Room for the letters' ascenders and tails, which grow with the text.
-  margin: "-0.25em 0",
-  padding: "0.25em 0"
+  margin: `calc(-1 * ${GLYPH_OVERHANG}) 0`,
+  padding: `${GLYPH_OVERHANG} 0`
 });
 
 export const rolled = style({});

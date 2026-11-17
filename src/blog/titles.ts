@@ -16,7 +16,6 @@ export function postTitle({
   return `${topicLabel(topic, topicVersion)} ${title}`;
 }
 
-/** A topic as its chip names it: "NoHorny 4", or "NoHorny" when the post gives no version. */
 export function topicLabel(topic: string, version?: string): string {
   return version ? `${topic} ${version}` : topic;
 }

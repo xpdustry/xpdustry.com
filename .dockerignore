@@ -1,31 +1,23 @@
-# Build output
-
 dist
 .tanstack
 
-# Environment
 .env
 .env*.local
 
-# Dependencies
 /node_modules
 
-# IDEs and editors
 .idea/
 .project
 .classpath
 *.launch
 .settings/
 
-# System Files
 .DS_Store
 Thumbs.db
 
-# Verification runs (.agents/skills/verify-xpdustry)
 .verify
 .fallow/
 
-# Container specific
 Dockerfile
 .dockerignore
 .git

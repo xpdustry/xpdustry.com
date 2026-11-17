@@ -5,9 +5,9 @@ import {
   hangUnder,
   popoverBox,
   popoverMoving,
-  popoverOpenUnder,
   popoverPanel,
-  popoverShut
+  popoverShut,
+  underParent
 } from "./popover";
 import { vars } from "#app/ui/styles/theme.css";
 
@@ -44,19 +44,18 @@ export const list = style({
   gap: 2
 });
 
-const hung = hangUnder(ANCHOR);
+const hung = hangUnder(ANCHOR, underParent(0));
 
 export const panel = style({
   ...popoverBox,
   position: "absolute",
-  top: ["calc(100% + 10px)", hung.top],
-  right: [0, hung.right],
+  ...hung.shut,
   zIndex: 6,
   ...popoverShut,
   minWidth: 170,
   padding: 8,
   ...popoverPanel,
-  selectors: popoverOpenUnder(hung),
+  selectors: hung.shown,
   "@media": {
     [media.motion]: {
       selectors: popoverMoving

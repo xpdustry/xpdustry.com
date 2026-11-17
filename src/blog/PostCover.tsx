@@ -34,16 +34,13 @@ export function PostCover({ post, className }: { post: Post; className?: string 
   );
 }
 
-/**
- * The heading reads as the post's full title: a title that does not name its topic takes the topic
- * chip inside the heading, and one that does leaves the chip beside it.
- */
 function CoverTitle({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
   const { title, topic, topicVersion } = frontmatter;
   const chip = (
     <TopicChip name={topic} version={topicVersion} tone="cover" linked className={styles.topic} />
   );
-  if (postTitle(frontmatter) === title) {
+  const namesItsTopic = postTitle(frontmatter) === title;
+  if (namesItsTopic) {
     return (
       <>
         {chip}

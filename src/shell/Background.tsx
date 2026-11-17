@@ -16,7 +16,7 @@ const DRIFT = inlineScript(
 export function Background() {
   return (
     <>
-      <div className={styles.clip} aria-hidden="true">
+      <div className={styles.clipToPage} aria-hidden="true">
         <div className={styles.background} {...texture("backdrop")} suppressHydrationWarning />
       </div>
       <script dangerouslySetInnerHTML={{ __html: DRIFT }} />

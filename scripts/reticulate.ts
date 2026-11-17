@@ -63,28 +63,31 @@ function wrappedLaplacian(
   }
 }
 
-/** `source` one column wider: each row repeats the point at its cut. */
-function widen(source: Float64Array, width: number, height: number, cuts: number[]): Float64Array {
+function widen(
+  source: Float64Array,
+  width: number,
+  height: number,
+  duplicatedColumns: number[]
+): Float64Array {
   const wider = new Float64Array((width + 1) * height);
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x <= width; x += 1) {
-      wider[y * (width + 1) + x] = source[y * width + (x > cuts[y]! ? x - 1 : x)]!;
+      wider[y * (width + 1) + x] = source[y * width + (x > duplicatedColumns[y]! ? x - 1 : x)]!;
     }
   }
   return wider;
 }
 
-/** `source` one row taller: each column repeats the point at its cut. */
 function heighten(
   source: Float64Array,
   width: number,
   height: number,
-  cuts: number[]
+  duplicatedRows: number[]
 ): Float64Array {
   const taller = new Float64Array(width * (height + 1));
   for (let x = 0; x < width; x += 1) {
     for (let y = 0; y <= height; y += 1) {
-      taller[y * width + x] = source[(y > cuts[x]! ? y - 1 : y) * width + x]!;
+      taller[y * width + x] = source[(y > duplicatedRows[x]! ? y - 1 : y) * width + x]!;
     }
   }
   return taller;
@@ -92,10 +95,10 @@ function heighten(
 
 function grow(field: Field, random: () => number): Field {
   const { a, b, width, height } = field;
-  const columnCuts = Array.from({ length: height }, () => Math.floor(random() * width));
-  const rowCuts = Array.from({ length: width + 1 }, () => Math.floor(random() * height));
+  const duplicatedColumns = Array.from({ length: height }, () => Math.floor(random() * width));
+  const duplicatedRows = Array.from({ length: width + 1 }, () => Math.floor(random() * height));
   const stretch = (source: Float64Array) =>
-    heighten(widen(source, width, height, columnCuts), width + 1, height, rowCuts);
+    heighten(widen(source, width, height, duplicatedColumns), width + 1, height, duplicatedRows);
   return { a: stretch(a), b: stretch(b), width: width + 1, height: height + 1 };
 }
 
@@ -119,8 +122,7 @@ const laplaciansFor = ({ a, b }: Field): Laplacians => ({
 const clamp = (value: number, low: number, high: number) =>
   value < low ? low : value > high ? high : value;
 
-/** Advances both morphogens by one time step, in place. */
-function react(field: Field, laplacians: Laplacians, rates: Rates): void {
+function advanceOneStep(field: Field, laplacians: Laplacians, rates: Rates): void {
   const { a, b, width, height } = field;
   wrappedLaplacian(a, laplacians.a, width, height);
   wrappedLaplacian(b, laplacians.b, width, height);
@@ -146,7 +148,7 @@ function runPhase(field: Field, options: PhaseOptions, random: () => number): Fi
       current = grow(current, random);
       laplacians = laplaciansFor(current);
     }
-    react(current, laplacians, rates);
+    advanceOneStep(current, laplacians, rates);
   }
   return current;
 }
@@ -156,7 +158,6 @@ const RETICULATE_PHASES: readonly PhaseOptions[] = [
   { ratio: 8, scale: 3, speed: 40, steps: 10000, floorB: 2, growEvery: 100 }
 ];
 
-/** Run the complete two-phase recipe and return its final morphogen fields. */
 export function reticulateField(size = 100, seed = 1): Field {
   const random = mulberry32(seed);
   let field = seedField(size, random);
@@ -164,7 +165,6 @@ export function reticulateField(size = 100, seed = 1): Field {
   return field;
 }
 
-/** How much of a point the net covers, from B normalised to 0..1: all of it at 0, none past the cutoff. */
 function netCoverage(normalisedB: number): number {
   const coverage = Math.max(0, 1 - normalisedB / NET_CUTOFF);
   return coverage * coverage * (3 - 2 * coverage);
@@ -180,7 +180,6 @@ function range(values: Float64Array): { low: number; high: number } {
   return { low, high };
 }
 
-/** The net's alpha, 0..255, from the B morphogen. */
 export function toMask(field: Field): Uint8Array {
   const { b } = field;
   const { low, high } = range(b);
@@ -214,14 +213,14 @@ function boxPass(
   horizontal: boolean
 ): Uint8Array {
   const out = new Uint8Array(source.length);
-  // A line is a row or a column: `along` is the stride between its pixels, `across` between lines.
-  const [length, lines, along, across] = horizontal
+  const [length, lines, pixelStride, lineStride] = horizontal
     ? [width, height, 1, width]
     : [height, width, width, 1];
   const window = radius * 2 + 1;
 
   for (let line = 0; line < lines; line += 1) {
-    const at = (index: number) => line * across + (((index % length) + length) % length) * along;
+    const at = (index: number) =>
+      line * lineStride + (((index % length) + length) % length) * pixelStride;
     let total = 0;
     for (let offset = -radius; offset <= radius; offset += 1) total += source[at(offset)];
     for (let index = 0; index < length; index += 1) {

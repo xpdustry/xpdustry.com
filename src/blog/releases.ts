@@ -21,14 +21,10 @@ export function releaseUrl(id: string): string {
     .join("/")}/releases/tag/${encodeURIComponent(parsed.tag)}`;
 }
 
-/**
- * The tag alone for a release of `ownRepository`, the project the post is about, which the post
- * already names; the project and the tag for any other.
- */
-export function releaseLabel(id: string, ownRepository?: string): string {
+export function releaseLabel(id: string, postRepository?: string): string {
   const parsed = parseReleaseId(id);
   if (!parsed) return id;
-  if (parsed.repository === ownRepository) return parsed.tag;
+  if (parsed.repository === postRepository) return parsed.tag;
   const project = projects.find((entry) => entry.repository === parsed.repository);
   return `${project?.name ?? parsed.repository.split("/")[1]} ${parsed.tag}`;
 }

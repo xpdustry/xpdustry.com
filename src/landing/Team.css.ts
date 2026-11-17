@@ -3,36 +3,31 @@ import { media } from "#app/ui/styles/media";
 import { font, leading, radius, rem, tracking } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
 
-/** Each tag's colour, as Discord colours names, dark enough to read on a tile. */
-export const rank = styleVariants({
+export const roleColour = styleVariants({
   owner: { vars: { "--role": "#0f6f68" } },
   developer: { vars: { "--role": "#8a5c00" } },
   admin: { vars: { "--role": "#b3261e" } },
   moderator: { vars: { "--role": "#2353b8" } }
 });
 
-/** Small print in the text face: the site's mono is for figures, not for names of things. */
 const caption = (weight: number) =>
   `${weight} ${rem(font.caption)} / ${leading.tight} ${vars.fontText}`;
 
-/** A teammate's face on their tile, and the room around it. */
-export const FACE = 40;
-const INSET = 8;
+export const TILE_FACE = 40;
+const TILE_INSET = 8;
+const TILE_RADIUS = TILE_FACE / 2 + TILE_INSET;
+const TWO_TAG_TILE = rem(300);
+export const PROFILE_FACE = 80;
 
-/**
- * Tiles wide enough for two tags side by side in every language, the longest being French's
- * "Propriétaire" and "Développeur"; they only wrap on a narrow screen or under large text.
- */
 export const members = style({
   display: "grid",
-  gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${rem(300)}), 1fr))`,
+  gridTemplateColumns: `repeat(auto-fill, minmax(min(100%, ${TWO_TAG_TILE}), 1fr))`,
   gap: 6,
   margin: 0,
   padding: 0,
   listStyle: "none"
 });
 
-/** The face, the name in their highest tag's colour, and their tags under it. */
 export const member = style({
   anchorName: "var(--anchor)",
   display: "grid",
@@ -42,11 +37,10 @@ export const member = style({
   alignItems: "center",
   columnGap: 10,
   width: "100%",
-  minHeight: FACE + 2 * INSET,
-  // As far from the face on its left as above and below it, for the corners to follow its curve.
-  padding: `${INSET}px 14px ${INSET}px ${INSET}px`,
+  minHeight: TILE_FACE + 2 * TILE_INSET,
+  padding: `${TILE_INSET}px 14px ${TILE_INSET}px ${TILE_INSET}px`,
   border: 0,
-  borderRadius: FACE / 2 + INSET,
+  borderRadius: TILE_RADIUS,
   background: `color-mix(in srgb, ${vars.tile} 70%, transparent)`,
   color: "inherit",
   font: "inherit",
@@ -91,7 +85,6 @@ export const tags = style({
   marginTop: 4
 });
 
-/** A tag with a dot of its colour, as Discord shows a role on a profile. */
 export const tag = style({
   display: "inline-flex",
   alignItems: "center",
@@ -111,14 +104,9 @@ export const tag = style({
   }
 });
 
-/**
- * Beside its row where the browser can anchor it there, in the middle of the screen where it
- * cannot, and over the bottom of a phone's screen.
- */
 export const profile = style({
   width: rem(300),
   maxWidth: "calc(100vw - 32px)",
-  // No taller than the screen, as under large text on a phone held sideways: it scrolls instead.
   maxHeight: "calc(100dvh - 16px)",
   padding: "0 16px 18px",
   overflow: "hidden auto",
@@ -128,18 +116,27 @@ export const profile = style({
   background: vars.tile,
   color: vars.ink,
   boxShadow: "0 18px 40px rgb(0 0 0 / 0.3)",
-  "@supports": {
-    "(position-area: right)": {
-      positionAnchor: "var(--anchor)",
-      positionArea: "right span-bottom",
-      // On the other side or upwards where it fits, else over the middle of the screen, as on a
-      // phone held sideways. Chromium reads no more than five of these.
-      positionTryFallbacks: "flip-inline, flip-block, flip-block flip-inline, span-all",
-      inset: "auto",
-      margin: "0 10px"
-    }
-  },
   "@media": {
+    [`not ${media.phone}`]: {
+      "@supports": {
+        "(position-area: right)": {
+          positionAnchor: "var(--anchor)",
+          positionArea: "right span-bottom",
+          positionTryFallbacks: "flip-inline, flip-block, flip-block flip-inline, span-all",
+          inset: "auto",
+          margin: "0 10px"
+        }
+      }
+    },
+    [media.phone]: {
+      inset: "auto 0 0",
+      width: "100%",
+      maxWidth: "none",
+      margin: 0,
+      border: 0,
+      borderTop: `2px solid ${vars.outline}`,
+      borderRadius: `${vars.r} ${vars.r} 0 0`
+    },
     [media.motion]: {
       transition:
         "opacity 0.18s, translate 0.18s, display 0.18s allow-discrete, overlay 0.18s allow-discrete"
@@ -151,22 +148,6 @@ export const profile = style({
   }
 });
 
-// After the anchoring above, so a phone's sheet wins over it.
-globalStyle(profile, {
-  "@media": {
-    [media.phone]: {
-      positionArea: "none",
-      inset: "auto 0 0",
-      width: "100%",
-      maxWidth: "none",
-      margin: 0,
-      border: 0,
-      borderTop: `2px solid ${vars.outline}`,
-      borderRadius: `${vars.r} ${vars.r} 0 0`
-    }
-  }
-});
-
 globalStyle(`${profile}:popover-open`, {
   "@starting-style": { opacity: 0, translate: "0 6px" }
 } as never);
@@ -175,7 +156,6 @@ globalStyle(`${profile}::backdrop`, {
   "@media": { [media.phone]: { background: "rgb(0 0 0 / 0.4)" } }
 });
 
-/** The colour or picture atop a Discord profile, or their highest tag's colour for want of one. */
 export const banner = style({
   height: 96,
   margin: "0 -16px",
@@ -202,7 +182,6 @@ export const title = style({
 
 globalStyle(`${profile} ${tags}`, { marginTop: 10 });
 
-/** A line on who they are, which `team.json` gives a few. */
 export const about = style({
   marginTop: 12,
   color: vars.muted,

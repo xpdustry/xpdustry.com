@@ -1,5 +1,5 @@
 {
-  "include": ["src", "scripts", ".agents", "*.ts"],
+  "include": ["src", "scripts", "tests", ".agents", "*.ts"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "target": "ES2024",
@@ -11,7 +11,8 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
-      "#app/*": ["./src/*"]
+      "#app/*": ["./src/*"],
+      "#tests/*": ["./tests/*"]
     },
     "strict": true,
     "skipLibCheck": true,

@@ -1,17 +1,23 @@
-import type { TextureSettings } from "./texture.ts";
+import { DEFAULT_SOFT_EDGE, type FieldBlob, type Px, type TextureSettings } from "./texture.ts";
 
-/** The labyrinth tile, as alpha in 0..1, `size` px square. */
-export interface Labyrinth {
-  data: Float32Array;
-  size: number;
+if (new Uint8Array(Uint32Array.of(1).buffer)[0] !== 1) {
+  throw new Error("the painter writes each RGBA pixel as one little-endian word");
 }
 
-/** The labyrinth from decoded pixels: `channels` values per pixel, the pattern in the first one. */
-export function toLabyrinth(pixels: ArrayLike<number>, channels: number, size: number): Labyrinth {
+export interface Labyrinth {
+  data: Float32Array;
+  size: Px;
+}
+
+export function toLabyrinth(
+  pixels: ArrayLike<number>,
+  channelsPerPixel: number,
+  size: Px
+): Labyrinth {
   let max = 0;
-  for (let i = 0; i < pixels.length; i += channels) max = Math.max(max, pixels[i]!);
+  for (let i = 0; i < pixels.length; i += channelsPerPixel) max = Math.max(max, pixels[i]!);
   const data = new Float32Array(size * size);
-  for (let i = 0; i < data.length; i++) data[i] = pixels[i * channels]! / max;
+  for (let i = 0; i < data.length; i++) data[i] = pixels[i * channelsPerPixel]! / max;
   return { data, size };
 }
 
@@ -66,134 +72,117 @@ const smoothstep = (edge0: number, edge1: number, x: number) => {
   return t * t * (3 - 2 * t);
 };
 
+const THRESHOLD = 0.62;
+
 function resolve(settings: TextureSettings) {
   return {
-    tile: 300,
-    hard: 2,
-    warp: 0.55,
-    reach: 2.2,
-    soft: 0.07,
-    bias: 0.62,
-    seed: 11,
+    fray: 2.2,
+    softEdge: DEFAULT_SOFT_EDGE,
     blobs: [],
-    ...settings
-  } satisfies TextureSettings & Record<string, unknown>;
+    ...settings,
+    lumps: { depth: 0.55, seed: 11, ...settings.lumps }
+  } satisfies TextureSettings;
 }
 
 type Settings = ReturnType<typeof resolve>;
-type Blobs = NonNullable<TextureSettings["blobs"]>;
 
-function spread(blobs: Blobs, span: number) {
-  const spread: Blobs[number][] = [];
-  for (let k = -1; k * span < 1 + span; k++) {
-    for (const [x, y, r, w] of blobs) spread.push([(k + x) * span, y, r, w]);
-  }
-  return spread;
+function wrappedAcrossEdges(blobs: readonly FieldBlob[]): FieldBlob[] {
+  return [-1, 0, 1].flatMap((offset) =>
+    blobs.map(([x, y, radius]): FieldBlob => [offset + x, y, radius])
+  );
 }
 
-/** Shifts a point by smooth noise, so outlines come out lumpy instead of perfectly round. */
-function makeWarp(s: Settings, w: number, h: number) {
-  const lumpsAcross = s.lumps ? w / s.lumps : w / h;
-  const lumpsDown = s.lumps ? h / s.lumps : 1;
-  const across = s.seamless ? Math.max(1, Math.round(2.1 * lumpsAcross)) : 2.1 * lumpsAcross;
-  const reachAcross = s.lumps ? lumpsAcross : 1;
-  const warpX = makeNoise(s.seed, s.seamless ? across : 0);
-  const warpY = makeNoise(s.seed + 1, s.seamless ? across : 0);
-  const down = 2.1 * lumpsDown;
-  const pull = s.warp * 0.5;
+const NOISE_CELLS_PER_LUMP = 2.1;
+
+function makeLumps({ lumps, seamless }: Settings, w: number, h: number) {
+  const lumpsAcross = lumps.size ? w / lumps.size : w / h;
+  const lumpsDown = lumps.size ? h / lumps.size : 1;
+  const across = seamless
+    ? Math.max(1, Math.round(NOISE_CELLS_PER_LUMP * lumpsAcross))
+    : NOISE_CELLS_PER_LUMP * lumpsAcross;
+  const reachAcross = lumps.size ? lumpsAcross : 1;
+  const shiftX = makeNoise(lumps.seed, seamless ? across : 0);
+  const shiftY = makeNoise(lumps.seed + 1, seamless ? across : 0);
+  const down = NOISE_CELLS_PER_LUMP * lumpsDown;
+  const pull = lumps.depth * 0.5;
   return {
-    u: (u: number, v: number) => u + (pull * (warpX(u * across, v * down, 3) - 0.5)) / reachAcross,
-    v: (u: number, v: number) => v + (pull * (warpY(u * across, v * down, 3) - 0.5)) / lumpsDown
+    u: (u: number, v: number) => u + (pull * (shiftX(u * across, v * down, 3) - 0.5)) / reachAcross,
+    v: (u: number, v: number) => v + (pull * (shiftY(u * across, v * down, 3) - 0.5)) / lumpsDown
   };
 }
 
-/** Scattered cells: the noise where it rises above `bias`, scaled by `amp`. */
-function makeScatter(noise: NonNullable<Settings["noise"]>, aspect: number, tiled: boolean) {
-  const sample = makeNoise(noise.seed ?? 7, tiled ? noise.scale : 0);
+function makeScatter(
+  { cells, threshold, gain, seed = 7 }: NonNullable<Settings["scatter"]>,
+  aspect: number,
+  tiled: boolean
+) {
+  const sample = makeNoise(seed, tiled ? cells : 0);
   return (u: number, v: number) =>
-    Math.max(0, (sample(u * noise.scale * aspect, v * noise.scale) - noise.bias) * noise.amp);
+    Math.max(0, (sample(u * cells * aspect, v * cells) - threshold) * gain);
 }
 
-/** Past this exponent a blob adds less than a billionth: the point is outside it. */
-const OUTSIDE = 20;
+const EXPONENT_OUTSIDE_BLOB = 20;
 
-/**
- * The blobs' strength at a point: each one `weight * exp(-distance ** hard)`. It works on the
- * squared distance, so the usual hardnesses of 2 and 6 take no root and no `pow`.
- */
-function makeBlobs(blobs: Blobs, aspect: number, hard: number) {
-  const half = hard / 2;
-  const falloff =
-    half === 3
-      ? (q: number) => q * q * q
-      : half === 1
-        ? (q: number) => q
-        : (q: number) => Math.pow(q, half);
+function makeBlobs(blobs: readonly FieldBlob[], aspect: number) {
   return (u: number, v: number) => {
     let strength = 0;
-    for (const [x, y, radius, weight] of blobs) {
+    for (const [x, y, radius] of blobs) {
       const dx = (u - x) * aspect;
       const dy = v - y;
-      const exponent = falloff((dx * dx + dy * dy) / (radius * radius));
-      if (exponent < OUTSIDE) strength += weight * Math.exp(-exponent);
+      const squared = (dx * dx + dy * dy) / (radius * radius);
+      const exponent = squared * squared * squared;
+      if (exponent < EXPONENT_OUTSIDE_BLOB) strength += Math.exp(-exponent);
     }
     return strength;
   };
 }
 
-/** The field's strength at a point in card units: the blobs, the level, the ramp and the noise. */
 function makeField(s: Settings, w: number, h: number) {
   const aspect = w / h;
-  const blobs = makeBlobs(s.span ? spread(s.blobs, s.span / aspect) : s.blobs, aspect, s.hard);
-  const warp = s.blobs.length > 0 || (s.ramp && s.warp > 0) ? makeWarp(s, w, h) : undefined;
-  const scatter = s.noise && makeScatter(s.noise, aspect, Boolean(s.repeat));
-  const { ramp, level = 0 } = s;
+  const blobs = makeBlobs(s.seamless ? wrappedAcrossEdges(s.blobs) : s.blobs, aspect);
+  const lumps =
+    s.blobs.length > 0 || (s.ramp && s.lumps.depth > 0) ? makeLumps(s, w, h) : undefined;
+  const scatter = s.scatter && makeScatter(s.scatter, aspect, Boolean(s.repeat));
+  const { ramp, baseStrength = 0 } = s;
   return (u: number, v: number) => {
-    const wu = warp ? warp.u(u, v) : u;
-    const wv = warp ? warp.v(u, v) : v;
-    let b = blobs(wu, wv) + level;
-    if (ramp) b += Math.min(1, Math.max(0, (wv - ramp[0]) / (ramp[1] - ramp[0])));
+    const wu = lumps ? lumps.u(u, v) : u;
+    const wv = lumps ? lumps.v(u, v) : v;
+    let b = blobs(wu, wv) + baseStrength;
+    if (ramp) b += Math.min(1, Math.max(0, (wv - ramp.clearAt) / (ramp.solidAt - ramp.clearAt)));
     if (scatter) b += scatter(u, v);
     return b;
   };
 }
 
-/**
- * The field varies slowly, so it is sampled on a grid and interpolated between: every 4 px, or
- * every 8 in a texture large enough for its blobs to span many cells. `shift` is that step as a
- * power of two.
- */
-const shiftFor = (w: number, h: number) => (Math.min(w, h) >= 160 ? 3 : 2);
+const gridStepShift = (w: number, h: number) => (Math.min(w, h) >= 160 ? 3 : 2);
 
 interface Grid {
   values: Float32Array;
   width: number;
-  shift: number;
+  stepShift: number;
 }
 
 function sampleField(field: (u: number, v: number) => number, w: number, h: number): Grid {
-  const shift = shiftFor(w, h);
-  const step = 1 << shift;
+  const stepShift = gridStepShift(w, h);
+  const step = 1 << stepShift;
   const width = Math.ceil(w / step) + 1;
   const height = Math.ceil(h / step) + 1;
   const values = new Float32Array(width * height);
   for (let j = 0; j < height; j++) {
     for (let i = 0; i < width; i++) values[j * width + i] = field((i * step) / w, (j * step) / h);
   }
-  return { values, width, shift };
+  return { values, width, stepShift };
 }
 
 interface Tile {
-  /** The labyrinth at the tile's size. */
-  line: Float32Array;
-  /** How far each of its points turns to the inner tone, where the field is strong. */
-  mix: Float32Array;
-  size: number;
+  labyrinth: Float32Array;
+  innerMix: Float32Array;
+  size: Px;
 }
 
 const tiles = new WeakMap<Labyrinth, Map<number, Tile>>();
 
-function tileOf(labyrinth: Labyrinth, size: number): Tile {
+function tileOf(labyrinth: Labyrinth, size: Px): Tile {
   let sizes = tiles.get(labyrinth);
   if (!sizes) tiles.set(labyrinth, (sizes = new Map()));
   let tile = sizes.get(size);
@@ -201,9 +190,9 @@ function tileOf(labyrinth: Labyrinth, size: number): Tile {
   return tile;
 }
 
-function resample({ data, size: from }: Labyrinth, size: number): Tile {
-  const line = new Float32Array(size * size);
-  const mix = new Float32Array(size * size);
+function resample({ data, size: from }: Labyrinth, size: Px): Tile {
+  const labyrinth = new Float32Array(size * size);
+  const innerMix = new Float32Array(size * size);
   const scale = from / size;
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
@@ -218,49 +207,44 @@ function resample({ data, size: from }: Labyrinth, size: number): Tile {
       const top = data[y0 * from + x0]! * (1 - fx) + data[y0 * from + x1]! * fx;
       const bottom = data[y1 * from + x0]! * (1 - fx) + data[y1 * from + x1]! * fx;
       const value = top * (1 - fy) + bottom * fy;
-      line[y * size + x] = value;
-      mix[y * size + x] = smoothstep(0.42, 0.58, value);
+      labyrinth[y * size + x] = value;
+      innerMix[y * size + x] = smoothstep(0.42, 0.58, value);
     }
   }
-  return { line, mix, size };
+  return { labyrinth, innerMix, size };
 }
 
-/** What a cell of the field's grid holds: nothing, the labyrinth's edge, or a fused patch. */
 const CLEAR = 0;
 const FRAYED = 1;
 const FUSED = 2;
 
-/** Everything a row needs, worked out once per texture. */
+const LABYRINTH_LOWEST = 0;
+const LABYRINTH_HIGHEST = 1;
+
+const coverage = (labyrinth: number, strength: number, fray: number) =>
+  labyrinth * Math.min(1, strength * fray) + strength * 0.9;
+
 interface Brush {
   grid: Grid;
   tile: Tile;
-  /** The threshold: the field's pull on a line, where coverage starts, and how fast it rises. */
-  reach: number;
-  low: number;
-  rise: number;
+  fray: number;
+  coverageFrom: number;
+  coverageRise: number;
   from: Rgba;
   to: Rgba;
-  /** One tone all over, so a fused cell is a single colour. */
-  flat: boolean;
-  /** The main tone without its alpha, and at full strength, as little-endian RGBA words. */
-  tone: number;
-  solid: number;
-  /** Each column's place in the labyrinth tile. */
-  columns: Uint16Array;
+  oneTone: boolean;
+  toneWithoutAlpha: number;
+  solidWord: number;
+  tileColumns: Uint16Array;
   words: Uint32Array;
-  width: number;
-  /** The field along the row being painted, and what each of its cells holds. */
-  row: Float32Array;
-  cells: Uint8Array;
+  width: Px;
+  rowField: Float32Array;
+  rowCells: Uint8Array;
 }
 
-/**
- * What each cell of a grid row holds, from its corners: the labyrinth is in 0..1, so a cell whose
- * strongest corner cannot reach the threshold is clear, and one whose weakest is past it is fused.
- */
-function classify({ grid, cells, reach, low, rise }: Brush, at: number) {
+function classifyRowCells({ grid, rowCells, fray, coverageFrom, coverageRise }: Brush, at: number) {
   const { values, width } = grid;
-  const high = low + 1 / rise;
+  const coverageFull = coverageFrom + 1 / coverageRise;
   for (let i = 0; i < width - 1; i++) {
     const a = values[at + i]!;
     const b = values[at + i + 1]!;
@@ -268,13 +252,12 @@ function classify({ grid, cells, reach, low, rise }: Brush, at: number) {
     const d = values[at + width + i + 1]!;
     const strongest = Math.max(a, b, c, d);
     const weakest = Math.min(a, b, c, d);
-    if (Math.min(1, strongest * reach) + strongest * 0.9 <= low) cells[i] = CLEAR;
-    else cells[i] = weakest * 0.9 >= high ? FUSED : FRAYED;
+    if (coverage(LABYRINTH_HIGHEST, strongest, fray) <= coverageFrom) rowCells[i] = CLEAR;
+    else rowCells[i] = coverage(LABYRINTH_LOWEST, weakest, fray) >= coverageFull ? FUSED : FRAYED;
   }
 }
 
-/** One px of the two tones, `mix` of the way to the inner one, as an RGBA word. */
-function blend(from: Rgba, to: Rgba, mix: number, alpha: number) {
+function blendedWord(from: Rgba, to: Rgba, mix: number, alpha: number) {
   const r = (from[0] + (to[0] - from[0]) * mix + 0.5) | 0;
   const g = (from[1] + (to[1] - from[1]) * mix + 0.5) | 0;
   const b = (from[2] + (to[2] - from[2]) * mix + 0.5) | 0;
@@ -282,68 +265,57 @@ function blend(from: Rgba, to: Rgba, mix: number, alpha: number) {
   return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
-/** Paints the px of one cell that the labyrinth covers: `from` up to `end` in the row at `out`. */
-function paintCell(
+function paintCoveredPx(
   brush: Brush,
   fused: boolean,
   cell: number,
-  from: number,
-  end: number,
-  out: number,
-  lines: number
+  startX: Px,
+  endX: Px,
+  rowStart: number,
+  tileRowStart: number
 ) {
-  const { tile, reach, low, rise, flat, tone, columns, words, row } = brush;
-  const step = 1 << brush.grid.shift;
-  const slope = (row[cell + 1]! - row[cell]!) / step;
-  let strength = row[cell]!;
-  for (let x = from; x < end; x++, strength += slope) {
-    const at = lines + columns[x]!;
+  const { tile, fray, coverageFrom, coverageRise, oneTone, toneWithoutAlpha } = brush;
+  const { tileColumns, words, rowField } = brush;
+  const step = 1 << brush.grid.stepShift;
+  const slope = (rowField[cell + 1]! - rowField[cell]!) / step;
+  let strength = rowField[cell]!;
+  for (let x = startX; x < endX; x++, strength += slope) {
+    const at = tileRowStart + tileColumns[x]!;
     let alpha = 1;
     if (!fused) {
-      // The field and the line, thresholded: how much of this px the labyrinth covers.
-      const t = (tile.line[at]! * Math.min(1, strength * reach) + strength * 0.9 - low) * rise;
-      if (t <= 0) continue;
-      if (t < 1) alpha = t * t * (3 - 2 * t);
+      const covered = (coverage(tile.labyrinth[at]!, strength, fray) - coverageFrom) * coverageRise;
+      if (covered <= 0) continue;
+      if (covered < 1) alpha = covered * covered * (3 - 2 * covered);
     }
-    if (flat) {
-      words[out + x] = (((brush.from[3] * alpha + 0.5) | 0) << 24) | tone;
+    if (oneTone) {
+      words[rowStart + x] = (((brush.from[3] * alpha + 0.5) | 0) << 24) | toneWithoutAlpha;
     } else {
-      const mix = Math.min(1, Math.max(0, (strength - 0.62) / 0.25)) * tile.mix[at]!;
-      words[out + x] = blend(brush.from, brush.to, mix, alpha);
+      const mix = Math.min(1, Math.max(0, (strength - 0.62) / 0.25)) * tile.innerMix[at]!;
+      words[rowStart + x] = blendedWord(brush.from, brush.to, mix, alpha);
     }
   }
 }
 
-/** Paints a row cell by cell: a clear cell costs nothing, and a fused one of a single tone one fill. */
 function paintRow(brush: Brush, y: number) {
-  const { tile, flat, solid, words, width, cells } = brush;
-  const step = 1 << brush.grid.shift;
-  const lines = (y % tile.size) * tile.size;
-  const out = y * width;
+  const { tile, oneTone, solidWord, words, width, rowCells } = brush;
+  const step = 1 << brush.grid.stepShift;
+  const tileRowStart = (y % tile.size) * tile.size;
+  const rowStart = y * width;
   for (let cell = 0, x = 0; x < width; cell++, x += step) {
-    const kind = cells[cell]!;
+    const kind = rowCells[cell]!;
     if (kind === CLEAR) continue;
     const end = Math.min(width, x + step);
-    if (kind === FUSED && flat) words.fill(solid, out + x, out + end);
-    else paintCell(brush, kind === FUSED, cell, x, end, out, lines);
+    if (kind === FUSED && oneTone) words.fill(solidWord, rowStart + x, rowStart + end);
+    else paintCoveredPx(brush, kind === FUSED, cell, x, end, rowStart, tileRowStart);
   }
 }
 
-/**
- * Paints the texture as RGBA pixels, `width` by `height` (or one `repeat` px tile).
- *
- * The labyrinth is summed with a field of blobs, a ramp and noise, then thresholded: where the
- * field is strong the labyrinth fuses into a solid patch, and at its edge it frays back into lines.
- *
- * It runs in the visitor's browser, so it spends nothing on what the field leaves clear, and
- * fills what it leaves fused when that is a single tone.
- */
 export function paintTexture(
   labyrinth: Labyrinth,
   settings: TextureSettings,
-  width: number,
-  height: number
-): { pixels: Uint8ClampedArray<ArrayBuffer>; width: number; height: number } {
+  width: Px,
+  height: Px
+): { pixels: Uint8ClampedArray<ArrayBuffer>; width: Px; height: Px } {
   const s = resolve(settings);
   const w = Math.ceil(s.repeat ?? width);
   const h = Math.ceil(s.repeat ?? height);
@@ -352,34 +324,33 @@ export function paintTexture(
   const from = parseHex(s.color);
   const to = s.inner ? parseHex(s.inner) : from;
   const pixels = new Uint8ClampedArray(w * h * 4);
-  const columns = new Uint16Array(w);
-  for (let x = 0; x < w; x++) columns[x] = x % tile.size;
-  const tone = (from[2] << 16) | (from[1] << 8) | from[0];
+  const tileColumns = new Uint16Array(w);
+  for (let x = 0; x < w; x++) tileColumns[x] = x % tile.size;
+  const toneWithoutAlpha = (from[2] << 16) | (from[1] << 8) | from[0];
   const brush: Brush = {
     grid,
     tile,
-    reach: s.reach,
-    low: s.bias - s.soft,
-    rise: 1 / (2 * s.soft),
+    fray: s.fray,
+    coverageFrom: THRESHOLD - s.softEdge,
+    coverageRise: 1 / (2 * s.softEdge),
     from,
     to,
-    flat: to.every((channel, at) => channel === from[at]),
-    tone,
-    solid: ((from[3] << 24) | tone) >>> 0,
-    columns,
-    // Every browser this runs in is little-endian, so a word is one RGBA pixel.
+    oneTone: to.every((channel, at) => channel === from[at]),
+    toneWithoutAlpha,
+    solidWord: ((from[3] << 24) | toneWithoutAlpha) >>> 0,
+    tileColumns,
     words: new Uint32Array(pixels.buffer),
     width: w,
-    row: new Float32Array(grid.width),
-    cells: new Uint8Array(grid.width)
+    rowField: new Float32Array(grid.width),
+    rowCells: new Uint8Array(grid.width)
   };
-  const step = 1 << grid.shift;
+  const step = 1 << grid.stepShift;
   for (let y = 0; y < h; y++) {
-    const at = (y >> grid.shift) * grid.width;
+    const at = (y >> grid.stepShift) * grid.width;
     const fy = (y & (step - 1)) / step;
-    if (fy === 0) classify(brush, at);
+    if (fy === 0) classifyRowCells(brush, at);
     for (let i = 0; i < grid.width; i++) {
-      brush.row[i] = grid.values[at + i]! * (1 - fy) + grid.values[at + grid.width + i]! * fy;
+      brush.rowField[i] = grid.values[at + i]! * (1 - fy) + grid.values[at + grid.width + i]! * fy;
     }
     paintRow(brush, y);
   }

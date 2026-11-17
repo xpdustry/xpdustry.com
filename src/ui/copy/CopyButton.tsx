@@ -4,20 +4,15 @@ import { PlinthButton, type PlinthStyle } from "../Plinth";
 import { CopyStatus } from "./CopyStatus";
 import { useCopy, type CopyState } from "./useCopy";
 
-interface CopyButtonProps {
+type CopyButtonProps = {
   text: string;
-  /**
-   * The button's text, which says "Copied" or "Could not copy" after a press. Or a function
-   * drawing the button's face for each state; `label` names it then.
-   */
-  children: ReactNode | ((state: CopyState) => ReactNode);
-  /** The accessible name of a drawn face, as in "Copy hub.md.xpdustry.com". */
-  label?: string;
   tone?: PlinthStyle["tone"];
   className?: string;
-}
+} & (
+  | { children: ReactNode; label?: never }
+  | { children: (state: CopyState) => ReactNode; label: string }
+);
 
-/** Copies `text`, turns teal when it landed or red when the browser refused, and says so. */
 export function CopyButton({ text, label, children, tone = "ink", className }: CopyButtonProps) {
   const gt = useGT();
   const { state, copy } = useCopy(text);
@@ -39,7 +34,6 @@ export function CopyButton({ text, label, children, tone = "ink", className }: C
   );
 }
 
-/** The button's text, or what became of the copy once it was pressed. */
 function Said({ state, children }: { state: CopyState; children: ReactNode }) {
   const gt = useGT();
   if (state === "copied") return gt("Copied");

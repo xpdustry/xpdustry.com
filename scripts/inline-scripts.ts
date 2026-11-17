@@ -1,11 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { minify, transformWithOxc, type Plugin } from "vite";
 
-/**
- * A standalone function's source must be identical in both bundles: Function.toString() differs
- * after client minification. Compile these raw imports before bundling, keeping the result a string.
- * The files export only their default function, with no runtime imports or module-level values.
- */
 export function inlineScriptsPlugin(): Plugin {
   return {
     name: "xpdustry:inline-scripts",
@@ -16,6 +11,10 @@ export function inlineScriptsPlugin(): Plugin {
       this.addWatchFile(file);
       const source = (await readFile(file, "utf8")).replace("export default ", "");
       const { code } = await transformWithOxc(source, file, { sourcemap: false });
+      const { body } = this.parse(code);
+      if (body.length !== 1 || body[0]!.type !== "FunctionDeclaration") {
+        this.error(`${file} must hold only its default function, which runs alone in the page`);
+      }
       const compact = await minify(file, code, { compress: false, mangle: true });
       return `export default ${JSON.stringify(compact.code)};`;
     }

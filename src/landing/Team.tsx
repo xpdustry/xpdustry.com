@@ -8,7 +8,6 @@ import { rem } from "#app/ui/styles/scale";
 import { Tray } from "#app/ui/Tray";
 import * as styles from "./Team.css";
 
-/** Whoever holds a team role on Discord, highest first. */
 export function Team({ team }: { team: Person[] }) {
   const gt = useGT();
   return (
@@ -27,7 +26,6 @@ export function Team({ team }: { team: Person[] }) {
   );
 }
 
-// Keep translated labels in the UI: build-time author validation also imports the team data.
 const TAG_LABELS = {
   owner: msg("Owner"),
   developer: msg("Developer"),
@@ -35,13 +33,12 @@ const TAG_LABELS = {
   moderator: msg("Moderator")
 } satisfies Record<Tag, unknown>;
 
-/** What someone does, each in its colour. */
 function Tags({ tags }: Pick<Person, "tags">) {
   const m = useMessages();
   return (
     <span className={styles.tags}>
       {tags.map((tag) => (
-        <span key={tag} className={`${styles.tag} ${styles.rank[tag]}`}>
+        <span key={tag} className={`${styles.tag} ${styles.roleColour[tag]}`}>
           {m(TAG_LABELS[tag])}
         </span>
       ))}
@@ -49,9 +46,12 @@ function Tags({ tags }: Pick<Person, "tags">) {
   );
 }
 
-/** A teammate's face, or the first letter of their name for want of one. */
+const INITIAL_SCALE = 0.45;
+
+const initial = (name: string) => /[\p{L}\p{N}]/u.exec(name)?.[0];
+
 function Face({ name, avatar, size }: Pick<Person, "name" | "avatar"> & { size: number }) {
-  const box = { width: size, height: size, fontSize: rem(size * 0.45) };
+  const box = { width: size, height: size, fontSize: rem(size * INITIAL_SCALE) };
   return avatar ? (
     <img
       className={styles.face}
@@ -65,19 +65,18 @@ function Face({ name, avatar, size }: Pick<Person, "name" | "avatar"> & { size: 
     />
   ) : (
     <span className={styles.face} style={box} aria-hidden="true">
-      {/[\p{L}\p{N}]/u.exec(name)?.[0]}
+      {initial(name)}
     </span>
   );
 }
 
-/** A teammate's tile, which opens their profile beside it. */
 function Teammate({ member }: { member: Person }) {
   const id = useId();
   const anchor = { "--anchor": `--${id.replace(/\W/g, "")}` } as CSSProperties;
   return (
-    <li className={styles.rank[member.tags[0]]} style={anchor}>
+    <li className={styles.roleColour[member.tags[0]]} style={anchor}>
       <button type="button" className={styles.member} popoverTarget={`${id}-profile`}>
-        <Face name={member.name} avatar={member.avatar} size={styles.FACE} />
+        <Face name={member.name} avatar={member.avatar} size={styles.TILE_FACE} />
         <span className={styles.name}>{member.name}</span>
         <Tags tags={member.tags} />
       </button>
@@ -86,10 +85,6 @@ function Teammate({ member }: { member: Person }) {
   );
 }
 
-/** A teammate's site, as its visitors type it. */
-const address = (website: string) => new URL(website).host;
-
-/** A teammate's profile: a card over the page, like Discord's, with where to find them. */
 function Profile({ id, member }: { id: string; member: Person }) {
   const gt = useGT();
   const { name, accent, banner } = member;
@@ -109,7 +104,7 @@ function Profile({ id, member }: { id: string; member: Person }) {
       >
         <X />
       </button>
-      <Face name={name} avatar={member.avatar} size={80} />
+      <Face name={name} avatar={member.avatar} size={styles.PROFILE_FACE} />
       <p id={`${id}-name`} className={styles.title}>
         {name}
       </p>
@@ -120,13 +115,11 @@ function Profile({ id, member }: { id: string; member: Person }) {
   );
 }
 
-/** Their line in the visitor's language, or in the default one for want of it. */
 function About({ member }: { member: Person }) {
   const text = aboutIn(member, useLocale(), DEFAULT_LOCALE);
   return text ? <p className={styles.about}>{text}</p> : null;
 }
 
-/** Where to find them: their GitHub account, their site, either or neither. */
 function Links({ member: { github, website } }: { member: Person }) {
   return (
     <span className={styles.links}>
@@ -138,7 +131,7 @@ function Links({ member: { github, website } }: { member: Person }) {
       )}
       {website && (
         <a href={website} {...outbound(website)}>
-          {address(website)}
+          {new URL(website).host}
         </a>
       )}
     </span>

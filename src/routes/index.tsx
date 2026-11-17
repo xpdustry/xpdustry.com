@@ -22,7 +22,7 @@ export const Route = createFileRoute("/")({
     return seo({
       locale,
       title: m(SITE.title),
-      fullTitle: true,
+      withoutSiteName: true,
       description: m(SITE.description),
       path: "/",
       image: siteCard(m),

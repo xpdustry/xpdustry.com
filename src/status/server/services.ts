@@ -39,15 +39,14 @@ class Services {
   });
   readonly github = new Poller<GitHubStats>({
     name: "github",
+    // https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api#primary-rate-limit-for-unauthenticated-users
     intervalMs: 60 * 60_000,
     load: (signal) => fetchGitHubStats(signal)
   });
-  /** The team's faces and banners, copied off Discord's CDN. */
   readonly pictures = new Pictures();
   readonly #team = new Poller<Teammate[]>({
     name: "team",
     intervalMs: 30 * 60_000,
-    // A thousand members a call, then two per teammate, each of which Discord may have wait.
     timeoutMs: 5 * 60_000,
     load: async (signal) =>
       TEAM ? this.pictures.localise(await fetchTeam(TEAM, signal), signal) : knownTeam
@@ -80,7 +79,6 @@ class Services {
     };
   }
 
-  /** Whoever holds a team role on Discord, or `team.json`'s team until Discord answers. */
   get team(): Teammate[] {
     return this.#team.value ?? knownTeam;
   }
@@ -104,7 +102,6 @@ export function services(): Services {
   return (registry[KEY] ??= new Services());
 }
 
-/** Starts polling unless `XPD_DISABLE_STATUS=1`, as the tests set. */
 export function startServices(): Services {
   const instance = services();
   if (process.env.XPD_DISABLE_STATUS !== "1") instance.start();

@@ -10,7 +10,6 @@ import type { DiscordCounts } from "./live";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./DiscordCard.css";
 
-/** The card's two sizes: the compact one sits in a narrow column, under smaller patches. */
 const SIZES = {
   regular: { className: "", patches: PATCHES.discord },
   compact: { className: styles.compact, patches: PATCHES.discordCompact }
@@ -25,7 +24,6 @@ export function DiscordCard({
 }: {
   title: string;
   children: ReactNode;
-  /** Who is there right now, where the page knows. */
   counts?: DiscordCounts;
   compact?: boolean;
   className?: string;

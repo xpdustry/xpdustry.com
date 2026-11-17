@@ -50,7 +50,7 @@ globalStyle(`${prose} a`, {
 });
 
 globalStyle(`${prose} a:hover`, {
-  background: `rgb(${vars.glow} / 0.18)`
+  background: `color-mix(in srgb, ${vars.t9} 18%, transparent)`
 });
 
 globalStyle(`${prose} code`, {

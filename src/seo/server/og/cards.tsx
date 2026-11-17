@@ -4,7 +4,7 @@ import dmMono from "@fontsource/dm-mono/files/dm-mono-latin-400-normal.woff2?inl
 import golosBold from "@fontsource/golos-text/files/golos-text-cyrillic-700-normal.woff2?inline";
 import plexMono from "@fontsource/ibm-plex-mono/files/ibm-plex-mono-cyrillic-400-normal.woff2?inline";
 import momo from "@fontsource/momo-trust-display/files/momo-trust-display-latin-400-normal.woff2?inline";
-import { Renderer } from "@takumi-rs/core";
+import { Renderer, type FontDetails } from "@takumi-rs/core";
 import { fromJsx } from "@takumi-rs/helpers/jsx";
 import type { ReactElement } from "react";
 import { posts, translated, type Post } from "#app/blog/content/registry";
@@ -19,15 +19,21 @@ import { BlogCard, HomeCard, PostCard, type CardLanguage, type CardPost } from "
 
 const MAX_AGE_MS = 60 * 60 * 1000;
 
-const FONTS = [
+const STATIC_FACES: FontDetails[] = [
   { name: FACE.display, data: bytes(momo), weight: DISPLAY_WEIGHT },
   { name: FACE.mono, data: bytes(dmMono), weight: 400 },
   { name: FACE.cyrillicDisplay, data: bytes(golosBold), weight: DISPLAY_WEIGHT },
-  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 },
-  // Variable faces go in without a weight, so the whole axis stays live.
+  { name: FACE.cyrillicMono, data: bytes(plexMono), weight: 400 }
+];
+
+type WholeWeightAxis = Omit<FontDetails, "weight">;
+
+const VARIABLE_FACES: WholeWeightAxis[] = [
   { name: FACE.text, data: bytes(momoSans) },
   { name: FACE.cyrillicText, data: bytes(golosText) }
 ];
+
+const FONTS = [...STATIC_FACES, ...VARIABLE_FACES];
 
 const iconData = import.meta.glob<string>("/src/brand/icons/*", {
   query: "?inline",
@@ -81,8 +87,7 @@ function getRenderer(): Promise<Renderer> {
 
 type DrawCard = (language: CardLanguage) => ReactElement;
 
-/** Every card the site serves, by its path under `/og/`. */
-const CARDS = new Map<string, DrawCard>([
+const CARDS_BY_OG_PATH = new Map<string, DrawCard>([
   [
     "home.png",
     (language) => (
@@ -114,7 +119,6 @@ async function renderCard(card: ReactElement): Promise<Png> {
   return new Uint8Array(png);
 }
 
-/** The PNG for a card path in `language`, or `undefined` when no page owns it. */
 export async function readCard(path: string, language: CardLanguage): Promise<Png | undefined> {
   const key = `${language.locale}/${path}`;
   const cached = cache.get(key);
@@ -124,7 +128,7 @@ export async function readCard(path: string, language: CardLanguage): Promise<Pn
   if (pending) return pending;
 
   const task = (async () => {
-    const card = CARDS.get(path)?.(language);
+    const card = CARDS_BY_OG_PATH.get(path)?.(language);
     if (!card) return undefined;
     const png = await renderCard(card);
     cache.set(key, { png, renderedAt: Date.now() });

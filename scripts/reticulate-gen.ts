@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { encode } from "fast-png";
+import { ASSETS, PATTERN } from "./labyrinth.ts";
 import { wrappedBoxBlur, reticulateField, toMask } from "./reticulate.ts";
 
 function greyAlpha(alpha: Uint8Array): Uint8Array {
@@ -15,7 +16,7 @@ function greyAlpha(alpha: Uint8Array): Uint8Array {
 const START_SIZE = 300;
 const BLUR_RADIUS_PX = 2;
 
-const target = fileURLToPath(new URL("../src/textures/assets/reticulate.png", import.meta.url));
+const target = fileURLToPath(new URL(PATTERN, ASSETS));
 const started = Date.now();
 const field = reticulateField(START_SIZE, 1);
 const mask = wrappedBoxBlur(toMask(field), field.width, field.height, BLUR_RADIUS_PX);

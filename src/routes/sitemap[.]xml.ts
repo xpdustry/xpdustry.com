@@ -38,7 +38,7 @@ function sitemap(): string {
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
-    ...pages().flatMap(entries),
+    ...pages().flatMap(entryPerLocale),
     "</urlset>",
     ""
   ].join("\n");
@@ -46,8 +46,7 @@ function sitemap(): string {
 
 const at = (path: string, locale: string) => `${SITE.origin}${withLocale(path, locale)}`;
 
-/** One entry per language, each listing the page in every language. */
-function entries({ path, lastmod }: Page): string[] {
+function entryPerLocale({ path, lastmod }: Page): string[] {
   const alternates = [
     ...LOCALES.map(
       (locale) => `<xhtml:link rel="alternate" hreflang="${locale}" href="${at(path, locale)}"/>`

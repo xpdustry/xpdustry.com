@@ -20,7 +20,7 @@ test("the backdrop is painted at half size, its labyrinth and its tile shrunk al
   const { settings } = painting("backdrop-far");
   expect(settings.repeat).toBe(BACKDROP.far.repeat / 2);
   expect(settings.tile).toBe(BACKDROP.far.tile / 2);
-  expect(settings.soft).toBeGreaterThan(0.07);
+  expect(settings.softEdge).toBeGreaterThan(0.07);
 });
 
 test("a blob's sprite is painted smaller than it shows, on a whole number of labyrinth px", () => {

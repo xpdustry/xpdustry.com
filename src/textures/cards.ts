@@ -1,4 +1,4 @@
-import { growing, patches, shaped, spreadPalette, type Blob } from "./texture.ts";
+import { growing, patches, shaped, spreadPalette, type Blob, type Shape } from "./texture.ts";
 
 const LIGHT_TEAL = ["#86d8cf", "#a6e7e0"] as const;
 const DEEP_TEAL = ["#104643", "#0c3c39"] as const;
@@ -13,9 +13,9 @@ const PURPLE = ["#d6c6f4", "#e1d5f7"] as const;
 
 const HEADER_EDGE_BLOBS: Blob[] = [
   [0, 0.14, 44],
-  [0, 0.86, 50, 3]
+  [0, 0.86, 50, { quarters: 3, mirrored: false }]
 ];
-const edge = (tint: string, shape: number) =>
+const edge = (tint: string, shape: Shape) =>
   shaped(growing(patches(tint, tint, HEADER_EDGE_BLOBS, 108), 1.25), shape);
 
 export const EDGES = {

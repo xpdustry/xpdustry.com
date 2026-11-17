@@ -33,10 +33,8 @@ export const logo = style([
   }
 ]);
 
-/**
- * The back link and the topic share a line while they fit, and the title always starts a line of
- * its own: the zero-height break before it takes a whole line.
- */
+const CRUMB_ORDER = { lineBreak: 1, title: 2 } as const;
+
 export const crumbs = style({
   display: "flex",
   flexWrap: "wrap",
@@ -45,7 +43,7 @@ export const crumbs = style({
   alignItems: "flex-start",
   "::before": {
     content: '""',
-    order: 1,
+    order: CRUMB_ORDER.lineBreak,
     flexBasis: "100%"
   }
 });
@@ -63,7 +61,7 @@ export const heading = style({
 });
 
 export const title = style({
-  order: 2,
+  order: CRUMB_ORDER.title,
   flexBasis: "100%",
   minWidth: 0,
   maxWidth: "17ch",

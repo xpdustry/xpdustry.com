@@ -8,15 +8,15 @@ const trayR = createVar();
 
 const trayWidth = createVar();
 
-/** Measured on the whole tray: 273px of content and the padding around it. */
-const cramped = narrowerThan(301);
+const CRAMPED_CONTENT = 273;
+const GAP_PX = 14;
+const cramped = narrowerThan(CRAMPED_CONTENT + 2 * GAP_PX);
 
 const narrow = upTo(700);
 const tiny = upTo(360);
 
 const slantHalf = "31.5px";
 
-/** The tab sits in the flow above the body, so a tab that grows with its text pushes the body down. */
 export const tray = style({
   vars: {
     [tabWidth]: rem(484),
@@ -160,7 +160,6 @@ export const subtitle = style({
   }
 });
 
-/** What the tray holds, and the container its cards measure. */
 export const content = style({
   gridArea: "2 / 1",
   containerType: "inline-size",

@@ -11,10 +11,6 @@ export const PAGE_GRID = {
   }
 } satisfies StyleRule;
 
-/**
- * The page grid and `changes` to it as a single class, so the changes win in any stylesheet
- * order. For a `.css.ts` file to call.
- */
 export function pageGridWith({ "@media": queries, ...changes }: StyleRule): string {
   return style({
     ...PAGE_GRID,

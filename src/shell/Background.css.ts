@@ -13,12 +13,8 @@ const drift = keyframes({
   to: { transform: `translateY(-${TILE}px)` }
 });
 
-/**
- * The backdrop is fixed to the viewport, so on its own it would also fill the gap a bounce opens past
- * either end of the page. Clipped to the body, the gap shows the canvas instead, the same deep green
- * as the top of the crown and the footer. Unlike `overflow`, `clip-path` also clips fixed descendants.
- */
-export const clip = style({
+// `overflow` cannot clip the fixed backdrop, whose containing block is the viewport: `clip-path` can.
+export const clipToPage = style({
   position: "absolute",
   inset: 0,
   zIndex: -1,

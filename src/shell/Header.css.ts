@@ -1,26 +1,20 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { media } from "#app/ui/styles/media";
+import { media, upTo } from "#app/ui/styles/media";
 import { onDeep } from "./onDeep";
 import {
   hangUnder,
   popoverBox,
   popoverMoving,
-  popoverOpenUnder,
   popoverPanel,
-  popoverShut
+  popoverShut,
+  underParent
 } from "./popover";
-import { tone, wall } from "#app/ui/Plinth.css";
+import { PLINTH_BORDER, PLINTH_DEPTH, tone, wall } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
 
-/*
- * In em, which media queries take from the browser's text size rather than the page's: text
- * enlarged on its own, as Firefox's text-only zoom does, folds the header sooner. At the usual 16px
- * these are 1160px and 520px.
- */
-/** Where the navigation folds into the menu: below it, the header is short of its full width. */
-export const folded = "(max-width: 72.5em)";
-/** Where the language button and GitHub fold into the menu too. */
-export const narrow = "(max-width: 32.5em)";
+export const navFolded = upTo(1160);
+export const controlsFolded = upTo(520);
+const navUnfolded = `not all and ${navFolded}`;
 
 const ANCHOR = "--site-menu";
 const BRAND = "--site-brand";
@@ -38,7 +32,7 @@ export const header = style({
   gap: "10px 22px",
   padding: `6px 6px ${below}`,
   "@media": {
-    [narrow]: { columnGap: 10 }
+    [controlsFolded]: { columnGap: 10 }
   }
 });
 
@@ -50,7 +44,6 @@ globalStyle(`${header} svg`, {
   flex: "none"
 });
 
-/** Its margin keeps the controls at the right, as does the header's end alignment once they wrap. */
 export const brand = style({
   position: "relative",
   flex: "none",
@@ -71,13 +64,15 @@ globalStyle(`${brand} span`, {
   }
 });
 
-const hung = hangUnder(ANCHOR);
+const menuLeftOpenWithoutScripts = {
+  position: "absolute",
+  top: `anchor(${BRAND} center)`,
+  left: `calc(anchor(${BRAND} right) + 22px)`,
+  translate: "0 -50%"
+} as const;
 
-/**
- * Where it sits in the header, the navigation takes the room left, and only needs its widest link:
- * enlarged or spaced text wraps its links, then moves the controls after it to a line of their own,
- * instead of pushing them off the screen.
- */
+const menuHung = hangUnder(ANCHOR, underParent(6, below));
+
 export const nav = style({
   ...popoverBox,
   position: "static",
@@ -90,10 +85,9 @@ export const nav = style({
   border: 0,
   background: "none",
   "@media": {
-    [folded]: {
+    [navFolded]: {
       position: "absolute",
-      top: [`calc(100% - ${below} + 10px)`, hung.top],
-      right: [6, hung.right],
+      ...menuHung.shut,
       ...popoverShut,
       flexDirection: "column",
       gap: 10,
@@ -101,23 +95,12 @@ export const nav = style({
       margin: 0,
       padding: "12px 12px 14px",
       ...popoverPanel,
-      selectors: popoverOpenUnder(hung)
+      selectors: menuHung.shown
     },
-    /*
-     * Without JavaScript nothing shuts a menu left open while the window widens past the fold, and
-     * the browser keeps it in the top layer: it is held where it would sit in the header.
-     */
-    [`not all and ${folded}`]: {
-      selectors: {
-        "&:popover-open": {
-          position: "absolute",
-          top: `anchor(${BRAND} center)`,
-          left: `calc(anchor(${BRAND} right) + 22px)`,
-          translate: "0 -50%"
-        }
-      }
+    [navUnfolded]: {
+      selectors: { "&:popover-open": menuLeftOpenWithoutScripts }
     },
-    [`${folded} and ${media.motion}`]: {
+    [`${navFolded} and ${media.motion}`]: {
       selectors: popoverMoving
     }
   }
@@ -126,7 +109,7 @@ export const nav = style({
 globalStyle(`${nav} > a > span`, {
   padding: "7px 20px",
   "@media": {
-    [folded]: { flex: 1, padding: "10px 14px" }
+    [navFolded]: { flex: 1, padding: "10px 14px" }
   }
 });
 
@@ -157,14 +140,14 @@ export const language = style({
     [`${header} ${play} ~ &`]: { marginLeft: -12 }
   },
   "@media": {
-    [narrow]: { display: "none" }
+    [controlsFolded]: { display: "none" }
   }
 });
 
 export const languages = style({
   display: "none",
   "@media": {
-    [narrow]: {
+    [controlsFolded]: {
       display: "flex",
       paddingTop: 10,
       borderTop: `2px solid ${vars.deepWall}`
@@ -176,7 +159,7 @@ export const github = style([
   end,
   {
     "@media": {
-      [narrow]: {
+      [controlsFolded]: {
         selectors: { [`${header} &`]: { display: "none" } }
       }
     }
@@ -191,10 +174,10 @@ export const toggle = style([
       [`${header} &`]: { display: "none" }
     },
     "@media": {
-      [folded]: {
+      [navFolded]: {
         selectors: { [`${header} &`]: { order: 1, display: "inline-flex" } }
       },
-      [narrow]: {
+      [controlsFolded]: {
         selectors: {
           [`${header} &`]: { marginLeft: "auto" },
           [`${header}:has(${play}) &`]: { marginLeft: 0 }
@@ -216,14 +199,16 @@ export const whenOpen = style({
   }
 });
 
-/**
- * On a touch screen every control in the header takes a press over at least 44px square, though
- * it draws 40px: the hit area covers the 4px the face rises above its box, and 2px to each side.
- * The insets count from inside the plinth's 2px border.
- */
+const TOUCH_TARGET = 44;
+const CONTROL_SIZE = 40;
+const touchSlack = (TOUCH_TARGET - CONTROL_SIZE) / 2;
+const touchInset = [PLINTH_BORDER + PLINTH_DEPTH, PLINTH_BORDER + touchSlack, PLINTH_BORDER]
+  .map((px) => `${-px}px`)
+  .join(" ");
+
 globalStyle(`${toggle}::after, ${play}::after, ${language} > button::after, ${github}::after`, {
   "@media": {
-    [media.coarse]: { content: '""', position: "absolute", inset: "-6px -4px -2px" }
+    [media.coarse]: { content: '""', position: "absolute", inset: touchInset }
   }
 });
 

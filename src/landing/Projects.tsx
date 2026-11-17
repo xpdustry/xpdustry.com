@@ -84,7 +84,6 @@ function Tile({
   );
 }
 
-/** A project's card, leading to its website, or else to its repository. */
 function ProjectTile({
   project,
   className,

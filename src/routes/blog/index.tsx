@@ -18,7 +18,7 @@ export const Route = createFileRoute("/blog/")({
     return seo({
       locale: getLocale(),
       title: m(BLOG_TITLE),
-      fullTitle: true,
+      withoutSiteName: true,
       description: m(BLOG_DESCRIPTION),
       path: "/blog",
       image: blogCard(m)

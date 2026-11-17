@@ -13,27 +13,24 @@ const FILES = {
 } as const;
 
 type Face = keyof typeof FILES;
+type Priority = "high" | "low";
+
+const QUEUE_ORDER: Record<Priority, number> = { high: 0, low: 1 };
 
 const CYRILLIC_LOCALES = new Set(["ru"]);
 
-/**
- * Queue the page's fonts before rendering children, whose images would otherwise take the first
- * preload slots, in the order given and each at its priority. A face is asked for once, at the
- * priority of the first to ask, so the whole page's faces are named together.
- *
- * Every face a first screen draws with is here, however little it draws: one left to the
- * stylesheet is only found once the page is laid out, and its text swaps long after the rest.
- */
-export function preloadFonts(faces: Partial<Record<Face, "high" | "low">>, locale: string) {
-  for (const [name, priority] of Object.entries(faces) as [Face, "high" | "low"][]) {
-    const face = FILES[name];
-    const files = CYRILLIC_LOCALES.has(locale) ? [face.latin, face.cyrillic] : [face.latin];
-    for (const href of files) {
+export function preloadFonts(priorities: Record<Face, Priority>, locale: string) {
+  const faces = (Object.keys(FILES) as Face[]).toSorted(
+    (a, b) => QUEUE_ORDER[priorities[a]] - QUEUE_ORDER[priorities[b]]
+  );
+  for (const face of faces) {
+    const { latin, cyrillic } = FILES[face];
+    for (const href of CYRILLIC_LOCALES.has(locale) ? [latin, cyrillic] : [latin]) {
       preload(href, {
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",
-        fetchPriority: priority
+        fetchPriority: priorities[face]
       });
     }
   }

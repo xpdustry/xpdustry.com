@@ -58,7 +58,6 @@ globalStyle(`${featured} p`, {
   lineHeight: leading.snug
 });
 
-/** Holds the screenshot without giving it height, so the card is as tall as its text needs. */
 export const stage = style({
   position: "relative",
   flex: "none",

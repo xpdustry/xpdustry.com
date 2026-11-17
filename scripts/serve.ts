@@ -8,10 +8,16 @@ const app: { default: { fetch: (request: Request) => Promise<Response> } } = awa
   new URL("../dist/server/server.js", import.meta.url).href
 );
 
-/** What `precompress.ts` compressed at build time is sent as it is; the rest is compressed here. */
-const encodings = { br: ".br" };
-const assets = staticMiddleware({ dir: client, maxAge: 31_536_000, immutable: true, encodings });
-const files = staticMiddleware({ dir: client, maxAge: 3600, encodings });
+const YEAR_S = 365 * 24 * 60 * 60;
+const HOUR_S = 60 * 60;
+const precompressed = { br: ".br" };
+const assets = staticMiddleware({
+  dir: client,
+  maxAge: YEAR_S,
+  immutable: true,
+  encodings: precompressed
+});
+const files = staticMiddleware({ dir: client, maxAge: HOUR_S, encodings: precompressed });
 const fromDisk: ServerMiddleware = (request, next) =>
   new URL(request.url).pathname.startsWith("/assets/")
     ? assets(request, next)

@@ -37,7 +37,7 @@ export const Route = createFileRoute("/blog/$slug")({
       image: postCard(post.slug, title),
       publishedAt,
       updatedAt,
-      authorUrl: authors[author].url,
+      authorProfileUrl: authors[author].url,
       jsonLd: postStructuredData(post, locale, await getMessages())
     });
   },

@@ -2,11 +2,13 @@ import { createVar, globalStyle, style, styleVariants } from "@vanilla-extract/c
 import { font, radius, rem } from "./styles/scale";
 import { vars } from "./styles/theme.css";
 
+export const PLINTH_BORDER = 2;
+export const PLINTH_DEPTH = 4;
+
 const depth = createVar();
 const faceColor = createVar();
 const hoverColor = createVar();
 const onColor = createVar();
-/** The wall's colour, and the face's edge. Exported for a plinth on the deep teal to retune. */
 export const wall = createVar();
 
 const TEAL_HOVER = "#62d4cd";
@@ -29,12 +31,12 @@ const palette = (colors: Palette) => ({
 const teal: Palette = { face: vars.t9, hover: TEAL_HOVER, wall: vars.wall, on: vars.onTeal };
 
 export const plinth = style({
-  vars: { [depth]: "4px", ...palette(teal) },
+  vars: { [depth]: `${PLINTH_DEPTH}px`, ...palette(teal) },
   position: "relative",
   display: "inline-flex",
   marginTop: depth,
   padding: 0,
-  border: `2px solid ${wall}`,
+  border: `${PLINTH_BORDER}px solid ${wall}`,
   borderRadius: radius.md,
   background: wall,
   color: onColor,
@@ -70,7 +72,7 @@ export const face = style({
   gap: 9,
   margin: -2,
   padding: "9px 16px",
-  border: `2px solid ${wall}`,
+  border: `${PLINTH_BORDER}px solid ${wall}`,
   borderRadius: "inherit",
   background: `${faceColor} linear-gradient(rgb(255 255 255 / 0.26) 0 45%, transparent 45%)`,
   fontSize: rem(font.small),

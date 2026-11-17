@@ -37,10 +37,7 @@ export function PostAside({ post, className }: { post: Post; className?: string 
         <p className={styles.label}>
           <T>Share this post</T>
         </p>
-        <CopyButton
-          text={`${SITE.origin}/blog/${post.slug}`}
-          label={gt("Copy the link to this post")}
-        >
+        <CopyButton text={`${SITE.origin}/blog/${post.slug}`}>
           <T>Copy link</T>
         </CopyButton>
       </section>
