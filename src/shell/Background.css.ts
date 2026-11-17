@@ -1,4 +1,5 @@
 import { keyframes, style } from "@vanilla-extract/css";
+import { paint } from "#app/textures/catalogue";
 import { BACKDROP, CROWN } from "#app/textures/page";
 import { media } from "#app/ui/styles/media";
 import { vars } from "#app/ui/styles/theme.css";
@@ -37,10 +38,10 @@ export const background = style({
       background: `0 0 / ${TILE}px`
     },
     "&::before": {
-      backgroundImage: 'url("../textures/assets/backdrop-far.webp")'
+      backgroundImage: paint("backdrop-far")
     },
     "&::after": {
-      backgroundImage: 'url("../textures/assets/backdrop-near.webp")'
+      backgroundImage: paint("backdrop-near")
     },
     "&[data-drift]::before, &[data-drift]::after": {
       bottom: -TILE,
@@ -82,6 +83,6 @@ export const crown = style({
   inset: "0 0 auto",
   zIndex: -1,
   height: CROWN.height,
-  background: `url("../textures/assets/crown.webp") 50% 0 / ${CROWN.width}px ${CROWN.height}px repeat-x`,
+  background: `${paint("crown")} 50% 0 / ${CROWN.width}px ${CROWN.height}px repeat-x`,
   pointerEvents: "none"
 });

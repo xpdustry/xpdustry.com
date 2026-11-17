@@ -15,12 +15,12 @@
   <defs>
     <rect id="xp-diagonal-bar" x="174.08" y="358.4" width="675.84" height="307.2" rx="51.2"/>
     <rect id="xp-x-bar" x="81.92" y="450.56" width="860.16" height="122.88" rx="20.48"/>
-    <rect id="xp-gap-bar" class="xp-gap-motion" x="40.96" y="409.6" width="942.08" height="204.8" rx="61.44"/>
+    <rect id="xp-gap-bar" class="xp-gap-motion" x="61.44" y="430.08" width="901.12" height="163.84" rx="40.96"/>
 
     <clipPath id="xp-clip-axis"><circle cx="512" cy="512" r="368.64"/></clipPath>
     <clipPath id="xp-clip-diagonal"><circle cx="512" cy="512" r="337.92"/></clipPath>
     <clipPath id="xp-clip-x"><circle cx="512" cy="512" r="430.08"/></clipPath>
-    <clipPath id="xp-clip-gap"><circle cx="512" cy="512" r="471.04"/></clipPath>
+    <clipPath id="xp-clip-gap"><circle cx="512" cy="512" r="450.56"/></clipPath>
 
     <path id="xp-tooth" d="M 812.994 450.56 L 871.933 459.482 A 10.24 10.24 0 0 1 880.64 469.606 L 880.64 554.394 A 10.24 10.24 0 0 1 871.933 564.518 L 812.994 573.44 Z"/>
 

@@ -1,4 +1,4 @@
-import { spreadTiles, type TextureSettings } from "./texture.ts";
+import { SPREAD_MASKS, fringe, type TextureSettings } from "./texture.ts";
 
 const DEEP = "#083230";
 
@@ -63,10 +63,14 @@ export const RIDGE = strip(
   [0.45, 1.6]
 );
 
-export const FADE = spreadTiles("#f7fdfd", "#eef7f6").solid.settings;
+export const FADE = { ...SPREAD_MASKS.solid, color: "#f7fdfd", inner: "#eef7f6" };
 
 /**
  * Thin labyrinth threads, one seamless tile. Only its alpha counts: patches grow in through it as
  * a mask, threads first, before they fuse.
  */
-export const THREADS = spreadTiles("#000000", "#000000").thin.settings;
+export const THREADS = SPREAD_MASKS.thin;
+
+/** The frayed edge under a gamemode's band, and the one a post tile's foot rises through. */
+export const FRINGE = fringe();
+export const RISE = fringe(true);

@@ -1,10 +1,10 @@
-import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { once } from "node:events";
 import { readdir, readFile, stat } from "node:fs/promises";
+import { isBuiltin } from "node:module";
 import { fileURLToPath } from "node:url";
 import { beforeAll, describe, expect, test } from "vitest";
 import { LEGACY_MEDIA_REDIRECTS } from "#app/seo/server/redirects";
+import { startProductionServer } from "./testServer";
 
 const entryPath = fileURLToPath(new URL("../dist/server/server.js", import.meta.url));
 const clientRoot = fileURLToPath(new URL("../dist/client/", import.meta.url));
@@ -27,39 +27,6 @@ async function digest(response: Response): Promise<string> {
   return createHash("sha256")
     .update(new Uint8Array(await response.arrayBuffer()))
     .digest("hex");
-}
-
-/** A fresh `scripts/serve.ts` on a free port, with caches of its own. */
-async function startProductionServer(): Promise<{ origin: string; stop: () => Promise<void> }> {
-  const server = spawn(process.execPath, ["scripts/serve.ts"], {
-    cwd: fileURLToPath(new URL("../", import.meta.url)),
-    env: { ...process.env, PORT: "0", HOST: "127.0.0.1", TEST: "" },
-    stdio: ["ignore", "pipe", "pipe"]
-  });
-  const exited = once(server, "exit");
-  const stop = async () => {
-    server.kill();
-    await exited;
-  };
-  try {
-    const origin = await new Promise<string>((resolve, reject) => {
-      let output = "";
-      server.stdout.on("data", (chunk) => {
-        output += String(chunk);
-        const address = /http:\/\/127\.0\.0\.1:\d+/.exec(output)?.[0];
-        if (address) resolve(address);
-      });
-      server.stderr.on("data", (chunk) => {
-        output += String(chunk);
-      });
-      server.once("error", reject);
-      server.once("exit", () => reject(new Error(`File server exited: ${output}`)));
-    });
-    return { origin, stop };
-  } catch (error) {
-    await stop();
-    throw error;
-  }
 }
 
 describe("built pages", () => {
@@ -318,6 +285,39 @@ test("the production file server preserves every public URL from the previous si
     expect(slash.status).toBe(308);
     expect(slash.headers.get("location")).toBe("/blog?q=a%20b");
 
+    // The painter starts ahead of the stylesheets, and the worker the page names is there to fetch.
+    const home = await (await fetch(`${origin}/`)).text();
+    const painter = home.indexOf('<script type="text/javascript">(function painter(');
+    expect(painter).toBeGreaterThan(0);
+    expect(painter).toBeLessThan(home.indexOf('rel="stylesheet"'));
+    expect(home.match(/<script type="text\/javascript">\(function painter\(/g)).toHaveLength(1);
+    const worker = /data-painter="(\/assets\/painter\.worker-[^"]+\.js)"/.exec(home)?.[1];
+    expect(worker, "the page names the painter's worker").toBeDefined();
+    const painterWorker = await fetch(`${origin}${worker}`);
+    expect(painterWorker.status).toBe(200);
+    expect(painterWorker.headers.get("content-type")).toMatch(/javascript/);
+    // The labyrinth travels inside the worker, so no page asks for it on its own.
+    expect(await painterWorker.text()).toContain("data:image/avif;base64,");
+    expect(home).not.toMatch(/labyrinth-[^"]*\.avif/);
+
+    const scripts = (await readdir(`${clientRoot}assets`)).filter((file) =>
+      file.endsWith(".js.br")
+    );
+    expect(scripts.length).toBeGreaterThan(0);
+    for (const file of scripts.slice(0, 3)) {
+      const script = await fetch(`${origin}/assets/${file.slice(0, -3)}`, {
+        headers: { "accept-encoding": "gzip, br" }
+      });
+      expect(script.headers.get("content-encoding"), file).toBe("br");
+      expect(script.headers.get("content-type"), file).toMatch(/javascript/);
+      expect(script.headers.get("content-length"), file).toBe(
+        String((await stat(`${clientRoot}assets/${file}`)).size)
+      );
+      expect(await script.text(), file).toBe(
+        await readFile(`${clientRoot}assets/${file.slice(0, -3)}`, "utf8")
+      );
+    }
+
     for (const [accepted, coding] of [
       ["gzip;q=0", null],
       ["identity", null],
@@ -374,7 +374,8 @@ test("the production server only imports runtime dependencies", async () => {
       /^(?:import|export)\b(?:[^;"']*?\bfrom)?\s*["']([^"'./][^"']*)["']|\bimport\(\s*["']([^"'./][^"']*)["']\s*\)/gm
     )) {
       const specifier = (statement ?? dynamic)!;
-      if (!specifier.startsWith("node:")) {
+      // A bundled dependency may name a built-in without its prefix.
+      if (!isBuiltin(specifier)) {
         packages.add(
           specifier
             .split("/")

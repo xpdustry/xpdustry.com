@@ -3,9 +3,7 @@ import { inPage, inlineScript } from "./inlineScript";
 
 test("calls the function with serialized arguments and in-page expressions", () => {
   const script = inlineScript(
-    (sink: string[], label: string, count: number) => {
-      sink.push(`${label}:${count}`);
-    },
+    "(sink, label, count) => { sink.push(`${label}:${count}`); }",
     inPage("sink"),
     'a "quoted" label',
     3

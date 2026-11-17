@@ -1,4 +1,5 @@
 import { createVar, fallbackVar, globalStyle, style, styleVariants } from "@vanilla-extract/css";
+import { paint } from "#app/textures/catalogue";
 import { media } from "#app/ui/styles/media";
 import { font, leading, rem } from "#app/ui/styles/scale";
 import { vars } from "#app/ui/styles/theme.css";
@@ -51,9 +52,9 @@ export const foot = style({
   flexDirection: "column",
   margin: `0 calc(-1 * ${pad}) calc(-1 * ${padFoot})`,
   padding: `calc(${fade} + 14px) ${pad} ${padFoot}`,
-  background: 'url("../textures/assets/fade.webp") 0 0 / 240px',
+  background: `${paint("fade")} 0 0 / 240px`,
   mask: [
-    `url("../textures/assets/fringe/f7fdfd-rise.webp") ${fallbackVar(fray, "0")} 0 / 486px 48px repeat-x`,
+    `${paint("rise")} ${fallbackVar(fray, "0")} 0 / 486px 48px repeat-x`,
     "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat"
   ].join(", "),
   selectors: {

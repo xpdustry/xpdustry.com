@@ -1,4 +1,5 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
+import { paint } from "#app/textures/catalogue";
 import { narrowerThan } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { figures } from "./sections";
@@ -34,7 +35,7 @@ export const mode = style({
       position: "absolute",
       inset: 0,
       zIndex: -2,
-      background: 'url("../textures/assets/fade.webp") 0 -60px / 240px'
+      background: `${paint("fade")} 0 -60px / 240px`
     }
   },
   "@container": {
@@ -90,12 +91,13 @@ export const below = style({
       inset: "100% 0 auto",
       display: "block",
       height: 48,
-      background: "0 0 / 486px 48px repeat-x",
+      background: tint,
+      mask: `${paint("fringe")} 0 0 / 486px 48px repeat-x`,
       selectors: {
-        [`${mode}:nth-child(2) &`]: { backgroundPositionX: -190 },
-        [`${mode}:nth-child(3) &`]: { backgroundPositionX: -75 },
-        [`${mode}:nth-child(4) &`]: { backgroundPositionX: -330 },
-        [`${mode}:nth-child(5) &`]: { backgroundPositionX: -255 }
+        [`${mode}:nth-child(2) &`]: { maskPosition: "-190px 0" },
+        [`${mode}:nth-child(3) &`]: { maskPosition: "-75px 0" },
+        [`${mode}:nth-child(4) &`]: { maskPosition: "-330px 0" },
+        [`${mode}:nth-child(5) &`]: { maskPosition: "-255px 0" }
       }
     }
   }

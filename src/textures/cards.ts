@@ -1,4 +1,4 @@
-import { fringe, growing, patches, shaped, spreadTiles, type Blob } from "./texture.ts";
+import { growing, patches, shaped, spreadPalette, type Blob } from "./texture.ts";
 
 const LIGHT_TEAL = ["#86d8cf", "#a6e7e0"] as const;
 const DEEP_TEAL = ["#104643", "#0c3c39"] as const;
@@ -15,10 +15,8 @@ const HEADER_EDGE_BLOBS: Blob[] = [
   [0, 0.14, 44],
   [0, 0.86, 50, 3]
 ];
-const edge = (tint: string, shape: number) => ({
-  side: shaped(growing(patches(tint, tint, HEADER_EDGE_BLOBS, 108), 1.25), shape),
-  below: fringe(tint)
-});
+const edge = (tint: string, shape: number) =>
+  shaped(growing(patches(tint, tint, HEADER_EDGE_BLOBS, 108), 1.25), shape);
 
 export const EDGES = {
   survival: edge(AMBER[1], 1),
@@ -59,7 +57,6 @@ export const PATCHES = {
       [0, 1, 62]
     ])
   ),
-  ...Object.fromEntries(Object.entries(EDGES).map(([mode, { side }]) => [`${mode}Side`, side])),
   nohornyCard: corners(...PLUM, [
     [0.9, -0.08, 105],
     [1, 1, 70],
@@ -101,14 +98,10 @@ export const PATCHES = {
 };
 
 export const SPREADS = {
-  play: spreadTiles(...GOLD),
-  survival: spreadTiles(...AMBER),
-  pvp: spreadTiles(...BLUE),
-  attack: spreadTiles(...RED),
-  tower: spreadTiles(...GREEN),
-  sandbox: spreadTiles(...PURPLE)
+  play: spreadPalette(...GOLD),
+  survival: spreadPalette(...AMBER),
+  pvp: spreadPalette(...BLUE),
+  attack: spreadPalette(...RED),
+  tower: spreadPalette(...GREEN),
+  sandbox: spreadPalette(...PURPLE)
 };
-
-const TILE_FRINGE = fringe("#f7fdfd", true);
-
-export const FRINGES = [...Object.values(EDGES).map(({ below }) => below), TILE_FRINGE];

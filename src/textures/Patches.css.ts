@@ -20,10 +20,17 @@ globalStyle(`:where(${patches})`, {
   pointerEvents: "none"
 });
 
-globalStyle(`${patches} img`, {
+export const placement = style({
   position: "absolute",
-  maxWidth: "none",
-  translate: "-50% -50%"
+  translate: "-50% -50%",
+  contentVisibility: "auto"
+});
+
+/** The painter sets `--paint` on a sprite once its image is painted: until then it is clear. */
+export const sprite = style({
+  position: "absolute",
+  inset: 0,
+  background: "var(--paint) 0 0 / 100% 100% no-repeat"
 });
 
 export const grown = style({

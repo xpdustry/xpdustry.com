@@ -7,17 +7,18 @@ export const online = style({
   vars: { [light]: vars.online },
   display: "inline-flex",
   alignItems: "center",
-  gap: 7,
+  gap: 4,
   whiteSpace: "nowrap",
 
   "::before": {
     content: '""',
     flex: "none",
-    width: 8,
-    height: 8,
+    width: 14,
+    height: 14,
     borderRadius: "50%",
     background: light,
-    boxShadow: `0 0 0 3px color-mix(in srgb, ${light} 22%, transparent)`
+    backgroundClip: "padding-box",
+    border: `3px solid color-mix(in srgb, ${light} 22%, transparent)`
   }
 });
 

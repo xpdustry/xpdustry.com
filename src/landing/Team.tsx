@@ -1,6 +1,6 @@
-import { useGT, useLocale, useMessages } from "gt-tanstack-start";
+import { msg, useGT, useLocale, useMessages } from "gt-tanstack-start";
 import { useId, type CSSProperties } from "react";
-import { aboutIn, TAGS, type Teammate as Person } from "#app/brand/team";
+import { aboutIn, type Tag, type Teammate as Person } from "#app/brand/team";
 import { DEFAULT_LOCALE } from "#app/i18n/locales";
 import { GitHub, UsersThree, X } from "#app/ui/icons";
 import { outbound } from "#app/ui/outbound";
@@ -27,6 +27,14 @@ export function Team({ team }: { team: Person[] }) {
   );
 }
 
+// Keep translated labels in the UI: build-time author validation also imports the team data.
+const TAG_LABELS = {
+  owner: msg("Owner"),
+  developer: msg("Developer"),
+  admin: msg("Admin"),
+  moderator: msg("Moderator")
+} satisfies Record<Tag, unknown>;
+
 /** What someone does, each in its colour. */
 function Tags({ tags }: Pick<Person, "tags">) {
   const m = useMessages();
@@ -34,7 +42,7 @@ function Tags({ tags }: Pick<Person, "tags">) {
     <span className={styles.tags}>
       {tags.map((tag) => (
         <span key={tag} className={`${styles.tag} ${styles.rank[tag]}`}>
-          {m(TAGS[tag])}
+          {m(TAG_LABELS[tag])}
         </span>
       ))}
     </span>

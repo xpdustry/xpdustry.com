@@ -11,7 +11,6 @@ import { postTitle } from "#app/blog/titles";
 import { postCard, seo } from "#app/seo/meta";
 import { postStructuredData } from "#app/seo/structuredData";
 import { Newspaper } from "#app/ui/icons";
-import { fontPreloads } from "#app/ui/styles/fontPreloads";
 import { Tray } from "#app/ui/Tray";
 import * as styles from "#app/blog/PostPage.css";
 import * as card from "#app/ui/Card.css";
@@ -29,7 +28,7 @@ export const Route = createFileRoute("/blog/$slug")({
     const post = translated(original, locale);
     const { description, publishedAt, updatedAt, author } = post.frontmatter;
     const title = postTitle(post.frontmatter);
-    const head = seo({
+    return seo({
       locale,
       title,
       description,
@@ -41,7 +40,6 @@ export const Route = createFileRoute("/blog/$slug")({
       authorUrl: authors[author].url,
       jsonLd: postStructuredData(post, locale, await getMessages())
     });
-    return { ...head, links: [...head.links, ...fontPreloads(["text"], locale)] };
   },
   component: PostPage
 });

@@ -11,12 +11,13 @@ import { Background } from "#app/shell/Background";
 import { ENTER } from "#app/shell/enter";
 import { Footer } from "#app/shell/Footer";
 import { Header } from "#app/shell/Header";
-import { FRAME_IMAGES, REVEAL, REVEAL_IMAGES } from "#app/shell/reveal";
+import { PAINTER_WORKER } from "#app/shell/painter";
+import { REVEAL } from "#app/shell/reveal";
 import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
 import { shellData } from "#app/shell/shellData";
 import { getLiveData } from "#app/status/live.functions";
 import { CROWN } from "#app/textures/page";
-import { fontPreloads } from "#app/ui/styles/fontPreloads";
+import { preloadFonts } from "#app/ui/styles/fontPreloads";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
@@ -33,7 +34,7 @@ export const Route = createRootRoute({
     ]);
     return { live, locale, translations };
   },
-  head: ({ loaderData }) => ({
+  head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -43,16 +44,7 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
-      { rel: "manifest", href: "/site.webmanifest" },
-      ...fontPreloads(["display", "mono"], shellData(loaderData).locale),
-      // The backdrop's layers are many times the crown's weight, so they yield to the first screen.
-      ...REVEAL_IMAGES.map((href) => ({
-        rel: "preload",
-        href,
-        as: "image",
-        type: "image/webp",
-        fetchPriority: FRAME_IMAGES.includes(href) ? ("high" as const) : ("low" as const)
-      }))
+      { rel: "manifest", href: "/site.webmanifest" }
     ]
   }),
   shellComponent: Document
@@ -83,9 +75,18 @@ function Document({ children }: { children: ReactNode }) {
   const { locale, translations, players } = shellData(
     useMatch({ from: rootRouteId, select: (match) => match.loaderData })
   );
+  // The header's language label is set in the text face, on every page; an article's body is too,
+  // and there it is most of the page, so it comes ahead of the monospace.
+  const reading = useMatch({ from: "/blog/$slug", shouldThrow: false }) !== undefined;
+  preloadFonts(
+    reading
+      ? { display: "high", text: "high", mono: "low" }
+      : { display: "high", mono: "low", text: "low" },
+    locale
+  );
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-painter={PAINTER_WORKER} suppressHydrationWarning>
       <head>
         <style>{UNSTYLED_CANVAS}</style>
         <HeadContent />

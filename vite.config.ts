@@ -1,7 +1,9 @@
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { redact } from "@tanstack/redact/vite";
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { inlineScriptsPlugin } from "./scripts/inline-scripts.ts";
 import { blogMarkdownPlugin } from "./src/blog/content/markdown.ts";
 
 export default defineConfig({
@@ -18,6 +20,7 @@ export default defineConfig({
   },
   plugins: [
     blogMarkdownPlugin(),
+    inlineScriptsPlugin(),
     vanillaExtractPlugin(),
     tanstackStart({
       importProtection: {
@@ -25,8 +28,12 @@ export default defineConfig({
       }
     }),
     // TanStack Start requires its plugin before React's.
-    viteReact()
+    viteReact(),
+    redact()
   ],
+  // Redact stands in for React on the server too, which it can only do in code Vite bundles:
+  // everything but the card renderer, whose native binding has to stay a package.
+  ssr: { noExternal: true, external: ["@takumi-rs/core"] },
   build: {
     sourcemap: true,
     assetsInlineLimit: 0

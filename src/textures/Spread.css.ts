@@ -7,10 +7,11 @@ import {
   style
 } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
+import { paint, type PaintName } from "./catalogue";
 import { vars } from "#app/ui/styles/theme.css";
 
-/** Each stage's tile, as a `url()`. */
-export const tile = { thin: createVar(), thick: createVar(), solid: createVar() };
+export const color = createVar();
+export const inner = createVar();
 /** Where the spread starts, from the top left corner. */
 export const x = createVar();
 export const y = createVar();
@@ -53,20 +54,32 @@ globalStyle(`${spread} > i, ${spread}::before, ${spread}::after`, {
   inset: 0
 });
 
-const layer = (stage: keyof typeof tile, solidTo: string, clearFrom: string) => ({
-  background: `${tile[stage]} 0 0 / 240px`,
-  mask: `radial-gradient(${at}, #000 ${solidTo}, transparent ${clearFrom})`
+const layer = (image: PaintName, solidTo: string, clearFrom: string) => ({
+  background: color,
+  maskImage: `${paint(image)}, radial-gradient(${at}, #000 ${solidTo}, transparent ${clearFrom})`,
+  maskComposite: "intersect",
+  maskSize: "240px, auto",
+  maskRepeat: "repeat, no-repeat"
 });
 
+export const ready = style({});
+
+globalStyle(`${ready} > i`, {
+  background: color,
+  mask: `radial-gradient(${at}, #000 calc(${spreadVar} - 110px), transparent calc(${spreadVar} - 92px))`
+});
+globalStyle(`${ready} > i::before`, {
+  content: '""',
+  position: "absolute",
+  inset: 0,
+  background: inner,
+  mask: `${paint("spread-core")} 0 0 / 240px repeat`
+});
 globalStyle(
-  `${spread} > i`,
-  layer("solid", `calc(${spreadVar} - 110px)`, `calc(${spreadVar} - 92px)`)
+  `${ready}::before`,
+  layer("spread-thick", `calc(${spreadVar} - 52px)`, `calc(${spreadVar} - 38px)`)
 );
-globalStyle(
-  `${spread}::before`,
-  layer("thick", `calc(${spreadVar} - 52px)`, `calc(${spreadVar} - 38px)`)
-);
-globalStyle(`${spread}::after`, layer("thin", `calc(${spreadVar} - 10px)`, spreadVar));
+globalStyle(`${ready}::after`, layer("threads", `calc(${spreadVar} - 10px)`, spreadVar));
 
 export const on = style({
   opacity: 1,
