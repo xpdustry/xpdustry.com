@@ -16,6 +16,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiServersRouteImport } from './routes/api/servers'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as DiscordSplatRouteImport } from './routes/discord/$'
 import { Route as OgSplatRouteImport } from './routes/og/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DiscordSplatRoute = DiscordSplatRouteImport.update({
+  id: '/discord/$',
+  path: '/discord/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OgSplatRoute = OgSplatRouteImport.update({
   id: '/og/$',
   path: '/og/$',
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/servers': typeof ApiServersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/discord/$': typeof DiscordSplatRoute
   '/og/$': typeof OgSplatRoute
   '/blog/': typeof BlogIndexRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/servers': typeof ApiServersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/discord/$': typeof DiscordSplatRoute
   '/og/$': typeof OgSplatRoute
   '/blog': typeof BlogIndexRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/servers': typeof ApiServersRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/discord/$': typeof DiscordSplatRoute
   '/og/$': typeof OgSplatRoute
   '/blog/': typeof BlogIndexRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/servers'
     | '/blog/$slug'
+    | '/discord/$'
     | '/og/$'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/servers'
     | '/blog/$slug'
+    | '/discord/$'
     | '/og/$'
     | '/blog'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/api/servers'
     | '/blog/$slug'
+    | '/discord/$'
     | '/og/$'
     | '/blog/'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiServersRoute: typeof ApiServersRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  DiscordSplatRoute: typeof DiscordSplatRoute
   OgSplatRoute: typeof OgSplatRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/discord/$': {
+      id: '/discord/$'
+      path: '/discord/$'
+      fullPath: '/discord/$'
+      preLoaderRoute: typeof DiscordSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/og/$': {
       id: '/og/$'
       path: '/og/$'
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiServersRoute: ApiServersRoute,
   BlogSlugRoute: BlogSlugRoute,
+  DiscordSplatRoute: DiscordSplatRoute,
   OgSplatRoute: OgSplatRoute,
   BlogIndexRoute: BlogIndexRoute,
 }

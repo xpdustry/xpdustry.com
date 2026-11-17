@@ -7,6 +7,7 @@ import { fetchDiscordCounts } from "./discord";
 import { fetchGitHubStats, type GitHubStats } from "./github";
 import { pollingSnapshot, queryServers } from "./mindustry/status";
 import { createNodeMindustryProbe } from "./mindustry/transport";
+import { Pictures } from "./pictures";
 import { Poller, type PollerHealth } from "./poller";
 import { fetchTeam, teamConfig } from "./team";
 
@@ -41,12 +42,15 @@ class Services {
     intervalMs: 60 * 60_000,
     load: (signal) => fetchGitHubStats(signal)
   });
+  /** The team's faces and banners, copied off Discord's CDN. */
+  readonly pictures = new Pictures();
   readonly #team = new Poller<Teammate[]>({
     name: "team",
     intervalMs: 30 * 60_000,
     // A thousand members a call, then two per teammate, each of which Discord may have wait.
     timeoutMs: 5 * 60_000,
-    load: (signal) => (TEAM ? fetchTeam(TEAM, signal) : Promise.resolve(knownTeam))
+    load: async (signal) =>
+      TEAM ? this.pictures.localise(await fetchTeam(TEAM, signal), signal) : knownTeam
   });
 
   start(): void {

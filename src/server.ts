@@ -10,12 +10,18 @@ import { startServices } from "#app/status/server/services";
 startServices();
 
 /**
- * Responses a shared cache keeps under their URL alone: social cards, the sitemap and the API. They
+ * Responses a shared cache keeps under their URL alone: social cards, the sitemap, the API and the
+ * team's pictures. They
  * must come out the same for every visitor, so nothing a visitor sends reaches them.
  */
 function isShared(pathname: string): boolean {
   const path = withoutLocale(pathname);
-  return path.startsWith("/og/") || path.startsWith("/api/") || path === "/sitemap.xml";
+  return (
+    path.startsWith("/og/") ||
+    path.startsWith("/api/") ||
+    path.startsWith("/discord/") ||
+    path === "/sitemap.xml"
+  );
 }
 
 /** The only cookie the server reads: the language a visitor chose, for unprefixed pages. */

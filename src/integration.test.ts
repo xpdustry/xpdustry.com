@@ -553,6 +553,10 @@ describe("what a visitor sends", () => {
         }
         expect(await digest(poisoned), path).toBe(await digest(clean));
       }
+      // The team's pictures are kept a year; with the poller off here, a missing one is enough.
+      const picture = await fetch(`${origin}/discord/avatars/1/a.webp`, { headers: hostile });
+      expect(picture.status).toBe(404);
+      expect(picture.headers.get("set-cookie")).toBeNull();
     } finally {
       await stop();
     }
