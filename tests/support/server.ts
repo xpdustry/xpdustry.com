@@ -72,7 +72,7 @@ export async function startProductionServer({
 }: ServerOptions = {}): Promise<ProductionServer> {
   const port = await freePort();
   const output = logFile ? openSync(logFile, "w") : "pipe";
-  const server = spawn(process.execPath, ["scripts/serve.ts"], {
+  const server = spawn(process.execPath, ["scripts/server/serve.ts"], {
     cwd: REPOSITORY,
     env: serverEnv(port, pollLiveStatus),
     stdio: ["ignore", output, output],

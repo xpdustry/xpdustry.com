@@ -5,20 +5,17 @@ import { expect, test } from "vitest";
 const root = new URL("../../", import.meta.url);
 const read = (path: string) => readFile(new URL(path, root), "utf8");
 
-test("the container image ships every file the production server imports", async () => {
-  const shipped = [
-    ...(await read("Dockerfile")).matchAll(/^COPY --from=build \S+ \/app\/(\S+)/gm)
-  ].map(([, path]) => path!);
-  const imported = [
-    ...(await read("scripts/serve.ts")).matchAll(/(?:from|import\()\s*["'](\.[^"']+)["']/g)
-  ].map(([, specifier]) =>
-    new URL(specifier!, new URL("scripts/", root)).pathname.slice(root.pathname.length)
-  );
-  for (const path of imported) {
-    expect(
-      shipped.some((copied) => path === copied || path.startsWith(`${copied}/`)),
-      `${path} is imported by scripts/serve.ts but not copied into the image`
-    ).toBe(true);
+const SERVER = "scripts/server";
+const serverFiles = async () =>
+  (await readdir(new URL(SERVER, root)))
+    .filter((file) => !file.endsWith(".test.ts"))
+    .map((file) => `${SERVER}/${file}`);
+
+test("the production server imports no file from outside the folder the image ships", async () => {
+  expect(await read("Dockerfile")).toContain(`/app/${SERVER} ./${SERVER}`);
+  for (const file of await serverFiles()) {
+    const relative = [...(await read(file)).matchAll(/(?:from|import\()\s*["'](\.[^"']+)["']/g)];
+    for (const [, specifier] of relative) expect(specifier, file).toMatch(/^\.\/[^/]+$/);
   }
 });
 
@@ -39,7 +36,7 @@ test("the production server imports only what the image installs: runtime depend
     .filter((file) => file.endsWith(".js"))
     .map((file) => `dist/server/${file}`);
   const packages = new Set<string>();
-  for (const source of [...bundle, "scripts/serve.ts", "scripts/compression.ts"]) {
+  for (const source of [...bundle, ...(await serverFiles())]) {
     for (const [, statement, dynamic] of (await read(source)).matchAll(TOP_LEVEL_IMPORT)) {
       const specifier = (statement ?? dynamic)!;
       if (!isBuiltin(specifier)) packages.add(packageOf(specifier));

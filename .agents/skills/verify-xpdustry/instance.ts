@@ -40,7 +40,8 @@ function servesThisCheckout(pid: number): boolean {
   try {
     const command = readFileSync(`/proc/${pid}/cmdline`, "utf8");
     return (
-      command.includes("scripts/serve.ts") && `${readlinkSync(`/proc/${pid}/cwd`)}/` === REPOSITORY
+      command.includes("scripts/server/serve.ts") &&
+      `${readlinkSync(`/proc/${pid}/cwd`)}/` === REPOSITORY
     );
   } catch {
     return false;

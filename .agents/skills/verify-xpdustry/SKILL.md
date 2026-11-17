@@ -1,6 +1,6 @@
 ---
 name: verify-xpdustry
-description: "Serve a production build of the Xpdustry website (xpdustry.com: TanStack Start, served by scripts/serve.ts) for someone to look at, and capture screenshots, ARIA trees and videos of it as evidence. Use after a visible change, to reply with screenshots; for live server status against the real game servers, Discord and GitHub; and for what no test can judge: how an animation feels, whether a social card or a page looks right."
+description: "Serve a production build of the Xpdustry website (xpdustry.com: TanStack Start, served by scripts/server/serve.ts) for someone to look at, and capture screenshots, ARIA trees and videos of it as evidence. Use after a visible change, to reply with screenshots; for live server status against the real game servers, Discord and GitHub; and for what no test can judge: how an animation feels, whether a social card or a page looks right."
 ---
 
 # Verify Xpdustry
