@@ -2,6 +2,7 @@ import { createVar, fallbackVar, globalStyle, style, styleVariants } from "@vani
 import { paint } from "#app/textures/catalogue";
 import { media } from "#app/ui/styles/media";
 import { font, insideOutline, leading, rem } from "#app/ui/styles/scale";
+import { riseFrom } from "#app/textures/enter.css";
 import { FACE_BLEED, FACE_INSET } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
 import { artLogo, artTop } from "./PostArt.css";
@@ -10,6 +11,10 @@ const fade = createVar();
 const pad = createVar();
 const padFoot = createVar();
 const fray = createVar();
+
+const TEAR_HEIGHT = 48;
+const TORN_FROM = TEAR_HEIGHT - 1;
+const tearX = `calc(${fallbackVar(fray, "0px")} + ${FACE_BLEED}px)`;
 
 const roomy = { [pad]: "22px", [padFoot]: "22px" };
 
@@ -55,10 +60,11 @@ export const foot = style({
   padding: `calc(${fade} + 14px) calc(${pad} + ${FACE_BLEED}px) calc(${padFoot} + ${FACE_BLEED}px)`,
   borderBottomLeftRadius: "inherit",
   borderBottomRightRadius: "inherit",
+  vars: { [riseFrom]: `${tearX} ${TORN_FROM}px, 0 ${TORN_FROM}px` },
   background: `${paint("fade")} ${FACE_BLEED}px 0 / 240px, ${vars.tile}`,
   mask: [
-    `${paint("rise")} calc(${fallbackVar(fray, "0px")} + ${FACE_BLEED}px) 0 / 486px 48px repeat-x`,
-    "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat"
+    `${paint("rise")} ${tearX} 0 / 486px ${TEAR_HEIGHT}px repeat-x`,
+    `linear-gradient(#000 0 0) 0 ${TORN_FROM}px / 100% calc(100% - ${TORN_FROM}px) no-repeat`
   ].join(", "),
   selectors: {
     [`${tile}:nth-child(2n) &`]: { vars: { [fray]: "-210px" } },

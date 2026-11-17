@@ -60,7 +60,16 @@ async function work() {
   working = false;
 }
 
+const requested = new Map<string, Job>();
+
 addEventListener("message", ({ data }: MessageEvent<PainterRequest>) => {
-  jobs.push({ ...data, arrival: received++ });
+  const known = requested.get(data.key);
+  if (known) {
+    known.priority = Math.min(known.priority, data.priority);
+    return;
+  }
+  const job = { ...data, arrival: received++ };
+  requested.set(data.key, job);
+  jobs.push(job);
   void work();
 });

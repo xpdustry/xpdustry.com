@@ -7,6 +7,7 @@ interface Layer {
   timings: OptionalEffectTiming[];
   keyframes?: Keyframe[];
   plays: number;
+  finishes: number;
   cancels: number;
 }
 
@@ -25,13 +26,19 @@ function texture(kind: string, top = 20, inCard: Card | null = null) {
     element: {
       dataset: { texture: kind } as Record<string, string>,
       closest: () => inCard,
+      querySelectorAll: () => [] as { dataset: { paint: string } }[],
       getBoundingClientRect: () => ({ top, bottom: top + 80 }),
       animate: vi.fn((_frames: Keyframe[], { pseudoElement = "" }: KeyframeAnimationOptions) => {
-        const layer: Layer = { timings: [], plays: 0, cancels: 0 };
+        const layer: Layer = { timings: [], plays: 0, finishes: 0, cancels: 0 };
         layers.set(pseudoElement ?? "", layer);
+        let playState = "running";
         return {
-          pause: () => {},
-          play: () => void layer.plays++,
+          get playState() {
+            return playState;
+          },
+          pause: () => void (playState = "paused"),
+          play: () => void (layer.plays++, (playState = "running")),
+          finish: () => void (layer.finishes++, (playState = "finished")),
           cancel: () => void layer.cancels++,
           effect: {
             updateTiming: (timing: OptionalEffectTiming) => layer.timings.push(timing),
@@ -58,6 +65,7 @@ function browser({
   textures?: ReturnType<typeof texture>[];
 } = {}) {
   const root = { dataset: {} as Record<string, string>, animate() {} };
+  const motion = { matches: !reduced, addEventListener: vi.fn() };
   const addEventListener = vi.fn();
   const on = (event: string) => addEventListener.mock.calls.find(([name]) => name === event)![1]();
   class Image {
@@ -68,6 +76,10 @@ function browser({
     root,
     parsed: () => on("DOMContentLoaded"),
     leave: () => on("pagehide"),
+    lessMotion: () => {
+      motion.matches = false;
+      for (const [, changed] of motion.addEventListener.mock.calls) changed();
+    },
     context: {
       document: {
         documentElement: root,
@@ -77,7 +89,7 @@ function browser({
       addEventListener,
       setTimeout: vi.fn(),
       clearTimeout: vi.fn(),
-      matchMedia: () => ({ matches: !reduced }),
+      matchMedia: () => motion,
       paints: (key: string) => Promise.resolve(`blob:${key}`),
       performance: { now: () => 0 },
       Image,
@@ -119,6 +131,56 @@ describe("inline texture entrance", () => {
     far.resolve();
     await settled();
     expect(played()).toEqual(["::before 1", "::after 1"]);
+  });
+
+  test("a face waits for both of its edges, and rests without moving when one cannot be painted", async () => {
+    const face = texture("face");
+    face.element.querySelectorAll = () => [{ dataset: { paint: "ridge_a" } }];
+    const fringe = Promise.withResolvers<void>();
+    const { context } = browser({
+      textures: [face],
+      decode: (src) => (src === "blob:fringe" ? fringe.promise : Promise.resolve())
+    });
+    const paints = vi.fn(context.paints);
+    runInNewContext(ENTER, { ...context, paints });
+    await settled();
+    expect(paints.mock.calls.map(([key]) => key)).toEqual(
+      expect.arrayContaining(["ridge_a", "fringe"])
+    );
+    expect(face.layer().plays).toBe(0);
+    expect(face.element.dataset).toHaveProperty("held");
+    fringe.resolve();
+    await settled();
+    expect(face.layer().plays).toBe(1);
+    expect(face.element.dataset).not.toHaveProperty("held");
+
+    const unpainted = texture("face");
+    runInNewContext(ENTER, {
+      ...browser({ textures: [unpainted] }).context,
+      paints: () => Promise.resolve(undefined)
+    });
+    await settled();
+    expect(unpainted.layer()).toMatchObject({ plays: 0, finishes: 1 });
+    expect(unpainted.element.dataset).not.toHaveProperty("held");
+  });
+
+  test("asking for less motion mid-entrance rests what moves and what has yet to", async () => {
+    const moving = texture("drop");
+    const late = texture("grow");
+    Object.assign(late.element.dataset, { paint: "blob_late" });
+    const image = Promise.withResolvers<void>();
+    const page = browser({
+      textures: [moving, late],
+      decode: (src) => (src === "blob:blob_late" ? image.promise : Promise.resolve())
+    });
+    runInNewContext(ENTER, page.context);
+    await settled();
+    expect(moving.layer()).toMatchObject({ plays: 1, finishes: 0 });
+    page.lessMotion();
+    expect(moving.layer().finishes).toBe(1);
+    image.resolve();
+    await settled();
+    expect(late.layer()).toMatchObject({ plays: 0, finishes: 1 });
   });
 
   test("a texture that cannot be painted, or has no painter, still takes its turn", async () => {

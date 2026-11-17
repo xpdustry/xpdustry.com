@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useLocale } from "gt-tanstack-start";
 import { formatDate } from "#app/i18n/format";
 import { PATCHES } from "#app/textures/cards";
+import { texture } from "#app/textures/enter";
 import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import type { Post } from "./content/registry";
@@ -29,7 +30,7 @@ export function PostTile({ post, variant, heading: Heading = "h3", className }: 
     >
       <PostArt post={post} className={styles.photo} />
       <TopicChip name={topic} className={styles.chip} />
-      <span className={styles.foot}>
+      <span className={styles.foot} {...texture("rise")}>
         <Patches patches={seeded(PATCHES.tile, post.slug)} />
         <Heading className={styles.title}>{title}</Heading>
         {variant === "listing" && <p className={styles.description}>{description}</p>}
