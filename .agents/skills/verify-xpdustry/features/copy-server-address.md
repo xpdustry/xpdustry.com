@@ -10,14 +10,14 @@ Mindustry has no join links, so the site's main action is copying a server addre
 - `copy-confirm` shows a confirmation on the control and announces it to screen readers with the paste instructions.
 - `copy-fit` falls back to the short confirmation (`Copied`) when the long one does not fit the card.
 - `copy-failed` handles a refused write: the chip or pill turns red with a cross, screen readers hear `Could not copy. The address is …`, and the address is shown as text one click selects (on the gamemode card it replaces the player count; below 780px the pill shows it on two lines). Browsers without `navigator.clipboard`, as on plain http, fail the same way.
-- `copy-spread` grows a spread of the card's colour from where the press landed, from nothing out past the card's farthest corner, and fades it away once `Copied` is over.
-- `copy-respread` plays the spread again from each new press, even before the last one has settled or while it fades: the new one grows from nothing over the old one, which carries on as it was (growing, or fading at its size) beneath.
+- `copy-spread` grows a spread of the card's colour from where the press landed, from nothing out past the card's farthest corner, and once `Copied` is over dissolves it back into threads: the solid goes first, then the thick threads, then the thin ones.
+- `copy-respread` plays the spread again from each new press, even before the last one has settled or while it dissolves: the new one grows from nothing over the old one, which carries on as it was (growing, or dissolving at its size) as it fades away beneath.
 
 ## How to get to it (user POV)
 
 - Scroll to `Gamemodes` on the home page and choose a mode card (Survival, PvP, Attack, Tower Defense, Sandbox).
 - Press anywhere on the `Play with us` card at the top of the home page.
-- Press a card again, quickly or while its colour fades, to see the spread start over.
+- Press a card again, quickly or while its colour dissolves, to see the spread start over.
 - Choose the pill in the header showing `hub.md.xpdustry.com`, on the blog or any page other than the landing page.
 
 ## Driving it with verify.ts
@@ -94,6 +94,7 @@ EOF
   };
   // Every animation frame, each spread on the card: which element (`play`, in order of
   // appearance), whether a newer one covers it, its size (`--spread`, px) and its opacity.
+  // `solid` is the opacity of its solid layer, the first to go when it dissolves.
   await card.evaluate((li) => {
     const ids = new WeakMap();
     let count = 0;
@@ -107,7 +108,8 @@ EOF
           play: ids.get(spread),
           role: spread.dataset.spread,
           size: Math.round(parseFloat(style.getPropertyValue("--spread"))),
-          opacity: Number(Number(style.opacity).toFixed(2))
+          opacity: Number(Number(style.opacity).toFixed(2)),
+          solid: Number(getComputedStyle(spread.firstElementChild).opacity)
         });
       }
       requestAnimationFrame(sample);
@@ -161,12 +163,14 @@ EOF
     fade.join(" ")
   );
 
-  // copy-respread, fading: once "Copied" is over the spread fades; a press then grows a new one,
-  // and the fading one keeps its size rather than growing again from nothing.
+  // copy-respread, dissolving: once "Copied" is over the spread dissolves, its solid layer going
+  // while the spread itself is still whole; a press then grows a new one, and the dissolving one
+  // keeps its size rather than growing again from nothing.
   await page.waitForFunction(
     (li) => {
-      const opacity = Number(getComputedStyle(li.querySelector('[data-spread="current"]')).opacity);
-      return opacity > 0.3 && opacity < 0.8;
+      const spread = li.querySelector('[data-spread="current"]');
+      const solid = Number(getComputedStyle(spread.firstElementChild).opacity);
+      return getComputedStyle(spread).opacity === "1" && solid > 0.2 && solid < 0.9;
     },
     await card.elementHandle(),
     { polling: 16 }
@@ -176,16 +180,16 @@ EOF
   await page.waitForTimeout(1100);
   seen = await frames();
   over = newest(visible(seen), "current");
-  // Every frame of it, as it may be all but faded away once the new one mounts.
+  // Every frame of it, as it may be all but gone once the new one mounts.
   under = newest(seen, "covered");
   expect(
     over[0].size < full(0.5) * 0.4,
-    "copy-respread starts small over a fading one",
+    "copy-respread starts small over a dissolving one",
     over[0].size
   );
   expect(
     under.length > 0 && new Set(sizes(under)).size === 1,
-    "copy-respread leaves a fading one at its size",
+    "copy-respread leaves a dissolving one at its size",
     sizes(under).slice(0, 8).join(" ")
   );
   await snap(page, "respread");
@@ -195,7 +199,7 @@ EOF
   const last = plays(seen).map((play) => of(seen, play).at(-1).opacity);
   expect(
     last.every((opacity) => opacity === 0),
-    "copy-spread fades away once copied is over",
+    "copy-spread is gone once copied is over",
     last.join(" ")
   );
   ```
@@ -205,5 +209,5 @@ EOF
 - The confirmation clears itself after a few seconds; snap right after the clipboard check. A failure stays until the next press.
 - With the default launch every count reads `Checking`. That is correct here; counts belong to [live status](live-status.md).
 - The clipboard only works because `newPage` grants the permission. A hand-made context without it makes the button show its failure message instead.
-- The spread checks read frames, never a moment after a fixed wait: a press lands only once the clipboard has answered, so until the new spread mounts the last one is still `current`, and one that was fading may be all but gone by then. `newest` and the fade window in the script are there for that.
-- `Copied` lasts 1.8 seconds (`COPIED_MS` in `src/ui/copy/useCopy.ts`) and the fade 0.55 more; a spread whose opacity is between 0 and 1 is fading in during its first 0.1 seconds and fading out after that. The script catches the fade-out by waiting it out after the last press, not by its opacity alone.
+- The spread checks read frames, never a moment after a fixed wait: a press lands only once the clipboard has answered, so until the new spread mounts the last one is still `current`, and one that was dissolving may be all but gone by then. `newest` and the dissolve window in the script are there for that.
+- `Copied` lasts 1.4 seconds (`COPIED_MS` in `src/ui/copy/useCopy.ts`) and the dissolve 0.8 more (`DISSOLVE` in `src/textures/Spread.css.ts`). A dissolving spread keeps an opacity of 1 until its layers are gone, so the script tells it by its solid layer, whose opacity falls first. Only a covered spread fades as a whole, over 0.55 seconds.

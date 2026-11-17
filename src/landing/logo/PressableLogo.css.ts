@@ -18,10 +18,15 @@ const FACE = face.slice("var(".length, -1);
 export const mark = style({
   flex: "none",
   margin: "-6px -4px -6px -8px",
+  padding: 0,
+  border: 0,
+  background: "none",
+  font: "inherit",
+  // It is a button whatever the motion setting: a press spreads the card's colour either way.
+  cursor: "pointer",
   userSelect: "none",
   WebkitTouchCallout: "none",
-  WebkitTapHighlightColor: "transparent",
-  "@media": { [media.motion]: { cursor: "pointer" } }
+  WebkitTapHighlightColor: "transparent"
 });
 
 export const logo = style({

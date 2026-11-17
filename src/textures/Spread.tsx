@@ -15,8 +15,11 @@ export interface SpreadStart {
 /**
  * A palette's reticulate spreading over its positioned parent, behind the content, while `on`:
  * out from `from` as thin threads that thicken and fuse solid behind them, until it has closed
- * over the farthest corner. It fades away once `on` is over. A new `from` plays it again from
- * there, over the last play, which carries on as it was as it fades away beneath.
+ * over the farthest corner. It dissolves back into threads once `on` is over. A new `from` plays
+ * it again from there, over the last play, which carries on as it was as it fades away beneath.
+ *
+ * A `wave` only passes: the threads sweep across as a band and leave the card as it was. It needs
+ * no end to its `on`, and a new one leaves the last to finish its sweep.
  *
  * Its palette can wait until the card is near the viewport. Every palette shows through the same
  * three masks the painter paints once, so another card's spread costs nothing more.
@@ -24,28 +27,26 @@ export interface SpreadStart {
 export function Spread({
   palette,
   on,
-  from
+  from,
+  wave
 }: {
   palette?: SpreadPalette;
   on: boolean;
   from?: SpreadStart;
+  wave?: boolean;
 }) {
   // Each press is a new `from`, and a fresh element, so its animation starts over from nothing.
-  const [plays, setPlays] = useState<readonly Play[]>([{ id: 0, from }]);
+  const [plays, setPlays] = useState<readonly Play[]>([{ id: 0, from, on }]);
   const last = plays.at(-1)!;
-  if (from !== last.from)
-    setPlays([
-      { ...last, on },
-      { id: last.id + 1, from }
-    ]);
+  if (from !== last.from) setPlays([...plays.slice(1 - PLAYS), { id: last.id + 1, from, on }]);
+  else if (on !== last.on) setPlays([...plays.slice(0, -1), { ...last, on }]);
 
   return plays.map((play) => {
     const current = play === last;
-    const growing = current ? on : play.on;
     return (
       <span
         key={play.id}
-        className={`${styles.spread} ${palette ? styles.ready : ""} ${growing ? styles.on : ""} ${current ? "" : styles.gone}`}
+        className={`${styles.spread} ${palette ? styles.ready : ""} ${play.on ? styles.on : ""} ${wave ? styles.wave : current ? "" : styles.gone}`}
         style={place(palette, play.from)}
         aria-hidden="true"
         data-spread={current ? "current" : "covered"}
@@ -56,14 +57,17 @@ export function Spread({
   });
 }
 
+/** How many plays stay mounted: enough for the ones before the newest to finish leaving. */
+const PLAYS = 4;
+
 /**
- * A press's spread, and, once a newer one is over it, whether it was still on then: one that had
- * started fading away keeps fading as it was, rather than growing again.
+ * A press's spread and whether it is on. Only the newest follows `on`: a covered one keeps what it
+ * had when covered, so one that had started fading away keeps fading rather than growing again.
  */
 interface Play {
   id: number;
   from?: SpreadStart;
-  on?: boolean;
+  on: boolean;
 }
 
 const place = (palette: SpreadPalette | undefined, from: SpreadStart | undefined) =>

@@ -1,19 +1,33 @@
 import { T } from "gt-tanstack-start";
+import { useRef, useState } from "react";
 import { SITE } from "#app/brand/site";
-import { PATCHES } from "#app/textures/cards";
+import { PATCHES, SPREADS } from "#app/textures/cards";
 import { Patches } from "#app/textures/Patches";
+import { Spread, spreadFromPress, type SpreadStart } from "#app/textures/Spread";
 import { GitHub } from "#app/ui/icons";
 import { PlinthAnchor, PlinthSectionLink } from "#app/ui/Plinth";
 import { PressableLogo } from "./logo/PressableLogo";
+import { useSeen } from "./useSeen";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./Hero.css";
 
 export function Hero({ className }: { className?: string }) {
+  const ref = useRef<HTMLElement>(null);
+  const seen = useSeen(ref);
+  const [spread, setSpread] = useState<SpreadStart>();
+
   return (
-    <section className={`${card.card} ${styles.hero} ${className ?? ""}`}>
+    <section ref={ref} className={`${card.card} ${styles.hero} ${className ?? ""}`}>
       <Patches patches={PATCHES.hero} />
+      <Spread palette={seen ? SPREADS.hero : undefined} on={!!spread} from={spread} wave />
       <div className={styles.brand}>
-        <PressableLogo className={styles.mark} />
+        <PressableLogo
+          className={styles.mark}
+          onClick={(event) => {
+            const box = ref.current!.getBoundingClientRect();
+            setSpread(spreadFromPress(event, box, event.currentTarget.getBoundingClientRect()));
+          }}
+        />
         <h1>{SITE.name}</h1>
       </div>
       <p>

@@ -17,11 +17,13 @@ No texture is an image the network carries: `src/shell/painter.script.ts` has a 
 - `enter-reduced`, `enter-no-api`, `enter-no-scripts` play no entrance and hide nothing.
 - `enter-painted` paints every named texture and every sprite on the page, with nothing left waiting.
 - `enter-stalled` holds the textures while the painter's worker never arrives, then releases every one after 4 seconds.
+- `hero-spread` sweeps a white band of threads across the introduction card when its Xpdustry logo is pressed, out from the pointer, or from the logo's centre for a key press, and off the card, which it leaves as it was. A press during a sweep starts another and lets the earlier one finish.
 
 ## How to get to it (user POV)
 
 - Open or reload the home page and watch the first second.
 - Scroll to the footer, then hover the `Play with us` card.
+- Press the large Xpdustry logo in the introduction card, or focus it and press Enter or Space.
 
 ## Driving it with verify.ts
 
@@ -197,6 +199,62 @@ EOF
 - **Expected.** Every line starts with `ok`: 40 in Chromium, 38 in Firefox. A failed check throws and names itself. `enter-order` prints each entrance as `<kind> [card n] <began>>=<turn>`, in ms after parsing. `<width>-1-entering.png` is the page 600 ms in, `<width>-2-settled.png` the page after the entrance.
 
 Variants:
+
+- **Logo spread.** Run `$V run hero-spread` with this script, which prints four `ok` lines. Repeat with `--browser firefox`, then with `width: 390`. With `motion: false` the press changes nothing on the card: the page stops every animation for a visitor who asked for less motion, and a wave is nothing else.
+
+  ```js
+  const page = await newPage({ width: 1280, motion: true, record: true });
+  await go(page, "/");
+  const logo = page.getByRole("button", { name: "Xpdustry", exact: true });
+  // Each wave sweeping across the card, oldest first: the radius of its front and of the hole
+  // behind it, px. Read in the page: a locator for the spreads crashes Playwright's Firefox.
+  const waves = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll("#main section:first-of-type > [data-spread]")]
+        .filter((spread) => spread.getAnimations().length > 0)
+        .map((spread) => {
+          const style = getComputedStyle(spread);
+          return {
+            front: parseFloat(style.getPropertyValue("--spread")),
+            hole: parseFloat(style.getPropertyValue("--spread-hole"))
+          };
+        })
+    );
+  const band = (wave) => Math.round(wave.front - wave.hole);
+
+  await logo.click();
+  await page.waitForTimeout(250);
+  let seen = await waves();
+  expect(
+    seen.length === 1 && seen[0].front > 100 && band(seen[0]) === 240,
+    "hero-spread sweeps a band from the press",
+    JSON.stringify(seen)
+  );
+  await snap(page, "logo-spread");
+
+  const before = seen[0].front;
+  await logo.click();
+  await page.waitForTimeout(100);
+  seen = await waves();
+  expect(
+    seen.length === 2 && seen[0].front > before && seen[1].front < seen[0].front,
+    "hero-spread starts another and lets the first finish",
+    JSON.stringify(seen)
+  );
+
+  await page.waitForTimeout(1600);
+  expect((await waves()).length === 0, "hero-spread leaves the card as it was");
+
+  await logo.focus();
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(250);
+  seen = await waves();
+  expect(
+    seen.length === 1 && band(seen[0]) === 240,
+    "hero-spread sweeps for a key press",
+    JSON.stringify(seen)
+  );
+  ```
 
 - **A recording.** Replace the first `newPage` call with `newPage({ width, motion: true, record: true })`. The videos land in the evidence folder when the run ends, one per width.
 - **Other pages.** `/blog` and a post (take its path from a link on `/blog`) have an entrance too. Replace `go(page, "/")` with `go(page, "/blog")` and `page.goto(base, …)` with `page.goto(base + "/blog", …)`, and delete the `enter-opens`, `enter-hover` and `enter-still` blocks, which name home page elements.
