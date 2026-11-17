@@ -14,6 +14,7 @@ import { Header } from "#app/shell/Header";
 import { PAINTER_WORKER } from "#app/shell/painter";
 import { REVEAL } from "#app/shell/reveal";
 import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
+import { Scrollbar } from "#app/shell/Scrollbar";
 import { shellData } from "#app/shell/shellData";
 import { getLiveData } from "#app/status/live.functions";
 import { CROWN } from "#app/textures/page";
@@ -94,6 +95,7 @@ function Document({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: ENTER }} />
       </head>
       <body>
+        <Scrollbar />
         <GTProvider locale={locale} translations={translations}>
           <SkipLink />
           <Background />
