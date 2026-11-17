@@ -1,37 +1,12 @@
-# Xpdustry verification map
+# What only a person or the real world can check
 
-The maintained list of what a visitor can do on the site and how to prove each part works. Read this, then the file for the feature you touched. When a change adds, removes or reshapes something a visitor can do, update the matching file in the same change.
+Everything a test can judge is in `tests/` and runs with `pnpm check` and `pnpm test:e2e`; [SKILL.md](../SKILL.md) says where. What is left here needs the live outside world or a person's eye. When a change adds something a visitor does, add a test for it first, and a file here only for what the test cannot judge.
 
-## Baseline preconditions
+Each file has an H1, a paragraph on what is judged, then `How to get to it (user POV)`, `Capturing it` and `What to judge`.
 
-- `$V launch` printed `ready:` and `$V doctor` exits 0.
-- [Live status](live-status.md) needs `$V launch --live`; every other feature uses the default launch.
-- Each script starts from `newPage()`: a visitor with no cookies, with reduced motion, whose browser language is English unless the script says otherwise.
+- [Live status](live-status.md): player counts, Discord and GitHub figures and the team as Discord lists it, against the real services. Needs `$V launch --live`.
+- [Texture entrance](texture-entrance.md): whether the first screen's entrance and the logo's wave read as one calm motion.
+- [Copy a server address](copy-server-address.md): whether a card's spread and its dissolve feel right.
+- [Social cards](search-metadata.md): whether each card reads well in its language.
 
-## Driving conventions
-
-- Run each script with `$V run <label>` exactly as written; the label names the evidence folder.
-- Each file has one main script for the sub-features a plain visit reaches. Bullets under `Variants` cover the rest (another width, a refused clipboard, motion) and are worth running when you touched that area; adapt the main script for them, or run the script a bullet gives, and say which you ran.
-- English pages have no prefix; French and Russian live under `/fr` and `/ru`. A recipe that names `/blog` means `/fr/blog` when you verify French.
-- Accessible names are translated. The English names in these files become the strings in `src/_gt/fr.json` and `src/_gt/ru.json` for the other languages.
-- Nothing here writes data: there is nothing to restore between journeys.
-
-## Proof and skip reporting
-
-- Every journey prints the observed values and snaps the state after the action.
-- State the launch mode and the languages and widths you covered.
-- A journey that cannot run is reported with its command and the unmet precondition, never as passed.
-
-## Feature entry contract
-
-Each file has an H1, one paragraph on what the visitor gets, then `Sub-features`, `How to get to it (user POV)`, `Driving it with verify.ts` and `Gotchas`, in that order.
-
-## Features
-
-- [Languages](languages.md): first-visit language, the switcher, prefixed URLs, the remembered choice.
-- [Copy a server address](copy-server-address.md): the gamemode cards, the play card and the spread a press starts on them, and the header pill on other pages.
-- [Texture entrance](texture-entrance.md): how the first screen's crown, backdrop and card blobs come in, and what a visitor without the entrance gets.
-- [Team](team.md): the grid of teammates with their tags, and the profile a tile opens.
-- [Blog](blog.md): the index, a post with its media and callouts, translated posts, missing posts.
-- [Search and social metadata](search-metadata.md): titles, canonical and alternate links, structured data, sitemap, social cards.
-- [Live status](live-status.md): player counts, Discord and GitHub figures, the health endpoint.
+Report what you judged with the evidence folder, the launch mode, the browsers and the widths. A journey you could not run is reported with its command and what was missing, never as passed.

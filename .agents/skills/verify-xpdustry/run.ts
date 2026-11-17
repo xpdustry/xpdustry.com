@@ -1,31 +1,30 @@
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { text } from "node:stream/consumers";
 import type { Browser, BrowserContextOptions, Page } from "playwright";
-import { type Engine, evidenceFolder, settle, withBrowser } from "./browser.ts";
-import { get, healthyInstance } from "./instance.ts";
+import { BROWSERS_WITH_OPEN_CLIPBOARD } from "#tests/support/browsers.ts";
+import { httpGet } from "#tests/support/http.ts";
+import { HOME, fail, healthyInstance } from "./instance.ts";
+
+export type Engine = keyof typeof BROWSERS_WITH_OPEN_CLIPBOARD;
+
+export function engine(name: string): Engine {
+  if (name in BROWSERS_WITH_OPEN_CLIPBOARD) return name as Engine;
+  return fail(
+    `unknown browser "${name}"; use ${Object.keys(BROWSERS_WITH_OPEN_CLIPBOARD).join(" or ")}`
+  );
+}
 
 interface Visitor {
   width?: number;
   height?: number;
-  /** The browser language, sent as Accept-Language. */
   language?: string;
-  /** Whether the visitor allows motion. Off by default, so screenshots are of settled pages. */
   motion?: boolean;
-  /** Whether the browser runs scripts. Without them the page is what the server sent. */
   scripts?: boolean;
-  /** Whether to keep a video of the visit, written to the evidence folder when the run ends. */
   record?: boolean;
 }
 
-interface Session {
-  base: string;
-  browser: Browser;
-  evidence: string;
-  transcript: string[];
-}
-
-const VISITOR = {
+const SETTLED_VISITOR: Required<Visitor> = {
   width: 1280,
   height: 800,
   language: "en",
@@ -34,26 +33,45 @@ const VISITOR = {
   record: false
 };
 
-/** The browser context that makes a visitor. */
-function contextOptions(
-  chromium: boolean,
-  evidence: string,
-  visitor: Visitor
-): BrowserContextOptions {
-  const { width, height, language, motion, scripts, record } = { ...VISITOR, ...visitor };
+function evidenceFolder(label: string): string {
+  const now = new Date();
+  const local = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
+  const stamp = local.toISOString().slice(0, 19).replaceAll(/[-:]/g, "").replace("T", "-");
+  const folder = join(HOME, "evidence", `${stamp}-${label}`);
+  mkdirSync(folder, { recursive: true });
+  return folder;
+}
+
+async function launchBrowser(name: Engine): Promise<Browser> {
+  const playwright = await import("playwright");
+  return playwright[name]
+    .launch(BROWSERS_WITH_OPEN_CLIPBOARD[name].launch)
+    .catch((error: Error) =>
+      fail(`${error.message.split("\n")[0]}\nrun \`pnpm exec playwright install ${name}\``)
+    );
+}
+
+function contextOptions(name: Engine, evidence: string, visitor: Visitor): BrowserContextOptions {
+  const { width, height, language, motion, scripts, record } = { ...SETTLED_VISITOR, ...visitor };
   return {
+    ...BROWSERS_WITH_OPEN_CLIPBOARD[name].context,
     viewport: { width, height },
     locale: language,
     reducedMotion: motion ? "no-preference" : "reduce",
     javaScriptEnabled: scripts,
-    recordVideo: record ? { dir: evidence, size: { width, height } } : undefined,
-    // Only Chromium has these to grant; Firefox is launched with the clipboard open.
-    permissions: chromium ? ["clipboard-read", "clipboard-write"] : []
+    recordVideo: record ? { dir: evidence, size: { width, height } } : undefined
   };
 }
 
-/** What a script sees as its globals; SKILL.md documents each one. */
-function scriptHelpers({ base, browser, evidence, transcript }: Session) {
+interface Session {
+  base: string;
+  browser: Browser;
+  name: Engine;
+  evidence: string;
+  transcript: string[];
+}
+
+function scriptGlobals({ base, browser, name, evidence, transcript }: Session) {
   const print = (...values: unknown[]) => {
     const line = values
       .map((value) => (typeof value === "string" ? value : JSON.stringify(value)))
@@ -65,49 +83,43 @@ function scriptHelpers({ base, browser, evidence, transcript }: Session) {
     base,
     browser,
     evidence,
-    /** A fresh visitor with no cookies. */
+    print,
     async newPage(visitor: Visitor = {}) {
-      const chromium = browser.browserType().name() === "chromium";
-      // Playwright cannot evaluate in a Firefox page whose scripts are off: every check would hang.
-      if (visitor.scripts === false && !chromium) {
-        throw new Error("newPage({ scripts: false }) needs Chromium");
+      if (visitor.scripts === false && name !== "chromium") {
+        fail(
+          "newPage({ scripts: false }) needs Chromium: Playwright cannot evaluate in a Firefox page whose scripts are off"
+        );
       }
-      const context = await browser.newContext(contextOptions(chromium, evidence, visitor));
+      const context = await browser.newContext(contextOptions(name, evidence, visitor));
       return context.newPage();
     },
-    go: (page: Page, path: string) => settle(page, base + path),
-    get: (path: string, headers?: Record<string, string>) => get(base, path, headers),
-    /** Save a screenshot and the ARIA tree of what the page shows now. */
-    async snap(page: Page, name: string) {
-      await page.screenshot({ path: join(evidence, `${name}.png`) });
+    async go(page: Page, path: string) {
+      const response = await page.goto(base + path, { waitUntil: "networkidle" });
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
+      return response;
+    },
+    get: (path: string, headers?: Record<string, string>) => httpGet(base + path, headers),
+    async snap(page: Page, label: string) {
+      await page.screenshot({ path: join(evidence, `${label}.png`) });
       const tree = await page.locator("body").ariaSnapshot();
       writeFileSync(
-        join(evidence, `${name}.aria.txt`),
+        join(evidence, `${label}.aria.txt`),
         `${page.url()}\n${await page.title()}\n\n${tree}\n`
       );
     },
-    save(name: string, content: string | Uint8Array) {
-      writeFileSync(join(evidence, name), content);
-    },
-    print,
-    /** Print the check as `ok` or `FAIL` with what was seen, and end the run on a `FAIL`. */
-    expect(ok: unknown, what: string, seen?: unknown) {
-      print(ok ? "ok  " : "FAIL", what, ...(seen === undefined ? [] : [seen]));
-      if (!ok) throw new Error(what);
+    save(file: string, content: string | Uint8Array) {
+      writeFileSync(join(evidence, file), content);
     }
   };
 }
 
-/**
- * Where in the script it failed: its outermost line in the stack, so a check that throws from a
- * helper names the line that called it. The function wrapper puts two lines before the first.
- */
+const LINES_BEFORE_THE_SCRIPT = 2;
+
 function scriptLine(stack: string): string {
   const where = [...stack.matchAll(/<anonymous>:(\d+):\d+/g)].at(-1)?.[1];
-  return where ? ` (line ${Number(where) - 2} of the script)` : "";
+  return where ? ` (line ${Number(where) - LINES_BEFORE_THE_SCRIPT} of the script)` : "";
 }
 
-/** Keeps a screenshot of every open page and the stack, and says which script line failed. */
 async function recordFailure(error: unknown, { browser, evidence, transcript }: Session) {
   const pages = browser.contexts().flatMap((context) => context.pages());
   for (const [index, page] of pages.entries()) {
@@ -122,28 +134,29 @@ async function recordFailure(error: unknown, { browser, evidence, transcript }: 
   console.error("verify: the page at that moment is in failure-*.png, the trace in output.txt");
 }
 
-const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor as new (
+  ...parameters: string[]
+) => (globals: object) => Promise<void>;
 
-export async function run(label: string, engine: Engine) {
+export async function run(label: string, name: Engine) {
   const { base } = healthyInstance();
   const evidence = evidenceFolder(label);
   const code = await text(process.stdin);
   writeFileSync(join(evidence, "drive.js"), code);
 
-  await withBrowser(async (browser) => {
-    const session: Session = { base, browser, evidence, transcript: [] };
-    const helpers = scriptHelpers(session);
-    try {
-      // Inside the `try`, so a script that does not parse still leaves its evidence.
-      const drive = new AsyncFunction(`{ ${Object.keys(helpers).join(", ")} }`, code);
-      await drive(helpers);
-    } catch (error) {
-      await recordFailure(error, session);
-      process.exitCode = 1;
-    } finally {
-      writeFileSync(join(evidence, "output.txt"), `${session.transcript.join("\n")}\n`);
-      await Promise.all(browser.contexts().map((context) => context.close()));
-      console.log(`evidence: ${evidence}`);
-    }
-  }, engine);
+  const browser = await launchBrowser(name);
+  const session: Session = { base, browser, name, evidence, transcript: [] };
+  const globals = scriptGlobals(session);
+  try {
+    const drive = new AsyncFunction(`{ ${Object.keys(globals).join(", ")} }`, code);
+    await drive(globals);
+  } catch (error) {
+    await recordFailure(error, session);
+    process.exitCode = 1;
+  } finally {
+    writeFileSync(join(evidence, "output.txt"), `${session.transcript.join("\n")}\n`);
+    await Promise.all(browser.contexts().map((context) => context.close()));
+    await browser.close();
+    console.log(`evidence: ${evidence}`);
+  }
 }
