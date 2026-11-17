@@ -39,7 +39,7 @@ export const release = style({
     "& + &": { marginTop: 10 }
   },
   "@container": {
-    [stackedControls]: { flexDirection: "column", alignItems: "stretch" }
+    [stackedControls]: { flexDirection: "column", flexWrap: "nowrap", alignItems: "stretch" }
   }
 });
 
@@ -69,7 +69,12 @@ export const share = style({
   justifyContent: "space-between",
   gap: 12,
   "@container": {
-    [stackedControls]: { flexDirection: "column", alignItems: "stretch", gap: 14 }
+    [stackedControls]: {
+      flexDirection: "column",
+      flexWrap: "nowrap",
+      alignItems: "stretch",
+      gap: 14
+    }
   }
 });
 

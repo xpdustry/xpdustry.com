@@ -1,18 +1,6 @@
 import { decode } from "fast-png";
+import { withoutShapes } from "#tests/support/shapes.ts";
 import { expect, test, type Locator, type Page } from "#tests/support/test.ts";
-
-/**
- * What a browser without `shape()` keeps of a stylesheet: it drops each declaration that uses an
- * unknown function, and its `@supports` test for one fails. Renaming the function does both.
- */
-const SHAPE_FUNCTION = /(?<![\w-])shape\(/g;
-
-const withoutShapes = (page: Page) =>
-  page.route(/\.css(?:\?|$)/, async (route) => {
-    const response = await route.fetch();
-    const css = (await response.text()).replaceAll(SHAPE_FUNCTION, "unknown-shape(");
-    await route.fulfill({ response, body: css });
-  });
 
 type Rgb = [number, number, number];
 

@@ -1,3 +1,4 @@
+import { ringStrength } from "#tests/support/focus.ts";
 import { expect, test } from "#tests/support/test.ts";
 
 test("a teammate's tile opens their profile, which closes every way a popover does", async ({
@@ -26,6 +27,52 @@ test("a teammate's tile opens their profile, which closes every way a popover do
   await page.mouse.click(5, 5);
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
+
+for (const width of [1280, 390]) {
+  test(`at ${width}px the keyboard walks a profile and leaves it shut behind`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+    const team = page.locator("#team");
+    const zetamap = team.getByRole("button", { name: /^ZetaMap/ });
+    const profile = page.getByRole("dialog", { name: "ZetaMap" });
+    await page.keyboard.press("Tab");
+    await zetamap.focus();
+
+    await page.keyboard.press("Enter");
+    await expect(profile).toBeVisible();
+    await expect(profile.getByRole("button", { name: "Close" })).toBeFocused();
+    const rings = [await ringStrength(page)];
+    for (const link of ["GitHub", "zetamap.fr"]) {
+      await page.keyboard.press("Tab");
+      await expect(profile.getByRole("link", { name: link })).toBeFocused();
+      rings.push(await ringStrength(page));
+    }
+    for (const { changed, needed } of rings) expect(changed).toBeGreaterThanOrEqual(needed);
+    await page.keyboard.press("Tab");
+    await expect(profile).toBeHidden();
+    const next = page.locator(":focus");
+    await expect(team.getByRole("button").and(next)).toHaveAccessibleName(/^(?!ZetaMap)/);
+    const box = (await next.boundingBox())!;
+    const onTop = await next.evaluate(
+      (control, [x, y]) => control.contains(document.elementFromPoint(x!, y!)),
+      [box.x + box.width / 2, box.y + box.height / 2]
+    );
+    expect(onTop).toBe(true);
+
+    await page.keyboard.press("Shift+Tab");
+    await expect(zetamap).toBeFocused();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Escape");
+    await expect(profile).toBeHidden();
+    await expect(zetamap).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(profile.getByRole("button", { name: "Close" })).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(profile).toBeHidden();
+    await expect(zetamap).toBeFocused();
+  });
+}
 
 const DOUBLED_TEXT = ":root { font-size: 200% }";
 

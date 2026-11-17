@@ -134,8 +134,7 @@ globalStyle(`${item}:nth-child(1 of ${item})`, {
 });
 
 globalStyle(`${item} p`, {
-  maxWidth: "26ch",
-  opacity: 0.86
+  maxWidth: "26ch"
 });
 
 globalStyle(`${item} ${version}`, {

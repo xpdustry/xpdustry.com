@@ -1,6 +1,8 @@
 import { readdir, readFile } from "node:fs/promises";
 import { JSDOM } from "jsdom";
 import { describe, expect, test } from "vitest";
+import { withLocale } from "#app/i18n/localePath.ts";
+import { LOCALES } from "#app/i18n/locales.ts";
 import { documentOf, get, html, textOf } from "#tests/support/served.ts";
 
 /**
@@ -94,7 +96,7 @@ describe("the blog", () => {
       }
     ]);
     const post = new JSDOM(page).window.document;
-    expect(textOf(post.querySelector("main aside"))).toContain("Breaking change");
+    expect(textOf(post.querySelector('main [role="note"]'))).toContain("Breaking change");
     expect(post.querySelector("main figure img")?.getAttribute("src")).toBe(
       "/blog/nohorny-discord-alert.webp"
     );
@@ -164,6 +166,33 @@ test.for(["/", "/blog/nohorny-4-beta-8"])(
     }
   }
 );
+
+const LISTED = ["/", "/blog"];
+
+describe("current page markers", () => {
+  test.for(
+    LOCALES.flatMap((locale) =>
+      [...LISTED, "/blog/nohorny-4-beta-8", "/no-such-page"].map((path) => [
+        locale,
+        withLocale(path, locale),
+        LISTED.includes(path)
+      ])
+    ) as [string, string, boolean][]
+  )(
+    "%s %s marks the links to itself, only those, and its language",
+    async ([locale, path, listed]) => {
+      const page = await documentOf(path);
+      const current = [...page.querySelectorAll('a[aria-current="page"]')].map(
+        (link) => new URL(link.getAttribute("href")!, "https://xpdustry.com").pathname
+      );
+      expect(new Set(current)).toEqual(new Set(listed ? [path] : []));
+      const languages = [...page.querySelectorAll('[aria-current="true"]')].map((option) =>
+        option.getAttribute("lang")
+      );
+      expect(new Set(languages)).toEqual(new Set([locale]));
+    }
+  );
+});
 
 describe("post bodies", () => {
   test.for(["/", "/blog", "/no-such-page"])("%s preloads none of them", async (path) => {

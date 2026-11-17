@@ -1,4 +1,5 @@
 import { useGT } from "gt-tanstack-start";
+import type { RefCallback } from "react";
 import type { PlayerCount as Count } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import { HUB } from "#app/status/servers";
@@ -14,8 +15,11 @@ export function PlayPill({ players, className }: { players: Count; className?: s
   const gt = useGT();
   const label =
     players.state === "online"
-      ? gt("Copy {address}, {players} playing", { address: HUB.hostname, players: players.players })
-      : `${gt("Copy {address}", { address: HUB.hostname })}, ${players.state === "polling" ? gt("Checking") : gt("Offline")}`;
+      ? gt("Copy IP {address}, {players} playing", {
+          address: HUB.hostname,
+          players: players.players
+        })
+      : `${gt("Copy IP {address}", { address: HUB.hostname })}, ${players.state === "polling" ? gt("Checking") : gt("Offline")}`;
   return (
     <CopyButton
       tone="amber"
@@ -23,12 +27,20 @@ export function PlayPill({ players, className }: { players: Count; className?: s
       label={label}
       className={`${styles.pill} ${className ?? ""}`}
     >
-      {(state) => <Face players={players} state={state} />}
+      {(state, address) => <Face players={players} state={state} address={address} />}
     </CopyButton>
   );
 }
 
-function Face({ players, state }: { players: Count; state: CopyState }) {
+function Face({
+  players,
+  state,
+  address
+}: {
+  players: Count;
+  state: CopyState;
+  address: RefCallback<HTMLElement>;
+}) {
   const Icon = STATE_ICON[state];
   return (
     <>
@@ -37,16 +49,16 @@ function Face({ players, state }: { players: Count; state: CopyState }) {
         compact
         className={`${styles.count} ${state === "failed" ? styles.aside : ""}`}
       />
-      <Address failed={state === "failed"} />
+      <Address failed={state === "failed"} address={address} />
       <Icon />
     </>
   );
 }
 
-function Address({ failed }: { failed: boolean }) {
+function Address({ failed, address }: { failed: boolean; address: RefCallback<HTMLElement> }) {
   if (failed) {
     return (
-      <span className={`${styles.address} ${styles.refused}`}>
+      <span ref={address} className={`${styles.address} ${styles.refused}`}>
         <Hostname name={HUB.hostname} />
       </span>
     );

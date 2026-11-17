@@ -51,13 +51,11 @@ export const say = style({
   maxWidth: "30ch",
   marginTop: 6,
   fontSize: rem(font.small),
-  lineHeight: leading.snug,
-  opacity: 0.95
+  lineHeight: leading.snug
 });
 
 export const counts = style({
   display: "block",
   marginTop: 10,
-  fontSize: rem(font.caption),
-  opacity: 0.9
+  fontSize: rem(font.caption)
 });

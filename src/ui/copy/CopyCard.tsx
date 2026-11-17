@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, CSSProperties, ReactNode } from "react";
 import { CopyStatus } from "./CopyStatus";
-import type { CopyState } from "./useCopy";
+import type { CopyOutcome } from "./useCopy";
 import * as card from "../Card.css";
 
 interface CopyCardProps {
@@ -9,7 +9,7 @@ interface CopyCardProps {
   className: string;
   style?: CSSProperties;
   text: string;
-  state: CopyState;
+  outcome: CopyOutcome | undefined;
   copiedMessage?: string;
   cover: ButtonHTMLAttributes<HTMLButtonElement>;
   children: ReactNode;
@@ -21,7 +21,7 @@ export function CopyCard({
   className,
   style,
   text,
-  state,
+  outcome,
   copiedMessage,
   cover,
   children
@@ -30,7 +30,7 @@ export function CopyCard({
     <Card id={id} className={`${card.card} ${className}`} style={style}>
       <button type="button" className={card.cover} {...cover} />
       {children}
-      <CopyStatus state={state} text={text} copiedMessage={copiedMessage} />
+      <CopyStatus outcome={outcome} text={text} copiedMessage={copiedMessage} />
     </Card>
   );
 }

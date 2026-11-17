@@ -55,7 +55,7 @@ export const foot = style({
   padding: `calc(${fade} + 14px) calc(${pad} + ${FACE_BLEED}px) calc(${padFoot} + ${FACE_BLEED}px)`,
   borderBottomLeftRadius: "inherit",
   borderBottomRightRadius: "inherit",
-  background: `${paint("fade")} ${FACE_BLEED}px 0 / 240px`,
+  background: `${paint("fade")} ${FACE_BLEED}px 0 / 240px, ${vars.tile}`,
   mask: [
     `${paint("rise")} calc(${fallbackVar(fray, "0px")} + ${FACE_BLEED}px) 0 / 486px 48px repeat-x`,
     "linear-gradient(#000 0 0) 0 47px / 100% calc(100% - 47px) no-repeat"

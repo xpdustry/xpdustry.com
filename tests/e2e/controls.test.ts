@@ -78,6 +78,11 @@ for (const width of [390, 320]) {
       await expect(page.locator(":popover-open")).toBeVisible();
       expect(await missedTaps(page, ":popover-open a, :popover-open button")).toEqual([]);
     });
+
+    test("so does every pill on a post's cover", async ({ page }) => {
+      await page.goto("/blog/nohorny-4-beta-8");
+      expect(await missedTaps(page, "main header a")).toEqual([]);
+    });
   });
 }
 
@@ -133,7 +138,7 @@ test.describe("for a visitor who wants less motion", () => {
       const opens = width < 520 ? "Menu" : /^Language/;
       await banner.getByRole("button", { name: opens }).click();
       await page.keyboard.press("Escape");
-      await page.getByRole("button", { name: "Xpdustry", exact: true }).click();
+      await page.getByRole("button", { name: "Send a wave from the Xpdustry logo" }).click();
       await page.locator("#gamemodes").getByRole("listitem").first().getByRole("button").click();
       await page.locator("#projects").getByRole("link").first().hover();
       await page

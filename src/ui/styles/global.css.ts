@@ -1,4 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
+import { ringOutside } from "./focus";
 import { media } from "./media";
 import { font, rem } from "./scale";
 import { vars } from "./theme.css";
@@ -64,8 +65,7 @@ globalStyle("img, svg, video, canvas", {
 });
 
 globalStyle(":where(:focus-visible)", {
-  outline: `3px solid ${vars.focus}`,
-  outlineOffset: 3,
+  ...ringOutside,
   borderRadius: 4
 });
 

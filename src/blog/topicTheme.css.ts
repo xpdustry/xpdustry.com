@@ -1,6 +1,7 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { media } from "#app/ui/styles/media";
 import { font, radius, rem } from "#app/ui/styles/scale";
+import { touchTargetHeight } from "#app/ui/styles/touch";
 import { vars } from "#app/ui/styles/theme.css";
 
 export const accent = createVar();
@@ -41,6 +42,8 @@ export const pill = style({
     }
   }
 });
+
+globalStyle(`a${pill}`, touchTargetHeight);
 
 export const accented = style({
   color: accent

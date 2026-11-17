@@ -19,6 +19,9 @@ function mount(text = "hub.md.xpdustry.com") {
     get state() {
       return copier.state;
     },
+    get outcome() {
+      return copier.outcome;
+    },
     copy: () => act(() => copier.copy())
   };
 }
@@ -54,6 +57,17 @@ describe("useCopy", () => {
     await mount().copy();
 
     expect(writeText).toHaveBeenCalledWith("hub.md.xpdustry.com");
+  });
+
+  test("shows copied for a moment, and says it until the next press", async () => {
+    clipboard(vi.fn<() => Promise<void>>().mockResolvedValueOnce().mockImplementationOnce(refusal));
+    const copier = mount();
+
+    await copier.copy();
+    await elapse(60_000);
+    expect([copier.state, copier.outcome]).toEqual(["idle", "copied"]);
+    await copier.copy();
+    expect(copier.outcome).toBe("failed");
   });
 
   test("says copied once the clipboard took the text, then goes back to idle", async () => {

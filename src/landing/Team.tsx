@@ -99,6 +99,7 @@ function Profile({ id, member }: { id: string; member: Person }) {
       popover="auto"
       aria-labelledby={`${id}-name`}
       className={styles.profile}
+      ref={shutWhenFocusLeaves}
       {...animateOnToggle}
     >
       <div className={styles.sheet}>
@@ -122,6 +123,19 @@ function Profile({ id, member }: { id: string; member: Person }) {
       </div>
     </dialog>
   );
+}
+
+function shutWhenFocusLeaves(profile: HTMLDialogElement) {
+  const shut = ({ relatedTarget: next }: FocusEvent) => {
+    if (!(next instanceof Node) || profile.contains(next)) return;
+    setTimeout(() => {
+      if (profile.matches(":popover-open") && !profile.contains(document.activeElement)) {
+        profile.hidePopover();
+      }
+    });
+  };
+  profile.addEventListener("focusout", shut);
+  return () => profile.removeEventListener("focusout", shut);
 }
 
 function About({ member }: { member: Person }) {

@@ -1,7 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { media, upTo } from "#app/ui/styles/media";
 import { reachTouchTarget } from "#app/ui/styles/touch";
-import { onDeep } from "./onDeep";
 import {
   hangUnder,
   popoverBox,
@@ -23,7 +22,7 @@ const BRAND = "--site-brand";
 const below = `calc(${vars.group} * 0.55)`;
 
 export const header = style({
-  ...onDeep,
+  color: vars.onDeep,
   position: "relative",
   zIndex: 5,
   display: "flex",

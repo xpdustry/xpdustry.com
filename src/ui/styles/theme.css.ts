@@ -33,6 +33,7 @@ export const vars = createGlobalThemeContract(
     tray: "tray",
     online: "online",
     focus: "focus",
+    focusGap: "focus-gap",
     onTeal: "on-teal",
     onAmber: "on-amber",
     alarm: "alarm",
@@ -62,6 +63,8 @@ createGlobalTheme(":root", vars, {
   tile: vars.n1,
   ink: vars.n12,
   muted: vars.n11,
+  focus: vars.outline,
+  focusGap: vars.onGround,
 
   r: "26px",
   gap: `${GAP}px`,
