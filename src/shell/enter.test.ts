@@ -1,24 +1,68 @@
 import { runInNewContext } from "node:vm";
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi, type Mock } from "vitest";
 import { ENTER } from "./enter";
 
-function texture(kind: string, top = 20) {
-  const animation = {
-    pause: vi.fn(),
-    play: vi.fn(),
-    cancel: vi.fn(),
-    effect: { updateTiming: vi.fn(), setKeyframes: vi.fn() }
+interface FakeAnimation {
+  pause: Mock<() => void>;
+  play: Mock<() => void>;
+  cancel: Mock<() => void>;
+  effect: {
+    updateTiming: Mock<(timing: OptionalEffectTiming) => void>;
+    setKeyframes: Mock<(frames: Keyframe[]) => void>;
   };
+}
+
+function fakeAnimation(every?: FakeAnimation): FakeAnimation {
+  return {
+    pause: vi.fn(() => every?.pause()),
+    play: vi.fn(() => every?.play()),
+    cancel: vi.fn(() => every?.cancel()),
+    effect: {
+      updateTiming: vi.fn((timing: OptionalEffectTiming) => every?.effect.updateTiming(timing)),
+      setKeyframes: vi.fn((frames: Keyframe[]) => every?.effect.setKeyframes(frames))
+    }
+  };
+}
+
+function texture(kind: string, top = 20) {
+  const animation = fakeAnimation();
+  const layers = new Map<string | null | undefined, FakeAnimation>();
   return {
     animation,
+    layers,
     element: {
       dataset: { texture: kind } as Record<string, string>,
       closest: () => null,
       getBoundingClientRect: () => ({ top, bottom: top + 80 }),
-      animate: vi.fn((_frames: Keyframe[], _options: KeyframeAnimationOptions) => ({
-        ...animation
-      }))
+      animate: vi.fn((_frames: Keyframe[], options: KeyframeAnimationOptions) => {
+        const layer = fakeAnimation(animation);
+        layers.set(options.pseudoElement, layer);
+        return layer;
+      })
     }
+  };
+}
+
+const playing = ({ layers }: ReturnType<typeof texture>) =>
+  [...layers].filter(([, layer]) => layer.play.mock.calls.length > 0).map(([name]) => name);
+
+const delays = ({ layers }: ReturnType<typeof texture>) =>
+  Object.fromEntries(
+    [...layers].map(([name, layer]) => [
+      name,
+      layer.effect.updateTiming.mock.calls.map(([timing]) => timing)
+    ])
+  );
+
+function images() {
+  const pending = new Map<string, PromiseWithResolvers<void>>();
+  const image = (src: string) => {
+    if (!pending.has(src)) pending.set(src, Promise.withResolvers<void>());
+    return pending.get(src)!;
+  };
+  return {
+    decode: (src: string) => image(src).promise,
+    ready: (src: string) => image(src).resolve()
   };
 }
 
@@ -35,13 +79,15 @@ function browser({
 } = {}) {
   const root = { dataset: {} as Record<string, string>, animate() {} };
   const addEventListener = vi.fn();
+  const on = (event: string) => addEventListener.mock.calls.find(([name]) => name === event)![1]();
   class Image {
     src = "";
     decode = () => decode(this.src);
   }
   return {
     root,
-    addEventListener,
+    parsed: () => on("DOMContentLoaded"),
+    leave: () => on("pagehide"),
     context: {
       document: {
         documentElement: root,
@@ -60,12 +106,14 @@ function browser({
   };
 }
 
+const settled = () => new Promise((done) => setTimeout(done));
+
 describe("inline texture entrance", () => {
   test("holds textures from the head and hands them to their animations once parsed", () => {
-    const { context, root, addEventListener } = browser({ loading: true });
+    const { context, root, parsed } = browser({ loading: true });
     runInNewContext(ENTER, context);
     expect(root.dataset).toHaveProperty("enter");
-    addEventListener.mock.calls.find(([event]) => event === "DOMContentLoaded")![1]();
+    parsed();
     expect(root.dataset).not.toHaveProperty("enter");
   });
 
@@ -77,7 +125,7 @@ describe("inline texture entrance", () => {
     const layers = shown.element.animate.mock.calls.map(([, options]) => options.pseudoElement);
     expect(layers).toEqual(["::before", "::after"]);
     expect(shown.animation.pause).toHaveBeenCalled();
-    await new Promise((resolve) => setTimeout(resolve));
+    await settled();
     expect(shown.animation.play).toHaveBeenCalledTimes(2);
   });
 
@@ -86,7 +134,7 @@ describe("inline texture entrance", () => {
     Object.assign(blob.element.dataset, { tile: "108" });
     runInNewContext(ENTER, browser({ textures: [blob] }).context);
     expect(blob.element.animate.mock.calls[0]![0]).toEqual([{ opacity: 0 }, { opacity: 1 }]);
-    await new Promise((done) => setTimeout(done));
+    await settled();
     const [frames] = blob.animation.effect.setKeyframes.mock.calls[0]!;
     expect(frames.at(-1)).toMatchObject({
       maskImage: expect.stringContaining('url("blob:threads")'),
@@ -100,24 +148,40 @@ describe("inline texture entrance", () => {
     const page = browser({ textures: [texture("drop"), texture("backdrop"), blob] });
     const paints = vi.fn(page.context.paints);
     runInNewContext(ENTER, { ...page.context, paints });
-    await new Promise((done) => setTimeout(done));
-    expect(paints.mock.calls.map(([key]) => key)).toEqual([
-      "threads",
-      "crown",
-      "backdrop-far",
-      "backdrop-near",
-      "blob_a"
-    ]);
+    await settled();
+    expect(paints.mock.calls.map(([key]) => key).sort()).toEqual(
+      ["threads", "crown", "backdrop-far", "backdrop-near", "blob_a"].sort()
+    );
   });
+
+  test.each([
+    ["backdrop-far", "::before", "backdrop-near", "::after"],
+    ["backdrop-near", "::after", "backdrop-far", "::before"]
+  ])(
+    "plays each backdrop layer once its own image is ready: %s, the %s layer",
+    async (first, firstLayer, second, secondLayer) => {
+      const shown = texture("backdrop");
+      const { decode, ready } = images();
+      runInNewContext(ENTER, browser({ textures: [shown], decode }).context);
+
+      ready(`blob:${first}`);
+      await settled();
+      expect(playing(shown)).toEqual([firstLayer]);
+
+      ready(`blob:${second}`);
+      await settled();
+      expect(new Set(playing(shown))).toEqual(new Set([firstLayer, secondLayer]));
+    }
+  );
 
   test("a texture that cannot be painted still takes its turn, and holds nothing", async () => {
     const shown = texture("drop");
     const { context } = browser({ textures: [shown] });
     runInNewContext(ENTER, { ...context, paints: () => Promise.resolve(undefined) });
-    await new Promise((done) => setTimeout(done));
+    await settled();
     expect(shown.animation.play).toHaveBeenCalledOnce();
     runInNewContext(ENTER, { ...context, paints: undefined });
-    await new Promise((done) => setTimeout(done));
+    await settled();
     expect(shown.animation.play).toHaveBeenCalledTimes(2);
   });
 
@@ -129,7 +193,7 @@ describe("inline texture entrance", () => {
         src.includes("threads") ? Promise.reject(new Error("missing")) : Promise.resolve()
     });
     runInNewContext(ENTER, context);
-    await new Promise((done) => setTimeout(done));
+    await settled();
     expect(blob.animation.effect.setKeyframes).not.toHaveBeenCalled();
     expect(blob.animation.effect.updateTiming).toHaveBeenCalledWith(
       expect.objectContaining({ duration: 350 })
@@ -139,15 +203,12 @@ describe("inline texture entrance", () => {
 
   test("starts the sequence when parsed, even after a slow document", async () => {
     const shown = texture("backdrop");
-    const { context, addEventListener } = browser({ loading: true, textures: [shown] });
+    const { context, parsed } = browser({ loading: true, textures: [shown] });
     runInNewContext(ENTER, context);
     context.performance.now = () => 500;
-    addEventListener.mock.calls.find(([event]) => event === "DOMContentLoaded")![1]();
-    await new Promise((done) => setTimeout(done));
-    expect(shown.animation.effect.updateTiming.mock.calls).toEqual([
-      [{ delay: 80 }],
-      [{ delay: 220 }]
-    ]);
+    parsed();
+    await settled();
+    expect(delays(shown)).toEqual({ "::before": [{ delay: 80 }], "::after": [{ delay: 220 }] });
   });
 
   test("keeps the backdrop's layers apart even when their images are late", async () => {
@@ -155,11 +216,8 @@ describe("inline texture entrance", () => {
     const { context } = browser({ textures: [shown] });
     runInNewContext(ENTER, context);
     context.performance.now = () => 500;
-    await new Promise((done) => setTimeout(done));
-    expect(shown.animation.effect.updateTiming.mock.calls).toEqual([
-      [{ delay: 0 }],
-      [{ delay: 140 }]
-    ]);
+    await settled();
+    expect(delays(shown)).toEqual({ "::before": [{ delay: 0 }], "::after": [{ delay: 140 }] });
   });
 
   test("leaves unknown kinds to paint with the page", () => {
@@ -190,25 +248,25 @@ describe("inline texture entrance", () => {
     expect(root.dataset).not.toHaveProperty("enter");
     expect(shown.animation.cancel).toHaveBeenCalledOnce();
     decoded();
-    await new Promise((done) => setTimeout(done));
+    await settled();
     expect(shown.animation.play).not.toHaveBeenCalled();
   });
 
   test("a stalled module cannot hold textures until DOMContentLoaded", () => {
     const shown = texture("drop");
-    const { context, root, addEventListener } = browser({ loading: true, textures: [shown] });
+    const { context, root, parsed } = browser({ loading: true, textures: [shown] });
     runInNewContext(ENTER, context);
     context.setTimeout.mock.calls[0]![0]();
     expect(root.dataset).not.toHaveProperty("enter");
-    addEventListener.mock.calls.find(([event]) => event === "DOMContentLoaded")![1]();
+    parsed();
     expect(shown.element.animate).not.toHaveBeenCalled();
   });
 
   test("leaves no waiting animation in a back navigation snapshot", () => {
     const shown = texture("drop");
-    const { context, root, addEventListener } = browser({ textures: [shown] });
+    const { context, root, leave } = browser({ textures: [shown] });
     runInNewContext(ENTER, context);
-    addEventListener.mock.calls.find(([event]) => event === "pagehide")![1]();
+    leave();
     expect(root.dataset).not.toHaveProperty("enter");
     expect(shown.animation.cancel).toHaveBeenCalledOnce();
   });

@@ -1,63 +1,9 @@
 import { describe, expect, test } from "vitest";
+import { serverInfoPacket as packet } from "#tests/support/mindustryPacket";
 import { MalformedPacketError, decodeServerInfo } from "./protocol";
 
-function packet(
-  overrides: Partial<{
-    name: string;
-    map: string;
-    players: number;
-    wave: number;
-    version: number;
-    versionType: string;
-    mode: number;
-    playerLimit: number;
-    description: string;
-    modeName: string;
-    port: number;
-  }> = {}
-): Uint8Array {
-  const fields = {
-    name: "<CN> Survival",
-    map: "Fungal Pass",
-    players: 27,
-    wave: 142,
-    version: 159,
-    versionType: "official",
-    mode: 0,
-    playerLimit: 50,
-    description: "The best server",
-    modeName: "",
-    port: 6567,
-    ...overrides
-  };
-
-  const parts: number[] = [];
-  const encoder = new TextEncoder();
-  const string = (value: string) => {
-    const bytes = encoder.encode(value);
-    parts.push(bytes.length, ...bytes);
-  };
-  const i32 = (value: number) => {
-    parts.push((value >>> 24) & 0xff, (value >>> 16) & 0xff, (value >>> 8) & 0xff, value & 0xff);
-  };
-
-  string(fields.name);
-  string(fields.map);
-  i32(fields.players);
-  i32(fields.wave);
-  i32(fields.version);
-  string(fields.versionType);
-  parts.push(fields.mode);
-  i32(fields.playerLimit);
-  string(fields.description);
-  string(fields.modeName);
-  parts.push((fields.port >> 8) & 0xff, fields.port & 0xff);
-
-  return Uint8Array.from(parts);
-}
-
 describe("decodeServerInfo", () => {
-  test("decodes a valid packet", () => {
+  test("reads what a server says about itself", () => {
     expect(decodeServerInfo(packet())).toEqual({
       name: "<CN> Survival",
       map: "Fungal Pass",
@@ -71,67 +17,62 @@ describe("decodeServerInfo", () => {
     });
   });
 
-  test("strips colour markup from every string field", () => {
+  test("strips colour markup from what it shows", () => {
     const decoded = decodeServerInfo(
       packet({
         name: "[accent]<CN>[] Survival",
-        map: "[#ff8800]Fungal Pass[]"
+        map: "[#ff8800]Fungal Pass[]",
+        description: "[gold]The best[] server"
       })
     );
-    expect(decoded.name).toBe("<CN> Survival");
-    expect(decoded.map).toBe("Fungal Pass");
+    expect([decoded.name, decoded.map, decoded.description]).toEqual([
+      "<CN> Survival",
+      "Fungal Pass",
+      "The best server"
+    ]);
   });
 
-  test("prefers a custom mode name over the gamemode ordinal", () => {
-    expect(decodeServerInfo(packet({ mode: 0, modeName: "[red]Tower Defense[]" })).mode).toBe(
+  test.each([
+    [
+      "by the custom name a server gives it",
+      { mode: 0, modeName: "[red]Tower Defense[]" },
       "Tower Defense"
-    );
+    ],
+    ["by its ordinal without one", { mode: 3 }, "pvp"]
+  ])("names the gamemode %s", (_label, fields, mode) => {
+    expect(decodeServerInfo(packet(fields)).mode).toBe(mode);
   });
 
-  test("names the gamemode from its ordinal when there is no custom name", () => {
-    expect(decodeServerInfo(packet({ mode: 3 })).mode).toBe("pvp");
+  test.each([1, 5, 12, 20, 33, 40, 50, 60, 70])("refuses a packet cut to %i bytes", (length) => {
+    expect(() => decodeServerInfo(packet().slice(0, length))).toThrow(MalformedPacketError);
   });
 
-  test.each([1, 5, 12, 20, 33, 40, 50, 60, 70])(
-    "rejects a packet truncated to %i bytes",
-    (length) => {
-      expect(() => decodeServerInfo(packet().slice(0, length))).toThrow(MalformedPacketError);
-    }
-  );
-
-  test("rejects a string that claims more bytes than the protocol allows", () => {
+  test("refuses a string longer than the packet", () => {
     const bytes = packet();
     bytes[0] = 255;
     expect(() => decodeServerInfo(bytes)).toThrow(MalformedPacketError);
   });
 
-  test("rejects an unknown gamemode ordinal", () => {
-    expect(() => decodeServerInfo(packet({ mode: 99 }))).toThrow(/gamemode ordinal/);
+  test.each([
+    ["an unknown gamemode", { mode: 99 }],
+    ["a negative player count", { players: -1 }],
+    ["two million players", { players: 2_000_000 }],
+    ["a negative wave", { wave: -5 }]
+  ])("refuses a packet with %s", (_label, fields) => {
+    expect(() => decodeServerInfo(packet(fields))).toThrow(MalformedPacketError);
   });
 
-  test("rejects a negative player count", () => {
-    expect(() => decodeServerInfo(packet({ players: -1 }))).toThrow(/player count/);
+  test("reads a packet a newer server extended with more fields", () => {
+    expect(decodeServerInfo(new Uint8Array([...packet(), 0, 0, 0]))).toEqual(
+      decodeServerInfo(packet())
+    );
   });
 
-  test("rejects an unreasonable player count", () => {
-    expect(() => decodeServerInfo(packet({ players: 2_000_000 }))).toThrow(/player count/);
+  test("keeps the server's port to itself", () => {
+    expect(decodeServerInfo(packet({ port: 65535 }))).not.toHaveProperty("port");
   });
 
-  test("rejects a negative wave", () => {
-    expect(() => decodeServerInfo(packet({ wave: -5 }))).toThrow(/wave/);
-  });
-
-  test("ignores metadata appended after the known packet fields", () => {
-    const bytes = new Uint8Array([...packet(), 0, 0, 0]);
-    expect(decodeServerInfo(bytes)).toEqual(decodeServerInfo(packet()));
-  });
-
-  test("consumes the unsigned port without exposing it", () => {
-    const decoded = decodeServerInfo(packet({ port: 65535 }));
-    expect(decoded).not.toHaveProperty("port");
-  });
-
-  test("accepts a zero-length description", () => {
+  test("reads an empty description", () => {
     expect(decodeServerInfo(packet({ description: "" })).description).toBe("");
   });
 });

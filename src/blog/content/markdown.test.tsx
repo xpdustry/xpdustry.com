@@ -19,6 +19,13 @@ function render(body: string): string {
   return renderToStaticMarkup(<PostBody document={compile(body).document} />);
 }
 
+function firstTagAttributes(html: string, name: string): Record<string, string> {
+  const tag = new RegExp(`<${name}\\b([^>]*)>`).exec(html)?.[1] ?? "";
+  return Object.fromEntries(
+    [...tag.matchAll(/([\w-]+)="([^"]*)"/g)].map(([, key, value]) => [key, value])
+  );
+}
+
 describe("compileBlogMarkdown", () => {
   test("compiles validated frontmatter and a serializable document", () => {
     const compiled = compile("## Install\n\nUse **the release**.");
@@ -31,9 +38,8 @@ describe("compileBlogMarkdown", () => {
   test("renders callouts as the site's own, without enabling raw HTML", () => {
     const html = render("> [!WARNING] Upgrade first\n> Do not use <script>alert(1)</script>.");
 
-    expect(html).toMatch(
-      /<aside class="[^"]*warning[^"]*"><span class="[^"]*">Upgrade first<\/span>/
-    );
+    expect(firstTagAttributes(html, "aside").class).toContain("warning");
+    expect(html).toMatch(/<aside[^>]*>[\s\S]*Upgrade first[\s\S]*<\/aside>/);
     expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
     expect(html).not.toContain("<script>");
   });
@@ -67,12 +73,22 @@ describe("post media", () => {
 A recording. [Download it.](/blog/demo.mp4)
 <!-- ::end:post-video -->`);
 
-    expect(html).toContain('src="/blog/screenshot.png"');
-    expect(html).toContain('alt="A &lt;screen&gt;"');
+    expect(firstTagAttributes(html, "img")).toMatchObject({
+      src: "/blog/screenshot.png",
+      alt: "A &lt;screen&gt;",
+      width: "799",
+      height: "741"
+    });
     expect(html).toContain("The alert &amp; details.");
-    expect(html).toContain(
-      '<video controls="" muted="" playsInline="" preload="metadata" poster="/blog/poster.jpg"'
-    );
+    expect(firstTagAttributes(html, "video")).toMatchObject({
+      controls: "",
+      muted: "",
+      playsInline: "",
+      preload: "metadata",
+      poster: "/blog/poster.jpg",
+      width: "1550",
+      height: "911"
+    });
     expect(html).toContain('<a href="/blog/demo.mp4">Download it.</a>');
   });
 

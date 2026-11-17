@@ -4,40 +4,23 @@ import { decode } from "fast-png";
 import { beforeAll, describe, expect, test } from "vitest";
 import { SITE_THEME, topic } from "#app/blog/topics";
 import { projects } from "#app/brand/projects";
+import { rgb, wcagContrast, wcagLuminance, type Rgb } from "#tests/support/contrast";
 import { CARD_SIZE } from "../../meta";
 import { cardPalette, Texture, type CardTheme } from "./Card";
 
-type Rgb = readonly number[];
+const AREAS_UNDER_TYPE = {
+  identifierTitleAndDescription: { left: 80, top: 60, right: 840, bottom: 330 },
+  stats: { left: 80, top: 490, right: 800, bottom: 580 }
+};
 
-function luminance(rgb: Rgb): number {
-  const [r, g, b] = rgb.map((channel) => {
-    const value = channel / 255;
-    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
-}
-
-function contrast(a: Rgb, b: Rgb): number {
-  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-  return (light! + 0.05) / (dark! + 0.05);
-}
-
-function rgb(hex: string): Rgb {
-  return [1, 3, 5].map((at) => parseInt(hex.slice(at, at + 2), 16));
-}
-
-/** Where the cards set type: the identifier, title and description column, then the stats row. */
-const TYPE_AREAS = [
-  { left: 80, top: 60, right: 840, bottom: 330 },
-  { left: 80, top: 490, right: 800, bottom: 580 }
-];
+const WCAG_AAA = 7;
+const WCAG_AA = 4.5;
 
 let renderer: Renderer;
 beforeAll(() => {
   renderer = new Renderer();
 });
 
-/** The brightest pixel the textured ground shows under the type. */
 async function brightestUnderType(ground: string): Promise<Rgb> {
   const { node, css } = await fromJsx(
     <div style={{ position: "relative", display: "flex", ...CARD_SIZE, background: ground }}>
@@ -52,11 +35,11 @@ async function brightestUnderType(ground: string): Promise<Rgb> {
   };
 
   let brightest = rgb(ground);
-  for (const area of TYPE_AREAS) {
+  for (const area of Object.values(AREAS_UNDER_TYPE)) {
     for (let y = area.top; y < area.bottom; y++) {
       for (let x = area.left; x < area.right; x++) {
         const candidate = pixel(x, y);
-        if (luminance(candidate) > luminance(brightest)) brightest = candidate;
+        if (wcagLuminance(candidate) > wcagLuminance(brightest)) brightest = candidate;
       }
     }
   }
@@ -75,13 +58,15 @@ describe("cardPalette", () => {
     const palette = cardPalette(theme);
     const ground = await brightestUnderType(palette.ground);
 
-    expect(contrast(rgb(palette.ink), ground)).toBeGreaterThanOrEqual(7);
-    expect(contrast(rgb(palette.muted), ground)).toBeGreaterThanOrEqual(7);
-    expect(contrast(rgb(palette.faint), ground)).toBeGreaterThanOrEqual(4.5);
+    expect(wcagContrast(rgb(palette.ink), ground)).toBeGreaterThanOrEqual(WCAG_AAA);
+    expect(wcagContrast(rgb(palette.muted), ground)).toBeGreaterThanOrEqual(WCAG_AAA);
+    expect(wcagContrast(rgb(palette.faint), ground)).toBeGreaterThanOrEqual(WCAG_AA);
   });
 
-  test("refuses a colour it cannot mix", () => {
-    expect(() => cardPalette({ ...SITE_THEME, accent: "#fff" })).toThrow("#rrggbb");
-    expect(() => cardPalette({ ...SITE_THEME, muted: "rgba(0, 0, 0, 0.5)" })).toThrow("#rrggbb");
-  });
+  test.each([{ accent: "#fff" }, { muted: "rgba(0, 0, 0, 0.5)" }])(
+    "refuses a colour it cannot mix: %j",
+    (colour) => {
+      expect(() => cardPalette({ ...SITE_THEME, ...colour })).toThrow("#rrggbb");
+    }
+  );
 });

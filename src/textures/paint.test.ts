@@ -2,22 +2,31 @@ import { describe, expect, test } from "vitest";
 import { paintTexture, toLabyrinth } from "./paint";
 import { blobSprite, patches, SPREAD_MASKS } from "./texture";
 
-/** A stand-in labyrinth: smooth stripes that wrap, as the real tile does. */
+type Painted = ReturnType<typeof paintTexture>;
+
 const SIZE = 64;
-const stripes = Uint8Array.from({ length: SIZE * SIZE }, (_, at) => {
+const wrappingStripes = Uint8Array.from({ length: SIZE * SIZE }, (_, at) => {
   const wave =
     Math.sin(((at % SIZE) / SIZE) * Math.PI * 8) * Math.sin((at / SIZE / SIZE) * Math.PI * 6);
   return Math.round(127.5 + 127.5 * wave);
 });
-const labyrinth = toLabyrinth(stripes, 1, SIZE);
+const standInLabyrinth = toLabyrinth(wrappingStripes, 1, SIZE);
 
 const sprite = (color: string, inner: string) => {
   const { settings, size } = blobSprite(patches(color, inner, [], 96), 60);
-  return paintTexture(labyrinth, settings, size, size);
+  return paintTexture(standInLabyrinth, settings, size, size);
 };
-const pixel = ({ pixels, width }: ReturnType<typeof sprite>, x: number, y: number) => [
+const pixel = ({ pixels, width }: Painted, x: number, y: number) => [
   ...pixels.subarray((y * width + x) * 4, (y * width + x) * 4 + 4)
 ];
+const channel = ({ pixels }: Painted, offset: number) =>
+  pixels.filter((_, at) => at % 4 === offset);
+const alphas = (painted: Painted) => channel(painted, 3);
+const square = ({ pixels, width }: Painted, left: number, top: number, size: number) =>
+  Array.from({ length: size }, (_, y) => {
+    const row = ((top + y) * width + left) * 4;
+    return [...pixels.subarray(row, row + size * 4)];
+  });
 
 describe("toLabyrinth", () => {
   test("takes the first channel and stretches it to 0..1", () => {
@@ -37,56 +46,65 @@ describe("paintTexture", () => {
   });
 
   test("frays between the two: some of the edge is covered, some is not", () => {
-    const blob = sprite("#102030", "#102030");
-    const alphas = new Set<number>();
-    for (let at = 3; at < blob.pixels.length; at += 4) alphas.add(blob.pixels[at]!);
-    expect(alphas.has(0) && alphas.has(255)).toBe(true);
-    expect(alphas.size).toBeGreaterThan(20);
+    const covered = new Set(alphas(sprite("#102030", "#102030")));
+    expect(covered.has(0) && covered.has(255)).toBe(true);
+    expect(covered.size).toBeGreaterThan(20);
   });
 
   test("covers the same px whether a fused patch is filled at once or px by px", () => {
-    // One tone takes the fast path through fused cells; a second tone, one value off, cannot.
-    const filled = sprite("#102030", "#102030");
-    const mixed = sprite("#102030", "#112030");
-    expect([filled.width, filled.height]).toEqual([mixed.width, mixed.height]);
-    for (let at = 0; at < filled.pixels.length; at += 4) {
-      expect(filled.pixels[at + 3]).toBe(mixed.pixels[at + 3]);
-      expect(Math.abs(filled.pixels[at]! - mixed.pixels[at]!)).toBeLessThanOrEqual(1);
-    }
+    const filledAtOnce = sprite("#102030", "#102030");
+    const filledPxByPx = sprite("#102030", "#112030");
+    expect([filledPxByPx.width, filledPxByPx.height]).toEqual([
+      filledAtOnce.width,
+      filledAtOnce.height
+    ]);
+    expect(alphas(filledPxByPx)).toEqual(alphas(filledAtOnce));
+    const [onceReds, pxReds] = [channel(filledAtOnce, 0), channel(filledPxByPx, 0)];
+    expect(Math.max(...onceReds.map((red, at) => Math.abs(red - pxReds[at]!)))).toBeLessThanOrEqual(
+      1
+    );
   });
 
   test("keeps the inner tone to the fused core", () => {
     const blob = sprite("#000000", "#ffffff");
     const middle = Math.floor(blob.width / 2);
-    let inner = 0;
+    const inner: { distance: number; alpha: number }[] = [];
     for (let y = 0; y < blob.height; y++) {
       for (let x = 0; x < blob.width; x++) {
         const [red, , , alpha] = pixel(blob, x, y);
-        if (red === 0) continue;
-        inner++;
-        expect(alpha).toBe(255);
-        expect(Math.hypot(x - middle, y - middle)).toBeLessThan(blob.width * 0.45);
+        if (red !== 0) inner.push({ distance: Math.hypot(x - middle, y - middle), alpha: alpha! });
       }
     }
-    expect(inner).toBeGreaterThan(100);
+    expect(inner.length).toBeGreaterThan(100);
+    expect(inner.every(({ alpha }) => alpha === 255)).toBe(true);
+    expect(Math.max(...inner.map(({ distance }) => distance))).toBeLessThan(blob.width * 0.45);
   });
 
   test("paints one seamless tile of `repeat` px, whatever size is asked for", () => {
-    const tile = paintTexture(labyrinth, { ...SPREAD_MASKS.thick, repeat: 64, tile: 64 }, 0, 0);
-    expect([tile.width, tile.height]).toEqual([64, 64]);
-    // Without blobs or a ramp the field is flat, so the tile wraps as the labyrinth does.
-    const again = paintTexture(labyrinth, { ...SPREAD_MASKS.thick, repeat: 128, tile: 64 }, 0, 0);
-    for (let y = 0; y < 64; y++) {
-      for (let x = 0; x < 64; x++) {
-        expect(pixel(again, x + 64, y + 64)).toEqual(pixel(tile, x, y));
-      }
-    }
+    const oneTile = paintTexture(
+      standInLabyrinth,
+      { ...SPREAD_MASKS.thick, repeat: 64, tile: 64 },
+      0,
+      0
+    );
+    const fourTiles = paintTexture(
+      standInLabyrinth,
+      { ...SPREAD_MASKS.thick, repeat: 128, tile: 64 },
+      0,
+      0
+    );
+    expect([oneTile.width, oneTile.height]).toEqual([64, 64]);
+    expect(square(fourTiles, 64, 64, 64)).toEqual(square(oneTile, 0, 0, 64));
   });
 
   test("the spread's core mask is clear where the main tone shows", () => {
-    const core = paintTexture(labyrinth, { ...SPREAD_MASKS.core, repeat: 64, tile: 64 }, 0, 0);
-    const alphas = new Set<number>();
-    for (let at = 3; at < core.pixels.length; at += 4) alphas.add(core.pixels[at]!);
-    expect(alphas.has(0) && alphas.has(255)).toBe(true);
+    const core = paintTexture(
+      standInLabyrinth,
+      { ...SPREAD_MASKS.core, repeat: 64, tile: 64 },
+      0,
+      0
+    );
+    const covered = new Set(alphas(core));
+    expect(covered.has(0) && covered.has(255)).toBe(true);
   });
 });
