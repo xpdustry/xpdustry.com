@@ -98,14 +98,15 @@ Media goes in `public/blog/` and needs its dimensions:
 <!-- ::end:post-video -->
 ```
 
-Callouts use GitHub's syntax:
+Callouts use GitHub's syntax and its five kinds (`NOTE`, `TIP`, `IMPORTANT`, `WARNING`, `CAUTION`), with an optional title
+after the marker:
 
 ```md
 > [!WARNING] Upgrade first
 > This release is not compatible with the previous version.
 ```
 
-`pnpm check` fails on invalid frontmatter and broken media comments.
+`pnpm check` fails on invalid frontmatter, broken media comments and callouts of any other kind.
 
 ## Attributions
 
