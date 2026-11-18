@@ -8,6 +8,7 @@ import { CopyButton } from "#app/ui/copy/CopyButton";
 import type { CopyState } from "#app/ui/copy/useCopy";
 import { Hostname } from "#app/ui/Hostname";
 import { Check, Copy, X } from "#app/ui/icons";
+import { play } from "#app/ui/viewTransition.css";
 import * as styles from "./PlayPill.css";
 
 const STATE_ICON = { idle: Copy, copied: Check, failed: X } satisfies Record<CopyState, unknown>;
@@ -25,7 +26,12 @@ export function PlayPill({ players, className }: { players: Count; className?: s
       : `${gt("Copy IP {address}", { address: HUB.hostname })}, ${players.state === "polling" ? gt("Checking") : gt("Offline")}`;
   return (
     <span className={`${styles.slot} ${className ?? ""}`} data-count-length={countLength}>
-      <CopyButton tone="amber" text={HUB.hostname} label={label} className={styles.pill}>
+      <CopyButton
+        tone="amber"
+        text={HUB.hostname}
+        label={label}
+        className={`${styles.pill} ${play}`}
+      >
         {(state, address) => <Face players={players} state={state} address={address} />}
       </CopyButton>
     </span>

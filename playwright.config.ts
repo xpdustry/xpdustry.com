@@ -35,6 +35,7 @@ export default defineConfig({
         "accessibility.test.ts",
         "entrance.test.ts",
         "fit.test.ts",
+        "navigation.test.ts",
         "spread.test.ts",
         "team.test.ts",
         "tray-outline.test.ts"

@@ -67,7 +67,8 @@ function browser({
   const root = { dataset: {} as Record<string, string>, animate() {} };
   const motion = { matches: !reduced, addEventListener: vi.fn() };
   const addEventListener = vi.fn();
-  const on = (event: string) => addEventListener.mock.calls.find(([name]) => name === event)![1]();
+  const on = (event: string, detail?: object) =>
+    addEventListener.mock.calls.find(([name]) => name === event)![1](detail);
   class Image {
     src = "";
     decode = () => decode(this.src);
@@ -80,6 +81,7 @@ function browser({
       motion.matches = false;
       for (const [, changed] of motion.addEventListener.mock.calls) changed();
     },
+    revealedByAViewTransition: () => on("pagereveal", { viewTransition: {} }),
     context: {
       document: {
         documentElement: root,
@@ -164,7 +166,10 @@ describe("inline texture entrance", () => {
     expect(unpainted.element.dataset).not.toHaveProperty("held");
   });
 
-  test("asking for less motion mid-entrance rests what moves and what has yet to", async () => {
+  test.each([
+    ["asking for less motion", "lessMotion"],
+    ["arriving through a view transition", "revealedByAViewTransition"]
+  ] as const)("%s mid-entrance rests what moves and what has yet to", async (_label, cause) => {
     const moving = texture("drop");
     const late = texture("grow");
     Object.assign(late.element.dataset, { paint: "blob_late" });
@@ -176,7 +181,7 @@ describe("inline texture entrance", () => {
     runInNewContext(ENTER, page.context);
     await settled();
     expect(moving.layer()).toMatchObject({ plays: 1, finishes: 0 });
-    page.lessMotion();
+    page[cause]();
     expect(moving.layer().finishes).toBe(1);
     image.resolve();
     await settled();

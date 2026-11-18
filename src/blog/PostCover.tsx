@@ -8,11 +8,13 @@ import { seeded } from "#app/textures/texture";
 import { CaretLeft } from "#app/ui/icons";
 import { authors } from "./content/authors";
 import type { Post } from "./content/registry";
+import { morphsWithItsPost } from "./morph";
 import { postTitle } from "./titles";
 import { TopicChip } from "./TopicChip";
 import { topic } from "./topics";
 import { themed } from "./topicTheme";
 import * as card from "#app/ui/Card.css";
+import * as morph from "./morph.css";
 import * as styles from "./PostCover.css";
 import { avatar, pill } from "./topicTheme.css";
 
@@ -27,9 +29,14 @@ export function PostCover({
 }) {
   const theme = topic(post.frontmatter.topic);
   return (
-    <header className={`${card.card} ${styles.cover} ${className ?? ""}`} style={themed(theme)}>
+    <header
+      className={`${card.card} ${morph.card.className} ${styles.cover} ${className ?? ""}`}
+      style={{ ...themed(theme), ...morphsWithItsPost(post.slug) }}
+    >
       <Patches patches={seeded(theme.patches, post.slug)} />
-      {theme.icon && <img className={styles.logo} src={theme.icon} alt="" />}
+      {theme.icon && (
+        <img className={`${styles.logo} ${morph.art.className}`} src={theme.icon} alt="" />
+      )}
       <div className={styles.crumbs}>
         <Link to="/blog" activeOptions={{ exact: true }} className={`${pill} ${styles.back}`}>
           <CaretLeft />
@@ -37,7 +44,9 @@ export function PostCover({
         </Link>
         <CoverTitle frontmatter={post.frontmatter} />
       </div>
-      <p className={styles.description}>{post.frontmatter.description}</p>
+      <p className={`${styles.description} ${morph.description.className}`}>
+        {post.frontmatter.description}
+      </p>
       <Byline frontmatter={post.frontmatter} author={author} />
     </header>
   );
@@ -46,20 +55,26 @@ export function PostCover({
 function CoverTitle({ frontmatter }: { frontmatter: Post["frontmatter"] }) {
   const { title, topic, topicVersion } = frontmatter;
   const chip = (
-    <TopicChip name={topic} version={topicVersion} tone="cover" linked className={styles.topic} />
+    <TopicChip
+      name={topic}
+      version={topicVersion}
+      tone="cover"
+      linked
+      className={`${styles.topic} ${morph.topic.className}`}
+    />
   );
   const namesItsTopic = postTitle(frontmatter) === title;
   if (namesItsTopic) {
     return (
       <>
         {chip}
-        <h1 className={styles.title}>{title}</h1>
+        <h1 className={`${styles.title} ${morph.title.className}`}>{title}</h1>
       </>
     );
   }
   return (
     <h1 className={styles.heading}>
-      {chip} <span className={styles.title}>{title}</span>
+      {chip} <span className={`${styles.title} ${morph.title.className}`}>{title}</span>
     </h1>
   );
 }

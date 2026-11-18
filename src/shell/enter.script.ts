@@ -44,15 +44,15 @@ export default function enter(faceFrom: string, riseFrom: string): void {
   addEventListener("pagehide", release, { once: true });
 
   const stopMoving = () => {
-    if (motion.matches) return;
     still = true;
     for (const animation of entering) {
       if (animation.playState === "running") animation.finish();
     }
   };
   try {
-    motion.addEventListener("change", stopMoving);
+    motion.addEventListener("change", () => motion.matches || stopMoving());
   } catch {}
+  addEventListener("pagereveal", (event) => event.viewTransition && stopMoving());
 
   const decoded = new Map<string, Promise<boolean>>();
   const decode = (src: string) => {

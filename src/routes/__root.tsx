@@ -16,9 +16,12 @@ import { REVEAL } from "#app/shell/reveal";
 import { RouteAnnouncer } from "#app/shell/RouteAnnouncer";
 import { Scrollbar } from "#app/shell/Scrollbar";
 import { shellData } from "#app/shell/shellData";
+import { SlowNavigation } from "#app/shell/SlowNavigation";
 import { getLiveData } from "#app/status/live.functions";
 import { CROWN } from "#app/textures/page";
 import { preloadFonts } from "#app/ui/styles/fontPreloads";
+import { media } from "#app/ui/styles/media";
+import { useTransitionCues } from "#app/ui/viewTransition";
 import "@fontsource/momo-trust-display/400.css";
 import "@fontsource-variable/momo-trust-sans/wght.css";
 import "@fontsource/dm-mono/400.css";
@@ -52,6 +55,7 @@ export const Route = createRootRoute({
 });
 
 const UNSTYLED_CANVAS = `:where(html){background:${CROWN.settings.color}}`;
+const CROSSFADE_LOADS = `@media ${media.motion}{@view-transition{navigation:auto}}`;
 
 const ARTICLE_FONTS = { display: "high", text: "high", mono: "low" } as const;
 const PAGE_FONTS = { display: "high", mono: "low", text: "low" } as const;
@@ -72,6 +76,7 @@ function SkipLink() {
 
 function Document({ children }: { children: ReactNode }) {
   useSmoothScrollOnceHydrated();
+  useTransitionCues();
   const { locale, translations, players } = shellData(
     useMatch({ from: rootRouteId, select: (match) => match.loaderData })
   );
@@ -81,7 +86,7 @@ function Document({ children }: { children: ReactNode }) {
   return (
     <html lang={locale} data-painter={PAINTER_WORKER_URL} suppressHydrationWarning>
       <head>
-        <style>{UNSTYLED_CANVAS}</style>
+        <style>{UNSTYLED_CANVAS + CROSSFADE_LOADS}</style>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: REVEAL }} />
         <script dangerouslySetInnerHTML={{ __html: ENTER }} />
@@ -98,6 +103,7 @@ function Document({ children }: { children: ReactNode }) {
           <Footer />
         </GTProvider>
         <RouteAnnouncer />
+        <SlowNavigation />
         <Scripts />
       </body>
     </html>
