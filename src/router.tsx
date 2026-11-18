@@ -3,12 +3,14 @@ import { getLocale, initializeGT } from "gt-tanstack-start";
 import { followAddressLocale } from "#app/i18n/addressLocale";
 import loadTranslations from "#app/i18n/loadTranslations";
 import { withLocale, withoutLocale } from "#app/i18n/localePath";
+import { LOCALES } from "#app/i18n/locales";
 import { routeTree } from "#app/routeTree.gen";
 import { RouteError, RouteNotFound } from "#app/shell/RouteError";
 import { typesReadyingTheCapture } from "#app/ui/viewTransition";
 import gtConfig from "../gt.config.json";
 
-initializeGT({ ...gtConfig, loadTranslations });
+// The request resolver treats `locales` as the full list, including the default language.
+initializeGT({ ...gtConfig, locales: [...LOCALES], loadTranslations });
 followAddressLocale();
 
 const restoreScrollOnlyInBrowser = () => typeof document !== "undefined";

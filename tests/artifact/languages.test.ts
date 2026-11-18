@@ -58,3 +58,18 @@ test.for(["en-US", "fr;q=0"])(
     expect(response.headers.get("vary")).toMatch(/accept-language.*cookie/i);
   }
 );
+
+test.for([
+  ["/", { "accept-language": "en-US,en;q=0.9,ru;q=0.8" }],
+  ["/", { "accept-language": "en-US,ru;q=0.8" }],
+  ["/blog", { "accept-language": "en-GB,en;q=0.9,fr;q=0.8" }],
+  ["/", { "accept-language": "ru;q=0.5,en;q=0.9" }],
+  ["/", { "accept-language": "ru-RU,ru;q=0.9", cookie: "generaltranslation.locale=en" }],
+  ["/blog", { "accept-language": "fr-FR,fr;q=0.9", cookie: "generaltranslation.locale=en" }]
+] as const)("a visit to %s that prefers English keeps it: %o", async ([path, visitor]) => {
+  const response = await get(path, visitor);
+  expect(response.status).toBe(200);
+  expect(response.headers.get("location")).toBeNull();
+  expect(response.headers.get("set-cookie")).toContain("generaltranslation.locale=en;");
+  expect(await response.text()).toContain('<html lang="en"');
+});

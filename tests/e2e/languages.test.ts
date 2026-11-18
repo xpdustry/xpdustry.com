@@ -40,6 +40,27 @@ test.describe("on a phone", () => {
       page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link")
     ).toHaveText(["Accueil", "Blog", "English", "Français", "Русский"]);
   });
+
+  test("chosen English survives a fresh visit to the root in a new tab", async ({
+    page,
+    context
+  }) => {
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/ru$/);
+
+    await page.getByRole("button", { name: "Меню" }).click();
+    await page.getByRole("list", { name: "Язык" }).getByRole("link", { name: "English" }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+
+    const tab = await context.newPage();
+    await tab.goto("/");
+    await expect(tab).toHaveURL(/\/$/);
+    await expect(tab.locator("html")).toHaveAttribute("lang", "en");
+    expect(
+      (await context.cookies()).find((cookie) => cookie.name === "generaltranslation.locale")?.value
+    ).toBe("en");
+  });
 });
 
 test("the menu closes when the window grows wide enough for the navigation", async ({ page }) => {
