@@ -34,6 +34,7 @@ export default defineConfig({
       testMatch: [
         "accessibility.test.ts",
         "entrance.test.ts",
+        "fit.test.ts",
         "spread.test.ts",
         "team.test.ts",
         "tray-outline.test.ts"

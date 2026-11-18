@@ -81,6 +81,62 @@ function navOverSeveralRows(): string[] {
   return rows.size > 1 ? [`navigation runs over ${rows.size} rows`] : [];
 }
 
+/**
+ * The header's controls on one row, apart and inside the header. A control is measured by all it
+ * draws, so a pill spilling out of its slot counts where it lands.
+ */
+function headerOutOfItsRow(): string[] {
+  const header = document.querySelector(".wrap > header");
+  if (!header) return [];
+  const SLACK = 1;
+  const inFlow = (element: Element) =>
+    !/absolute|fixed/.test(getComputedStyle(element).position) &&
+    !element.closest(":popover-open, .sr-only") &&
+    element.checkVisibility({ visibilityProperty: true });
+  const drawn = (control: Element) => {
+    const boxes = [control, ...control.querySelectorAll("*")]
+      .filter(inFlow)
+      .map((element) => element.getBoundingClientRect())
+      .filter((box) => box.width > 0 && box.height > 0);
+    return {
+      name: control.getAttribute("aria-label") ?? window.fit.shortText(control),
+      left: Math.min(...boxes.map((box) => box.left)),
+      right: Math.max(...boxes.map((box) => box.right)),
+      top: Math.min(...boxes.map((box) => box.top)),
+      bottom: Math.max(...boxes.map((box) => box.bottom))
+    };
+  };
+  const controls = [...header.children]
+    .filter(inFlow)
+    .map(drawn)
+    .filter((control) => control.right > control.left);
+  const findings: string[] = [];
+  const firstRowEnds = Math.min(...controls.map((control) => control.bottom));
+  if (controls.some((control) => control.top >= firstRowEnds)) {
+    findings.push("header runs over several rows");
+  }
+  const box = header.getBoundingClientRect();
+  const style = getComputedStyle(header);
+  const start = box.left + Number.parseFloat(style.paddingLeft);
+  const end = box.right - Number.parseFloat(style.paddingRight);
+  for (const control of controls) {
+    if (control.left < start - SLACK || control.right > end + SLACK) {
+      findings.push(`header control leaves the header: ${control.name}`);
+    }
+  }
+  for (const [index, one] of controls.entries()) {
+    for (const other of controls.slice(index + 1)) {
+      const apart =
+        one.right <= other.left + SLACK ||
+        other.right <= one.left + SLACK ||
+        one.bottom <= other.top + SLACK ||
+        other.bottom <= one.top + SLACK;
+      if (!apart) findings.push(`header controls overlap: ${one.name}, ${other.name}`);
+    }
+  }
+  return findings;
+}
+
 function crowdedSectionHeaders(): string[] {
   return [...document.querySelectorAll("section > header")].flatMap((header) => {
     const title = header.querySelector("h2");
@@ -196,7 +252,7 @@ function popoversOffScreen(): string[] {
     .map((popover) => `popover leaves the screen: ${window.fit.shortText(popover)}`);
 }
 
-const OVERFLOW_CHECKS = [sidewaysScroll, clippedText, popoversOffScreen];
+const OVERFLOW_CHECKS = [sidewaysScroll, clippedText, popoversOffScreen, headerOutOfItsRow];
 
 function rememberFontSizes(): string[] {
   window.fit.fontSizes = new Map();
@@ -240,3 +296,6 @@ export const rememberFontSizesOn = (page: Page) => findings(page, [rememberFontS
 export const fontGrowthFindings = (page: Page) => findings(page, [...OVERFLOW_CHECKS, fixedText]);
 export const layoutFindings = (page: Page) =>
   findings(page, [...LAYOUT_CHECKS, ...OVERFLOW_CHECKS]);
+/** What the header's own state can break: its row, the page's width, text cut short. */
+export const headerFindings = (page: Page) =>
+  findings(page, [headerOutOfItsRow, sidewaysScroll, clippedText]);

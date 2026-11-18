@@ -134,8 +134,8 @@ test.describe("for a visitor who wants less motion", () => {
       await page.addInitScript(recordMotion);
       await page.goto("/");
       const banner = page.getByRole("banner");
-      // Below 520px the language list is in the menu.
-      const opens = width < 520 ? "Menu" : /^Language/;
+      // Up to 680px the language list is in the menu.
+      const opens = width <= 680 ? "Menu" : /^Language/;
       await banner.getByRole("button", { name: opens }).click();
       await page.keyboard.press("Escape");
       await page.getByRole("button", { name: "Send a wave from the Xpdustry logo" }).click();
