@@ -96,6 +96,7 @@ globalStyle(".skip-link", {
   top: 12,
   left: 12,
   zIndex: 100,
+  maxWidth: "calc(100% - 24px)",
   padding: "8px 14px",
   borderRadius: 10,
   background: vars.tile,
