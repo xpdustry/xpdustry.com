@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useGT } from "gt-tanstack-start";
 import { useEffect, useState } from "react";
 import { Brand } from "#app/brand/Brand";
@@ -5,6 +6,7 @@ import { SITE } from "#app/brand/site";
 import { ArrowUp } from "#app/ui/icons";
 import { outbound } from "#app/ui/outbound";
 import { PlinthAnchor } from "#app/ui/Plinth";
+import { SITE_PAGES } from "./sitePages";
 import * as styles from "./Footer.css";
 
 export function Footer() {
@@ -15,16 +17,25 @@ export function Footer() {
     <footer className={`${styles.footer} reveal`}>
       <div className={styles.ridge} aria-hidden="true" />
       <div className={`wrap ${styles.inner}`}>
-        <Brand className={styles.brand} />
-        <nav className={styles.links} aria-label={gt("Elsewhere")}>
-          <a href={SITE.github} {...outbound(SITE.github)}>
-            GitHub
-          </a>
-          <a href={SITE.discord} {...outbound(SITE.discord)}>
-            Discord
-          </a>
-          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
-        </nav>
+        <Brand className={styles.brand} linked={false} />
+        <div className={styles.links}>
+          <nav aria-label={gt("Pages")}>
+            {SITE_PAGES.map(({ to, name }) => (
+              <Link key={to} to={to} activeOptions={{ exact: true }}>
+                {name}
+              </Link>
+            ))}
+          </nav>
+          <nav aria-label={gt("Elsewhere")}>
+            <a href={SITE.github} {...outbound(SITE.github)}>
+              GitHub
+            </a>
+            <a href={SITE.discord} {...outbound(SITE.discord)}>
+              Discord
+            </a>
+            <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          </nav>
+        </div>
         <small className={styles.copyright}>© {import.meta.env.BUILD_YEAR} Xpdustry</small>
         <PlinthAnchor
           className={styles.top}

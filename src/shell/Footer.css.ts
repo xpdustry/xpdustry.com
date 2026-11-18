@@ -1,14 +1,12 @@
 import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { paint } from "#app/textures/catalogue";
 import { RIDGE } from "#app/textures/page";
-import { media, upTo } from "#app/ui/styles/media";
+import { media } from "#app/ui/styles/media";
 import { font, leading, rem, tracking } from "#app/ui/styles/scale";
 import { reachTouchTarget, touchTargetHeight } from "#app/ui/styles/touch";
 import { logoWidth, nameSize } from "#app/brand/Brand.css";
 import { PLINTH_CENTRED_ABOVE_ITS_BOX_BY } from "#app/ui/Plinth.css";
 import { vars } from "#app/ui/styles/theme.css";
-
-const narrow = upTo(900);
 
 export const ridgeHeight = createVar();
 
@@ -43,7 +41,7 @@ export const inner = style({
     }
   },
   "@media": {
-    [narrow]: {
+    [media.tablet]: {
       selectors: {
         [`${footer} &`]: {
           gridTemplateAreas: '"brand top" "links links" "copy copy"',
@@ -71,9 +69,6 @@ export const brand = style({
     }
   },
   "@media": {
-    [media.coarse]: {
-      selectors: { [`${footer} &`]: { position: "relative" } }
-    },
     [media.phone]: {
       selectors: {
         [`${footer} &`]: { vars: { [logoWidth]: "44px", [nameSize]: `${rem(font.h2)}` } }
@@ -87,8 +82,6 @@ export const brand = style({
   }
 });
 
-reachTouchTarget(`${footer} ${brand}`);
-
 globalStyle(`${footer} ${brand} span`, {
   minWidth: 0,
   letterSpacing: tracking.display
@@ -97,15 +90,30 @@ globalStyle(`${footer} ${brand} span`, {
 export const links = style({
   gridArea: "links",
   display: "flex",
-  flexWrap: "wrap",
   justifyContent: "flex-end",
-  gap: "8px 26px",
+  alignItems: "center",
+  gap: 26,
   "@media": {
-    [narrow]: { justifyContent: "flex-start" }
+    [media.tablet]: { flexDirection: "column", alignItems: "flex-start", gap: 8 }
+  }
+});
+
+globalStyle(`${links} nav`, {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "8px 26px"
+});
+
+globalStyle(`${links} nav + nav`, {
+  paddingLeft: 26,
+  borderLeft: `2px solid ${vars.deepInk}`,
+  "@media": {
+    [media.tablet]: { paddingLeft: 0, borderLeft: "none" }
   }
 });
 
 globalStyle(`${links} a`, {
+  position: "relative",
   color: "inherit",
   overflowWrap: "anywhere",
   textDecoration: "underline 2px transparent",
@@ -114,8 +122,14 @@ globalStyle(`${links} a`, {
   ...touchTargetHeight
 });
 
+reachTouchTarget(`${links} a`);
+
 globalStyle(`${links} a:hover`, {
   "@media": { [media.hover]: { textDecorationColor: vars.t9 } }
+});
+
+globalStyle(`${links} a[aria-current="page"]`, {
+  textDecorationColor: vars.t9
 });
 
 export const copyright = style({

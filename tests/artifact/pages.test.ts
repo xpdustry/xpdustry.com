@@ -179,13 +179,14 @@ describe("current page markers", () => {
       ])
     ) as [string, string, boolean][]
   )(
-    "%s %s marks the links to itself, only those, and its language",
+    "%s %s marks the links to itself in the header and the footer, only those, and its language",
     async ([locale, path, listed]) => {
       const page = await documentOf(path);
       const current = [...page.querySelectorAll('a[aria-current="page"]')].map(
-        (link) => new URL(link.getAttribute("href")!, "https://xpdustry.com").pathname
+        (link) =>
+          `${link.closest("header, main, footer")?.localName} ${new URL(link.getAttribute("href")!, "https://xpdustry.com").pathname}`
       );
-      expect(new Set(current)).toEqual(new Set(listed ? [path] : []));
+      expect(new Set(current)).toEqual(new Set(listed ? [`header ${path}`, `footer ${path}`] : []));
       const languages = [...page.querySelectorAll('[aria-current="true"]')].map((option) =>
         option.getAttribute("lang")
       );

@@ -3,11 +3,19 @@ import logo from "./logo.svg";
 import { SITE } from "./site";
 import * as styles from "./Brand.css";
 
-export function Brand({ className }: { className?: string }) {
-  return (
-    <Link to="/" className={`${styles.brand} ${className ?? ""}`}>
+export function Brand({ className, linked = true }: { className?: string; linked?: boolean }) {
+  const look = `${styles.brand} ${className ?? ""}`;
+  const mark = (
+    <>
       <img src={logo} alt="" width="40" height="40" />
       <span>{SITE.name}</span>
+    </>
+  );
+  return linked ? (
+    <Link to="/" className={look}>
+      {mark}
     </Link>
+  ) : (
+    <div className={look}>{mark}</div>
   );
 }
