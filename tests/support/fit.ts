@@ -91,7 +91,7 @@ function headerOutOfItsRow(): string[] {
   const SLACK = 1;
   const inFlow = (element: Element) =>
     !/absolute|fixed/.test(getComputedStyle(element).position) &&
-    !element.closest("[popover], .sr-only") &&
+    !element.closest(":popover-open, .sr-only") &&
     element.checkVisibility({ visibilityProperty: true });
   const drawn = (control: Element) => {
     const boxes = [control, ...control.querySelectorAll("*")]
@@ -107,8 +107,9 @@ function headerOutOfItsRow(): string[] {
     };
   };
   const controls = [...header.children]
-    .filter((control) => inFlow(control) && control.getBoundingClientRect().width > 0)
-    .map(drawn);
+    .filter(inFlow)
+    .map(drawn)
+    .filter((control) => control.right > control.left);
   const findings: string[] = [];
   const firstRowEnds = Math.min(...controls.map((control) => control.bottom));
   if (controls.some((control) => control.top >= firstRowEnds)) {
