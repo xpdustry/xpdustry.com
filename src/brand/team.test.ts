@@ -29,6 +29,7 @@ test("tags come once each, highest first", () => {
 test("before Discord answers, the team is whoever team.json names and tags, highest first", () => {
   expect(knownTeam.map(({ name, tags }) => [name, tags])).toEqual([
     ["ZetaMap", ["owner", "developer"]],
+    [".json", ["developer"]],
     ["Maxou", ["developer"]],
     ["phinner", ["developer"]]
   ]);

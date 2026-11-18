@@ -177,6 +177,7 @@ describe("the team on Discord", () => {
     expect(team.map(({ name, tags, accent }) => [name, tags, accent])).toEqual([
       ["phinner", ["owner", "developer"], "#123456"],
       ["ZetaMap", ["owner", "developer"], undefined],
+      [".json", ["developer"], undefined],
       ["Maxou", ["developer"], undefined],
       ["Madness", ["admin"], OWN_FACE_COLOUR],
       ["Legacy", ["moderator"], DEFAULT_FACE_COLOUR],
@@ -254,6 +255,7 @@ describe("the team on Discord", () => {
     expect(team.map(({ name, tags }) => [name, tags])).toEqual([
       ["phinner", ["owner", "developer"]],
       ["ZetaMap", ["owner", "developer"]],
+      [".json", ["developer"]],
       ["Maxou", ["developer"]]
     ]);
   });
@@ -332,7 +334,15 @@ describe("the team on Discord", () => {
 
     const team = await fetchTeam(config, signal, refusing);
 
-    expect(names(team)).toEqual(["phinner", "ZetaMap", "Maxou", "Madness", "Legacy", "Strange"]);
+    expect(names(team)).toEqual([
+      "phinner",
+      "ZetaMap",
+      ".json",
+      "Maxou",
+      "Madness",
+      "Legacy",
+      "Strange"
+    ]);
     expect(named(team, "Madness")?.accent).toBe(OWN_FACE_COLOUR);
     expect(named(team, "Strange")?.accent).toBe(DEFAULT_FACE_COLOUR);
     expect(warn).toHaveBeenCalledTimes(2);
