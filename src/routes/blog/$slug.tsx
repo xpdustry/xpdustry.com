@@ -79,7 +79,13 @@ function PostPage() {
         >
           <div className={styles.more}>
             {nearby.map((other) => (
-              <PostTile key={other.slug} post={other} variant="small" className={styles.tile} />
+              <PostTile
+                key={other.slug}
+                post={other}
+                variant="small"
+                morphs={false}
+                className={styles.tile}
+              />
             ))}
           </div>
         </Tray>

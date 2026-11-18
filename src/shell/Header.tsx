@@ -1,4 +1,4 @@
-import { useLocation } from "@tanstack/react-router";
+import { useMatch } from "@tanstack/react-router";
 import { useGT } from "gt-tanstack-start";
 import { useId, useRef } from "react";
 import { Brand } from "#app/brand/Brand";
@@ -17,7 +17,7 @@ export function Header({ players }: { players: PlayerCount }) {
   const header = useRef<HTMLElement>(null);
   const menu = useId();
   const gt = useGT();
-  const pageHasPlayCard = useLocation({ select: (location) => location.pathname === "/" });
+  const pageHasPlayCard = useMatch({ from: "/", shouldThrow: false }) !== undefined;
   useShutPopovers(header);
 
   return (

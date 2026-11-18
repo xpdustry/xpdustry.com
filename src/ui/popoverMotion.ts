@@ -32,6 +32,13 @@ export function stopMoving(popover: HTMLElement) {
   popover.removeAttribute(MOVING);
 }
 
+/** A transition still running when `data-moving` goes keeps running: `all 0s` still matches. */
+export function shutAtOnce(popover: HTMLElement) {
+  if (popover.matches(":popover-open")) popover.hidePopover();
+  for (const animation of popover.getAnimations()) animation.finish();
+  stopMoving(popover);
+}
+
 const stopOnceItsOwnTransitionIsOver = (event: TransitionEvent<HTMLElement>) => {
   if (event.target === event.currentTarget) stopMoving(event.currentTarget);
 };

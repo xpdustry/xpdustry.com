@@ -3,6 +3,7 @@ import { Patches } from "#app/textures/Patches";
 import { seeded } from "#app/textures/texture";
 import type { Post } from "./content/registry";
 import { topic } from "./topics";
+import * as morph from "./morph.css";
 import * as styles from "./PostArt.css";
 
 export function PostArt({ post, className }: { post: Post; className?: string }) {
@@ -14,7 +15,7 @@ export function PostArt({ post, className }: { post: Post; className?: string })
   return (
     <span className={`${styles.art} ${className ?? ""}`} style={{ background: theme.ground }}>
       <Patches patches={seeded(theme.patches, post.slug)} />
-      <img className={styles.logo} src={theme.icon ?? logo} alt="" />
+      <img className={`${styles.logo} ${morph.art.className}`} src={theme.icon ?? logo} alt="" />
     </span>
   );
 }

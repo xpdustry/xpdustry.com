@@ -12,6 +12,7 @@ import { Hostname } from "#app/ui/Hostname";
 import { useCopyPress } from "./useCopyPress";
 import { useSeen } from "./useSeen";
 import * as card from "#app/ui/Card.css";
+import { play } from "#app/ui/viewTransition.css";
 import * as styles from "./PlayCard.css";
 
 export function PlayCard({ players, className }: { players: Count; className?: string }) {
@@ -23,7 +24,7 @@ export function PlayCard({ players, className }: { players: Count; className?: s
     <CopyCard
       as="section"
       id="servers"
-      className={`${styles.play} ${failed ? styles.failed : ""} ${className ?? ""}`}
+      className={`${styles.play} ${play} ${failed ? styles.failed : ""} ${className ?? ""}`}
       text={HUB.hostname}
       outcome={outcome}
       cover={{

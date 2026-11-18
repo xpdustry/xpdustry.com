@@ -5,6 +5,7 @@ import loadTranslations from "#app/i18n/loadTranslations";
 import { withLocale, withoutLocale } from "#app/i18n/localePath";
 import { routeTree } from "#app/routeTree.gen";
 import { RouteError, RouteNotFound } from "#app/shell/RouteError";
+import { typesReadyingTheCapture } from "#app/ui/viewTransition";
 import gtConfig from "../gt.config.json";
 
 initializeGT({ ...gtConfig, loadTranslations });
@@ -28,6 +29,7 @@ export function getRouter() {
     scrollRestoration: restoreScrollOnlyInBrowser,
     scrollRestorationBehavior: "instant",
     defaultPreload: "intent",
+    defaultViewTransition: { types: typesReadyingTheCapture },
     defaultErrorComponent: RouteError,
     defaultNotFoundComponent: RouteNotFound
   });

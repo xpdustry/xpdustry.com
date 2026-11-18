@@ -1,9 +1,19 @@
 export default function reveal(): void {
+  const revealing: Animation[] = [];
+  let arrivedInATransition = false;
+  const rest = () => {
+    for (const animation of revealing) animation.finish();
+  };
+  addEventListener("pagereveal", (event) => {
+    if (!event.viewTransition) return;
+    arrivedInATransition = true;
+    rest();
+  });
+
   const show = () => {
     try {
       const less = matchMedia("(prefers-reduced-motion: reduce)");
-      if (less.matches) return;
-      const revealing: Animation[] = [];
+      if (less.matches || arrivedInATransition) return;
       let order = 0;
       for (const block of document.querySelectorAll<HTMLElement>(".reveal")) {
         const rect = block.getBoundingClientRect();
@@ -16,13 +26,7 @@ export default function reveal(): void {
         });
         revealing.push(animation);
       }
-      less.addEventListener(
-        "change",
-        () => {
-          for (const animation of revealing) animation.finish();
-        },
-        { once: true }
-      );
+      less.addEventListener("change", rest, { once: true });
     } catch {}
   };
 
