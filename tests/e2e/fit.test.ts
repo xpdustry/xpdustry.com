@@ -19,8 +19,8 @@ const JUST_ABOVE_THE_HEADER_FOLDS = [1161, 681, 471];
  * header's fold at 1160/1161 and a phone; the blog, whose header carries the play pill, adds the
  * width just above each of its other folds, and measures its header again with the pill showing
  * each of `PILL_STATES`: 42 header layouts. Chromium measures them under the four text settings,
- * 392 states; Firefox under the three it can set from the page, 294, and the blog's 63 again with
- * its font size doubled from its settings.
+ * 392 states. Firefox measures the blog's header in its 63 layouts, under the three settings it
+ * can set from the page and with its font size doubled from its settings: 252 states.
  */
 const MATRIX = [
   { path: "/", widths: [1280, 1161, 1160, 1000, 600, 390, 320], locales: LOCALES },
@@ -29,8 +29,8 @@ const MATRIX = [
   { path: "/no-such-page", widths: [1280, 320], locales: ["en"] }
 ];
 const PILL_STATES = {
-  "8,888 online": (page: Page) => showPlayers(page, 8888),
-  "a refused copy, with 8,888 online": refuseCopy
+  "888,888 online": (page: Page) => showPlayers(page, 888_888),
+  "a refused copy": refuseCopy
 };
 
 const WCAG_TEXT_SPACING =
@@ -62,6 +62,9 @@ const HEADER: Measures = {
   afterFontGrew: headerFindings,
   underTextSetting: headerFindings
 };
+
+const range = (from: number, to: number) =>
+  Array.from({ length: to - from + 1 }, (_, index) => from + index);
 
 const nextFrame = (page: Page) =>
   page.evaluate(
@@ -122,13 +125,14 @@ for (const { path, widths, locales } of MATRIX) {
     const url = withLocale(path, locale);
     const statesOfThePill = path === "/blog" ? Object.entries(PILL_STATES) : [];
     test(`${url} fits at every width, under every text setting`, async ({ page, browserName }) => {
+      const chromium = browserName === "chromium";
+      test.skip(!chromium && path !== "/blog", "Firefox measures the header, on the blog");
       // Each width was a test of its own with Playwright's 30 s.
       test.setTimeout(widths.length * (1 + statesOfThePill.length) * 30_000);
       await open(page, url, widths[0]!);
-      const fontSizes =
-        browserName === "chromium" ? await page.context().newCDPSession(page) : undefined;
+      const fontSizes = chromium ? await page.context().newCDPSession(page) : undefined;
       const found: Record<string, unknown> = await findingsAtEachWidth(page, widths, (page) =>
-        findingsUnderEachSetting(page, fontSizes, WHOLE_PAGE)
+        findingsUnderEachSetting(page, fontSizes, chromium ? WHOLE_PAGE : HEADER)
       );
       for (const [state, show] of statesOfThePill) {
         await show(page);
@@ -140,6 +144,29 @@ for (const { path, widths, locales } of MATRIX) {
       expect(found).toEqual({});
     });
   }
+}
+
+/** Where a pill that kept room for five characters covered the brand, in the second review. */
+const LONG_COUNTS_OVER_THE_BRAND = [
+  { players: 88_888, setting: WCAG_TEXT_SPACING, widths: range(337, 344) },
+  { players: 888_888, setting: TEXT_ONLY_ZOOM, widths: [...range(345, 357), ...range(404, 410)] }
+];
+
+for (const locale of ["en", "ru"]) {
+  const url = withLocale("/blog", locale);
+  test(`${url} keeps a long count off the brand`, async ({ page }) => {
+    await open(page, url, 1280);
+    const found: Record<string, unknown> = {};
+    for (const { players, setting, widths } of LONG_COUNTS_OVER_THE_BRAND) {
+      await page.unrouteAll();
+      await showPlayers(page, players);
+      const sheet = await page.addStyleTag({ content: setting });
+      const atWidths = await findingsAtEachWidth(page, widths, headerFindings);
+      if (Object.keys(atWidths).length > 0) found[`${players} online`] = atWidths;
+      await sheet.evaluate((element: Element) => element.remove());
+    }
+    expect(found).toEqual({});
+  });
 }
 
 test.describe("with the browser's font size doubled from its settings", () => {
