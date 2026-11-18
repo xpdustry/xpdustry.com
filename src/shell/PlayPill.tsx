@@ -1,5 +1,6 @@
-import { useGT } from "gt-tanstack-start";
+import { useGT, useLocale } from "gt-tanstack-start";
 import type { RefCallback } from "react";
+import { formatNumber } from "#app/i18n/format";
 import type { PlayerCount as Count } from "#app/status/live";
 import { PlayerCount } from "#app/status/PlayerCount";
 import { HUB } from "#app/status/servers";
@@ -13,6 +14,8 @@ const STATE_ICON = { idle: Copy, copied: Check, failed: X } satisfies Record<Cop
 
 export function PlayPill({ players, className }: { players: Count; className?: string }) {
   const gt = useGT();
+  const locale = useLocale();
+  const countLength = players.state === "online" ? formatNumber(players.players, locale).length : 0;
   const label =
     players.state === "online"
       ? gt("Copy IP {address}, {players} playing", {
@@ -21,7 +24,7 @@ export function PlayPill({ players, className }: { players: Count; className?: s
         })
       : `${gt("Copy IP {address}", { address: HUB.hostname })}, ${players.state === "polling" ? gt("Checking") : gt("Offline")}`;
   return (
-    <span className={`${styles.slot} ${className ?? ""}`}>
+    <span className={`${styles.slot} ${className ?? ""}`} data-count-length={countLength}>
       <CopyButton tone="amber" text={HUB.hostname} label={label} className={styles.pill}>
         {(state, address) => <Face players={players} state={state} address={address} />}
       </CopyButton>
@@ -39,31 +42,24 @@ function Face({
   address: RefCallback<HTMLElement>;
 }) {
   const Icon = STATE_ICON[state];
-  return (
-    <>
-      <PlayerCount
-        count={players}
-        compact
-        className={`${styles.count} ${state === "failed" ? styles.aside : ""}`}
-      />
-      <Address failed={state === "failed"} address={address} />
-      <Icon />
-    </>
-  );
-}
-
-function Address({ failed, address }: { failed: boolean; address: RefCallback<HTMLElement> }) {
-  if (failed) {
+  if (state === "failed") {
     return (
-      <span ref={address} className={`${styles.address} ${styles.refused}`}>
-        <Hostname name={HUB.hostname} />
-      </span>
+      <>
+        <span ref={address} className={styles.refused}>
+          <Hostname name={HUB.hostname} />
+        </span>
+        <Icon />
+      </>
     );
   }
   return (
     <>
-      <span className={styles.address}>{HUB.hostname}</span>
+      <PlayerCount count={players} compact className={styles.count} />
+      <span className={styles.address}>
+        <Hostname name={HUB.hostname} />
+      </span>
       <span className={styles.brief}>IP</span>
+      <Icon />
     </>
   );
 }
