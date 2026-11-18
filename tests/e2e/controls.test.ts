@@ -72,16 +72,21 @@ for (const width of [390, 320]) {
       );
     });
 
-    test("so does every control of an open team profile", async ({ page }) => {
-      await page.goto("/");
-      await page.locator("#team button[popovertarget]").first().click();
-      await expect(page.locator(":popover-open")).toBeVisible();
-      expect(await missedTaps(page, ":popover-open a, :popover-open button")).toEqual([]);
-    });
+    for (const { path, opener } of [
+      { path: "/", opener: "#team button[popovertarget]" },
+      { path: "/blog/nohorny-4-beta-8", opener: "main header button[popovertarget]" }
+    ]) {
+      test(`so does every control of a profile opened on ${path}`, async ({ page }) => {
+        await page.goto(path);
+        await page.locator(opener).first().click();
+        await expect(page.locator(":popover-open")).toBeVisible();
+        expect(await missedTaps(page, ":popover-open a, :popover-open button")).toEqual([]);
+      });
+    }
 
     test("so does every pill on a post's cover", async ({ page }) => {
       await page.goto("/blog/nohorny-4-beta-8");
-      expect(await missedTaps(page, "main header a")).toEqual([]);
+      expect(await missedTaps(page, "main header a, main header button")).toEqual([]);
     });
   });
 }
