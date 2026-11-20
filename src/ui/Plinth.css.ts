@@ -85,7 +85,9 @@ export const icon = style({});
 
 export const face = style({
   display: "flex",
+  flex: 1,
   alignItems: "center",
+  justifyContent: "center",
   gap: 9,
   margin: -2,
   padding: "9px 16px",

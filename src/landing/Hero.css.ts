@@ -1,5 +1,5 @@
 import { createVar, fallbackVar, globalStyle, style } from "@vanilla-extract/css";
-import { media } from "#app/ui/styles/media";
+import { media, narrowerThan } from "#app/ui/styles/media";
 import { font, insideOutline, leading, rem, tracking } from "#app/ui/styles/scale";
 import { face } from "#app/ui/Card.css";
 import { vars } from "#app/ui/styles/theme.css";
@@ -57,9 +57,22 @@ globalStyle(`${hero} p`, {
   opacity: 0.85
 });
 
+// The width each language's actions need on one row; narrower, they stack.
+const ROW_WIDTH = { en: 455, fr: 550, ru: 420 };
+const ACROSS = narrowerThan(480);
+
 export const actions = style({
   display: "flex",
   flexWrap: "wrap",
   gap: 10,
   marginTop: 26
 });
+
+for (const [language, width] of Object.entries(ROW_WIDTH)) {
+  globalStyle(`${actions}:lang(${language})`, {
+    "@container": {
+      [narrowerThan(width)]: { display: "grid", justifyContent: "start" },
+      [ACROSS]: { justifyContent: "stretch" }
+    }
+  });
+}
