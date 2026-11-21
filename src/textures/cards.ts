@@ -57,14 +57,14 @@ export const PATCHES = {
       [0, 1, 62]
     ])
   ),
-  nohornyCard: corners(...PLUM, [
+  nohornyItem: corners(...PLUM, [
+    [1, 1, 92],
+    [0.96, -0.12, 52]
+  ]),
+  clajFeatured: corners("#bf7b50", "#cc8b60", [
     [0.9, -0.08, 105],
     [1, 1, 70],
     [0, 0.6, 60]
-  ]),
-  clajCard: corners("#bf7b50", "#cc8b60", [
-    [1, 1, 92],
-    [0.96, -0.12, 52]
   ]),
   toxopidCard: corners("#6c80d2", "#7d90da", [
     [1, 0.02, 66],

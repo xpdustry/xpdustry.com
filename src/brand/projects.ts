@@ -1,7 +1,7 @@
 import { msg } from "gt-tanstack-start";
 import { PATCHES } from "#app/textures/cards";
 import type { Patches } from "#app/textures/texture";
-import { Package, PlugsConnected, Toolbox, type Icon } from "#app/ui/icons";
+import { Package, Toolbox, type Icon } from "#app/ui/icons";
 import clajIcon from "./icons/claj.png";
 import nohornyIcon from "./icons/nohorny.svg";
 
@@ -19,15 +19,18 @@ interface FeaturedCard {
   kind: "featured";
   ground: string;
   patches: Patches;
+  ink: string;
   muted: string;
-  screenshot: string;
+  roomLink: string;
 }
 
 interface ItemCard {
   kind: "item";
   ground: string;
   patches: Patches;
-  symbol: Icon;
+  ink?: string;
+  muted?: string;
+  symbol: Icon | string;
 }
 
 export interface Project {
@@ -51,6 +54,23 @@ const NOHORNY_THEME: ProjectTheme = {
 
 export const projects: readonly Project[] = [
   {
+    slug: "claj",
+    name: "CLaJ",
+    repository: "xpdustry/claj",
+    summary: msg(
+      "CLaJ (Copy Link and Join) is a Mindustry mod that lets you play with your friends through a shared link."
+    ),
+    icon: clajIcon,
+    card: {
+      kind: "featured",
+      ground: "#d99d73",
+      patches: PATCHES.clajFeatured,
+      ink: "#1a1310",
+      muted: "#3d2416",
+      roomLink: "claj://n4.xpdustry.com:50000/Hq3f-v9LxPw"
+    }
+  },
+  {
     slug: "nohorny",
     name: "NoHorny",
     repository: "xpdustry/nohorny",
@@ -60,28 +80,14 @@ export const projects: readonly Project[] = [
     ),
     icon: nohornyIcon,
     card: {
-      kind: "featured",
+      kind: "item",
       ground: NOHORNY_THEME.ground,
-      patches: PATCHES.nohornyCard,
+      patches: PATCHES.nohornyItem,
+      ink: "#ffffff",
       muted: NOHORNY_THEME.muted,
-      screenshot: "/blog/nohorny-admin-overview-dark.webp"
+      symbol: nohornyIcon
     },
     theme: NOHORNY_THEME
-  },
-  {
-    slug: "claj",
-    name: "CLaJ",
-    repository: "xpdustry/claj",
-    summary: msg(
-      "CLaJ (Copy Link and Join) is a Mindustry mod that lets you play with your friends through a shared link."
-    ),
-    icon: clajIcon,
-    card: {
-      kind: "item",
-      ground: "#d99d73",
-      patches: PATCHES.clajCard,
-      symbol: PlugsConnected
-    }
   },
   {
     slug: "toxopid",

@@ -6,7 +6,7 @@
     "canonical": "https://xpdustry.com/",
     "card": "/og/home.png",
     "structuredData": "Organization, WebSite",
-    "words": 224,
+    "words": 238,
     "links": 7
   },
   "/fr": {
@@ -16,7 +16,7 @@
     "canonical": "https://xpdustry.com/fr",
     "card": "/fr/og/home.png",
     "structuredData": "Organization, WebSite",
-    "words": 264,
+    "words": 282,
     "links": 7
   },
   "/ru": {
@@ -26,7 +26,7 @@
     "canonical": "https://xpdustry.com/ru",
     "card": "/ru/og/home.png",
     "structuredData": "Organization, WebSite",
-    "words": 202,
+    "words": 216,
     "links": 7
   },
   "/blog": {
