@@ -20,11 +20,7 @@ export const featured = style({
   gridRow: "span 4",
   display: "flex",
   flexDirection: "column",
-  padding: insideOutline(24),
-  color: vars.onGround,
-  "@media": {
-    [media.phone]: { minHeight: 300 }
-  }
+  padding: insideOutline(24)
 });
 
 export const top = style({
@@ -57,30 +53,6 @@ globalStyle(`${featured} p`, {
   marginTop: 8,
   fontSize: rem(font.small),
   lineHeight: leading.snug
-});
-
-export const stage = style({
-  position: "relative",
-  flex: "none",
-  height: 0
-});
-
-export const screenshot = style({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "calc(100% + 44px)",
-  maxWidth: "none",
-  marginTop: 19,
-  border: `1px solid ${glass}`,
-  borderRadius: radius.md,
-  boxShadow: "0 20px 50px -18px rgb(0 0 0 / 0.7)",
-  transition: `translate 0.45s ${vars.easeOut}`,
-  "@media": {
-    [media.hover]: {
-      selectors: { [`${featured}:hover &`]: { translate: "0 -8px" } }
-    }
-  }
 });
 
 const SMALL_PADDING = 22;
@@ -127,12 +99,6 @@ export const item = style([
   }
 ]);
 
-globalStyle(`${item}:nth-child(1 of ${item})`, {
-  "@media": {
-    [media.tablet]: { gridColumn: "span 6" }
-  }
-});
-
 globalStyle(`${item} p`, {
   maxWidth: "26ch"
 });
@@ -144,14 +110,17 @@ globalStyle(`${item} ${version}`, {
   background: "rgb(255 255 255 / 0.45)"
 });
 
+export const dark = style({});
+
+globalStyle(`${dark} ${version}`, {
+  background: glass
+});
+
 export const more = style([
   small,
   {
     vars: { [face]: vars.deep },
-    color: vars.onDeep,
-    "@media": {
-      [media.tablet]: { gridColumn: "span 6" }
-    }
+    color: vars.onDeep
   }
 ]);
 
@@ -185,5 +154,12 @@ export const symbol = style({
 globalStyle(`${more} ${symbol}`, {
   width: 52,
   height: 52,
+  filter: "drop-shadow(0 5px 0 rgb(0 0 0 / 0.35))"
+});
+
+export const logo = style({
+  width: 64,
+  height: "auto",
+  objectFit: "contain",
   filter: "drop-shadow(0 5px 0 rgb(0 0 0 / 0.35))"
 });

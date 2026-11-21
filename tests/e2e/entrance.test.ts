@@ -220,15 +220,7 @@ for (const width of [1280, 390]) {
           window.entrances.map(({ kind, card, onFirstScreen }) => ({ kind, card, onFirstScreen }))
         );
         const kinds = [...new Set(played.map(({ kind }) => kind))].sort();
-        const gamemodesOnFirstScreen = width === 1280 ? ["face"] : [];
-        expect(kinds).toEqual([
-          "backdrop::after",
-          "backdrop::before",
-          "drop",
-          ...gamemodesOnFirstScreen,
-          "grow",
-          "grown"
-        ]);
+        expect(kinds).toEqual(["backdrop::after", "backdrop::before", "drop", "grow", "grown"]);
         expect(played.filter(({ onFirstScreen }) => !onFirstScreen)).toEqual([]);
         expect(new Set(played.map(({ card }) => card)).size).toBeGreaterThan(2);
         expect(await entrancesOverTransitions(page)).toEqual([]);
@@ -466,9 +458,7 @@ test.describe("with motion", () => {
     await expect
       .poll(() =>
         page.evaluate(() =>
-          window.entrances.some(
-            ({ kind, animation }) => kind === "face" && animation.playState === "running"
-          )
+          window.entrances.some(({ animation }) => animation.playState === "running")
         )
       )
       .toBe(true);

@@ -11,6 +11,7 @@ import type { Patches as PatchSet } from "#app/textures/texture";
 import { GitHub, PuzzlePiece } from "#app/ui/icons";
 import { outbound } from "#app/ui/outbound";
 import { Tray } from "#app/ui/Tray";
+import { ClajRoom } from "./ClajRoom";
 import * as card from "#app/ui/Card.css";
 import * as styles from "./Projects.css";
 
@@ -62,12 +63,14 @@ export function Projects({ releases }: { releases: LiveData["releases"] }) {
 function Tile({
   href,
   ground,
+  ink,
   patches,
   className,
   children
 }: {
   href: string;
   ground?: string;
+  ink?: string;
   patches: PatchSet;
   className: string;
   children: ReactNode;
@@ -77,7 +80,10 @@ function Tile({
       href={href}
       {...outbound(href)}
       className={`${card.card} ${className}`}
-      style={ground ? assignInlineVars({ [card.face]: ground }) : undefined}
+      style={{
+        ...(ground ? assignInlineVars({ [card.face]: ground }) : undefined),
+        ...(ink ? { color: ink } : undefined)
+      }}
     >
       <Patches patches={patches} />
       {children}
@@ -88,16 +94,19 @@ function Tile({
 function ProjectTile({
   project,
   className,
+  ink,
   children
 }: {
   project: Project;
   className: string;
+  ink?: string;
   children: ReactNode;
 }) {
   return (
     <Tile
       href={project.website ?? repositoryUrl(project)}
       ground={project.card.ground}
+      ink={ink}
       patches={project.card.patches}
       className={className}
     >
@@ -119,33 +128,34 @@ function Version({ tag }: { tag?: string }) {
 function Featured({ project, card, release }: CardProps<"featured">) {
   const m = useMessages();
   return (
-    <ProjectTile project={project} className={styles.featured}>
+    <ProjectTile project={project} className={styles.featured} ink={card.ink}>
       <span className={styles.top}>
         {project.icon && <img src={project.icon} alt="" />}
         <h3>{project.name}</h3>
         <Version tag={release} />
       </span>
       <p style={{ color: card.muted }}>{m(project.summary)}</p>
-      <span className={styles.stage}>
-        <img
-          className={styles.screenshot}
-          src={card.screenshot}
-          alt=""
-          loading="lazy"
-          decoding="async"
-        />
-      </span>
+      <ClajRoom link={card.roomLink} icon={project.icon} />
     </ProjectTile>
   );
 }
 
-function Item({ project, card: { symbol: Glyph }, release }: CardProps<"item">) {
+function Item({ project, card, release }: CardProps<"item">) {
   const m = useMessages();
+  const { symbol: Glyph } = card;
   return (
-    <ProjectTile project={project} className={styles.item}>
-      <Glyph className={styles.symbol} />
+    <ProjectTile
+      project={project}
+      className={`${styles.item} ${card.ink ? styles.dark : ""}`}
+      ink={card.ink}
+    >
+      {typeof Glyph === "string" ? (
+        <img className={`${styles.symbol} ${styles.logo}`} src={Glyph} alt="" />
+      ) : (
+        <Glyph className={styles.symbol} />
+      )}
       <h3>{project.name}</h3>
-      <p>{m(project.summary)}</p>
+      <p style={card.muted ? { color: card.muted } : undefined}>{m(project.summary)}</p>
       <Version tag={release} />
     </ProjectTile>
   );

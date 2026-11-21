@@ -48,9 +48,9 @@ function Home() {
   return (
     <main id="main">
       <Cover live={live} />
+      <Projects releases={live.releases} />
       <Gamemodes snapshot={live.servers} />
       <News />
-      <Projects releases={live.releases} />
       <Team team={team} />
     </main>
   );
