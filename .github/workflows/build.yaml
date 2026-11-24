@@ -102,32 +102,15 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-resolute@sha256:916c9fb63a8340822589dd5c821dae82e8012106bb8515a72f278d97f277446a
+      options: --user 1001
     steps:
       - name: "Checkout Repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: "Setup Node.js And Dependencies"
         uses: ./.github/actions/setup
-
-      - name: "Find Playwright Version"
-        id: playwright
-        run: echo "version=$(pnpm exec playwright --version | cut -d ' ' -f 2)" >> "$GITHUB_OUTPUT"
-
-      - name: "Restore Chromium And Firefox For This Playwright"
-        id: browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium-firefox
-
-      - name: "Install Chromium And Firefox"
-        if: ${{ steps.browsers.outputs.cache-hit != 'true' }}
-        run: pnpm exec playwright install --with-deps chromium firefox
-
-      # The cache holds the browsers, not the system libraries they need
-      - name: "Install The Browsers' System Dependencies"
-        if: ${{ steps.browsers.outputs.cache-hit == 'true' }}
-        run: pnpm exec playwright install-deps chromium firefox
 
       - name: "Build Site And Run End-to-End Tests"
         run: pnpm test:e2e
