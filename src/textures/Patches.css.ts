@@ -34,8 +34,7 @@ globalStyle(`:where(${card}) > :where(${patches})`, {
 
 export const placement = style({
   position: "absolute",
-  translate: "-50% -50%",
-  contentVisibility: "auto"
+  translate: "-50% -50%"
 });
 
 export const sprite = style({
