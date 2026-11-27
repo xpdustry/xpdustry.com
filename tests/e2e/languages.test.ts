@@ -25,12 +25,14 @@ test("a visitor switches language from the header and keeps it", async ({ page, 
 test.describe("on a phone", () => {
   test.use({ viewport: { width: 390, height: 844 }, locale: "ru-RU" });
 
-  test("a Russian browser lands in Russian and switches from the menu", async ({ page }) => {
+  test("a Russian browser lands in Russian and switches from the language icon", async ({
+    page
+  }) => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/ru$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "ru");
 
-    await page.getByRole("button", { name: "Меню" }).click();
+    await page.getByRole("button", { name: "Язык: Русский" }).click();
     await page.getByRole("list", { name: "Язык" }).getByRole("link", { name: "Français" }).click();
     await expect(page).toHaveURL(/\/fr$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "fr");
@@ -38,7 +40,7 @@ test.describe("on a phone", () => {
     await page.getByRole("button", { name: "Menu" }).click();
     await expect(
       page.getByRole("navigation", { name: "Navigation principale" }).getByRole("link")
-    ).toHaveText(["Accueil", "Blog", "English", "Français", "Русский"]);
+    ).toHaveText(["Accueil", "Blog"]);
   });
 
   test("chosen English survives a fresh visit to the root in a new tab", async ({
@@ -48,7 +50,7 @@ test.describe("on a phone", () => {
     await page.goto("/");
     await expect(page).toHaveURL(/\/ru$/);
 
-    await page.getByRole("button", { name: "Меню" }).click();
+    await page.getByRole("button", { name: "Язык: Русский" }).click();
     await page.getByRole("list", { name: "Язык" }).getByRole("link", { name: "English" }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");

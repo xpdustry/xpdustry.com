@@ -126,23 +126,7 @@ export const play = style({
 });
 
 export const language = style({
-  marginLeft: "auto",
-  "@container": {
-    [controlsFolded]: {
-      selectors: { [`${header} &`]: { display: "none" } }
-    }
-  }
-});
-
-export const languages = style({
-  display: "none",
-  "@container": {
-    [controlsFolded]: {
-      display: "flex",
-      paddingTop: 10,
-      borderTop: `2px solid ${vars.deepWall}`
-    }
-  }
+  marginLeft: "auto"
 });
 
 export const github = style([
@@ -166,9 +150,6 @@ export const toggle = style([
     "@container": {
       [navFolded]: {
         selectors: { [`${header} &`]: { order: 1, display: "inline-flex" } }
-      },
-      [controlsFolded]: {
-        selectors: { [`${header} &`]: { marginLeft: "auto" } }
       }
     }
   }

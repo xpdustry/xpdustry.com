@@ -7,7 +7,7 @@ import type { PlayerCount } from "#app/status/live";
 import { GitHub, List, X } from "#app/ui/icons";
 import { PlinthAnchor, PlinthButton, PlinthLink } from "#app/ui/Plinth";
 import { animateOnToggle } from "#app/ui/popoverMotion";
-import { LocaleList, LocaleSwitch } from "./LocaleSwitch";
+import { LocaleSwitch } from "./LocaleSwitch";
 import { PlayPill } from "./PlayPill";
 import { SITE_PAGES } from "./sitePages";
 import { useShutPopovers } from "./usePopovers";
@@ -58,7 +58,6 @@ function MainNav({ id }: { id: string }) {
           {name}
         </PlinthLink>
       ))}
-      <LocaleList className={styles.languages} />
     </nav>
   );
 }

@@ -65,7 +65,7 @@ EOF
 
 `--browser firefox` after the label runs the script in Firefox. A script that throws leaves `failure-*.png` of every open page and exits 1. Each run writes `.verify/evidence/<date>-<time>-<label>/`, which is git-ignored: cite it, and attach the screenshots to your reply.
 
-Find elements by role and accessible name, never by generated class names. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`, `#team`. Names are translated: find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. At the default font size, up to 1160px the navigation is in the `Menu`, and up to 680px the language list too; the header folds by the room its text needs, so larger text folds it at wider screens.
+Find elements by role and accessible name, never by generated class names. Sections have stable ids: `#servers`, `#gamemodes`, `#news`, `#projects`, `#team`. Names are translated: find the English text in `src/_gt/en.json` and read the same key in `fr.json` or `ru.json`. At the default font size, up to 1160px the navigation is in the `Menu`, and up to 680px the language switch becomes an icon beside the menu; the header folds by the room its text needs, so larger text folds it at wider screens.
 
 A screenshot proves what it shows. Look at it before you cite it: text in the wrong language, a fallback font, a cut word or an overlap are failures even when every test passes. For a change that moves, record it.
 

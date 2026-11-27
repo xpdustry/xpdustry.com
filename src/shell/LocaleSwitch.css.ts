@@ -1,5 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { media } from "#app/ui/styles/media";
+import { media, upTo } from "#app/ui/styles/media";
 import { font, leading, radius, rem } from "#app/ui/styles/scale";
 import {
   hangUnder,
@@ -29,13 +29,22 @@ globalStyle(`${button} > span`, {
   fontFamily: vars.fontText,
   fontSize: rem(font.small),
   fontWeight: 500,
-  lineHeight: leading.snug
+  lineHeight: leading.snug,
+  "@container": {
+    [upTo(572)]: { padding: 9 }
+  }
 });
 
 globalStyle(`${button} > span > svg:last-child`, {
   width: 14,
   height: 14,
   color: vars.muted
+});
+
+globalStyle(`${button} > span > :is(span, svg:last-child)`, {
+  "@container": {
+    [upTo(572)]: { display: "none" }
+  }
 });
 
 export const list = style({

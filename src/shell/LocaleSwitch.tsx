@@ -27,7 +27,7 @@ export function LocaleSwitch({ className }: { className?: string }) {
         </span>
         <CaretDown />
       </PlinthButton>
-      <LocaleList id={list} popover className={styles.panel} />
+      <LocaleList id={list} />
     </div>
   );
 }
@@ -38,15 +38,7 @@ export function isPlainClick(
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
-export function LocaleList({
-  id,
-  popover,
-  className
-}: {
-  id?: string;
-  popover?: boolean;
-  className?: string;
-}) {
+function LocaleList({ id }: { id: string }) {
   const gt = useGT();
   const current = useLocale();
   const setLocale = useSetLocale();
@@ -54,10 +46,10 @@ export function LocaleList({
   return (
     <ul
       id={id}
-      popover={popover ? "auto" : undefined}
-      className={`${styles.list} ${className ?? ""}`}
+      popover="auto"
+      className={`${styles.list} ${styles.panel}`}
       aria-label={gt("Language")}
-      {...(popover ? animateOnToggle : {})}
+      {...animateOnToggle}
     >
       {LOCALES.map((locale) => (
         <li key={locale}>
